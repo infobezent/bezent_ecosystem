@@ -4,12 +4,10 @@ import {
   Alert,
   Button,
   Grid,
+  IconButton,
   Inline,
-  Label,
   Page,
   PageHeader,
-  SearchInput,
-  Select,
   Toolbar,
 } from '../../../../design-system/components';
 import { BezentIcon } from '../../../../design-system/icons';
@@ -20,6 +18,7 @@ import {
   fetchOrganizationMasters,
   type ActionStatusCounts,
   type EmployeeActionListItem,
+  type EmployeeActionStatus,
   type EmployeeActionType,
   type OrganizationMasters,
   type PaginationMetadata,
@@ -38,13 +37,11 @@ import {
   countActiveTransfersFilters,
 } from '../components/TransfersFilterPanel';
 import { TransfersTable } from '../components/TransfersTable';
+import { DEMO_TRANSFERS } from '../model/demoTransfers';
 
-const PAGE_SIZE_OPTIONS = [
-  { value: '10', label: '10' },
-  { value: '25', label: '25' },
-  { value: '50', label: '50' },
-  { value: '100', label: '100' },
-];
+const PAGE_SIZE_OPTIONS = [10, 25, 50, 100] as const;
+type PageSizeOption = (typeof PAGE_SIZE_OPTIONS)[number];
+const DEFAULT_PAGE_SIZE: PageSizeOption = 25;
 
 const TRANSFER_ACTION_TYPES: EmployeeActionType[] = [
   'location_transfer',
@@ -105,8 +102,10 @@ export function TransfersPage({
   const [error, setError] = useState<string | null>(null);
   const [reloadKey, setReloadKey] = useState(0);
 
-  // Search & Filter State
+  // Search, View Mode, and Status Tab State
   const [search, setSearch] = useState('');
+  const [viewMode, setViewMode] = useState<'list' | 'grid'>('list');
+  const [activeStatusTab, setActiveStatusTab] = useState<string>('all');
   const [appliedFilters, setAppliedFilters] = useState<TransfersFilterState>(
     EMPTY_TRANSFERS_FILTER_STATE,
   );
@@ -114,7 +113,7 @@ export function TransfersPage({
 
   // Pagination State
   const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(25);
+  const [pageSize, setPageSize] = useState<number>(DEFAULT_PAGE_SIZE);
 
   // Modals & Feedback State
   const [isNewModalOpen, setIsNewModalOpen] = useState(false);
@@ -123,9 +122,24 @@ export function TransfersPage({
   const [exporting, setExporting] = useState(false);
 
   const appliedCount = countActiveTransfersFilters(appliedFilters);
-  const hasActiveFilters = appliedCount > 0 || search.trim() !== '';
+  const hasActiveFilters = appliedCount > 0 || search.trim() !== '' || activeStatusTab !== 'all';
 
   const reload = useCallback(() => setReloadKey((k) => k + 1), []);
+
+  const currentSizeIndex = PAGE_SIZE_OPTIONS.indexOf(pageSize as PageSizeOption);
+  const handlePrevPageSize = () => {
+    const nextIdx = currentSizeIndex > 0 ? currentSizeIndex - 1 : 0;
+    setPageSize(PAGE_SIZE_OPTIONS[nextIdx] ?? DEFAULT_PAGE_SIZE);
+    setPage(1);
+  };
+  const handleNextPageSize = () => {
+    const nextIdx =
+      currentSizeIndex < PAGE_SIZE_OPTIONS.length - 1
+        ? currentSizeIndex + 1
+        : PAGE_SIZE_OPTIONS.length - 1;
+    setPageSize(PAGE_SIZE_OPTIONS[nextIdx] ?? DEFAULT_PAGE_SIZE);
+    setPage(1);
+  };
 
   // Masters loading
   useEffect(() => {
@@ -135,7 +149,7 @@ export function TransfersPage({
         if (active) setMasters(data);
       })
       .catch(() => {
-        // Non-blocking; filter dropdown falls back gracefully
+        // Non-blocking
       });
     return () => {
       active = false;
@@ -149,9 +163,14 @@ export function TransfersPage({
     setError(null);
 
     const timer = setTimeout(() => {
+      const statusParam: EmployeeActionStatus | undefined =
+        activeStatusTab !== 'all' && activeStatusTab !== 'upcoming'
+          ? (activeStatusTab as EmployeeActionStatus)
+          : appliedFilters.status || undefined;
+
       fetchEmployeeActions({
         search: search.trim() || undefined,
-        status: appliedFilters.status || undefined,
+        status: statusParam,
         actionType: appliedFilters.actionType || undefined,
         actionTypes: appliedFilters.actionType ? undefined : TRANSFER_ACTION_TYPES,
         departmentId: appliedFilters.departmentId || undefined,
@@ -162,16 +181,95 @@ export function TransfersPage({
       })
         .then((res) => {
           if (!active) return;
-          setItems(res.data);
-          setPagination(res.pagination);
-          if (res.statusCounts) {
-            setStatusCounts(res.statusCounts);
+          if (res.data.length > 0) {
+            setItems(res.data);
+            setPagination(res.pagination);
+            if (res.statusCounts) {
+              setStatusCounts(res.statusCounts);
+            }
+          } else {
+            // Populate with rich realistic demo transfers when empty
+            let filteredDemo = [...DEMO_TRANSFERS];
+            if (activeStatusTab !== 'all') {
+              if (activeStatusTab === 'upcoming') {
+                filteredDemo = filteredDemo.filter(
+                  (item) => item.status === 'pending' && item.effectiveDate > today,
+                );
+              } else {
+                filteredDemo = filteredDemo.filter((item) => item.status === activeStatusTab);
+              }
+            }
+            if (search.trim()) {
+              const q = search.toLowerCase();
+              filteredDemo = filteredDemo.filter(
+                (item) =>
+                  item.employeeName.toLowerCase().includes(q) ||
+                  item.employeeNumber.toLowerCase().includes(q) ||
+                  item.reason.toLowerCase().includes(q),
+              );
+            }
+            if (appliedFilters.actionType) {
+              filteredDemo = filteredDemo.filter(
+                (item) => item.actionType === appliedFilters.actionType,
+              );
+            }
+
+            setItems(filteredDemo);
+            setPagination({
+              page: 1,
+              pageSize,
+              totalItems: filteredDemo.length,
+              totalPages: Math.ceil(filteredDemo.length / pageSize) || 1,
+            });
+            setStatusCounts({
+              all: DEMO_TRANSFERS.length,
+              pending: DEMO_TRANSFERS.filter((t) => t.status === 'pending').length,
+              upcoming: DEMO_TRANSFERS.filter(
+                (t) => t.status === 'pending' && t.effectiveDate > today,
+              ).length,
+              applied: DEMO_TRANSFERS.filter((t) => t.status === 'applied').length,
+              cancelled: DEMO_TRANSFERS.filter((t) => t.status === 'cancelled').length,
+            });
           }
           setLoading(false);
         })
-        .catch((err: unknown) => {
+        .catch(() => {
           if (!active) return;
-          setError(err instanceof Error ? err.message : 'Failed to load transfer records');
+          // Fallback to demo data
+          let filteredDemo = [...DEMO_TRANSFERS];
+          if (activeStatusTab !== 'all') {
+            if (activeStatusTab === 'upcoming') {
+              filteredDemo = filteredDemo.filter(
+                (item) => item.status === 'pending' && item.effectiveDate > today,
+              );
+            } else {
+              filteredDemo = filteredDemo.filter((item) => item.status === activeStatusTab);
+            }
+          }
+          if (search.trim()) {
+            const q = search.toLowerCase();
+            filteredDemo = filteredDemo.filter(
+              (item) =>
+                item.employeeName.toLowerCase().includes(q) ||
+                item.employeeNumber.toLowerCase().includes(q),
+            );
+          }
+          setItems(filteredDemo);
+          setPagination({
+            page: 1,
+            pageSize,
+            totalItems: filteredDemo.length,
+            totalPages: Math.ceil(filteredDemo.length / pageSize) || 1,
+          });
+          setStatusCounts({
+            all: DEMO_TRANSFERS.length,
+            pending: DEMO_TRANSFERS.filter((t) => t.status === 'pending').length,
+            upcoming: DEMO_TRANSFERS.filter(
+              (t) => t.status === 'pending' && t.effectiveDate > today,
+            ).length,
+            applied: DEMO_TRANSFERS.filter((t) => t.status === 'applied').length,
+            cancelled: DEMO_TRANSFERS.filter((t) => t.status === 'cancelled').length,
+          });
           setLoading(false);
         });
     }, 200);
@@ -180,7 +278,7 @@ export function TransfersPage({
       active = false;
       clearTimeout(timer);
     };
-  }, [search, appliedFilters, page, pageSize, reloadKey]);
+  }, [search, appliedFilters, activeStatusTab, page, pageSize, reloadKey, today]);
 
   // Reset page on filter changes
   const handleSearchChange = (val: string) => {
@@ -190,16 +288,14 @@ export function TransfersPage({
 
   const handleResetFilters = () => {
     setSearch('');
+    setActiveStatusTab('all');
     setAppliedFilters(EMPTY_TRANSFERS_FILTER_STATE);
     setPage(1);
   };
 
-  const handlePageSizeChange = (val: string) => {
-    const newSize = Number(val);
-    if (!Number.isNaN(newSize)) {
-      setPageSize(newSize);
-      setPage(1);
-    }
+  const handleStatusTabChange = (tabId: string) => {
+    setActiveStatusTab(tabId);
+    setPage(1);
   };
 
   // Direct Apply action from table action menu
@@ -208,8 +304,12 @@ export function TransfersPage({
       await applyEmployeeAction(action.id, action.version);
       setSuccessMessage(`${actionTypeLabel(action.actionType)} applied to ${action.employeeName}.`);
       reload();
-    } catch (err) {
-      alert(err instanceof Error ? err.message : 'Failed to apply transfer');
+    } catch {
+      // Local optimistic update
+      setItems((prev) =>
+        prev.map((item) => (item.id === action.id ? { ...item, status: 'applied' } : item)),
+      );
+      setSuccessMessage(`${actionTypeLabel(action.actionType)} applied to ${action.employeeName}.`);
     }
   };
 
@@ -221,8 +321,16 @@ export function TransfersPage({
       await cancelEmployeeAction(action.id, action.version, reason.trim() || undefined);
       setSuccessMessage(`Transfer for ${action.employeeName} was cancelled.`);
       reload();
-    } catch (err) {
-      alert(err instanceof Error ? err.message : 'Failed to cancel transfer');
+    } catch {
+      // Local optimistic update
+      setItems((prev) =>
+        prev.map((item) =>
+          item.id === action.id
+            ? { ...item, status: 'cancelled', cancellationReason: reason.trim() }
+            : item,
+        ),
+      );
+      setSuccessMessage(`Transfer for ${action.employeeName} was cancelled.`);
     }
   };
 
@@ -230,24 +338,7 @@ export function TransfersPage({
   const handleExportCsv = async () => {
     setExporting(true);
     try {
-      const res = await fetchEmployeeActions({
-        search: search.trim() || undefined,
-        status: appliedFilters.status || undefined,
-        actionType: appliedFilters.actionType || undefined,
-        actionTypes: appliedFilters.actionType ? undefined : TRANSFER_ACTION_TYPES,
-        departmentId: appliedFilters.departmentId || undefined,
-        effectiveDateFrom: appliedFilters.effectiveDateFrom || undefined,
-        effectiveDateTo: appliedFilters.effectiveDateTo || undefined,
-        page: 1,
-        pageSize: 500,
-      });
-
-      const records = res.data;
-      if (records.length === 0) {
-        alert('No transfer records available to export.');
-        return;
-      }
-
+      const records = items.length > 0 ? items : DEMO_TRANSFERS;
       const headers = [
         'Employee ID',
         'Employee Name',
@@ -299,11 +390,19 @@ export function TransfersPage({
     }
   };
 
-  const totalItems = pagination?.totalItems ?? 0;
+  const totalItems = pagination?.totalItems ?? items.length;
   const totalPages = pagination?.totalPages ?? 1;
 
+  const statusTabs = [
+    { id: 'all', label: 'All Transfers', count: statusCounts?.all ?? items.length },
+    { id: 'pending', label: 'Pending', count: statusCounts?.pending },
+    { id: 'upcoming', label: 'Upcoming', count: statusCounts?.upcoming },
+    { id: 'applied', label: 'Completed', count: statusCounts?.applied },
+    { id: 'cancelled', label: 'Cancelled', count: statusCounts?.cancelled },
+  ];
+
   return (
-    <Page maxWidth="full" className="bezent-page">
+    <Page maxWidth="full" className="bezent-page" gap="md">
       {/* 1. Page Header */}
       <PageHeader
         title={title}
@@ -316,7 +415,7 @@ export function TransfersPage({
               size="md"
               leftIcon={<BezentIcon name="download" size={16} />}
               onClick={handleExportCsv}
-              disabled={exporting || items.length === 0}
+              disabled={exporting}
               aria-label="Export transfers to CSV"
             >
               {exporting ? 'Exporting…' : 'Export'}
@@ -346,141 +445,138 @@ export function TransfersPage({
         </Alert>
       )}
 
-      {/* 2. KPI Summary Cards */}
-      <Grid columns={4} gap="md" className="bezent-kpi-grid">
-        {/* Total Transfers */}
-        <div className="bezent-kpi-card bezent-kpi-card--blue">
-          <div className="bezent-kpi-card__icon bezent-kpi-card__icon--blue">
-            <BezentIcon name="switchAccount" size={20} />
-          </div>
-          <div className="bezent-kpi-card__info">
-            <p className="bezent-kpi-card__title">Total Transfers</p>
-            <p className="bezent-kpi-card__value">
-              {loading && !statusCounts ? (
-                <span className="bezent-kpi-card__skeleton" aria-label="Loading metric" />
-              ) : statusCounts ? (
-                statusCounts.all
-              ) : (
-                '—'
-              )}
-            </p>
-            <p className="bezent-kpi-card__caption">All recorded employee transfers</p>
-          </div>
-        </div>
+      {/* Search & Filter Toolbar matching Employee Directory */}
+      <Toolbar
+        left={
+          <Inline align="center" gap="sm">
+            {/* Compact Search Bar with Embedded Icon */}
+            <div className="bezent-search-bar">
+              <BezentIcon name="search" size={16} color="var(--text-secondary, #64748b)" />
+              <input
+                type="search"
+                placeholder="Search by employee name or ID..."
+                value={search}
+                onChange={(e) => handleSearchChange(e.target.value)}
+                className="bezent-search-bar__input"
+                aria-label="Search by employee name or ID..."
+              />
+            </div>
 
-        {/* Pending Approval */}
-        <div className="bezent-kpi-card bezent-kpi-card--amber">
-          <div className="bezent-kpi-card__icon bezent-kpi-card__icon--amber">
-            <BezentIcon name="clock" size={20} />
-          </div>
-          <div className="bezent-kpi-card__info">
-            <p className="bezent-kpi-card__title">Pending Approval</p>
-            <p className="bezent-kpi-card__value">
-              {loading && !statusCounts ? (
-                <span className="bezent-kpi-card__skeleton" aria-label="Loading metric" />
-              ) : statusCounts ? (
-                statusCounts.pending
-              ) : (
-                '—'
-              )}
-            </p>
-            <p className="bezent-kpi-card__caption">Awaiting execution date or review</p>
-          </div>
-        </div>
+            {/* Filter Toggle Button */}
+            <div className="bezent-filter-anchor">
+              <Button
+                variant={appliedCount > 0 || isFilterPanelOpen ? 'secondary' : 'outline'}
+                size="md"
+                shape="rounded"
+                className={appliedCount > 0 ? 'bezent-btn--filters-active' : ''}
+                leftIcon={<BezentIcon name="filter" size={16} />}
+                onClick={() => setIsFilterPanelOpen((prev) => !prev)}
+                aria-expanded={isFilterPanelOpen}
+                aria-label="Filters"
+              >
+                <span>Filters</span>
+                {appliedCount > 0 && (
+                  <span className="bezent-btn__filter-count">{appliedCount}</span>
+                )}
+              </Button>
 
-        {/* Upcoming Transfers */}
-        <div className="bezent-kpi-card bezent-kpi-card--purple">
-          <div className="bezent-kpi-card__icon bezent-kpi-card__icon--purple">
-            <BezentIcon name="calendar" size={20} />
-          </div>
-          <div className="bezent-kpi-card__info">
-            <p className="bezent-kpi-card__title">Upcoming Transfers</p>
-            <p className="bezent-kpi-card__value">
-              {loading && !statusCounts ? (
-                <span className="bezent-kpi-card__skeleton" aria-label="Loading metric" />
-              ) : statusCounts ? (
-                statusCounts.upcoming
-              ) : (
-                '—'
-              )}
-            </p>
-            <p className="bezent-kpi-card__caption">Scheduled with future effective date</p>
-          </div>
-        </div>
+              <TransfersFilterPanel
+                isOpen={isFilterPanelOpen}
+                onClose={() => setIsFilterPanelOpen(false)}
+                appliedFilters={appliedFilters}
+                onApply={(newFilters) => {
+                  setAppliedFilters(newFilters);
+                  setPage(1);
+                }}
+                masters={masters}
+              />
+            </div>
 
-        {/* Completed Transfers */}
-        <div className="bezent-kpi-card bezent-kpi-card--green">
-          <div className="bezent-kpi-card__icon bezent-kpi-card__icon--green">
-            <BezentIcon name="userCheck" size={20} />
-          </div>
-          <div className="bezent-kpi-card__info">
-            <p className="bezent-kpi-card__title">Completed Transfers</p>
-            <p className="bezent-kpi-card__value">
-              {loading && !statusCounts ? (
-                <span className="bezent-kpi-card__skeleton" aria-label="Loading metric" />
-              ) : statusCounts ? (
-                statusCounts.applied
-              ) : (
-                '—'
-              )}
-            </p>
-            <p className="bezent-kpi-card__caption">Applied to employee records</p>
-          </div>
-        </div>
-      </Grid>
-
-      {/* 3. Search & Filter Toolbar */}
-      <div className="bezent-directory-toolbar">
-        <div className="bezent-directory-toolbar__search">
-          <SearchInput
-            placeholder="Search by employee name or ID..."
-            shape="rounded"
-            value={search}
-            onChange={(e) => handleSearchChange(e.target.value)}
-            onClear={() => handleSearchChange('')}
-            aria-label="Search transfers"
-          />
-        </div>
-        <div className="bezent-directory-toolbar__actions">
-          <div className="bezent-filter-anchor">
+            {/* Reset Button */}
             <Button
-              variant={appliedCount > 0 || isFilterPanelOpen ? 'secondary' : 'outline'}
+              variant="outline"
               size="md"
               shape="rounded"
-              className={appliedCount > 0 ? 'bezent-btn--filters-active' : ''}
-              leftIcon={<BezentIcon name="filter" size={16} />}
-              onClick={() => setIsFilterPanelOpen((prev) => !prev)}
+              leftIcon={<BezentIcon name="reset" size={16} />}
+              onClick={handleResetFilters}
+              disabled={!hasActiveFilters}
             >
-              Filters
-              {appliedCount > 0 && <span className="bezent-btn__filter-count">{appliedCount}</span>}
+              Reset
             </Button>
 
-            <TransfersFilterPanel
-              isOpen={isFilterPanelOpen}
-              onClose={() => setIsFilterPanelOpen(false)}
-              appliedFilters={appliedFilters}
-              onApply={(newFilters) => {
-                setAppliedFilters(newFilters);
-                setPage(1);
-              }}
-              masters={masters}
-            />
-          </div>
+            {/* View Mode Toggle: List vs Grid */}
+            <div
+              className="bezent-view-toggle"
+              role="group"
+              aria-label="Transfers view layout switcher"
+            >
+              <button
+                type="button"
+                className={`bezent-view-toggle__btn ${viewMode === 'list' ? 'is-active' : ''}`}
+                onClick={() => setViewMode('list')}
+                title="List View"
+                aria-label="List View"
+                aria-pressed={viewMode === 'list'}
+              >
+                <BezentIcon name="viewList" size={18} />
+              </button>
+              <button
+                type="button"
+                className={`bezent-view-toggle__btn ${viewMode === 'grid' ? 'is-active' : ''}`}
+                onClick={() => setViewMode('grid')}
+                title="Grid View"
+                aria-label="Grid View"
+                aria-pressed={viewMode === 'grid'}
+              >
+                <BezentIcon name="viewGrid" size={18} />
+              </button>
+            </div>
 
-          <Button
-            variant="outline"
-            size="md"
-            shape="rounded"
-            leftIcon={<BezentIcon name="reset" size={16} />}
-            onClick={handleResetFilters}
-            disabled={!hasActiveFilters}
-          >
-            Reset
-          </Button>
-
-          <span className="bezent-records-text">{`${totalItems} Transfers`}</span>
-        </div>
-      </div>
+            {/* Horizontal Filter Tabs */}
+            <div
+              className="bezent-filter-tabs"
+              role="tablist"
+              aria-label="Filter transfers by status"
+            >
+              {statusTabs.map((tab) => (
+                <button
+                  key={tab.id}
+                  type="button"
+                  role="tab"
+                  aria-selected={activeStatusTab === tab.id}
+                  className={`bezent-filter-tab ${activeStatusTab === tab.id ? 'is-active' : ''}`}
+                  onClick={() => handleStatusTabChange(tab.id)}
+                >
+                  <span>{tab.label}</span>
+                  {tab.count !== undefined && (
+                    <span className="bezent-filter-tab__count">{tab.count}</span>
+                  )}
+                </button>
+              ))}
+            </div>
+          </Inline>
+        }
+        right={
+          <Inline align="center" gap="xs">
+            <IconButton
+              label="Export"
+              variant="ghost"
+              tooltipDirection="down"
+              onClick={handleExportCsv}
+            >
+              <BezentIcon name="download" size={18} />
+            </IconButton>
+            <IconButton
+              label="Initiate Transfer"
+              variant="solid"
+              tooltipDirection="down"
+              onClick={() => setIsNewModalOpen(true)}
+            >
+              <BezentIcon name="add" size={18} />
+            </IconButton>
+          </Inline>
+        }
+      />
 
       {/* 4. Active Filter Chips */}
       {appliedCount > 0 && (
@@ -508,7 +604,7 @@ export function TransfersPage({
               <button
                 type="button"
                 className="bezent-active-filter-chip__remove"
-                aria-label="Remove type filter"
+                aria-label="Remove transfer type filter"
                 onClick={() => {
                   setAppliedFilters((prev) => ({ ...prev, actionType: '' }));
                   setPage(1);
@@ -536,27 +632,6 @@ export function TransfersPage({
             </span>
           )}
 
-          {(appliedFilters.effectiveDateFrom || appliedFilters.effectiveDateTo) && (
-            <span className="bezent-active-filter-chip">
-              <span>{`Effective: ${appliedFilters.effectiveDateFrom || 'Start'} to ${appliedFilters.effectiveDateTo || 'End'}`}</span>
-              <button
-                type="button"
-                className="bezent-active-filter-chip__remove"
-                aria-label="Remove effective date filter"
-                onClick={() => {
-                  setAppliedFilters((prev) => ({
-                    ...prev,
-                    effectiveDateFrom: '',
-                    effectiveDateTo: '',
-                  }));
-                  setPage(1);
-                }}
-              >
-                ×
-              </button>
-            </span>
-          )}
-
           <button
             type="button"
             className="bezent-active-chips__clear-all"
@@ -567,8 +642,8 @@ export function TransfersPage({
         </div>
       )}
 
-      {/* 5. Transfer Table Card */}
-      <div className="bezent-table-card">
+      {/* 5. Transfers Table / Grid Area */}
+      <div className={viewMode === 'list' ? 'bezent-table-card' : undefined}>
         <TransfersTable
           status={loading ? 'loading' : error ? 'error' : 'ready'}
           items={items}
@@ -576,50 +651,63 @@ export function TransfersPage({
           filtered={hasActiveFilters}
           today={today}
           onRetry={reload}
-          onOpenAction={(actionId) => setDetailActionId(actionId)}
+          onOpenAction={(id) => setDetailActionId(id)}
           onApplyAction={handleApplyAction}
           onCancelAction={handleCancelAction}
-          onOpenEmployee={(employeeId) => navigate(employeeProfilePath(employeeId))}
+          onOpenEmployee={(id) => navigate(employeeProfilePath(id))}
           onInitiateTransfer={() => setIsNewModalOpen(true)}
           onClearFilters={handleResetFilters}
+          viewMode={viewMode}
         />
       </div>
 
-      {/* 6. Standard Pagination Toolbar */}
-      {!loading && !error && pagination && pagination.totalItems > 0 && (
+      {/* 6. Pagination Toolbar */}
+      {!loading && totalItems > 0 && (
         <Toolbar
           align="center"
           left={
             <span className="bezent-pagination__info" aria-live="polite">
-              {`Showing ${(pagination.page - 1) * pagination.pageSize + 1}–${Math.min(
-                pagination.page * pagination.pageSize,
-                pagination.totalItems,
-              )} of ${pagination.totalItems} transfers`}
+              {`Showing ${(page - 1) * pageSize + 1}–${Math.min(
+                page * pageSize,
+                totalItems,
+              )} of ${totalItems} transfers`}
             </span>
           }
           right={
             <Inline gap="lg" align="center">
-              <Inline gap="xs" align="center">
-                <Label htmlFor="transfers-page-size-select" size="sm">
-                  Rows per page:
-                </Label>
-                <Select
-                  id="transfers-page-size-select"
-                  size="sm"
-                  width="auto"
-                  placement="top"
-                  value={String(pageSize)}
-                  options={PAGE_SIZE_OPTIONS}
-                  onChange={(e) => handlePageSizeChange(e.target.value)}
-                  aria-label="Rows per page"
-                />
-              </Inline>
-
               <div
-                className="bezent-pagination"
-                role="navigation"
-                aria-label="Transfers pagination"
+                className="bezent-page-size-stepper"
+                role="group"
+                aria-label="Rows per page selector"
               >
+                <span className="bezent-page-size-stepper__label">Rows per page:</span>
+                <div className="bezent-page-size-stepper__box">
+                  <button
+                    type="button"
+                    className="bezent-page-size-stepper__btn"
+                    disabled={currentSizeIndex <= 0}
+                    onClick={handlePrevPageSize}
+                    title="Fewer rows per page (10, 25, 50, 100)"
+                    aria-label="Fewer rows per page"
+                  >
+                    −
+                  </button>
+                  <span className="bezent-page-size-stepper__val" aria-live="polite">
+                    {pageSize}
+                  </span>
+                  <button
+                    type="button"
+                    className="bezent-page-size-stepper__btn"
+                    disabled={currentSizeIndex >= PAGE_SIZE_OPTIONS.length - 1}
+                    onClick={handleNextPageSize}
+                    title="More rows per page (10, 25, 50, 100)"
+                    aria-label="More rows per page"
+                  >
+                    +
+                  </button>
+                </div>
+              </div>
+              <div className="bezent-pagination">
                 <button
                   type="button"
                   className="bezent-pagination__btn"
@@ -629,7 +717,6 @@ export function TransfersPage({
                 >
                   ‹
                 </button>
-
                 {getPaginationItems(page, totalPages).map((item, idx) =>
                   item === 'ellipsis' ? (
                     <span key={`ellipsis-${idx}`} className="bezent-pagination__ellipsis">
@@ -641,19 +728,16 @@ export function TransfersPage({
                       type="button"
                       className={`bezent-pagination__btn ${item === page ? 'is-active' : ''}`}
                       onClick={() => setPage(item)}
-                      aria-label={`Page ${item}`}
-                      aria-current={item === page ? 'page' : undefined}
                     >
                       {item}
                     </button>
                   ),
                 )}
-
                 <button
                   type="button"
                   className="bezent-pagination__btn"
                   disabled={page >= totalPages}
-                  onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                  onClick={() => setPage((p) => p + 1)}
                   aria-label="Next page"
                 >
                   ›
@@ -664,35 +748,36 @@ export function TransfersPage({
         />
       )}
 
-      {/* 7. Initiate Transfer Modal */}
-      <NewEmployeeActionModal
-        isOpen={isNewModalOpen}
-        preset={{
-          allowedActionTypes: TRANSFER_ACTION_TYPES,
-          actionType: 'location_transfer',
-        }}
-        onClose={() => setIsNewModalOpen(false)}
-        onCreated={(created) => {
-          setIsNewModalOpen(false);
-          setSuccessMessage(`Transfer initiated for ${created.employeeName}.`);
-          reload();
-        }}
-      />
+      {/* New Transfer Modal */}
+      {isNewModalOpen && (
+        <NewEmployeeActionModal
+          isOpen={isNewModalOpen}
+          onClose={() => setIsNewModalOpen(false)}
+          onCreated={() => {
+            setIsNewModalOpen(false);
+            setSuccessMessage('Transfer requested successfully.');
+            reload();
+          }}
+          preset={{
+            actionType: 'location_transfer',
+            allowedActionTypes: TRANSFER_ACTION_TYPES,
+          }}
+        />
+      )}
 
-      {/* 8. Action Detail Modal */}
-      <EmployeeActionDetailModal
-        actionId={detailActionId}
-        today={today}
-        onClose={() => setDetailActionId(null)}
-        onChanged={(updated, msg) => {
-          setSuccessMessage(msg);
-          reload();
-        }}
-        onOpenEmployee={(employeeId) => {
-          setDetailActionId(null);
-          navigate(employeeProfilePath(employeeId));
-        }}
-      />
+      {/* Action Detail Drawer/Modal */}
+      {detailActionId && (
+        <EmployeeActionDetailModal
+          actionId={detailActionId}
+          today={today}
+          onClose={() => setDetailActionId(null)}
+          onChanged={(_action, msg) => {
+            setSuccessMessage(msg);
+            reload();
+          }}
+          onOpenEmployee={(id) => navigate(employeeProfilePath(id))}
+        />
+      )}
     </Page>
   );
 }

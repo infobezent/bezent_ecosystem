@@ -4,8 +4,9 @@ import {
   Actions,
   Alert,
   Avatar,
-  Badge,
   Button,
+  Card,
+  CardBody,
   EmptyState,
   Grid,
   IconButton,
@@ -16,7 +17,6 @@ import {
   Modal,
   Page,
   PageHeader,
-  SearchInput,
   Select,
   Stack,
   Table,
@@ -25,11 +25,11 @@ import {
   TableHead,
   TableHeaderCell,
   TableRow,
-  Tabs,
   Toolbar,
   type BadgeVariant,
 } from '../../../../design-system/components';
 import { BezentIcon } from '../../../../design-system/icons';
+import { employmentTypeLabel, getAvatarColor } from '../../employees/model/employeeModel';
 import {
   fetchOrganizationMasters,
   fetchNewHiresPaginated,
@@ -69,6 +69,14 @@ export function OnboardingPage({ title = 'Onboarding', onAddNewHire }: Onboardin
   const [transitioning, setTransitioning] = useState<boolean>(false);
   const [transitionError, setTransitionError] = useState<string | null>(null);
 
+  // View mode switcher: list vs grid (matching Employee Directory)
+  const [viewMode, setViewMode] = useState<'list' | 'grid'>('list');
+  const [activeActionMenuId, setActiveActionMenuId] = useState<string | null>(null);
+
+  // Sorting
+  const [sortColumn, setSortColumn] = useState<string>('newHire');
+  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
+
   // Filters & Search
   const [activeTab, setActiveTab] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState('');
@@ -76,6 +84,26 @@ export function OnboardingPage({ title = 'Onboarding', onAddNewHire }: Onboardin
     EMPTY_ONBOARDING_FILTER_STATE,
   );
   const [isFilterPanelOpen, setIsFilterPanelOpen] = useState(false);
+
+  // Close menus when clicking outside
+  useEffect(() => {
+    const handleDocumentClick = () => setActiveActionMenuId(null);
+    document.addEventListener('click', handleDocumentClick);
+    return () => document.removeEventListener('click', handleDocumentClick);
+  }, []);
+
+  const toggleMenu = (id: string) => {
+    setActiveActionMenuId((prev) => (prev === id ? null : id));
+  };
+
+  const handleSort = (column: string) => {
+    if (sortColumn === column) {
+      setSortDirection((prev) => (prev === 'asc' ? 'desc' : 'asc'));
+    } else {
+      setSortColumn(column);
+      setSortDirection('asc');
+    }
+  };
 
   const appliedCount = countActiveOnboardingFilters(appliedFilters);
   const hasActiveFilters = appliedCount > 0 || searchQuery !== '';
@@ -231,18 +259,127 @@ export function OnboardingPage({ title = 'Onboarding', onAddNewHire }: Onboardin
     return (parts[0]?.[0] || 'U').toUpperCase();
   };
 
-  const formatDate = (dateStr: string): string => {
+  const formatDate = (dateStr: string | null | undefined): string => {
+    if (!dateStr || dateStr.startsWith('1970-01-01') || dateStr === '0000-00-00') return '—';
     try {
-      const date = new Date(dateStr);
-      if (isNaN(date.getTime())) return dateStr;
+      const date = new Date(dateStr.includes('T') ? dateStr : `${dateStr}T00:00:00Z`);
+      if (isNaN(date.getTime()) || date.getUTCFullYear() <= 1970) return '—';
       return date.toLocaleDateString('en-US', {
         month: 'short',
         day: 'numeric',
         year: 'numeric',
+        timeZone: 'UTC',
       });
     } catch {
-      return dateStr;
+      return '—';
     }
+  };
+
+  const sortedCases = useMemo(() => {
+    if (!sortColumn) return cases;
+    return [...cases].sort((a, b) => {
+      let valA = '';
+      let valB = '';
+      if (sortColumn === 'newHire') {
+        valA = a.fullName || '';
+        valB = b.fullName || '';
+      } else if (sortColumn === 'department') {
+        valA = a.departmentName || '';
+        valB = b.departmentName || '';
+      } else if (sortColumn === 'location') {
+        valA = a.locationName || '';
+        valB = b.locationName || '';
+      } else if (sortColumn === 'employment') {
+        valA = a.employmentType || '';
+        valB = b.employmentType || '';
+      } else if (sortColumn === 'joiningDate') {
+        valA = a.joiningDate || '';
+        valB = b.joiningDate || '';
+      } else if (sortColumn === 'status' || sortColumn === 'stage') {
+        valA = a.stage || '';
+        valB = b.stage || '';
+      }
+      const cmp = valA.localeCompare(valB);
+      return sortDirection === 'asc' ? cmp : -cmp;
+    });
+  }, [cases, sortColumn, sortDirection]);
+
+  const handleExportCsv = () => {
+    try {
+      const records = sortedCases;
+      if (records.length === 0) {
+        alert('No new hire records to export.');
+        return;
+      }
+      const headers = [
+        'Candidate Name',
+        'Email',
+        'Phone',
+        'Department',
+        'Designation',
+        'Location',
+        'Employment Type',
+        'Stage',
+        'Status',
+        'Joining Date',
+      ];
+      const csvRows = [
+        headers.join(','),
+        ...records.map((item) =>
+          [
+            `"${(item.fullName || '').replace(/"/g, '""')}"`,
+            `"${(item.email || '').replace(/"/g, '""')}"`,
+            `"${(item.phone || '').replace(/"/g, '""')}"`,
+            `"${(item.departmentName || '').replace(/"/g, '""')}"`,
+            `"${(item.designationName || '').replace(/"/g, '""')}"`,
+            `"${(item.locationName || '').replace(/"/g, '""')}"`,
+            `"${employmentTypeLabel(item.employmentType) || ''}"`,
+            `"${item.stage || ''}"`,
+            `"${item.status || ''}"`,
+            `"${item.joiningDate || ''}"`,
+          ].join(','),
+        ),
+      ];
+      const blob = new Blob([csvRows.join('\n')], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute(
+        'download',
+        `onboarding_new_hires_${new Date().toISOString().slice(0, 10)}.csv`,
+      );
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+    } catch (err: unknown) {
+      alert(err instanceof Error ? err.message : 'Failed to export new hires');
+    }
+  };
+
+  const renderSortHeader = (column: string, label: string) => {
+    const isActive = sortColumn === column;
+    const arrow = isActive ? (sortDirection === 'asc' ? '↑' : '↓') : '↑';
+    const ariaSort = isActive ? (sortDirection === 'asc' ? 'ascending' : 'descending') : 'none';
+
+    return (
+      <TableHeaderCell aria-sort={ariaSort}>
+        <button
+          type="button"
+          className={`bezent-table-th-sortable ${isActive ? 'bezent-table-th-sortable--active' : ''}`}
+          onClick={() => handleSort(column)}
+          aria-label={`Sort by ${label} ${isActive && sortDirection === 'asc' ? 'descending' : 'ascending'}`}
+        >
+          <span>{label}</span>
+          <span
+            className={`bezent-table-sort-arrow ${isActive ? 'bezent-table-sort-arrow--active' : ''}`}
+            aria-hidden="true"
+          >
+            {arrow}
+          </span>
+        </button>
+      </TableHeaderCell>
+    );
   };
 
   const getStageBadgeProps = (
@@ -350,135 +487,154 @@ export function OnboardingPage({ title = 'Onboarding', onAddNewHire }: Onboardin
             </Alert>
           )}
 
-          {/* 2. Workforce KPI Cards (4 columns matching Employees Directory) */}
-          <Grid columns={4} gap="md">
-            {/* Total New Hires */}
-            <div className="bezent-kpi-card bezent-kpi-card--blue">
-              <div className="bezent-kpi-card__icon bezent-kpi-card__icon--blue">
-                <BezentIcon name="employees" size={20} />
-              </div>
-              <div className="bezent-kpi-card__info">
-                <p className="bezent-kpi-card__title">Total New Hires</p>
-                <p className="bezent-kpi-card__value">
-                  {loading ? (
-                    <span className="bezent-kpi-card__skeleton" aria-label="Loading metric" />
-                  ) : (
-                    counts.all
-                  )}
-                </p>
-                <p className="bezent-kpi-card__caption">All tracked onboarding cases</p>
-              </div>
-            </div>
+          {/* Search & Action Toolbar with Status Filter Tabs */}
+          <Toolbar
+            left={
+              <Inline align="center" gap="sm">
+                {/* Compact Search Bar with Icon */}
+                <div className="bezent-search-bar">
+                  <BezentIcon name="search" size={16} color="var(--text-secondary, #64748b)" />
+                  <input
+                    type="search"
+                    placeholder="Search by name, email, department..."
+                    value={searchQuery}
+                    onChange={(e) => handleSearchChange(e.target.value)}
+                    className="bezent-search-bar__input"
+                    aria-label="Search by name, email, department..."
+                  />
+                </div>
 
-            {/* In Progress */}
-            <div className="bezent-kpi-card bezent-kpi-card--purple">
-              <div className="bezent-kpi-card__icon bezent-kpi-card__icon--purple">
-                <BezentIcon name="clock" size={20} />
-              </div>
-              <div className="bezent-kpi-card__info">
-                <p className="bezent-kpi-card__title">In Progress</p>
-                <p className="bezent-kpi-card__value">
-                  {loading ? (
-                    <span className="bezent-kpi-card__skeleton" aria-label="Loading metric" />
-                  ) : (
-                    inProgressCount
-                  )}
-                </p>
-                <p className="bezent-kpi-card__caption">Preboarding & document verification</p>
-              </div>
-            </div>
+                {/* Filter Toggle Button */}
+                <div className="bezent-filter-anchor">
+                  <Button
+                    variant={appliedCount > 0 || isFilterPanelOpen ? 'secondary' : 'outline'}
+                    size="md"
+                    shape="rounded"
+                    className={appliedCount > 0 ? 'bezent-btn--filters-active' : ''}
+                    leftIcon={<BezentIcon name="filter" size={16} />}
+                    onClick={() => setIsFilterPanelOpen((prev) => !prev)}
+                    aria-expanded={isFilterPanelOpen}
+                    aria-label="Filters"
+                  >
+                    <span>Filters</span>
+                    {appliedCount > 0 && (
+                      <span className="bezent-btn__filter-count">{appliedCount}</span>
+                    )}
+                  </Button>
 
-            {/* Completed */}
-            <div className="bezent-kpi-card bezent-kpi-card--green">
-              <div className="bezent-kpi-card__icon bezent-kpi-card__icon--green">
-                <BezentIcon name="userCheck" size={20} />
-              </div>
-              <div className="bezent-kpi-card__info">
-                <p className="bezent-kpi-card__title">Completed</p>
-                <p className="bezent-kpi-card__value">
-                  {loading ? (
-                    <span className="bezent-kpi-card__skeleton" aria-label="Loading metric" />
-                  ) : (
-                    counts.completed
-                  )}
-                </p>
-                <p className="bezent-kpi-card__caption">Successfully completed onboarding</p>
-              </div>
-            </div>
+                  <OnboardingFilterPanel
+                    isOpen={isFilterPanelOpen}
+                    onClose={() => setIsFilterPanelOpen(false)}
+                    appliedFilters={appliedFilters}
+                    onApply={(newFilters) => {
+                      setAppliedFilters(newFilters);
+                      setPage(1);
+                    }}
+                    masters={masters}
+                  />
+                </div>
 
-            {/* Pre-boarding */}
-            <div className="bezent-kpi-card bezent-kpi-card--amber">
-              <div className="bezent-kpi-card__icon bezent-kpi-card__icon--amber">
-                <BezentIcon name="onboarding" size={20} />
-              </div>
-              <div className="bezent-kpi-card__info">
-                <p className="bezent-kpi-card__title">Pre-boarding</p>
-                <p className="bezent-kpi-card__value">
-                  {loading ? (
-                    <span className="bezent-kpi-card__skeleton" aria-label="Loading metric" />
-                  ) : (
-                    (counts.preboarding ?? 0)
-                  )}
-                </p>
-                <p className="bezent-kpi-card__caption">Awaiting registration & verification</p>
-              </div>
-            </div>
-          </Grid>
-
-          {/* 3. Search & Filter Toolbar directly below KPI Cards */}
-          <div className="bezent-directory-toolbar">
-            <div className="bezent-directory-toolbar__search">
-              <SearchInput
-                placeholder="Search by name, email, department..."
-                shape="rounded"
-                value={searchQuery}
-                onChange={(e) => handleSearchChange(e.target.value)}
-                onClear={() => handleSearchChange('')}
-                aria-label="Search new hires"
-              />
-            </div>
-            <div className="bezent-directory-toolbar__actions">
-              <div className="bezent-filter-anchor">
+                {/* Reset Button */}
                 <Button
-                  variant={appliedCount > 0 || isFilterPanelOpen ? 'secondary' : 'outline'}
+                  variant="outline"
                   size="md"
                   shape="rounded"
-                  className={appliedCount > 0 ? 'bezent-btn--filters-active' : ''}
-                  leftIcon={<BezentIcon name="filter" size={16} />}
-                  onClick={() => setIsFilterPanelOpen((prev) => !prev)}
+                  leftIcon={<BezentIcon name="reset" size={16} />}
+                  onClick={handleResetFilters}
+                  disabled={!hasActiveFilters}
                 >
-                  Filters
-                  {appliedCount > 0 && (
-                    <span className="bezent-btn__filter-count">{appliedCount}</span>
-                  )}
+                  Reset
                 </Button>
 
-                <OnboardingFilterPanel
-                  isOpen={isFilterPanelOpen}
-                  onClose={() => setIsFilterPanelOpen(false)}
-                  appliedFilters={appliedFilters}
-                  onApply={(newFilters) => {
-                    setAppliedFilters(newFilters);
-                    setPage(1);
+                {/* View Mode Toggle: List vs Grid */}
+                <div
+                  className="bezent-view-toggle"
+                  role="group"
+                  aria-label="New hires view layout switcher"
+                >
+                  <button
+                    type="button"
+                    className={`bezent-view-toggle__btn ${viewMode === 'list' ? 'is-active' : ''}`}
+                    onClick={() => setViewMode('list')}
+                    title="List View"
+                    aria-label="List View"
+                    aria-pressed={viewMode === 'list'}
+                  >
+                    <BezentIcon name="viewList" size={18} />
+                  </button>
+                  <button
+                    type="button"
+                    className={`bezent-view-toggle__btn ${viewMode === 'grid' ? 'is-active' : ''}`}
+                    onClick={() => setViewMode('grid')}
+                    title="Grid View"
+                    aria-label="Grid View"
+                    aria-pressed={viewMode === 'grid'}
+                  >
+                    <BezentIcon name="viewGrid" size={18} />
+                  </button>
+                </div>
+
+                {/* Horizontal Status Filter Tabs */}
+                <div
+                  className="bezent-filter-tabs"
+                  role="tablist"
+                  aria-label="Filter new hires by stage"
+                >
+                  {tabItems.map((tab) => {
+                    const isActive = activeTab === tab.id;
+                    return (
+                      <button
+                        key={tab.id}
+                        type="button"
+                        role="tab"
+                        aria-selected={isActive}
+                        className={`bezent-filter-tab ${isActive ? 'is-active' : ''}`}
+                        onClick={() => handleTabChange(tab.id)}
+                      >
+                        <span>{tab.label}</span>
+                        {tab.count !== undefined && tab.count > 0 && (
+                          <span className="bezent-filter-tab-count">{tab.count}</span>
+                        )}
+                      </button>
+                    );
+                  })}
+                </div>
+              </Inline>
+            }
+            right={
+              <Inline align="center" gap="xs">
+                <span className="bezent-records-text" hidden>
+                  {`${totalItems} New Hires`}
+                </span>
+                <IconButton
+                  label="Export"
+                  variant="ghost"
+                  tooltipDirection="down"
+                  onClick={handleExportCsv}
+                >
+                  <BezentIcon name="export" size={18} />
+                </IconButton>
+                <IconButton
+                  label="Import"
+                  variant="ghost"
+                  tooltipDirection="down"
+                  onClick={() => {
+                    alert('Import new hires via CSV is available in Settings > Import.');
                   }}
-                  masters={masters}
-                />
-              </div>
-
-              <Button
-                variant="outline"
-                size="md"
-                shape="rounded"
-                leftIcon={<BezentIcon name="reset" size={16} />}
-                onClick={handleResetFilters}
-                disabled={!hasActiveFilters}
-              >
-                Reset
-              </Button>
-
-              <span className="bezent-records-text">{`${totalItems} New Hires`}</span>
-            </div>
-          </div>
+                >
+                  <BezentIcon name="upload" size={18} />
+                </IconButton>
+                <IconButton
+                  label="Add New Hire"
+                  variant="solid"
+                  tooltipDirection="down"
+                  onClick={handleAddNewHire}
+                >
+                  <BezentIcon name="plusSign" size={18} />
+                </IconButton>
+              </Inline>
+            }
+          />
 
           {/* Active Filter Chips (rendered below toolbar without pushing down table when empty) */}
           {appliedCount > 0 && (
@@ -593,9 +749,6 @@ export function OnboardingPage({ title = 'Onboarding', onAddNewHire }: Onboardin
             </div>
           )}
 
-          {/* 4. Stage Filter Tabs on their own dedicated line */}
-          <Tabs activeId={activeTab} onChange={handleTabChange} items={tabItems} />
-
           {/* 4. Table / Content States */}
           {loading ? (
             <LoadingState label="Loading new hire records…" fill />
@@ -621,103 +774,278 @@ export function OnboardingPage({ title = 'Onboarding', onAddNewHire }: Onboardin
             />
           ) : (
             <>
-              <div className="bezent-table-card">
-                <Table hoverable>
-                  <TableHead>
-                    <TableRow>
-                      <TableHeaderCell>New Hire</TableHeaderCell>
-                      <TableHeaderCell>Job / Department</TableHeaderCell>
-                      <TableHeaderCell>Location</TableHeaderCell>
-                      <TableHeaderCell>Joining Date</TableHeaderCell>
-                      <TableHeaderCell>Current Stage</TableHeaderCell>
-                      <TableHeaderCell align="right">Actions</TableHeaderCell>
-                    </TableRow>
-                  </TableHead>
-                  <TableBody>
-                    {cases.map((item) => {
-                      const badgeInfo = getStageBadgeProps(item.stage, item.status);
-                      const isCompleted = item.stage === 'completed';
+              {viewMode === 'grid' ? (
+                <Grid columns={3} gap="md" aria-label="New Hires Grid View">
+                  {sortedCases.map((item) => {
+                    const isMenuOpen = activeActionMenuId === item.id;
+                    const avatarColor = getAvatarColor(item.id || item.fullName);
+                    const initials = getInitials(item.fullName);
+                    const badgeInfo = getStageBadgeProps(item.stage, item.status);
+                    const isCompleted = item.stage === 'completed';
 
-                      return (
-                        <TableRow key={item.id}>
-                          <TableCell>
-                            <div className="bezent-table-cell--avatar-meta">
-                              <Avatar initials={getInitials(item.fullName)} alt={item.fullName} />
-                              <div className="bezent-table-meta-group">
-                                <Label
-                                  as="span"
-                                  size="sm"
-                                  weight="semibold"
-                                  className="bezent-table-meta-title"
+                    return (
+                      <Card
+                        key={item.id}
+                        variant="default"
+                        padding="md"
+                        hoverable
+                        onClick={() => handleRowAction(item)}
+                      >
+                        <CardBody>
+                          <Stack gap="sm">
+                            {/* Top: Avatar + Name & Email + Context Action */}
+                            <Inline justify="between" align="start">
+                              <Inline align="center" gap="sm">
+                                <Avatar
+                                  initials={initials}
+                                  size="md"
+                                  color={avatarColor}
+                                  alt={item.fullName}
+                                />
+                                <Stack gap="none">
+                                  <span className="bezent-table-meta-title">{item.fullName}</span>
+                                  <span className="bezent-table-meta-subtitle">
+                                    {item.email || '—'}
+                                  </span>
+                                </Stack>
+                              </Inline>
+                              <div
+                                className="bezent-table-action-menu"
+                                onClick={(e) => e.stopPropagation()}
+                              >
+                                <button
+                                  type="button"
+                                  className={`bezent-table-action-btn ${isMenuOpen ? 'is-active' : ''}`}
+                                  aria-label={`Actions for ${item.fullName}`}
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    toggleMenu(item.id);
+                                  }}
                                 >
-                                  {item.fullName}
-                                </Label>
-                                {item.email && (
-                                  <span className="bezent-table-meta-subtitle">{item.email}</span>
+                                  <BezentIcon name="more" size={18} />
+                                </button>
+                                {isMenuOpen && (
+                                  <div className="bezent-table-action-menu__dropdown" role="menu">
+                                    <button
+                                      type="button"
+                                      role="menuitem"
+                                      className="bezent-table-action-menu__item"
+                                      onClick={() => {
+                                        toggleMenu(item.id);
+                                        handleRowAction(item);
+                                      }}
+                                    >
+                                      <BezentIcon
+                                        name={isCompleted ? 'employees' : 'edit'}
+                                        size={16}
+                                      />
+                                      {isCompleted
+                                        ? 'View Profile'
+                                        : item.stage === 'preboarding'
+                                          ? 'Start Registration'
+                                          : 'Continue Registration'}
+                                    </button>
+                                    {!isCompleted && item.status === 'active' && (
+                                      <button
+                                        type="button"
+                                        role="menuitem"
+                                        className="bezent-table-action-menu__item"
+                                        onClick={() => {
+                                          toggleMenu(item.id);
+                                          openTransitionModal(item);
+                                        }}
+                                      >
+                                        <BezentIcon name="arrowRight" size={16} />
+                                        Transition Stage
+                                      </button>
+                                    )}
+                                  </div>
                                 )}
                               </div>
-                            </div>
-                          </TableCell>
-                          <TableCell>
-                            <div className="bezent-table-meta-group">
-                              <Label
-                                as="span"
-                                size="sm"
-                                weight="semibold"
-                                className="bezent-table-meta-title"
-                              >
-                                {item.designationName || '—'}
-                              </Label>
-                              {item.departmentName && (
-                                <span className="bezent-table-meta-subtitle">
-                                  {item.departmentName}
-                                </span>
-                              )}
-                            </div>
-                          </TableCell>
-                          <TableCell>
-                            <Label as="span" size="sm" weight="regular">
-                              {item.locationName || '—'}
-                            </Label>
-                          </TableCell>
-                          <TableCell>
-                            <Label as="span" size="sm" weight="regular">
-                              {formatDate(item.joiningDate)}
-                            </Label>
-                          </TableCell>
-                          <TableCell>
-                            <Badge variant={badgeInfo.variant}>{badgeInfo.label}</Badge>
-                          </TableCell>
-                          <TableCell align="right">
-                            <Inline gap="xs" justify="end" align="center">
-                              {!isCompleted && item.status === 'active' && (
-                                <IconButton
-                                  label={`Transition ${item.fullName}`}
-                                  onClick={() => openTransitionModal(item)}
-                                >
-                                  <BezentIcon name="arrowRight" size={18} />
-                                </IconButton>
-                              )}
-                              <IconButton
-                                label={
-                                  isCompleted
-                                    ? `View ${item.fullName}`
-                                    : item.stage === 'preboarding'
-                                      ? `Start Registration (${item.fullName})`
-                                      : `Continue Registration (${item.fullName})`
-                                }
-                                onClick={() => handleRowAction(item)}
-                              >
-                                <BezentIcon name={isCompleted ? 'openInNew' : 'edit'} size={18} />
-                              </IconButton>
                             </Inline>
-                          </TableCell>
-                        </TableRow>
-                      );
-                    })}
-                  </TableBody>
-                </Table>
-              </div>
+
+                            {/* Middle: Designation & Department */}
+                            <Stack gap="none">
+                              <span className="bezent-table-meta-title">
+                                {item.designationName || 'New Hire'}
+                              </span>
+                              <span className="bezent-table-meta-subtitle">
+                                {item.departmentName || '—'}
+                              </span>
+                            </Stack>
+
+                            {/* Location & Employment Type */}
+                            <Inline justify="between" align="center">
+                              <span className="bezent-table-meta-subtitle">
+                                {item.locationName || 'Main Campus'}
+                              </span>
+                              <span className="bezent-table-meta-title">
+                                {employmentTypeLabel(item.employmentType)}
+                              </span>
+                            </Inline>
+
+                            {/* Footer: Stage Badge + Joined Date */}
+                            <Inline justify="between" align="center">
+                              <span
+                                className={`bezent-status-pill bezent-status-pill--${badgeInfo.variant} bezent-status-pill--sm`}
+                              >
+                                <span className="bezent-status-pill__dot" aria-hidden="true" />
+                                <span className="bezent-status-pill__label">{badgeInfo.label}</span>
+                              </span>
+                              <span className="bezent-table-meta-dim">
+                                {formatDate(item.joiningDate)}
+                              </span>
+                            </Inline>
+                          </Stack>
+                        </CardBody>
+                      </Card>
+                    );
+                  })}
+                </Grid>
+              ) : (
+                <div className="bezent-table-card">
+                  <Table hoverable aria-label="New Hires">
+                    <TableHead>
+                      <TableRow>
+                        {renderSortHeader(
+                          'newHire',
+                          totalItems !== undefined ? `New Hire (${totalItems})` : 'New Hire',
+                        )}
+                        {renderSortHeader('department', 'Department')}
+                        {renderSortHeader('location', 'Work Location')}
+                        {renderSortHeader('employment', 'Employment')}
+                        {renderSortHeader('joiningDate', 'Joined Date')}
+                        {renderSortHeader('status', 'Status')}
+                        <TableHeaderCell className="bezent-table-col--actions">
+                          Actions
+                        </TableHeaderCell>
+                      </TableRow>
+                    </TableHead>
+                    <TableBody>
+                      {sortedCases.map((item, _index) => {
+                        const isMenuOpen = activeActionMenuId === item.id;
+                        const avatarColor = getAvatarColor(item.id || item.fullName);
+                        const initials = getInitials(item.fullName);
+                        const badgeInfo = getStageBadgeProps(item.stage, item.status);
+                        const isCompleted = item.stage === 'completed';
+                        const isNearBottom =
+                          _index >= sortedCases.length - 2 && sortedCases.length > 2;
+
+                        return (
+                          <TableRow key={item.id} className={isMenuOpen ? 'is-menu-open' : ''}>
+                            {/* New Hire Avatar + Name + Subtitle (Email • Designation) */}
+                            <TableCell>
+                              <div className="bezent-table-cell--avatar-meta">
+                                <Avatar
+                                  initials={initials}
+                                  color={avatarColor}
+                                  size="md"
+                                  alt={item.fullName}
+                                />
+                                <div className="bezent-table-meta-group">
+                                  <button
+                                    type="button"
+                                    className="bezent-table-meta-title"
+                                    onClick={() => handleRowAction(item)}
+                                    aria-label={`Open registration for ${item.fullName}`}
+                                  >
+                                    {item.fullName}
+                                  </button>
+                                  <span className="bezent-table-meta-subtitle">
+                                    {item.email || '—'}
+                                    {item.designationName ? ` • ${item.designationName}` : ''}
+                                  </span>
+                                </div>
+                              </div>
+                            </TableCell>
+
+                            {/* Department */}
+                            <TableCell>{item.departmentName || '—'}</TableCell>
+
+                            {/* Work Location */}
+                            <TableCell>{item.locationName || '—'}</TableCell>
+
+                            {/* Employment */}
+                            <TableCell>{employmentTypeLabel(item.employmentType) || '—'}</TableCell>
+
+                            {/* Joined Date */}
+                            <TableCell>{formatDate(item.joiningDate)}</TableCell>
+
+                            {/* Status / Stage Pill with dot */}
+                            <TableCell>
+                              <span
+                                className={`bezent-status-pill bezent-status-pill--${badgeInfo.variant} bezent-status-pill--sm`}
+                              >
+                                <span className="bezent-status-pill__dot" aria-hidden="true" />
+                                <span className="bezent-status-pill__label">{badgeInfo.label}</span>
+                              </span>
+                            </TableCell>
+
+                            {/* Actions (dropdown menu) */}
+                            <TableCell className="bezent-table-col--actions">
+                              <div className="bezent-table-action-menu">
+                                <button
+                                  type="button"
+                                  className={`bezent-table-action-btn ${isMenuOpen ? 'is-active' : ''}`}
+                                  aria-label={`Actions for ${item.fullName}`}
+                                  aria-expanded={isMenuOpen}
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    toggleMenu(item.id);
+                                  }}
+                                >
+                                  <BezentIcon name="more" size={18} />
+                                </button>
+
+                                {isMenuOpen && (
+                                  <div
+                                    className={`bezent-table-action-menu__dropdown ${isNearBottom ? 'bezent-table-action-menu__dropdown--upwards' : ''}`}
+                                    role="menu"
+                                  >
+                                    <button
+                                      type="button"
+                                      role="menuitem"
+                                      className="bezent-table-action-menu__item"
+                                      onClick={() => {
+                                        toggleMenu(item.id);
+                                        handleRowAction(item);
+                                      }}
+                                    >
+                                      <BezentIcon
+                                        name={isCompleted ? 'employees' : 'edit'}
+                                        size={16}
+                                      />
+                                      {isCompleted
+                                        ? 'View Profile'
+                                        : item.stage === 'preboarding'
+                                          ? 'Start Registration'
+                                          : 'Continue Registration'}
+                                    </button>
+                                    {!isCompleted && item.status === 'active' && (
+                                      <button
+                                        type="button"
+                                        role="menuitem"
+                                        className="bezent-table-action-menu__item"
+                                        onClick={() => {
+                                          toggleMenu(item.id);
+                                          openTransitionModal(item);
+                                        }}
+                                      >
+                                        <BezentIcon name="arrowRight" size={16} />
+                                        Transition Stage
+                                      </button>
+                                    )}
+                                  </div>
+                                )}
+                              </div>
+                            </TableCell>
+                          </TableRow>
+                        );
+                      })}
+                    </TableBody>
+                  </Table>
+                </div>
+              )}
 
               {/* Pagination Controls */}
               <Toolbar
@@ -839,7 +1167,9 @@ export function OnboardingPage({ title = 'Onboarding', onAddNewHire }: Onboardin
               label="Transition Notes"
               value={transitionNotes}
               maxLength={500}
-              onChange={(e) => setTransitionNotes(e.target.value)}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                setTransitionNotes(e.target.value)
+              }
               placeholder="Optional notes or audit comments"
             />
           </Stack>

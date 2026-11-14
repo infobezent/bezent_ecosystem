@@ -2,8 +2,13 @@ import React, { useState, useEffect, useRef } from 'react';
 import {
   Avatar,
   Badge,
+  Card,
+  CardBody,
   EmptyState,
+  Grid,
+  Inline,
   LoadingState,
+  Stack,
   Table,
   TableBody,
   TableCell,
@@ -19,7 +24,7 @@ import {
   actionTypeLabel,
   formatDate,
 } from '../../employee-administration/model/actionCatalog';
-import { getAvatarColor, getEmployeeAvatarId } from '../../employees/model/employeeModel';
+import { getAvatarColor } from '../../employees/model/employeeModel';
 
 export interface OffboardingTableProps {
   status: 'loading' | 'error' | 'ready';
@@ -34,6 +39,7 @@ export interface OffboardingTableProps {
   onOpenEmployee: (employeeId: string) => void;
   onInitiateOffboarding?: () => void;
   onClearFilters?: () => void;
+  viewMode?: 'list' | 'grid';
 }
 
 function getInitials(name: string): string {
@@ -57,6 +63,7 @@ export const OffboardingTable: React.FC<OffboardingTableProps> = ({
   onOpenEmployee,
   onInitiateOffboarding,
   onClearFilters,
+  viewMode = 'list',
 }) => {
   const [activeMenuId, setActiveMenuId] = useState<string | null>(null);
   const tableRef = useRef<HTMLDivElement>(null);
@@ -125,6 +132,180 @@ export const OffboardingTable: React.FC<OffboardingTableProps> = ({
     );
   }
 
+  // Grid View Mode matching Employee Directory / Candidates layout
+  if (viewMode === 'grid') {
+    return (
+      <Grid columns={3} gap="md" aria-label="Offboarding Grid View">
+        {items.map((action) => {
+          const isMenuOpen = activeMenuId === action.id;
+          const avatarColor = getAvatarColor(action.employeeId || action.employeeNumber);
+          const initials = getInitials(action.employeeName);
+          const isPending = action.status === 'pending';
+          const canApply = isPending && action.effectiveDate <= today;
+          const isServingNotice = isPending && action.effectiveDate > today;
+
+          return (
+            <Card
+              key={action.id}
+              variant="default"
+              padding="md"
+              hoverable
+              onClick={() => onOpenAction(action.id)}
+            >
+              <CardBody>
+                <Stack gap="sm">
+                  {/* Top: Avatar + Name & ID + Context Action */}
+                  <Inline justify="between" align="start">
+                    <Inline align="center" gap="sm">
+                      <Avatar
+                        initials={initials}
+                        size="md"
+                        color={avatarColor}
+                        alt={action.employeeName}
+                      />
+                      <Stack gap="none">
+                        <button
+                          type="button"
+                          className="bezent-table-meta-title"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            onOpenAction(action.id);
+                          }}
+                          aria-label={`Open offboarding details for ${action.employeeName}`}
+                        >
+                          {action.employeeName}
+                        </button>
+                        <span className="bezent-table-meta-subtitle font-mono">
+                          {action.employeeNumber}
+                        </span>
+                      </Stack>
+                    </Inline>
+                    <div className="bezent-table-action-menu">
+                      <button
+                        type="button"
+                        className={`bezent-table-action-btn ${isMenuOpen ? 'is-active' : ''}`}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setActiveMenuId((prev) => (prev === action.id ? null : action.id));
+                        }}
+                        title="Actions"
+                        aria-label={`Actions for offboarding of ${action.employeeName}`}
+                      >
+                        <BezentIcon name="more" size={16} />
+                      </button>
+                      {isMenuOpen && (
+                        <div
+                          className="bezent-table-action-menu__dropdown"
+                          role="menu"
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          <button
+                            type="button"
+                            role="menuitem"
+                            className="bezent-table-action-menu__item"
+                            onClick={() => {
+                              setActiveMenuId(null);
+                              onOpenAction(action.id);
+                            }}
+                          >
+                            <BezentIcon name="eye" size={16} />
+                            View Offboarding Details
+                          </button>
+                          {canApply && (
+                            <button
+                              type="button"
+                              role="menuitem"
+                              className="bezent-table-action-menu__item"
+                              onClick={() => {
+                                setActiveMenuId(null);
+                                onApplyAction(action);
+                              }}
+                            >
+                              <BezentIcon name="checkCircle" size={16} />
+                              Complete Separation
+                            </button>
+                          )}
+                          {isPending && (
+                            <button
+                              type="button"
+                              role="menuitem"
+                              className="bezent-table-action-menu__item bezent-table-action-menu__item--danger"
+                              onClick={() => {
+                                setActiveMenuId(null);
+                                onCancelAction(action);
+                              }}
+                            >
+                              <BezentIcon name="close" size={16} />
+                              Cancel Request
+                            </button>
+                          )}
+                          <button
+                            type="button"
+                            role="menuitem"
+                            className="bezent-table-action-menu__item"
+                            onClick={() => {
+                              setActiveMenuId(null);
+                              onOpenEmployee(action.employeeId);
+                            }}
+                          >
+                            <BezentIcon name="employees" size={16} />
+                            View Employee Profile
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  </Inline>
+
+                  {/* Exit Type & Notice */}
+                  <Stack gap="none">
+                    <span className="bezent-table-meta-title">
+                      {actionTypeLabel(action.actionType)}
+                    </span>
+                    <span className="bezent-table-meta-subtitle">
+                      {action.reason || 'Exit formalities in progress'}
+                    </span>
+                  </Stack>
+
+                  {/* Notice Status Pill */}
+                  <Inline justify="between" align="center">
+                    <span className="bezent-table-meta-subtitle">Notice Status:</span>
+                    {isServingNotice ? (
+                      <Badge variant="warning" size="sm">
+                        Serving Notice
+                      </Badge>
+                    ) : isPending ? (
+                      <Badge variant="warning" size="sm">
+                        Notice Complete · Due
+                      </Badge>
+                    ) : action.status === 'applied' ? (
+                      <Badge variant="neutral" size="sm">
+                        Separated
+                      </Badge>
+                    ) : (
+                      <Badge variant="neutral" size="sm">
+                        Cancelled
+                      </Badge>
+                    )}
+                  </Inline>
+
+                  {/* Footer: Status Badge + LWD */}
+                  <Inline justify="between" align="center">
+                    <Badge variant={actionStatusVariant(action.status)} size="sm">
+                      {ACTION_STATUS_LABELS[action.status]}
+                    </Badge>
+                    <span className="bezent-table-meta-dim">
+                      {`LWD: ${formatDate(action.effectiveDate)}`}
+                    </span>
+                  </Inline>
+                </Stack>
+              </CardBody>
+            </Card>
+          );
+        })}
+      </Grid>
+    );
+  }
+
   return (
     <div ref={tableRef}>
       <Table hoverable aria-label="Offboarding directory">
@@ -149,15 +330,13 @@ export const OffboardingTable: React.FC<OffboardingTableProps> = ({
             const isServingNotice = isPending && action.effectiveDate > today;
 
             const avatarColor = getAvatarColor(action.employeeId || action.employeeNumber);
-            const avatarId = getEmployeeAvatarId(action.employeeId || action.employeeNumber);
 
             return (
-              <TableRow key={action.id}>
+              <TableRow key={action.id} className={isMenuOpen ? 'is-menu-open' : ''}>
                 {/* Employee Name + Avatar */}
                 <TableCell>
                   <div className="bezent-table-cell--avatar-meta">
                     <Avatar
-                      avatarId={avatarId}
                       initials={getInitials(action.employeeName)}
                       color={avatarColor}
                       size="md"
@@ -188,7 +367,7 @@ export const OffboardingTable: React.FC<OffboardingTableProps> = ({
                 <TableCell>
                   <button
                     type="button"
-                    className="bezent-table-meta-subtitle"
+                    className="bezent-table-meta-subtitle font-mono"
                     onClick={() => onOpenEmployee(action.employeeId)}
                     aria-label={`Open profile of employee ${action.employeeNumber}`}
                   >
@@ -234,9 +413,12 @@ export const OffboardingTable: React.FC<OffboardingTableProps> = ({
 
                 {/* Overall Action Status Badge */}
                 <TableCell>
-                  <Badge variant={actionStatusVariant(action.status)} size="sm">
-                    {ACTION_STATUS_LABELS[action.status]}
-                  </Badge>
+                  <span
+                    className={`bezent-status-pill bezent-status-pill--${actionStatusVariant(action.status)}`}
+                  >
+                    <span className="bezent-status-pill__dot" aria-hidden="true" />
+                    <span>{ACTION_STATUS_LABELS[action.status]}</span>
+                  </span>
                 </TableCell>
 
                 {/* Actions Menu */}

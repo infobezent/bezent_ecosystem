@@ -114,21 +114,15 @@ describe('TransfersPage', () => {
     expect(html).not.toContain('Import');
   });
 
-  it('renders the 4 KPI Summary Cards using Workforce tinted cards', () => {
+  it('renders without summary cards matching the employee directory layout', () => {
     const html = renderToStaticMarkup(
       <MemoryRouter>
         <TransfersPage />
       </MemoryRouter>,
     );
 
-    expect(html).toContain('Total Transfers');
-    expect(html).toContain('Pending Approval');
-    expect(html).toContain('Upcoming Transfers');
-    expect(html).toContain('Completed Transfers');
-    expect(html).toContain('bezent-kpi-card--blue');
-    expect(html).toContain('bezent-kpi-card--amber');
-    expect(html).toContain('bezent-kpi-card--purple');
-    expect(html).toContain('bezent-kpi-card--green');
+    expect(html).not.toContain('Total Transfers');
+    expect(html).not.toContain('bezent-kpi-card');
   });
 
   it('renders search input and toolbar controls', () => {

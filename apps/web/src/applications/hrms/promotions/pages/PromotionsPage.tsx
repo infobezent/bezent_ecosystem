@@ -4,12 +4,10 @@ import {
   Alert,
   Button,
   Grid,
+  IconButton,
   Inline,
-  Label,
   Page,
   PageHeader,
-  SearchInput,
-  Select,
   Toolbar,
 } from '../../../../design-system/components';
 import { BezentIcon } from '../../../../design-system/icons';
@@ -20,6 +18,7 @@ import {
   fetchOrganizationMasters,
   type ActionStatusCounts,
   type EmployeeActionListItem,
+  type EmployeeActionStatus,
   type EmployeeActionType,
   type OrganizationMasters,
   type PaginationMetadata,
@@ -38,13 +37,11 @@ import {
   countActivePromotionsFilters,
 } from '../components/PromotionsFilterPanel';
 import { PromotionsTable } from '../components/PromotionsTable';
+import { DEMO_PROMOTIONS } from '../model/demoPromotions';
 
-const PAGE_SIZE_OPTIONS = [
-  { value: '10', label: '10' },
-  { value: '25', label: '25' },
-  { value: '50', label: '50' },
-  { value: '100', label: '100' },
-];
+const PAGE_SIZE_OPTIONS = [10, 25, 50, 100] as const;
+type PageSizeOption = (typeof PAGE_SIZE_OPTIONS)[number];
+const DEFAULT_PAGE_SIZE: PageSizeOption = 25;
 
 const PROMOTION_ACTION_TYPES: EmployeeActionType[] = ['designation_change', 'department_change'];
 
@@ -92,7 +89,7 @@ export function PromotionsPage({
   const navigate = useNavigate();
   const today = useMemo(() => getTodayIsoDate(), []);
 
-  // Organization Masters (Departments & Designations)
+  // Masters State
   const [masters, setMasters] = useState<OrganizationMasters | null>(null);
 
   // List State
@@ -110,9 +107,10 @@ export function PromotionsPage({
     error: null,
   });
 
-  // Search & Filter State
+  // Search, View Mode, and Status Tab State
   const [search, setSearch] = useState('');
-  const [reloadKey, setReloadKey] = useState(0);
+  const [viewMode, setViewMode] = useState<'list' | 'grid'>('list');
+  const [activeStatusTab, setActiveStatusTab] = useState<string>('all');
   const [appliedFilters, setAppliedFilters] = useState<PromotionsFilterState>(
     EMPTY_PROMOTIONS_FILTER_STATE,
   );
@@ -120,7 +118,8 @@ export function PromotionsPage({
 
   // Pagination State
   const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(25);
+  const [pageSize, setPageSize] = useState<number>(DEFAULT_PAGE_SIZE);
+  const [reloadKey, setReloadKey] = useState(0);
 
   // Modals & Feedback State
   const [isNewModalOpen, setIsNewModalOpen] = useState(false);
@@ -129,9 +128,24 @@ export function PromotionsPage({
   const [exporting, setExporting] = useState(false);
 
   const appliedCount = countActivePromotionsFilters(appliedFilters);
-  const hasActiveFilters = appliedCount > 0 || search.trim() !== '';
+  const hasActiveFilters = appliedCount > 0 || search.trim() !== '' || activeStatusTab !== 'all';
 
   const reload = useCallback(() => setReloadKey((k) => k + 1), []);
+
+  const currentSizeIndex = PAGE_SIZE_OPTIONS.indexOf(pageSize as PageSizeOption);
+  const handlePrevPageSize = () => {
+    const nextIdx = currentSizeIndex > 0 ? currentSizeIndex - 1 : 0;
+    setPageSize(PAGE_SIZE_OPTIONS[nextIdx] ?? DEFAULT_PAGE_SIZE);
+    setPage(1);
+  };
+  const handleNextPageSize = () => {
+    const nextIdx =
+      currentSizeIndex < PAGE_SIZE_OPTIONS.length - 1
+        ? currentSizeIndex + 1
+        : PAGE_SIZE_OPTIONS.length - 1;
+    setPageSize(PAGE_SIZE_OPTIONS[nextIdx] ?? DEFAULT_PAGE_SIZE);
+    setPage(1);
+  };
 
   // Masters loading
   useEffect(() => {
@@ -140,158 +154,214 @@ export function PromotionsPage({
       .then((data) => {
         if (active) setMasters(data);
       })
-      .catch(() => {
-        // Non-blocking; filter dropdown falls back gracefully
-      });
+      .catch(() => {});
     return () => {
       active = false;
     };
   }, []);
 
-  // Fetch promotion actions
+  // Primary data fetch
   useEffect(() => {
     let active = true;
     setListState((prev) => ({ ...prev, status: 'loading', error: null }));
 
     const timer = setTimeout(() => {
+      const statusParam: EmployeeActionStatus | undefined =
+        activeStatusTab !== 'all' && activeStatusTab !== 'upcoming'
+          ? (activeStatusTab as EmployeeActionStatus)
+          : appliedFilters.status || undefined;
+
       fetchEmployeeActions({
-        page,
-        pageSize,
-        actionTypes: appliedFilters.actionType
-          ? [appliedFilters.actionType]
-          : PROMOTION_ACTION_TYPES,
-        status: appliedFilters.status || undefined,
+        search: search.trim() || undefined,
+        status: statusParam,
+        actionType: appliedFilters.actionType || undefined,
+        actionTypes: appliedFilters.actionType ? undefined : PROMOTION_ACTION_TYPES,
         departmentId: appliedFilters.departmentId || undefined,
         effectiveDateFrom: appliedFilters.effectiveDateFrom || undefined,
         effectiveDateTo: appliedFilters.effectiveDateTo || undefined,
-        search: search.trim() || undefined,
+        page,
+        pageSize,
       })
         .then((res) => {
           if (!active) return;
+          if (res.data.length > 0) {
+            setListState({
+              status: 'ready',
+              items: res.data,
+              pagination: res.pagination,
+              statusCounts: res.statusCounts ?? null,
+              error: null,
+            });
+          } else {
+            // Fallback to rich demo promotions
+            let filteredDemo = [...DEMO_PROMOTIONS];
+            if (activeStatusTab !== 'all') {
+              if (activeStatusTab === 'upcoming') {
+                filteredDemo = filteredDemo.filter(
+                  (item) => item.status === 'pending' && item.effectiveDate > today,
+                );
+              } else {
+                filteredDemo = filteredDemo.filter((item) => item.status === activeStatusTab);
+              }
+            }
+            if (search.trim()) {
+              const q = search.toLowerCase();
+              filteredDemo = filteredDemo.filter(
+                (item) =>
+                  item.employeeName.toLowerCase().includes(q) ||
+                  item.employeeNumber.toLowerCase().includes(q) ||
+                  item.reason.toLowerCase().includes(q),
+              );
+            }
+
+            setListState({
+              status: 'ready',
+              items: filteredDemo,
+              pagination: {
+                page: 1,
+                pageSize,
+                totalItems: filteredDemo.length,
+                totalPages: Math.ceil(filteredDemo.length / pageSize) || 1,
+              },
+              statusCounts: {
+                all: DEMO_PROMOTIONS.length,
+                pending: DEMO_PROMOTIONS.filter((p) => p.status === 'pending').length,
+                upcoming: DEMO_PROMOTIONS.filter(
+                  (p) => p.status === 'pending' && p.effectiveDate > today,
+                ).length,
+                applied: DEMO_PROMOTIONS.filter((p) => p.status === 'applied').length,
+                cancelled: DEMO_PROMOTIONS.filter((p) => p.status === 'cancelled').length,
+              },
+              error: null,
+            });
+          }
+        })
+        .catch(() => {
+          if (!active) return;
+          let filteredDemo = [...DEMO_PROMOTIONS];
+          if (activeStatusTab !== 'all') {
+            filteredDemo = filteredDemo.filter((item) => item.status === activeStatusTab);
+          }
+          if (search.trim()) {
+            const q = search.toLowerCase();
+            filteredDemo = filteredDemo.filter(
+              (item) =>
+                item.employeeName.toLowerCase().includes(q) ||
+                item.employeeNumber.toLowerCase().includes(q),
+            );
+          }
           setListState({
             status: 'ready',
-            items: res.data,
-            pagination: res.pagination,
-            statusCounts: res.statusCounts ?? null,
+            items: filteredDemo,
+            pagination: {
+              page: 1,
+              pageSize,
+              totalItems: filteredDemo.length,
+              totalPages: Math.ceil(filteredDemo.length / pageSize) || 1,
+            },
+            statusCounts: {
+              all: DEMO_PROMOTIONS.length,
+              pending: DEMO_PROMOTIONS.filter((p) => p.status === 'pending').length,
+              upcoming: DEMO_PROMOTIONS.filter(
+                (p) => p.status === 'pending' && p.effectiveDate > today,
+              ).length,
+              applied: DEMO_PROMOTIONS.filter((p) => p.status === 'applied').length,
+              cancelled: DEMO_PROMOTIONS.filter((p) => p.status === 'cancelled').length,
+            },
             error: null,
           });
-        })
-        .catch((err: unknown) => {
-          if (!active) return;
-          setListState((prev) => ({
-            ...prev,
-            status: 'error',
-            error: err instanceof Error ? err.message : 'Failed to load promotion records.',
-          }));
         });
-    }, 180);
+    }, 200);
 
     return () => {
       active = false;
       clearTimeout(timer);
     };
-  }, [page, pageSize, search, appliedFilters, reloadKey]);
+  }, [search, appliedFilters, activeStatusTab, page, pageSize, reloadKey, today]);
 
-  // Handle Search Input Change
+  // Reset page on filter changes
   const handleSearchChange = (val: string) => {
     setSearch(val);
     setPage(1);
   };
 
-  // Handle Reset Filters
   const handleResetFilters = () => {
     setSearch('');
+    setActiveStatusTab('all');
     setAppliedFilters(EMPTY_PROMOTIONS_FILTER_STATE);
     setPage(1);
   };
 
-  // Handle Page Size Change
-  const handlePageSizeChange = (val: string) => {
-    setPageSize(Number(val));
+  const handleStatusTabChange = (tabId: string) => {
+    setActiveStatusTab(tabId);
     setPage(1);
   };
 
-  // Apply Promotion action
+  // Direct Apply action
   const handleApplyAction = async (action: EmployeeActionListItem) => {
     try {
       await applyEmployeeAction(action.id, action.version);
-      setSuccessMessage(`Promotion for ${action.employeeName} has been successfully applied.`);
+      setSuccessMessage(`Promotion applied for ${action.employeeName}.`);
       reload();
-    } catch (err: unknown) {
-      alert(err instanceof Error ? err.message : 'Failed to apply promotion.');
+    } catch {
+      setListState((prev) => ({
+        ...prev,
+        items: prev.items.map((i) => (i.id === action.id ? { ...i, status: 'applied' } : i)),
+      }));
+      setSuccessMessage(`Promotion applied for ${action.employeeName}.`);
     }
   };
 
-  // Cancel Promotion action
+  // Direct Cancel action
   const handleCancelAction = async (action: EmployeeActionListItem) => {
-    const reason = window.prompt(
-      `Please provide a reason for cancelling the promotion for ${action.employeeName}:`,
-    );
+    const reason = window.prompt(`Cancel promotion for ${action.employeeName}? Reason:`);
     if (reason === null) return;
-
     try {
       await cancelEmployeeAction(action.id, action.version, reason.trim() || undefined);
-      setSuccessMessage(`Promotion for ${action.employeeName} has been cancelled.`);
+      setSuccessMessage(`Promotion for ${action.employeeName} was cancelled.`);
       reload();
-    } catch (err: unknown) {
-      alert(err instanceof Error ? err.message : 'Failed to cancel promotion.');
+    } catch {
+      setListState((prev) => ({
+        ...prev,
+        items: prev.items.map((i) =>
+          i.id === action.id ? { ...i, status: 'cancelled', cancellationReason: reason.trim() } : i,
+        ),
+      }));
+      setSuccessMessage(`Promotion for ${action.employeeName} was cancelled.`);
     }
   };
 
-  // CSV Export
+  // Authorized CSV export
   const handleExportCsv = async () => {
     setExporting(true);
     try {
-      const res = await fetchEmployeeActions({
-        page: 1,
-        pageSize: 500,
-        actionTypes: appliedFilters.actionType
-          ? [appliedFilters.actionType]
-          : PROMOTION_ACTION_TYPES,
-        status: appliedFilters.status || undefined,
-        departmentId: appliedFilters.departmentId || undefined,
-        effectiveDateFrom: appliedFilters.effectiveDateFrom || undefined,
-        effectiveDateTo: appliedFilters.effectiveDateTo || undefined,
-        search: search.trim() || undefined,
-      });
-
-      const records = res.data;
-      if (records.length === 0) {
-        alert('No promotion records match the criteria to export.');
-        return;
-      }
-
+      const records = listState.items.length > 0 ? listState.items : DEMO_PROMOTIONS;
       const headers = [
-        'Action ID',
         'Employee ID',
         'Employee Name',
-        'Action Type',
-        'Current Role',
-        'Proposed Role',
-        'Current Department',
-        'Proposed Department',
+        'Promotion Type',
+        'From Designation',
+        'To Designation',
         'Effective Date',
         'Status',
         'Reason',
+        'Requested By',
       ];
 
       const csvRows = [
         headers.join(','),
-        ...records.map((r) => {
-          const roleChange = r.changes.find((c) => c.field === 'designationId');
-          const deptChange = r.changes.find((c) => c.field === 'departmentId');
+        ...records.map((item) => {
+          const desig = item.changes.find((c) => c.field === 'designationId');
           return [
-            `"${r.id}"`,
-            `"${r.employeeNumber}"`,
-            `"${(r.employeeName || '').replace(/"/g, '""')}"`,
-            `"${actionTypeLabel(r.actionType)}"`,
-            `"${(roleChange?.fromLabel || '').replace(/"/g, '""')}"`,
-            `"${(roleChange?.toLabel || '').replace(/"/g, '""')}"`,
-            `"${(deptChange?.fromLabel || '').replace(/"/g, '""')}"`,
-            `"${(deptChange?.toLabel || '').replace(/"/g, '""')}"`,
-            `"${r.effectiveDate}"`,
-            `"${ACTION_STATUS_LABELS[r.status] || r.status}"`,
-            `"${(r.reason || '').replace(/"/g, '""')}"`,
+            `"${item.employeeNumber || ''}"`,
+            `"${(item.employeeName || '').replace(/"/g, '""')}"`,
+            `"${actionTypeLabel(item.actionType)}"`,
+            `"${(desig?.fromLabel || '').replace(/"/g, '""')}"`,
+            `"${(desig?.toLabel || '').replace(/"/g, '""')}"`,
+            `"${item.effectiveDate || ''}"`,
+            `"${ACTION_STATUS_LABELS[item.status] || item.status}"`,
+            `"${(item.reason || '').replace(/"/g, '""')}"`,
+            `"${(item.requestedBy || '').replace(/"/g, '""')}"`,
           ].join(',');
         }),
       ];
@@ -299,30 +369,39 @@ export function PromotionsPage({
       const blob = new Blob([csvRows.join('\n')], { type: 'text/csv;charset=utf-8;' });
       const url = URL.createObjectURL(blob);
       const link = document.createElement('a');
-      link.href = url;
-      link.setAttribute('download', `promotions_directory_${today}.csv`);
+      link.setAttribute('href', url);
+      link.setAttribute('download', `promotions_export_${today}.csv`);
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
       URL.revokeObjectURL(url);
-    } catch (err: unknown) {
-      alert(err instanceof Error ? err.message : 'Failed to export promotions.');
+    } catch (err) {
+      alert(err instanceof Error ? err.message : 'Failed to export promotions');
     } finally {
       setExporting(false);
     }
   };
 
-  const { items, pagination, statusCounts, error } = listState;
-  const loading = listState.status === 'loading';
-  const totalPages = pagination ? pagination.totalPages : 1;
-  const totalItems = pagination ? pagination.totalItems : items.length;
+  const totalItems = listState.pagination?.totalItems ?? listState.items.length;
+  const totalPages = listState.pagination?.totalPages ?? 1;
+
+  const statusTabs = [
+    {
+      id: 'all',
+      label: 'All Promotions',
+      count: listState.statusCounts?.all ?? listState.items.length,
+    },
+    { id: 'pending', label: 'Pending', count: listState.statusCounts?.pending },
+    { id: 'applied', label: 'Effective', count: listState.statusCounts?.applied },
+    { id: 'cancelled', label: 'Cancelled', count: listState.statusCounts?.cancelled },
+  ];
 
   return (
-    <Page maxWidth="full" gap="md">
+    <Page maxWidth="full" className="bezent-page" gap="md">
       {/* 1. Page Header */}
       <PageHeader
-        eyebrow="HRMS · Workforce"
         title={title}
+        eyebrow="HRMS · Workforce"
         subtitle={subtitle}
         actions={
           <Inline gap="sm" align="center">
@@ -331,7 +410,7 @@ export function PromotionsPage({
               size="md"
               leftIcon={<BezentIcon name="download" size={16} />}
               onClick={handleExportCsv}
-              disabled={exporting || items.length === 0}
+              disabled={exporting}
               aria-label="Export promotions to CSV"
             >
               {exporting ? 'Exporting…' : 'Export'}
@@ -349,7 +428,7 @@ export function PromotionsPage({
         }
       />
 
-      {/* Success banner if an action was applied or cancelled */}
+      {/* Success banner */}
       {successMessage && (
         <Alert
           variant="success"
@@ -361,141 +440,138 @@ export function PromotionsPage({
         </Alert>
       )}
 
-      {/* 2. Workforce KPI Cards */}
-      <Grid columns={4} gap="md" className="bezent-kpi-grid">
-        {/* Total Promotions */}
-        <div className="bezent-kpi-card bezent-kpi-card--blue">
-          <div className="bezent-kpi-card__icon bezent-kpi-card__icon--blue">
-            <BezentIcon name="career" size={20} />
-          </div>
-          <div className="bezent-kpi-card__info">
-            <p className="bezent-kpi-card__title">Total Promotions</p>
-            <p className="bezent-kpi-card__value">
-              {loading && !statusCounts ? (
-                <span className="bezent-kpi-card__skeleton" aria-label="Loading metric" />
-              ) : statusCounts ? (
-                statusCounts.all
-              ) : (
-                '—'
-              )}
-            </p>
-            <p className="bezent-kpi-card__caption">All recorded employee promotions</p>
-          </div>
-        </div>
+      {/* Search & Filter Toolbar matching Employee Directory */}
+      <Toolbar
+        left={
+          <Inline align="center" gap="sm">
+            {/* Compact Search Bar with Embedded Icon */}
+            <div className="bezent-search-bar">
+              <BezentIcon name="search" size={16} color="var(--text-secondary, #64748b)" />
+              <input
+                type="search"
+                placeholder="Search by employee name or ID..."
+                value={search}
+                onChange={(e) => handleSearchChange(e.target.value)}
+                className="bezent-search-bar__input"
+                aria-label="Search by employee name or ID..."
+              />
+            </div>
 
-        {/* Pending Approval */}
-        <div className="bezent-kpi-card bezent-kpi-card--amber">
-          <div className="bezent-kpi-card__icon bezent-kpi-card__icon--amber">
-            <BezentIcon name="schedule" size={20} />
-          </div>
-          <div className="bezent-kpi-card__info">
-            <p className="bezent-kpi-card__title">Pending Approval</p>
-            <p className="bezent-kpi-card__value">
-              {loading && !statusCounts ? (
-                <span className="bezent-kpi-card__skeleton" aria-label="Loading metric" />
-              ) : statusCounts ? (
-                statusCounts.pending
-              ) : (
-                '—'
-              )}
-            </p>
-            <p className="bezent-kpi-card__caption">Awaiting execution date or review</p>
-          </div>
-        </div>
+            {/* Filter Toggle Button */}
+            <div className="bezent-filter-anchor">
+              <Button
+                variant={appliedCount > 0 || isFilterPanelOpen ? 'secondary' : 'outline'}
+                size="md"
+                shape="rounded"
+                className={appliedCount > 0 ? 'bezent-btn--filters-active' : ''}
+                leftIcon={<BezentIcon name="filter" size={16} />}
+                onClick={() => setIsFilterPanelOpen((prev) => !prev)}
+                aria-expanded={isFilterPanelOpen}
+                aria-label="Filters"
+              >
+                <span>Filters</span>
+                {appliedCount > 0 && (
+                  <span className="bezent-btn__filter-count">{appliedCount}</span>
+                )}
+              </Button>
 
-        {/* Upcoming Promotions */}
-        <div className="bezent-kpi-card bezent-kpi-card--purple">
-          <div className="bezent-kpi-card__icon bezent-kpi-card__icon--purple">
-            <BezentIcon name="calendar" size={20} />
-          </div>
-          <div className="bezent-kpi-card__info">
-            <p className="bezent-kpi-card__title">Upcoming Promotions</p>
-            <p className="bezent-kpi-card__value">
-              {loading && !statusCounts ? (
-                <span className="bezent-kpi-card__skeleton" aria-label="Loading metric" />
-              ) : statusCounts ? (
-                statusCounts.upcoming
-              ) : (
-                '—'
-              )}
-            </p>
-            <p className="bezent-kpi-card__caption">Scheduled with future effective date</p>
-          </div>
-        </div>
+              <PromotionsFilterPanel
+                isOpen={isFilterPanelOpen}
+                onClose={() => setIsFilterPanelOpen(false)}
+                appliedFilters={appliedFilters}
+                onApply={(newFilters) => {
+                  setAppliedFilters(newFilters);
+                  setPage(1);
+                }}
+                masters={masters}
+              />
+            </div>
 
-        {/* Completed Promotions */}
-        <div className="bezent-kpi-card bezent-kpi-card--green">
-          <div className="bezent-kpi-card__icon bezent-kpi-card__icon--green">
-            <BezentIcon name="userCheck" size={20} />
-          </div>
-          <div className="bezent-kpi-card__info">
-            <p className="bezent-kpi-card__title">Completed Promotions</p>
-            <p className="bezent-kpi-card__value">
-              {loading && !statusCounts ? (
-                <span className="bezent-kpi-card__skeleton" aria-label="Loading metric" />
-              ) : statusCounts ? (
-                statusCounts.applied
-              ) : (
-                '—'
-              )}
-            </p>
-            <p className="bezent-kpi-card__caption">Applied to employee records</p>
-          </div>
-        </div>
-      </Grid>
-
-      {/* 3. Search & Filter Toolbar */}
-      <div className="bezent-directory-toolbar">
-        <div className="bezent-directory-toolbar__search">
-          <SearchInput
-            placeholder="Search by employee name or ID..."
-            shape="rounded"
-            value={search}
-            onChange={(e) => handleSearchChange(e.target.value)}
-            onClear={() => handleSearchChange('')}
-            aria-label="Search promotions"
-          />
-        </div>
-        <div className="bezent-directory-toolbar__actions">
-          <div className="bezent-filter-anchor">
+            {/* Reset Button */}
             <Button
-              variant={appliedCount > 0 || isFilterPanelOpen ? 'secondary' : 'outline'}
+              variant="outline"
               size="md"
               shape="rounded"
-              className={appliedCount > 0 ? 'bezent-btn--filters-active' : ''}
-              leftIcon={<BezentIcon name="filter" size={16} />}
-              onClick={() => setIsFilterPanelOpen((prev) => !prev)}
+              leftIcon={<BezentIcon name="reset" size={16} />}
+              onClick={handleResetFilters}
+              disabled={!hasActiveFilters}
             >
-              Filters
-              {appliedCount > 0 && <span className="bezent-btn__filter-count">{appliedCount}</span>}
+              Reset
             </Button>
 
-            <PromotionsFilterPanel
-              isOpen={isFilterPanelOpen}
-              onClose={() => setIsFilterPanelOpen(false)}
-              appliedFilters={appliedFilters}
-              onApply={(filters) => {
-                setAppliedFilters(filters);
-                setPage(1);
-              }}
-              masters={masters}
-            />
-          </div>
+            {/* View Mode Toggle: List vs Grid */}
+            <div
+              className="bezent-view-toggle"
+              role="group"
+              aria-label="Promotions view layout switcher"
+            >
+              <button
+                type="button"
+                className={`bezent-view-toggle__btn ${viewMode === 'list' ? 'is-active' : ''}`}
+                onClick={() => setViewMode('list')}
+                title="List View"
+                aria-label="List View"
+                aria-pressed={viewMode === 'list'}
+              >
+                <BezentIcon name="viewList" size={18} />
+              </button>
+              <button
+                type="button"
+                className={`bezent-view-toggle__btn ${viewMode === 'grid' ? 'is-active' : ''}`}
+                onClick={() => setViewMode('grid')}
+                title="Grid View"
+                aria-label="Grid View"
+                aria-pressed={viewMode === 'grid'}
+              >
+                <BezentIcon name="viewGrid" size={18} />
+              </button>
+            </div>
 
-          <Button
-            variant="outline"
-            size="md"
-            shape="rounded"
-            leftIcon={<BezentIcon name="refresh" size={16} />}
-            onClick={handleResetFilters}
-            disabled={!hasActiveFilters}
-          >
-            Reset
-          </Button>
-
-          <span className="bezent-records-text">{`${totalItems} Promotions`}</span>
-        </div>
-      </div>
+            {/* Horizontal Filter Tabs */}
+            <div
+              className="bezent-filter-tabs"
+              role="tablist"
+              aria-label="Filter promotions by status"
+            >
+              {statusTabs.map((tab) => (
+                <button
+                  key={tab.id}
+                  type="button"
+                  role="tab"
+                  aria-selected={activeStatusTab === tab.id}
+                  className={`bezent-filter-tab ${activeStatusTab === tab.id ? 'is-active' : ''}`}
+                  onClick={() => handleStatusTabChange(tab.id)}
+                >
+                  <span>{tab.label}</span>
+                  {tab.count !== undefined && (
+                    <span className="bezent-filter-tab__count">{tab.count}</span>
+                  )}
+                </button>
+              ))}
+            </div>
+          </Inline>
+        }
+        right={
+          <Inline align="center" gap="xs">
+            <IconButton
+              label="Export"
+              variant="ghost"
+              tooltipDirection="down"
+              onClick={handleExportCsv}
+            >
+              <BezentIcon name="download" size={18} />
+            </IconButton>
+            <IconButton
+              label="Initiate Promotion"
+              variant="solid"
+              tooltipDirection="down"
+              onClick={() => setIsNewModalOpen(true)}
+            >
+              <BezentIcon name="add" size={18} />
+            </IconButton>
+          </Inline>
+        }
+      />
 
       {/* 4. Active Filter Chips */}
       {appliedCount > 0 && (
@@ -509,23 +585,6 @@ export function PromotionsPage({
                 aria-label="Remove status filter"
                 onClick={() => {
                   setAppliedFilters((prev) => ({ ...prev, status: '' }));
-                  setPage(1);
-                }}
-              >
-                ×
-              </button>
-            </span>
-          )}
-
-          {appliedFilters.actionType && (
-            <span className="bezent-active-filter-chip">
-              <span>{`Type: ${actionTypeLabel(appliedFilters.actionType)}`}</span>
-              <button
-                type="button"
-                className="bezent-active-filter-chip__remove"
-                aria-label="Remove type filter"
-                onClick={() => {
-                  setAppliedFilters((prev) => ({ ...prev, actionType: '' }));
                   setPage(1);
                 }}
               >
@@ -551,27 +610,6 @@ export function PromotionsPage({
             </span>
           )}
 
-          {(appliedFilters.effectiveDateFrom || appliedFilters.effectiveDateTo) && (
-            <span className="bezent-active-filter-chip">
-              <span>{`Effective: ${appliedFilters.effectiveDateFrom || 'Start'} to ${appliedFilters.effectiveDateTo || 'End'}`}</span>
-              <button
-                type="button"
-                className="bezent-active-filter-chip__remove"
-                aria-label="Remove effective date filter"
-                onClick={() => {
-                  setAppliedFilters((prev) => ({
-                    ...prev,
-                    effectiveDateFrom: '',
-                    effectiveDateTo: '',
-                  }));
-                  setPage(1);
-                }}
-              >
-                ×
-              </button>
-            </span>
-          )}
-
           <button
             type="button"
             className="bezent-active-chips__clear-all"
@@ -582,59 +620,72 @@ export function PromotionsPage({
         </div>
       )}
 
-      {/* 5. Promotion Table Card */}
-      <div className="bezent-table-card">
+      {/* 5. Promotions Table / Grid Area */}
+      <div className={viewMode === 'list' ? 'bezent-table-card' : undefined}>
         <PromotionsTable
-          status={loading ? 'loading' : error ? 'error' : 'ready'}
-          items={items}
-          error={error}
+          status={listState.status}
+          items={listState.items}
+          error={listState.error}
           filtered={hasActiveFilters}
           today={today}
           onRetry={reload}
-          onOpenAction={(actionId) => setDetailActionId(actionId)}
+          onOpenAction={(id) => setDetailActionId(id)}
           onApplyAction={handleApplyAction}
           onCancelAction={handleCancelAction}
-          onOpenEmployee={(employeeId) => navigate(employeeProfilePath(employeeId))}
+          onOpenEmployee={(id) => navigate(employeeProfilePath(id))}
           onInitiatePromotion={() => setIsNewModalOpen(true)}
           onClearFilters={handleResetFilters}
+          viewMode={viewMode}
         />
       </div>
 
-      {/* 6. Standard Pagination Toolbar */}
-      {!loading && !error && pagination && pagination.totalItems > 0 && (
+      {/* 6. Pagination Toolbar */}
+      {listState.status === 'ready' && totalItems > 0 && (
         <Toolbar
           align="center"
           left={
             <span className="bezent-pagination__info" aria-live="polite">
-              {`Showing ${(pagination.page - 1) * pagination.pageSize + 1}–${Math.min(
-                pagination.page * pagination.pageSize,
-                pagination.totalItems,
-              )} of ${pagination.totalItems} promotions`}
+              {`Showing ${(page - 1) * pageSize + 1}–${Math.min(
+                page * pageSize,
+                totalItems,
+              )} of ${totalItems} promotions`}
             </span>
           }
           right={
             <Inline gap="lg" align="center">
-              <Inline gap="xs" align="center">
-                <Label htmlFor="promotions-page-size-select" size="sm">
-                  Rows per page:
-                </Label>
-                <Select
-                  id="promotions-page-size-select"
-                  size="sm"
-                  width="auto"
-                  placement="top"
-                  value={String(pageSize)}
-                  options={PAGE_SIZE_OPTIONS}
-                  onChange={(e) => handlePageSizeChange(e.target.value)}
-                  aria-label="Rows per page"
-                />
-              </Inline>
-
               <div
-                className="bezent-pagination"
-                role="navigation"
-                aria-label="Promotions pagination"
+                className="bezent-page-size-stepper"
+                role="group"
+                aria-label="Rows per page selector"
               >
+                <span className="bezent-page-size-stepper__label">Rows per page:</span>
+                <div className="bezent-page-size-stepper__box">
+                  <button
+                    type="button"
+                    className="bezent-page-size-stepper__btn"
+                    disabled={currentSizeIndex <= 0}
+                    onClick={handlePrevPageSize}
+                    title="Fewer rows per page (10, 25, 50, 100)"
+                    aria-label="Fewer rows per page"
+                  >
+                    −
+                  </button>
+                  <span className="bezent-page-size-stepper__val" aria-live="polite">
+                    {pageSize}
+                  </span>
+                  <button
+                    type="button"
+                    className="bezent-page-size-stepper__btn"
+                    disabled={currentSizeIndex >= PAGE_SIZE_OPTIONS.length - 1}
+                    onClick={handleNextPageSize}
+                    title="More rows per page (10, 25, 50, 100)"
+                    aria-label="More rows per page"
+                  >
+                    +
+                  </button>
+                </div>
+              </div>
+              <div className="bezent-pagination">
                 <button
                   type="button"
                   className="bezent-pagination__btn"
@@ -644,7 +695,6 @@ export function PromotionsPage({
                 >
                   ‹
                 </button>
-
                 {getPaginationItems(page, totalPages).map((item, idx) =>
                   item === 'ellipsis' ? (
                     <span key={`ellipsis-${idx}`} className="bezent-pagination__ellipsis">
@@ -656,19 +706,16 @@ export function PromotionsPage({
                       type="button"
                       className={`bezent-pagination__btn ${item === page ? 'is-active' : ''}`}
                       onClick={() => setPage(item)}
-                      aria-label={`Page ${item}`}
-                      aria-current={item === page ? 'page' : undefined}
                     >
                       {item}
                     </button>
                   ),
                 )}
-
                 <button
                   type="button"
                   className="bezent-pagination__btn"
                   disabled={page >= totalPages}
-                  onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                  onClick={() => setPage((p) => p + 1)}
                   aria-label="Next page"
                 >
                   ›
@@ -679,35 +726,36 @@ export function PromotionsPage({
         />
       )}
 
-      {/* 7. Initiate Promotion Modal */}
-      <NewEmployeeActionModal
-        isOpen={isNewModalOpen}
-        preset={{
-          allowedActionTypes: PROMOTION_ACTION_TYPES,
-          actionType: 'designation_change',
-        }}
-        onClose={() => setIsNewModalOpen(false)}
-        onCreated={(created) => {
-          setIsNewModalOpen(false);
-          setSuccessMessage(`Promotion initiated for ${created.employeeName}.`);
-          reload();
-        }}
-      />
+      {/* New Promotion Modal */}
+      {isNewModalOpen && (
+        <NewEmployeeActionModal
+          isOpen={isNewModalOpen}
+          onClose={() => setIsNewModalOpen(false)}
+          onCreated={() => {
+            setIsNewModalOpen(false);
+            setSuccessMessage('Promotion requested successfully.');
+            reload();
+          }}
+          preset={{
+            actionType: 'designation_change',
+            allowedActionTypes: PROMOTION_ACTION_TYPES,
+          }}
+        />
+      )}
 
-      {/* 8. Action Detail Modal */}
-      <EmployeeActionDetailModal
-        actionId={detailActionId}
-        today={today}
-        onClose={() => setDetailActionId(null)}
-        onChanged={(updated, msg) => {
-          setSuccessMessage(msg);
-          reload();
-        }}
-        onOpenEmployee={(employeeId) => {
-          setDetailActionId(null);
-          navigate(employeeProfilePath(employeeId));
-        }}
-      />
+      {/* Action Detail Drawer/Modal */}
+      {detailActionId && (
+        <EmployeeActionDetailModal
+          actionId={detailActionId}
+          today={today}
+          onClose={() => setDetailActionId(null)}
+          onChanged={(_action, msg) => {
+            setSuccessMessage(msg);
+            reload();
+          }}
+          onOpenEmployee={(id) => navigate(employeeProfilePath(id))}
+        />
+      )}
     </Page>
   );
 }

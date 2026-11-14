@@ -149,16 +149,9 @@ export const TransfersKpiCard: React.FC<TransfersKpiCardProps> = ({
     iconModifierClass = 'bezent-kpi-flow-icon--center';
   }
 
-  let dynamicColorModifier = 'bezent-exec-kpi-card--amber';
-  if (isTopHovered) {
-    dynamicColorModifier = 'bezent-exec-kpi-card--dynamic-active';
-  } else if (isBottomHovered) {
-    dynamicColorModifier = 'bezent-exec-kpi-card--dynamic-probation';
-  }
-
   return (
     <div
-      className={`bezent-exec-kpi-card bezent-exec-kpi-card--transfers ${dynamicColorModifier}`}
+      className="bezent-exec-kpi-card bezent-exec-kpi-card--transfers"
       onClick={onClick}
       role="region"
       aria-label="Total Transfers"
@@ -229,18 +222,18 @@ export const TransfersKpiCard: React.FC<TransfersKpiCardProps> = ({
             >
               {/* Transparent fat hit area to guarantee effortless hover anywhere near top arc */}
               <path
-                d="M 10.7 24.8 A 20 20 0 0 1 49.3 24.8"
+                d="M 11.5 23.5 A 20 20 0 0 1 48.5 23.5"
                 strokeWidth={14}
                 stroke="transparent"
                 fill="none"
               />
               <path
-                d="M 10.7 24.8 A 20 20 0 0 1 49.3 24.8"
+                d="M 11.5 23.5 A 20 20 0 0 1 48.5 23.5"
                 strokeWidth={4.8}
                 className="bezent-kpi-flow-arc bezent-kpi-flow-arc--out bezent-kpi-flow-arc--approved"
               />
               <polygon
-                points="49.3,29.5 45.5,24.5 53.5,24.5"
+                points="48.5,28.5 44.5,23.5 52.5,23.5"
                 className="bezent-kpi-flow-arrowhead bezent-kpi-flow-arrowhead--out bezent-kpi-flow-arrowhead--approved"
               />
             </g>
@@ -274,18 +267,18 @@ export const TransfersKpiCard: React.FC<TransfersKpiCardProps> = ({
             >
               {/* Transparent fat hit area to guarantee effortless hover anywhere near bottom arc */}
               <path
-                d="M 49.3 35.2 A 20 20 0 0 1 10.7 35.2"
+                d="M 48.5 36.5 A 20 20 0 0 1 11.5 36.5"
                 strokeWidth={14}
                 stroke="transparent"
                 fill="none"
               />
               <path
-                d="M 49.3 35.2 A 20 20 0 0 1 10.7 35.2"
+                d="M 48.5 36.5 A 20 20 0 0 1 11.5 36.5"
                 strokeWidth={4.8}
                 className="bezent-kpi-flow-arc bezent-kpi-flow-arc--in bezent-kpi-flow-arc--pending"
               />
               <polygon
-                points="10.7,30.5 6.9,35.5 14.9,35.5"
+                points="11.5,31.5 7.5,36.5 15.5,36.5"
                 className="bezent-kpi-flow-arrowhead bezent-kpi-flow-arrowhead--in bezent-kpi-flow-arrowhead--pending"
               />
             </g>

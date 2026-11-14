@@ -90,24 +90,15 @@ describe('Workforce Records Page', () => {
     expect(html).not.toContain('Import');
   });
 
-  it('renders all 4 summary KPI cards with titles and descriptions', () => {
+  it('renders without summary cards matching the employee directory layout', () => {
     const html = renderToStaticMarkup(
       <MemoryRouter>
         <RecordsPage />
       </MemoryRouter>,
     );
 
-    expect(html).toContain('Total Records');
-    expect(html).toContain('Centralized employee records');
-
-    expect(html).toContain('Pending Verification');
-    expect(html).toContain('Awaiting administrative review');
-
-    expect(html).toContain('Expiring Soon');
-    expect(html).toContain('Expiring within 30 days');
-
-    expect(html).toContain('Expired Records');
-    expect(html).toContain('Past validity date');
+    expect(html).not.toContain('Total Records');
+    expect(html).not.toContain('bezent-kpi-card');
   });
 
   it('renders search input with approved workforce placeholder', () => {

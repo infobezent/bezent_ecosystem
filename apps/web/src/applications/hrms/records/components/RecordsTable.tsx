@@ -1,8 +1,13 @@
+import { useState } from 'react';
 import {
   Alert,
+  Avatar,
   Badge,
   Button,
+  Card,
+  CardBody,
   EmptyState,
+  Grid,
   Inline,
   LoadingState,
   Stack,
@@ -13,10 +18,9 @@ import {
   TableHeaderCell,
   TableRow,
 } from '../../../../design-system/components';
-import { EmployeeCartoonAvatar } from '../../../../design-system/components/EmployeeCartoonAvatar';
 import { BezentIcon } from '../../../../design-system/icons';
 import type { EmployeeDocument } from '../../documents/api/documentsApi';
-import { formatDate } from '../../employees/model/employeeModel';
+import { formatDate, getAvatarColor, getInitials } from '../../employees/model/employeeModel';
 import {
   CATEGORY_LABELS,
   EXPIRY_LABELS,
@@ -32,6 +36,7 @@ export interface RecordsTableProps {
   onRetry: () => void;
   onView: (documentId: string) => void;
   onOpenEmployee: (employeeId: string) => void;
+  viewMode?: 'list' | 'grid';
 }
 
 /**
@@ -46,7 +51,10 @@ export function RecordsTable({
   onRetry,
   onView,
   onOpenEmployee,
+  viewMode = 'list',
 }: RecordsTableProps) {
+  const [activeMenuId, setActiveMenuId] = useState<string | null>(null);
+
   if (status === 'loading') {
     return <LoadingState label="Loading employee records…" minHeight="md" />;
   }
@@ -79,6 +87,108 @@ export function RecordsTable({
     );
   }
 
+  // Grid View Mode matching Employee Directory / Candidates layout
+  if (viewMode === 'grid') {
+    return (
+      <Grid columns={3} gap="md" aria-label="Records Grid View">
+        {documents.map((record) => {
+          const avatarColor = getAvatarColor(record.employeeId || record.employeeNumber);
+          const initials = getInitials(record.employeeName);
+
+          return (
+            <Card
+              key={record.id}
+              variant="default"
+              padding="md"
+              hoverable
+              onClick={() => onView(record.id)}
+            >
+              <CardBody>
+                <Stack gap="sm">
+                  {/* Top: Avatar + Name & ID + Context Action */}
+                  <Inline justify="between" align="start">
+                    <Inline align="center" gap="sm">
+                      <Avatar
+                        initials={initials}
+                        size="md"
+                        color={avatarColor}
+                        alt={record.employeeName}
+                      />
+                      <Stack gap="none">
+                        <button
+                          type="button"
+                          className="bezent-table-meta-title"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            onOpenEmployee(record.employeeId);
+                          }}
+                          aria-label={`Open profile of ${record.employeeName}`}
+                        >
+                          {record.employeeName}
+                        </button>
+                        <span className="bezent-table-meta-subtitle font-mono">
+                          {record.employeeNumber}
+                        </span>
+                      </Stack>
+                    </Inline>
+                    <div className="bezent-table-action-menu">
+                      <button
+                        type="button"
+                        className="bezent-table-action-btn"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onView(record.id);
+                        }}
+                        title="View Document"
+                        aria-label={`View record details for ${record.documentName}`}
+                      >
+                        <BezentIcon name="eye" size={16} />
+                      </button>
+                    </div>
+                  </Inline>
+
+                  {/* Document Name & Ref */}
+                  <Stack gap="none">
+                    <span className="bezent-table-meta-title">{record.documentName}</span>
+                    <span className="bezent-table-meta-subtitle">
+                      {CATEGORY_LABELS[record.category] ?? record.category}
+                      {record.documentNumber ? ` · Ref: ${record.documentNumber}` : ''}
+                    </span>
+                  </Stack>
+
+                  {/* Department & Upload Date */}
+                  <Inline justify="between" align="center">
+                    <span className="bezent-table-meta-subtitle">
+                      {record.departmentName ?? 'General'}
+                    </span>
+                    <span className="bezent-table-meta-dim">{formatDate(record.createdAt)}</span>
+                  </Inline>
+
+                  {/* Footer: Verification Status Badge + Expiry */}
+                  <Inline justify="between" align="center">
+                    <span
+                      className={`bezent-status-pill bezent-status-pill--${statusVariant(record.status)}`}
+                    >
+                      <span className="bezent-status-pill__dot" aria-hidden="true" />
+                      <span>{STATUS_LABELS[record.status] ?? record.status}</span>
+                    </span>
+                    {record.expiryDate ? (
+                      <span className="bezent-table-meta-dim">
+                        Exp: {formatDate(record.expiryDate)}
+                      </span>
+                    ) : (
+                      <span className="bezent-table-meta-dim">No Expiry</span>
+                    )}
+                  </Inline>
+                </Stack>
+              </CardBody>
+            </Card>
+          );
+        })}
+      </Grid>
+    );
+  }
+
   return (
     <Table hoverable aria-label="Employee records directory">
       <TableHead>
@@ -94,101 +204,126 @@ export function RecordsTable({
         </TableRow>
       </TableHead>
       <TableBody>
-        {documents.map((record) => (
-          <TableRow key={record.id}>
-            {/* Record / Document Name */}
-            <TableCell>
-              <Inline gap="xs" align="center">
-                <BezentIcon
-                  name="documents"
-                  size={16}
-                  color="var(--bezent-text-secondary, #6b7280)"
-                />
-                <Stack gap="none">
-                  <span className="bezent-table-meta-title">{record.documentName}</span>
-                  {record.documentNumber ? (
-                    <span className="bezent-table-meta-subtitle">Ref: {record.documentNumber}</span>
-                  ) : null}
-                </Stack>
-              </Inline>
-            </TableCell>
+        {documents.map((record) => {
+          const avatarColor = getAvatarColor(record.employeeId || record.employeeNumber);
+          const initials = getInitials(record.employeeName);
 
-            {/* Employee Name & ID */}
-            <TableCell>
-              <Inline gap="sm" align="center">
-                <EmployeeCartoonAvatar employeeName={record.employeeName} size="sm" />
-                <Stack gap="none">
-                  <button
-                    type="button"
-                    onClick={() => onOpenEmployee(record.employeeId)}
-                    className="bezent-table-meta-title"
-                    aria-label={`Open profile of ${record.employeeName}`}
-                  >
-                    {record.employeeName}
-                  </button>
-                  <span className="bezent-table-meta-subtitle">{record.employeeNumber}</span>
-                </Stack>
-              </Inline>
-            </TableCell>
-
-            {/* Category */}
-            <TableCell>{CATEGORY_LABELS[record.category] ?? record.category}</TableCell>
-
-            {/* Department */}
-            <TableCell>{record.departmentName ?? '—'}</TableCell>
-
-            {/* Uploaded / Created Date */}
-            <TableCell>{formatDate(record.createdAt)}</TableCell>
-
-            {/* Expiry Date */}
-            <TableCell>
-              {record.expiryDate ? (
-                <Inline gap="xs" align="center">
-                  <span>{formatDate(record.expiryDate)}</span>
-                  {record.expiryState === 'expired' || record.expiryState === 'expiring' ? (
-                    <Badge
-                      variant={record.expiryState === 'expired' ? 'danger' : 'warning'}
-                      size="sm"
+          return (
+            <TableRow key={record.id}>
+              {/* Record / Document Name */}
+              <TableCell>
+                <div className="bezent-table-cell--avatar-meta">
+                  <Avatar
+                    icon={<BezentIcon name="documents" size={16} />}
+                    size="sm"
+                    color="default"
+                    alt={record.documentName}
+                  />
+                  <div className="bezent-table-meta-group">
+                    <button
+                      type="button"
+                      className="bezent-table-meta-title"
+                      onClick={() => onView(record.id)}
+                      aria-label={`View document ${record.documentName}`}
                     >
-                      {EXPIRY_LABELS[record.expiryState]}
-                    </Badge>
-                  ) : null}
+                      {record.documentName}
+                    </button>
+                    {record.documentNumber ? (
+                      <span className="bezent-table-meta-subtitle font-mono">
+                        Ref: {record.documentNumber}
+                      </span>
+                    ) : null}
+                  </div>
+                </div>
+              </TableCell>
+
+              {/* Employee Name & ID */}
+              <TableCell>
+                <div className="bezent-table-cell--avatar-meta">
+                  <Avatar
+                    initials={initials}
+                    color={avatarColor}
+                    size="sm"
+                    alt={record.employeeName}
+                  />
+                  <div className="bezent-table-meta-group">
+                    <button
+                      type="button"
+                      onClick={() => onOpenEmployee(record.employeeId)}
+                      className="bezent-table-meta-title"
+                      aria-label={`Open profile of ${record.employeeName}`}
+                    >
+                      {record.employeeName}
+                    </button>
+                    <span className="bezent-table-meta-subtitle font-mono">
+                      {record.employeeNumber}
+                    </span>
+                  </div>
+                </div>
+              </TableCell>
+
+              {/* Category */}
+              <TableCell>{CATEGORY_LABELS[record.category] ?? record.category}</TableCell>
+
+              {/* Department */}
+              <TableCell>{record.departmentName ?? '—'}</TableCell>
+
+              {/* Uploaded / Created Date */}
+              <TableCell>{formatDate(record.createdAt)}</TableCell>
+
+              {/* Expiry Date */}
+              <TableCell>
+                {record.expiryDate ? (
+                  <Inline gap="xs" align="center">
+                    <span>{formatDate(record.expiryDate)}</span>
+                    {record.expiryState === 'expired' || record.expiryState === 'expiring' ? (
+                      <Badge
+                        variant={record.expiryState === 'expired' ? 'danger' : 'warning'}
+                        size="sm"
+                      >
+                        {EXPIRY_LABELS[record.expiryState]}
+                      </Badge>
+                    ) : null}
+                  </Inline>
+                ) : (
+                  '—'
+                )}
+              </TableCell>
+
+              {/* Verification Status */}
+              <TableCell>
+                <span
+                  className={`bezent-status-pill bezent-status-pill--${statusVariant(record.status)}`}
+                >
+                  <span className="bezent-status-pill__dot" aria-hidden="true" />
+                  <span>{STATUS_LABELS[record.status] ?? record.status}</span>
+                </span>
+              </TableCell>
+
+              {/* Actions */}
+              <TableCell>
+                <Inline gap="xs" align="center">
+                  <Button
+                    variant="text"
+                    size="sm"
+                    onClick={() => onView(record.id)}
+                    aria-label={`View record details for ${record.documentName}`}
+                  >
+                    View
+                  </Button>
+                  <Button
+                    variant="text"
+                    size="sm"
+                    onClick={() => onOpenEmployee(record.employeeId)}
+                    aria-label={`View employee profile for ${record.employeeName}`}
+                  >
+                    Profile
+                  </Button>
                 </Inline>
-              ) : (
-                '—'
-              )}
-            </TableCell>
-
-            {/* Verification Status */}
-            <TableCell>
-              <Badge variant={statusVariant(record.status)} size="sm">
-                {STATUS_LABELS[record.status] ?? record.status}
-              </Badge>
-            </TableCell>
-
-            {/* Actions */}
-            <TableCell>
-              <Inline gap="xs" align="center">
-                <Button
-                  variant="text"
-                  size="sm"
-                  onClick={() => onView(record.id)}
-                  aria-label={`View record details for ${record.documentName}`}
-                >
-                  View
-                </Button>
-                <Button
-                  variant="text"
-                  size="sm"
-                  onClick={() => onOpenEmployee(record.employeeId)}
-                  aria-label={`View employee profile for ${record.employeeName}`}
-                >
-                  Profile
-                </Button>
-              </Inline>
-            </TableCell>
-          </TableRow>
-        ))}
+              </TableCell>
+            </TableRow>
+          );
+        })}
       </TableBody>
     </Table>
   );

@@ -85,8 +85,8 @@ const DONUT_CIRCUMFERENCE = 2 * Math.PI * 46;
 
 // Dropdown Options
 const CATEGORY_OPTIONS: SelectOption[] = [
-  { value: 'distribution', label: 'Distribution' },
   { value: 'growth', label: 'Growth' },
+  { value: 'distribution', label: 'Distribution' },
   { value: 'retention', label: 'Retention' },
 ];
 
@@ -321,8 +321,8 @@ export const WorkforceAnalyticsCard: React.FC<WorkforceAnalyticsCardProps> = ({
   onTimeFilterChange,
   onDimensionChange,
 }) => {
-  // Category state (Dropdown 1)
-  const [internalCategory, setInternalCategory] = useState<AnalyticsView>('distribution');
+  // Category state (Dropdown 1) - Defaults to Growth per executive UX
+  const [internalCategory, setInternalCategory] = useState<AnalyticsView>('growth');
   const activeCategory = selectedCategory ?? internalCategory;
 
   // Dynamic filter state (Dropdown 2)
@@ -984,7 +984,7 @@ export const WorkforceAnalyticsCard: React.FC<WorkforceAnalyticsCardProps> = ({
                     <span className="bezent-wf-chart-legend-text">Joiners</span>
                   </div>
                   <div className="bezent-wf-chart-legend-item">
-                    <span className="bezent-wf-legend-dot bezent-wf-legend-dot--rose" />
+                    <span className="bezent-wf-legend-dot bezent-wf-legend-dot--slate" />
                     <span className="bezent-wf-chart-legend-text">Exits</span>
                   </div>
                 </div>
@@ -1013,14 +1013,14 @@ export const WorkforceAnalyticsCard: React.FC<WorkforceAnalyticsCardProps> = ({
                 >
                   <defs>
                     <linearGradient id={gradJoinersId} x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor="#10b981" stopOpacity="0.22" />
-                      <stop offset="85%" stopColor="#10b981" stopOpacity="0.03" />
-                      <stop offset="100%" stopColor="#10b981" stopOpacity="0.0" />
+                      <stop offset="0%" stopColor="#0d9488" stopOpacity="0.22" />
+                      <stop offset="85%" stopColor="#0d9488" stopOpacity="0.03" />
+                      <stop offset="100%" stopColor="#0d9488" stopOpacity="0.0" />
                     </linearGradient>
                     <linearGradient id={gradExitsId} x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor="#ef4444" stopOpacity="0.16" />
-                      <stop offset="85%" stopColor="#ef4444" stopOpacity="0.02" />
-                      <stop offset="100%" stopColor="#ef4444" stopOpacity="0.0" />
+                      <stop offset="0%" stopColor="#cbd5e1" stopOpacity="0.14" />
+                      <stop offset="85%" stopColor="#cbd5e1" stopOpacity="0.02" />
+                      <stop offset="100%" stopColor="#cbd5e1" stopOpacity="0.0" />
                     </linearGradient>
                     <filter
                       id="wf-analytics-dot-shadow"
@@ -1157,11 +1157,11 @@ export const WorkforceAnalyticsCard: React.FC<WorkforceAnalyticsCardProps> = ({
                         className="bezent-wf-trend-guide-line"
                       />
 
-                      {/* Joiner Marker: White Ring + Drop Shadow + Emerald Center */}
+                      {/* Primary Marker: White Ring + Drop Shadow + Teal Center (Image 1 reference) */}
                       <circle
                         cx={activeGrowthHover.x}
                         cy={activeGrowthHover.yJoiners}
-                        r={6}
+                        r={6.5}
                         fill="#ffffff"
                         filter="url(#wf-analytics-dot-shadow)"
                       />
@@ -1169,28 +1169,33 @@ export const WorkforceAnalyticsCard: React.FC<WorkforceAnalyticsCardProps> = ({
                         cx={activeGrowthHover.x}
                         cy={activeGrowthHover.yJoiners}
                         r={3.2}
-                        fill="#10b981"
+                        fill="#0d9488"
                       />
 
-                      {/* Exit Marker: White Ring + Drop Shadow + Rose Center */}
-                      <circle
-                        cx={activeGrowthHover.x}
-                        cy={activeGrowthHover.yExits}
-                        r={6}
-                        fill="#ffffff"
-                        filter="url(#wf-analytics-dot-shadow)"
-                      />
-                      <circle
-                        cx={activeGrowthHover.x}
-                        cy={activeGrowthHover.yExits}
-                        r={3.2}
-                        fill="#ef4444"
-                      />
+                      {/* Exit Marker: Secondary Dot (only when exits > 0 and distinct) */}
+                      {activeGrowthHover.data.exits > 0 &&
+                        Math.abs(activeGrowthHover.yExits - activeGrowthHover.yJoiners) > 4 && (
+                          <>
+                            <circle
+                              cx={activeGrowthHover.x}
+                              cy={activeGrowthHover.yExits}
+                              r={5.5}
+                              fill="#ffffff"
+                              filter="url(#wf-analytics-dot-shadow)"
+                            />
+                            <circle
+                              cx={activeGrowthHover.x}
+                              cy={activeGrowthHover.yExits}
+                              r={2.8}
+                              fill="#94a3b8"
+                            />
+                          </>
+                        )}
 
-                      {/* Modern Floating Tooltip Card */}
+                      {/* Modern Floating Tooltip Card (Matching Image 1 reference) */}
                       {(() => {
-                        const tipW = 156;
-                        const tipH = 88;
+                        const tipW = 168;
+                        const tipH = 96;
                         const tipX =
                           activeGrowthHover.x > chartWidth / 2
                             ? Math.max(plotLeft + 4, activeGrowthHover.x - tipW - 14)
@@ -1212,27 +1217,27 @@ export const WorkforceAnalyticsCard: React.FC<WorkforceAnalyticsCardProps> = ({
                             <rect
                               width={tipW}
                               height={tipH}
-                              rx={10}
+                              rx={12}
                               className="bezent-wf-trend-tooltip-bg"
                             />
-                            <text x={12} y={20} className="bezent-wf-trend-tooltip-date">
+                            {/* Header: Date + 3 Vertical Dots (NO divider line per Image 1) */}
+                            <text x={14} y={22} className="bezent-wf-trend-tooltip-date">
                               {activeGrowthHover.data.label}
                             </text>
-                            <line
-                              x1={12}
-                              x2={tipW - 12}
-                              y1={29}
-                              y2={29}
-                              className="bezent-wf-trend-tooltip-divider"
-                            />
+                            <g opacity="0.45">
+                              <circle cx={tipW - 14} cy={14} r={1.2} fill="#94a3b8" />
+                              <circle cx={tipW - 14} cy={19} r={1.2} fill="#94a3b8" />
+                              <circle cx={tipW - 14} cy={24} r={1.2} fill="#94a3b8" />
+                            </g>
+
                             {/* Joiners Row */}
-                            <circle cx={18} cy={44} r={3} fill="#10b981" />
-                            <text x={26} y={48} className="bezent-wf-trend-tooltip-name">
+                            <circle cx={19} cy={43} r={3} fill="#0d9488" />
+                            <text x={28} y={47} className="bezent-wf-trend-tooltip-name">
                               Joiners
                             </text>
                             <text
-                              x={tipW - 12}
-                              y={48}
+                              x={tipW - 14}
+                              y={47}
                               textAnchor="end"
                               className="bezent-wf-trend-tooltip-val-teal"
                             >
@@ -1240,12 +1245,12 @@ export const WorkforceAnalyticsCard: React.FC<WorkforceAnalyticsCardProps> = ({
                             </text>
 
                             {/* Exits Row */}
-                            <circle cx={18} cy={61} r={3} fill="#ef4444" />
-                            <text x={26} y={65} className="bezent-wf-trend-tooltip-name">
+                            <circle cx={19} cy={61} r={3} fill="#94a3b8" />
+                            <text x={28} y={65} className="bezent-wf-trend-tooltip-name">
                               Exits
                             </text>
                             <text
-                              x={tipW - 12}
+                              x={tipW - 14}
                               y={65}
                               textAnchor="end"
                               className="bezent-wf-trend-tooltip-val-sec"
@@ -1254,13 +1259,13 @@ export const WorkforceAnalyticsCard: React.FC<WorkforceAnalyticsCardProps> = ({
                             </text>
 
                             {/* Net Row */}
-                            <circle cx={18} cy={77} r={3} fill="#38bdf8" />
-                            <text x={26} y={80} className="bezent-wf-trend-tooltip-name">
+                            <circle cx={19} cy={79} r={3} fill="#38bdf8" />
+                            <text x={28} y={83} className="bezent-wf-trend-tooltip-name">
                               Net Change
                             </text>
                             <text
-                              x={tipW - 12}
-                              y={80}
+                              x={tipW - 14}
+                              y={83}
                               textAnchor="end"
                               className="bezent-wf-trend-tooltip-val-net"
                             >
@@ -1495,10 +1500,10 @@ export const WorkforceAnalyticsCard: React.FC<WorkforceAnalyticsCardProps> = ({
                         fill="#f59e0b"
                       />
 
-                      {/* Modern Floating Tooltip Card */}
+                      {/* Modern Floating Tooltip Card (Matching Image 1 reference) */}
                       {(() => {
-                        const tipW = 162;
-                        const tipH = 88;
+                        const tipW = 168;
+                        const tipH = 96;
                         const tipX =
                           activeRetentionHover.x > chartWidth / 2
                             ? Math.max(plotLeft + 4, activeRetentionHover.x - tipW - 14)
@@ -1523,27 +1528,27 @@ export const WorkforceAnalyticsCard: React.FC<WorkforceAnalyticsCardProps> = ({
                             <rect
                               width={tipW}
                               height={tipH}
-                              rx={10}
+                              rx={12}
                               className="bezent-wf-trend-tooltip-bg"
                             />
-                            <text x={12} y={20} className="bezent-wf-trend-tooltip-date">
+                            {/* Header: Date + 3 Vertical Dots (NO divider line per Image 1) */}
+                            <text x={14} y={22} className="bezent-wf-trend-tooltip-date">
                               {activeRetentionHover.data.label}
                             </text>
-                            <line
-                              x1={12}
-                              x2={tipW - 12}
-                              y1={29}
-                              y2={29}
-                              className="bezent-wf-trend-tooltip-divider"
-                            />
+                            <g opacity="0.45">
+                              <circle cx={tipW - 14} cy={14} r={1.2} fill="#94a3b8" />
+                              <circle cx={tipW - 14} cy={19} r={1.2} fill="#94a3b8" />
+                              <circle cx={tipW - 14} cy={24} r={1.2} fill="#94a3b8" />
+                            </g>
+
                             {/* Retention Rate Row */}
-                            <circle cx={18} cy={44} r={3} fill="#10b981" />
-                            <text x={26} y={48} className="bezent-wf-trend-tooltip-name">
+                            <circle cx={19} cy={43} r={3} fill="#0d9488" />
+                            <text x={28} y={47} className="bezent-wf-trend-tooltip-name">
                               Retention Rate
                             </text>
                             <text
-                              x={tipW - 12}
-                              y={48}
+                              x={tipW - 14}
+                              y={47}
                               textAnchor="end"
                               className="bezent-wf-trend-tooltip-val-teal"
                             >
@@ -1551,12 +1556,12 @@ export const WorkforceAnalyticsCard: React.FC<WorkforceAnalyticsCardProps> = ({
                             </text>
 
                             {/* Attrition Rate Row */}
-                            <circle cx={18} cy={61} r={3} fill="#f59e0b" />
-                            <text x={26} y={65} className="bezent-wf-trend-tooltip-name">
+                            <circle cx={19} cy={61} r={3} fill="#f59e0b" />
+                            <text x={28} y={65} className="bezent-wf-trend-tooltip-name">
                               Attrition Rate
                             </text>
                             <text
-                              x={tipW - 12}
+                              x={tipW - 14}
                               y={65}
                               textAnchor="end"
                               className="bezent-wf-trend-tooltip-val-sec"
@@ -1565,8 +1570,8 @@ export const WorkforceAnalyticsCard: React.FC<WorkforceAnalyticsCardProps> = ({
                             </text>
 
                             {/* Retained Staff Row */}
-                            <circle cx={18} cy={77} r={3} fill="#60a5fa" />
-                            <text x={26} y={80} className="bezent-wf-trend-tooltip-name">
+                            <circle cx={19} cy={79} r={3} fill="#38bdf8" />
+                            <text x={28} y={83} className="bezent-wf-trend-tooltip-name">
                               Retained Staff
                             </text>
                             <text
