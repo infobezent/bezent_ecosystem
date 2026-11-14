@@ -79,6 +79,27 @@ export class EmployeeController {
     }
   };
 
+  getDistributionTrends = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const companyContext = req.companyContext;
+      if (!companyContext) {
+        throw new AppError('Context not resolved', 400, 'CONTEXT_MISSING');
+      }
+
+      const trends = await this.service.getDistributionTrends(
+        companyContext.tenantId,
+        companyContext.companyId,
+        req.query as Record<string, unknown>,
+      );
+
+      res.json({
+        data: trends,
+      });
+    } catch (err) {
+      next(err);
+    }
+  };
+
   getEmployeeById = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const companyContext = req.companyContext;

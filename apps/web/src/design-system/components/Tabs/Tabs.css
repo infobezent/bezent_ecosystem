@@ -42,7 +42,7 @@
 }
 
 .bezent-tab.is-active {
-  color: var(--accent-interactive, #1a73e8);
+  color: #0f766e;
   font-weight: 700;
 }
 
@@ -66,17 +66,18 @@
 }
 
 .bezent-tabs--underline .bezent-tab.is-active::after {
-  background: var(--accent-interactive, #1a73e8);
+  background: #14b8a6;
 }
 
 /* Pills variant */
 .bezent-tabs--pills .bezent-tab {
-  border-radius: 8px;
-  padding: 6px 12px;
+  border-radius: 999px;
+  padding: 6px 14px;
+  border: 1px solid transparent;
 }
 
 .bezent-tabs--pills .bezent-tab:hover:not(:disabled) {
-  background: var(--bg-hover, #c2e7ff);
+  background: #f8fafc;
 }
 
 .bezent-tabs--pills .bezent-tab:active:not(:disabled) {
@@ -84,9 +85,10 @@
 }
 
 .bezent-tabs--pills .bezent-tab.is-active {
-  background: var(--bg-hover, #c2e7ff);
-  color: var(--accent-primary-text, #001d35);
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+  background: #f0fdfa;
+  color: #0f766e;
+  border-color: #99f6e4;
+  box-shadow: 0 1px 3px rgba(20, 184, 166, 0.12);
 }
 
 /* Tab count badge */
@@ -101,18 +103,58 @@
   font-size: 11.5px;
   font-weight: 700;
   line-height: 1;
-  background: var(--bg-surface-secondary, #f0f4f9);
-  color: var(--text-primary, #000000);
+  background: #f1f5f9;
+  color: var(--text-secondary, #475569);
 }
 
 .bezent-tab.is-active .bezent-tab__count {
-  background: rgba(26, 115, 232, 0.12);
-  color: var(--accent-interactive, #1a73e8);
+  background: #ccfbf1;
+  color: #0f766e;
 }
 
 .bezent-tab:focus-visible {
-  outline: 2px solid var(--border-focus, #1a73e8);
+  outline: 2px solid #14b8a6;
   outline-offset: 2px;
+}
+
+[data-theme='dark'] .bezent-tabs--underline {
+  border-bottom-color: #334155;
+}
+
+[data-theme='dark'] .bezent-tab {
+  color: #94a3b8;
+}
+
+[data-theme='dark'] .bezent-tab:hover:not(:disabled) {
+  color: #f8fafc;
+}
+
+[data-theme='dark'] .bezent-tab.is-active {
+  color: #5eead4;
+}
+
+[data-theme='dark'] .bezent-tabs--underline .bezent-tab.is-active::after {
+  background: #2dd4bf;
+}
+
+[data-theme='dark'] .bezent-tabs--pills .bezent-tab:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+[data-theme='dark'] .bezent-tabs--pills .bezent-tab.is-active {
+  background: rgba(20, 184, 166, 0.16);
+  color: #5eead4;
+  border-color: rgba(45, 212, 191, 0.35);
+}
+
+[data-theme='dark'] .bezent-tab__count {
+  background: #1e293b;
+  color: #94a3b8;
+}
+
+[data-theme='dark'] .bezent-tab.is-active .bezent-tab__count {
+  background: rgba(20, 184, 166, 0.25);
+  color: #5eead4;
 }
 
 .bezent-tab:disabled {

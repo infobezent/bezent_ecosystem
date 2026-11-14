@@ -97,13 +97,13 @@
 }
 
 .bezent-journey-step:hover:not(:disabled) .bezent-journey-step__indicator {
-  border-color: var(--accent-interactive, #1a73e8);
-  color: var(--brand-primary, #041e49);
+  border-color: #14b8a6;
+  color: #0f766e;
 }
 
 .bezent-journey-step:focus-visible {
-  border-color: var(--border-focus, #1a73e8);
-  box-shadow: 0 0 0 2px var(--accent-subtle, #e8f0fe);
+  border-color: #14b8a6;
+  box-shadow: 0 0 0 2px #ccfbf1;
 }
 
 /* Step Indicator & Numeral */
@@ -154,31 +154,31 @@
 }
 
 .bezent-journey-step.is-completed .bezent-journey-step__indicator {
-  background: var(--search-bg, #eaf1fb);
-  border-color: var(--accent-interactive, #1a73e8);
-  color: var(--nav-icon-active, #041e49);
+  background: #f0fdfa;
+  border-color: #14b8a6;
+  color: #0f766e;
 }
 
-/* ─── Active Step — Strong Blue-Family Architectural Weight ────────── */
+/* ─── Active Step — Rich Teal SaaS Highlight ───────────────────────── */
 .bezent-journey-step.is-active {
   background: var(--bg-surface, #ffffff);
-  border-color: var(--card-border, #dde3ea);
-  color: var(--brand-primary, #041e49);
+  border-color: #99f6e4;
+  color: #0f766e;
   font-weight: 600;
   box-shadow:
-    0 2px 6px -1px rgba(4, 30, 73, 0.08),
-    0 1px 2px rgba(4, 30, 73, 0.04);
+    0 2px 6px -1px rgba(20, 184, 166, 0.1),
+    0 1px 2px rgba(32, 45, 75, 0.04);
 }
 
 .bezent-journey-step.is-active .bezent-journey-step__indicator {
-  background: var(--brand-primary, #041e49);
-  border-color: var(--brand-primary, #041e49);
-  color: var(--text-inverse, #ffffff);
-  box-shadow: 0 0 0 3px var(--search-bg, #eaf1fb);
+  background: #0d9488;
+  border-color: #0d9488;
+  color: #ffffff;
+  box-shadow: 0 0 0 3px #f0fdfa;
 }
 
 .bezent-journey-step.is-active .bezent-journey-step__label {
-  color: var(--brand-primary, #041e49);
+  color: #0f766e;
   font-weight: 600;
 }
 
@@ -187,7 +187,7 @@
   position: absolute;
   inset: -3px;
   border-radius: 50%;
-  border: 1.5px solid var(--accent-interactive, #1a73e8);
+  border: 1.5px solid #14b8a6;
   opacity: 0.6;
   pointer-events: none;
   animation: bezentStepPulse 2.4s cubic-bezier(0.24, 0, 0.38, 1) infinite;
@@ -198,10 +198,12 @@
     transform: scale(0.95);
     opacity: 0.8;
   }
+
   50% {
     transform: scale(1.18);
     opacity: 0;
   }
+
   100% {
     transform: scale(0.95);
     opacity: 0;

@@ -5,11 +5,13 @@ import {
   validateCreateEmployee,
   validateUpdateEmployee,
   validateListEmployeesParams,
+  validateDistributionTrendsQuery,
 } from '../validation/employee.schema.js';
 import type {
   EmployeeDetails,
   PaginatedEmployeesResult,
   EmploymentStatus,
+  DistributionTrendsResult,
 } from '../types/employee.types.js';
 import { NotFoundError, ConflictError, BadRequestError } from '../../../../app/errors/AppError.js';
 import { provisionUserForEmployee } from './employeeUserBridge.service.js';
@@ -347,6 +349,15 @@ export class EmployeeService {
     }
 
     return fullDetails;
+  }
+
+  async getDistributionTrends(
+    tenantId: string,
+    companyId: string,
+    query: Record<string, unknown>,
+  ): Promise<DistributionTrendsResult> {
+    const granularity = validateDistributionTrendsQuery(query);
+    return this.repo.getDistributionTrends(tenantId, companyId, granularity);
   }
 
   async getEmployeeById(tenantId: string, companyId: string, id: string): Promise<EmployeeDetails> {

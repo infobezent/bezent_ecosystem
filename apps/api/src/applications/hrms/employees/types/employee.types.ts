@@ -119,3 +119,27 @@ export interface ListEmployeesParams {
   joiningDateFrom?: string;
   joiningDateTo?: string;
 }
+
+export type DistributionTrendGranularity = 'day' | 'month' | 'year';
+
+export interface DistributionTrendSlice {
+  primary: number;
+  other: number;
+}
+
+export interface DistributionTrendPoint {
+  label: string;
+  fullLabel: string;
+  department: DistributionTrendSlice;
+  location: DistributionTrendSlice;
+  employment: DistributionTrendSlice;
+}
+
+export interface DistributionTrendsResult {
+  granularity: DistributionTrendGranularity;
+  metricUnit: string;
+  primaryDeptLabel: string;
+  primaryLocLabel: string;
+  primaryEmpLabel: string;
+  points: DistributionTrendPoint[];
+}

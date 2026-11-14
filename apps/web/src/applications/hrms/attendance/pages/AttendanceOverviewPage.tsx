@@ -25,15 +25,15 @@ import { fetchAttendanceOverview } from '../api/attendanceApi';
 import type { AttendanceOverviewKpis } from '../types/attendance.types';
 
 const DEPT_PIE_COLORS = [
-  '#0284c7', // Sky Blue
-  '#10b981', // Emerald
-  '#8b5cf6', // Violet
+  '#60a5fa', // Blue
+  '#14b8a6', // Rich Teal
+  '#a78bfa', // Lavender
   '#f59e0b', // Amber
-  '#ec4899', // Pink
-  '#06b6d4', // Cyan
-  '#6366f1', // Indigo
-  '#14b8a6', // Teal
-  '#f97316', // Orange
+  '#f472b6', // Rose Pink
+  '#2dd4bf', // Mint Teal
+  '#818cf8', // Indigo
+  '#38bdf8', // Sky
+  '#fb923c', // Coral Amber
 ];
 
 export function AttendanceOverviewPage() {
@@ -683,13 +683,13 @@ export function AttendanceOverviewPage() {
                               role="img"
                               aria-label="Department Attendance Distribution Pie Chart"
                             >
-                              {/* Soft Clay Inset Ring */}
+                              {/* Clean Flat Track Ring */}
                               <circle
                                 cx={85}
                                 cy={85}
                                 r={radius}
                                 fill="transparent"
-                                stroke="#e8edf7"
+                                stroke="#f1f5f9"
                                 strokeWidth={strokeWidth}
                               />
                               {totalDeptPresent > 0 &&
@@ -730,7 +730,7 @@ export function AttendanceOverviewPage() {
                                     </circle>
                                   );
                                 })}
-                              {/* 3D Elevated Center Disc */}
+                              {/* Clean Center Disc */}
                               <circle
                                 cx={85}
                                 cy={85}
@@ -743,7 +743,7 @@ export function AttendanceOverviewPage() {
                                 y="46%"
                                 dominantBaseline="middle"
                                 textAnchor="middle"
-                                fill="#222a3b"
+                                fill="#20263a"
                                 fontSize="22"
                                 fontWeight="800"
                               >
@@ -754,7 +754,7 @@ export function AttendanceOverviewPage() {
                                 y="60%"
                                 dominantBaseline="middle"
                                 textAnchor="middle"
-                                fill="#68758f"
+                                fill="#64748b"
                                 fontSize="10.5"
                                 fontWeight="700"
                               >
@@ -874,8 +874,8 @@ export function AttendanceOverviewPage() {
                                       x2="0"
                                       y2="1"
                                     >
-                                      <stop offset="0%" stopColor="#34d399" />
-                                      <stop offset="100%" stopColor="#059669" />
+                                      <stop offset="0%" stopColor="#2dd4bf" />
+                                      <stop offset="100%" stopColor="#14b8a6" />
                                     </linearGradient>
                                     <linearGradient
                                       id={`trendGradWarn-${item.date}`}
@@ -885,7 +885,7 @@ export function AttendanceOverviewPage() {
                                       y2="1"
                                     >
                                       <stop offset="0%" stopColor="#fbbf24" />
-                                      <stop offset="100%" stopColor="#d97706" />
+                                      <stop offset="100%" stopColor="#f59e0b" />
                                     </linearGradient>
                                   </defs>
                                   <rect
@@ -893,7 +893,7 @@ export function AttendanceOverviewPage() {
                                     y={100 - barHeight}
                                     width="28"
                                     height={barHeight}
-                                    rx="6"
+                                    rx="8"
                                     fill={
                                       isGood
                                         ? `url(#trendGradGood-${item.date})`
@@ -1042,7 +1042,7 @@ export function AttendanceOverviewPage() {
                                     width={readyW}
                                     height={12}
                                     rx={readyW >= 100 ? 6 : 0}
-                                    fill="#10b981"
+                                    fill="#14b8a6"
                                   />
                                 )}
                                 {reviewW > 0 && (
@@ -1061,7 +1061,7 @@ export function AttendanceOverviewPage() {
                                     width={blockedW}
                                     height={12}
                                     rx={readyW + reviewW + blockedW >= 100 ? 6 : 0}
-                                    fill="#ef4444"
+                                    fill="#f43f5e"
                                   />
                                 )}
                               </>

@@ -55,7 +55,7 @@ export function InterviewCalendarView({
           <Stack key={date} gap="sm">
             {/* Date Header Banner */}
             <Inline align="center" gap="sm">
-              <span className="bezent-font-bold bezent-text-base text-gray-900">{date}</span>
+              <span className="bezent-font-bold bezent-text-base">{date}</span>
               {isToday && (
                 <Badge variant="success" size="sm">
                   Today&apos;s Schedule
@@ -75,11 +75,9 @@ export function InterviewCalendarView({
                       {/* Left: Time + Candidate Info */}
                       <Inline align="start" gap="md">
                         {/* Time slot pill */}
-                        <div className="bg-gray-100 rounded-lg px-3 py-2 text-center min-w-[90px]">
-                          <span className="bezent-font-bold bezent-text-sm text-gray-800 block">
-                            {item.startTime}
-                          </span>
-                          <span className="bezent-text-xs text-gray-500 block">
+                        <div className="bezent-hiring-time-pill">
+                          <span className="bezent-font-bold bezent-text-sm">{item.startTime}</span>
+                          <span className="bezent-text-xs bezent-text-secondary">
                             to {item.endTime}
                           </span>
                         </div>
@@ -96,7 +94,7 @@ export function InterviewCalendarView({
                               size="sm"
                               color={item.candidateAvatarColor || 'blue'}
                             />
-                            <span className="bezent-font-bold bezent-text-base text-gray-900">
+                            <span className="bezent-font-bold bezent-text-base">
                               {item.candidateName}
                             </span>
                             <span className="bezent-text-xs bezent-text-secondary">
@@ -105,7 +103,7 @@ export function InterviewCalendarView({
                             {formatInterviewStatusBadge(item.status)}
                           </Inline>
 
-                          <span className="bezent-font-medium bezent-text-sm text-gray-800">
+                          <span className="bezent-font-medium bezent-text-sm bezent-hiring-accent">
                             {item.roundName}
                           </span>
 
@@ -124,7 +122,7 @@ export function InterviewCalendarView({
                               href={item.meetingLink}
                               target="_blank"
                               rel="noopener noreferrer"
-                              className="bezent-text-xs text-primary-600 hover:underline flex items-center gap-1 pt-1"
+                              className="bezent-text-xs bezent-hiring-link"
                             >
                               <BezentIcon name="calendar" size={14} />
                               <span>Join Google Meet ({item.meetingLink})</span>

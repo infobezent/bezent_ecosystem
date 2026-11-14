@@ -30,7 +30,12 @@ export function LeaveStatGrid({ stats }: { stats: LeaveStat[] }) {
   return (
     <Grid columns={stats.length >= 4 ? 4 : stats.length === 3 ? 3 : 2} gap="md">
       {stats.map((stat) => (
-        <Card key={stat.label} variant="flat" padding="md">
+        <Card
+          key={stat.label}
+          variant="flat"
+          padding="md"
+          className={`bezent-clay-card bezent-clay-card--${stat.tone ?? 'purple'}`}
+        >
           <Stack gap="xs">
             <CardDescription>{stat.label}</CardDescription>
             <CardTitle>{stat.value}</CardTitle>

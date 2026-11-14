@@ -32,11 +32,11 @@
   width: 100%;
   max-height: calc(100vh - 40px);
   background: var(--bg-surface, #ffffff);
-  border: 1px solid var(--border-default, #dde3ea);
-  border-radius: var(--card-radius, 8px);
+  border: 1px solid #e9eaf4;
+  border-radius: 18px;
   box-shadow:
-    0 25px 50px -12px rgba(0, 0, 0, 0.25),
-    0 0 0 1px rgba(0, 0, 0, 0.02);
+    0 25px 50px -12px rgba(32, 45, 75, 0.2),
+    0 0 0 1px rgba(32, 45, 75, 0.03);
   overflow: hidden;
   animation: bezentModalZoomIn 0.22s cubic-bezier(0.16, 1, 0.3, 1);
 }
@@ -79,8 +79,8 @@
   max-width: calc(100vw - 40px);
   height: 94vh;
   max-height: calc(100vh - 40px);
-  border-radius: var(--card-radius, 8px);
-  box-shadow: 0 25px 60px -15px rgba(4, 30, 73, 0.28);
+  border-radius: 18px;
+  box-shadow: 0 25px 60px -15px rgba(32, 45, 75, 0.24);
 }
 
 /* ── Drawer Variant ── */
@@ -141,8 +141,8 @@
   flex-direction: column;
   flex-shrink: 0;
   padding: 20px 24px 16px;
-  background: #c2e7ff;
-  border-bottom: 1px solid var(--border-subtle, #e7ebf0);
+  background: var(--bg-surface, #ffffff);
+  border-bottom: 1px solid #e9eaf4;
 }
 
 .bezent-modal__header--with-bottom {
@@ -209,9 +209,9 @@
 }
 
 .bezent-modal__close-btn:hover {
-  background: var(--bg-hover, #c2e7ff);
-  border-color: var(--border-default, #dde3ea);
-  color: var(--icon-active, #041e49);
+  background: #f0fdfa;
+  border-color: #99f6e4;
+  color: #0f766e;
   transform: scale(1.05);
 }
 
@@ -223,8 +223,8 @@
 .bezent-modal--workspace .bezent-modal__header,
 .bezent-modal__header--brand {
   padding: 0;
-  background: #c2e7ff;
-  border-bottom: none;
+  background: linear-gradient(180deg, #f0fdfa 0%, #ffffff 100%);
+  border-bottom: 1px solid #e9eaf4;
 }
 
 .bezent-modal--workspace .bezent-modal__header-main,
@@ -238,7 +238,7 @@
   font-size: 23px;
   font-weight: 700;
   line-height: 1.2;
-  color: #041e49;
+  color: #20263a;
   letter-spacing: -0.35px;
 }
 
@@ -272,34 +272,34 @@
 
 .bezent-modal__header--brand .bezent-btn-draft {
   background: #ffffff;
-  color: #041e49;
-  border: 1px solid #dde3ea;
-  box-shadow: 0 1px 2px rgba(4, 30, 73, 0.08);
+  color: #20263a;
+  border: 1px solid #e9eaf4;
+  box-shadow: 0 1px 2px rgba(32, 45, 75, 0.04);
 }
 
 .bezent-modal__header--brand .bezent-btn-draft:hover {
-  background: #f0f4f9;
-  color: #041e49;
-  border-color: #1a73e8;
+  background: #f0fdfa;
+  color: #0f766e;
+  border-color: #14b8a6;
 }
 
 .bezent-modal--workspace .bezent-modal__close-btn {
   background: var(--bg-surface, #ffffff);
-  border: 1px solid var(--border-default, #dde3ea);
-  box-shadow: 0 1px 2px rgba(4, 30, 73, 0.05);
+  border: 1px solid #e9eaf4;
+  box-shadow: 0 1px 2px rgba(32, 45, 75, 0.04);
 }
 
 .bezent-modal--workspace .bezent-modal__close-btn:hover {
-  background: var(--bg-hover, #c2e7ff);
-  border-color: var(--border-focus, #1a73e8);
-  color: var(--icon-active, #041e49);
+  background: #f0fdfa;
+  border-color: #14b8a6;
+  color: #0f766e;
 }
 
 /* ── Dark Mode Workspace Identity Zone ── */
 [data-theme='dark'] .bezent-modal--workspace .bezent-modal__header,
 [data-theme='dark'] .bezent-modal__header--brand {
-  background: #081b3a;
-  border-bottom: 1px solid rgba(56, 189, 248, 0.24);
+  background: #1e293b;
+  border-bottom: 1px solid #334155;
 }
 
 [data-theme='dark'] .bezent-modal--workspace .bezent-modal__title,
@@ -317,36 +317,36 @@
 }
 
 [data-theme='dark'] .bezent-modal__header--brand .bezent-breadcrumb-item--active {
-  color: #38bdf8;
+  color: #5eead4;
 }
 
 [data-theme='dark'] .bezent-modal__header--brand .bezent-breadcrumb-separator {
-  color: rgba(56, 189, 248, 0.32);
+  color: #475569;
 }
 
 [data-theme='dark'] .bezent-modal__header--brand .bezent-btn-draft {
-  background: rgba(56, 189, 248, 0.08);
+  background: rgba(20, 184, 166, 0.1);
   color: #f8fafc;
-  border: 1px solid rgba(56, 189, 248, 0.32);
+  border: 1px solid rgba(45, 212, 191, 0.35);
   box-shadow: 0 1px 3px rgba(2, 11, 28, 0.5);
 }
 
 [data-theme='dark'] .bezent-modal__header--brand .bezent-btn-draft:hover {
-  background: rgba(22, 131, 255, 0.22);
+  background: rgba(20, 184, 166, 0.22);
   color: #ffffff;
-  border-color: #1683ff;
+  border-color: #2dd4bf;
 }
 
 [data-theme='dark'] .bezent-modal--workspace .bezent-modal__close-btn {
-  background: #081b3a;
-  border: 1px solid rgba(56, 189, 248, 0.32);
+  background: #1e293b;
+  border: 1px solid #334155;
   color: #94a3b8;
 }
 
 [data-theme='dark'] .bezent-modal--workspace .bezent-modal__close-btn:hover {
-  background: rgba(22, 131, 255, 0.22);
-  border-color: #1683ff;
-  color: #38bdf8;
+  background: rgba(20, 184, 166, 0.2);
+  border-color: #2dd4bf;
+  color: #5eead4;
 }
 
 /* ── Body ── */

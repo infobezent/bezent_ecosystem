@@ -3,7 +3,12 @@ import { EmployeeService } from '../service/employee.service.js';
 import type { EmployeeRepository } from '../repository/employee.repository.js';
 import type { OrganizationRepository } from '../../../../platform/organization/repository/organization.repository.js';
 import { workforceSettingsService } from '../../workforce/service/workforceSettings.service.js';
-import { ConflictError, NotFoundError, BadRequestError } from '../../../../app/errors/AppError.js';
+import {
+  ConflictError,
+  NotFoundError,
+  BadRequestError,
+  ValidationError,
+} from '../../../../app/errors/AppError.js';
 import type { Employee } from '../../../../db/schema.js';
 import type { EmployeeDetails } from '../types/employee.types.js';
 
@@ -110,6 +115,7 @@ describe('EmployeeService', () => {
       getByEmail: vi.fn(),
       listPaginated: vi.fn(),
       update: vi.fn(),
+      getDistributionTrends: vi.fn(),
     };
 
     mockOrgRepo = {
@@ -280,6 +286,39 @@ describe('EmployeeService', () => {
           email: 'other@example.com',
         }),
       ).rejects.toThrow(ConflictError);
+    });
+  });
+
+  describe('getDistributionTrends', () => {
+    it('forwards validated granularity scoped to tenant and company', async () => {
+      const expected = {
+        granularity: 'day' as const,
+        metricUnit: 'hrs',
+        primaryDeptLabel: 'Engineering',
+        primaryLocLabel: 'Chennai (HQ)',
+        primaryEmpLabel: 'Full-Time',
+        points: [
+          {
+            label: 'Nov 11',
+            fullLabel: 'Nov 11, 2026',
+            department: { primary: 28, other: 18 },
+            location: { primary: 18, other: 28 },
+            employment: { primary: 9, other: 37 },
+          },
+        ],
+      };
+      vi.mocked(mockRepo.getDistributionTrends!).mockResolvedValue(expected);
+
+      const res = await service.getDistributionTrends(tenantId, companyId, { granularity: 'day' });
+      expect(res).toEqual(expected);
+      expect(mockRepo.getDistributionTrends).toHaveBeenCalledWith(tenantId, companyId, 'day');
+    });
+
+    it('throws ValidationError when granularity query is invalid', async () => {
+      await expect(
+        service.getDistributionTrends(tenantId, companyId, { granularity: 'weekly' }),
+      ).rejects.toThrow(ValidationError);
+      expect(mockRepo.getDistributionTrends).not.toHaveBeenCalled();
     });
   });
 });

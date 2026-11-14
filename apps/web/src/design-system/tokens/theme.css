@@ -1,25 +1,3 @@
-/*
- * BEZENT Design System — Semantic Theme Tokens
- *
- * Source of truth: extracted faithfully from the separately approved old
- * BEZENT UI (`src/index.css`, `:root`/`[data-theme="light"]` and
- * `[data-theme="dark"]` blocks — see
- * docs/architecture/UI-MIGRATION-INVENTORY.md §4).
- *
- * These are the ONLY BEZENT colors/surfaces/shadows. Do not add a new
- * token here for a one-off need — see docs/architecture/DESIGN-SYSTEM.md.
- * Do not hardcode a hex value anywhere else in the app; consume these via
- * var(--token-name).
- *
- * Cleanup performed during migration (documented in
- * docs/architecture/UI-MIGRATION-INVENTORY.md and the Phase 0B.2 report):
- * - 8 unused legacy `--color-*` aliases were removed (zero references
- *   found anywhere in the old UI's component source).
- * - Redundant hex fallbacks on token-to-token references were removed
- *   (e.g. `var(--nav-selected, #EAD7FD)` → `var(--nav-selected)`) since
- *   every token here is unconditionally defined by this file.
- */
-
 :root,
 [data-theme='light'] {
   /* Core Enterprise SaaS Surfaces */

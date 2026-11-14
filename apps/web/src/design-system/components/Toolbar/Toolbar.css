@@ -40,26 +40,26 @@
   gap: var(--space-2, 8px);
 }
 
-/* Segmented Filter Tabs — Clean Enterprise Tabs */
+/* Segmented Filter Tabs — Workforce Clean Pill Tabs */
 .bezent-filter-tabs {
   display: flex;
   align-items: center;
-  gap: var(--space-1, 4px);
+  gap: 4px;
   background-color: #f1f5f9;
   padding: 3px;
-  border-radius: 8px;
-  border: 1px solid rgba(226, 232, 240, 0.8);
+  border-radius: 999px;
+  border: 1px solid #e9eaf4;
   box-shadow: none;
   margin-left: 14px;
 }
 
 .bezent-filter-tab {
   background: transparent;
-  border: none;
-  padding: 6px 14px;
-  border-radius: 6px;
+  border: 1px solid transparent;
+  padding: 5px 14px;
+  border-radius: 999px;
   font-size: var(--font-tab-size, var(--font-size-md, 13px));
-  font-weight: var(--font-tab-weight, 500);
+  font-weight: 600;
   line-height: var(--font-tab-line-height, var(--line-height-snug, 1.375));
   color: var(--text-secondary, #64748b);
   cursor: pointer;
@@ -70,35 +70,37 @@
 }
 
 .bezent-filter-tab:hover {
-  color: var(--text-primary, #0f172a);
+  color: var(--text-primary, #20263a);
 }
 
 .bezent-filter-tab:focus-visible {
-  outline: 2px solid var(--border-focus, #38bdf8);
+  outline: 2px solid #14b8a6;
   outline-offset: 2px;
 }
 
 .bezent-filter-tab.is-active,
 .bezent-filter-tab--active {
-  background-color: var(--bg-hover, #c2e7ff);
-  color: var(--text-brand, #001d35) !important;
-  font-weight: var(--font-weight-semibold, 600);
-  box-shadow: 0 1px 2px rgba(0, 29, 53, 0.08);
+  background-color: #f0fdfa;
+  color: #0f766e !important;
+  border-color: #99f6e4;
+  font-weight: 700;
+  box-shadow: 0 1px 3px rgba(20, 184, 166, 0.12);
   transform: none;
 }
 
 .bezent-filter-tab-count {
   font-size: var(--font-caption-size, var(--font-size-xs, 11px));
-  padding: 1px 6px;
+  padding: 1px 7px;
   border-radius: var(--radius-full);
-  background-color: var(--card-border, #e2e8f0);
-  color: var(--text-secondary, #475569);
+  background-color: #e2e8f0;
+  color: #475569;
+  font-weight: 700;
 }
 
 .bezent-filter-tab.is-active .bezent-filter-tab-count,
 .bezent-filter-tab--active .bezent-filter-tab-count {
-  background-color: var(--bg-hover, #c2e7ff);
-  color: var(--text-primary, #001d35);
+  background-color: #ccfbf1;
+  color: #0f766e;
 }
 
 /* ── Modern Segmented View Mode Toggle ── */
@@ -106,9 +108,9 @@
   display: inline-flex;
   align-items: center;
   background-color: #f1f5f9;
-  padding: 2.5px;
-  border-radius: 8px;
-  border: 1px solid rgba(226, 232, 240, 0.9);
+  padding: 3px;
+  border-radius: 10px;
+  border: 1px solid #e9eaf4;
   box-shadow: none;
   gap: 2px;
   height: 36px;
@@ -120,12 +122,12 @@
   align-items: center;
   justify-content: center;
   width: 32px;
-  height: 30px;
+  height: 28px;
   padding: 0;
-  border: none;
+  border: 1px solid transparent;
   background: transparent;
   color: var(--text-secondary, #64748b);
-  border-radius: 7px;
+  border-radius: 8px;
   cursor: pointer;
   transition: all 0.16s cubic-bezier(0.16, 1, 0.3, 1);
   outline: none;
@@ -141,28 +143,28 @@
 .bezent-toolbar .bezent-icon-btn {
   width: 36px;
   height: 36px;
-  border-radius: 8px;
-  border: 1px solid rgba(226, 232, 240, 0.9);
+  border-radius: 10px;
+  border: 1px solid #e9eaf4;
   background: #ffffff;
   color: var(--text-secondary, #64748b);
 }
 
 .bezent-toolbar .bezent-icon-btn:hover:not(:disabled) {
   background: #f8fafc;
-  color: var(--text-primary, #0f172a);
+  color: var(--text-primary, #20263a);
   border-color: #cbd5e1;
 }
 
 .bezent-toolbar .bezent-icon-btn--solid {
-  background: var(--primary, #d3e3fd);
-  border-color: transparent;
-  color: var(--nav-label-active, #041e49);
+  background: #f0fdfa;
+  border-color: #99f6e4;
+  color: #0f766e;
 }
 
 .bezent-toolbar .bezent-icon-btn--solid:hover:not(:disabled) {
-  background: #c2e7ff;
-  border-color: transparent;
-  color: var(--nav-label-active, #041e49);
+  background: #ccfbf1;
+  border-color: #5eead4;
+  color: #0f766e;
 }
 
 .bezent-view-toggle__btn .bezent-material-icon {
@@ -180,37 +182,84 @@
 }
 
 .bezent-view-toggle__btn:hover:not(.is-active) {
-  color: var(--text-primary, #0f172a);
-  background: rgba(255, 255, 255, 0.65);
+  color: var(--text-primary, #20263a);
+  background: rgba(255, 255, 255, 0.72);
 }
 
 .bezent-view-toggle__btn:focus-visible {
-  outline: 2px solid var(--border-focus, #38bdf8);
+  outline: 2px solid #14b8a6;
   outline-offset: 2px;
 }
 
 .bezent-view-toggle__btn:hover:not(.is-active) .bezent-material-icon {
-  color: var(--text-primary, #0f172a) !important;
+  color: var(--text-primary, #20263a) !important;
 }
 
 .bezent-view-toggle__btn.is-active {
-  background-color: var(--bg-hover, #c2e7ff);
-  color: var(--text-brand, #001d35) !important;
-  box-shadow: 0 1px 2px rgba(0, 29, 53, 0.08);
+  background-color: #ffffff;
+  color: #0f766e !important;
+  border-color: #99f6e4;
+  box-shadow: 0 1px 3px rgba(20, 184, 166, 0.14);
   transform: none;
 }
 
 .bezent-view-toggle__btn.is-active:hover {
-  background-color: #a8dbfc;
-  color: var(--text-brand, #001d35) !important;
+  background-color: #f0fdfa;
+  color: #0f766e !important;
 }
 
 .bezent-view-toggle__btn.is-active .bezent-material-icon {
-  color: var(--text-brand, #001d35) !important;
+  color: #0f766e !important;
 }
 
 .bezent-view-toggle__btn.is-active:hover .bezent-material-icon {
-  color: var(--text-brand, #001d35) !important;
+  color: #0f766e !important;
+}
+
+[data-theme='dark'] .bezent-filter-tabs,
+[data-theme='dark'] .bezent-view-toggle {
+  background-color: #0f172a;
+  border-color: #334155;
+}
+
+[data-theme='dark'] .bezent-filter-tab,
+[data-theme='dark'] .bezent-view-toggle__btn {
+  color: #94a3b8;
+}
+
+[data-theme='dark'] .bezent-filter-tab:hover,
+[data-theme='dark'] .bezent-view-toggle__btn:hover:not(.is-active) {
+  color: #f8fafc;
+}
+
+[data-theme='dark'] .bezent-filter-tab.is-active,
+[data-theme='dark'] .bezent-filter-tab--active,
+[data-theme='dark'] .bezent-view-toggle__btn.is-active {
+  background-color: rgba(20, 184, 166, 0.16);
+  color: #5eead4 !important;
+  border-color: rgba(45, 212, 191, 0.35);
+}
+
+[data-theme='dark'] .bezent-filter-tab.is-active .bezent-filter-tab-count,
+[data-theme='dark'] .bezent-filter-tab--active .bezent-filter-tab-count {
+  background-color: rgba(20, 184, 166, 0.25);
+  color: #5eead4;
+}
+
+[data-theme='dark'] .bezent-view-toggle__btn.is-active .bezent-material-icon {
+  color: #5eead4 !important;
+}
+
+[data-theme='dark'] .bezent-toolbar .bezent-icon-btn {
+  background: #1e293b;
+  border-color: #334155;
+  color: #cbd5e1;
+}
+
+[data-theme='dark'] .bezent-toolbar .bezent-icon-btn--solid {
+  background: rgba(20, 184, 166, 0.16);
+  border-color: rgba(45, 212, 191, 0.35);
+  color: #5eead4;
 }
 
 /* ── Compact Filter Toolbar Grid ── */

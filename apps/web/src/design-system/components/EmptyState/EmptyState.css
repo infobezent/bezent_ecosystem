@@ -89,18 +89,16 @@
   font: inherit;
   font-size: var(--font-button-size, var(--font-size-md, 13px));
   font-weight: var(--font-weight-semibold, 600);
-  border-radius: var(--radius-md);
-  border: none;
+  border-radius: 10px;
+  border: 1px solid #0d9488;
   cursor: pointer;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 7px;
-  background: var(--accent-primary);
-  color: var(--accent-primary-text, #001d35);
-  box-shadow:
-    0 1px 2px rgba(60, 64, 67, 0.15),
-    inset 0 1px 0 rgba(255, 255, 255, 0.4);
+  background: #0d9488;
+  color: #ffffff;
+  box-shadow: 0 2px 6px rgba(13, 148, 136, 0.18);
   transition:
     box-shadow 0.16s cubic-bezier(0.16, 1, 0.3, 1),
     transform 0.12s cubic-bezier(0.16, 1, 0.3, 1),
@@ -116,11 +114,10 @@
 
 .bezent-empty-state__primary-action:hover {
   transform: translateY(-1.5px);
-  background: var(--accent-hover);
-  color: var(--accent-primary-text, #001d35);
-  box-shadow:
-    0 2px 6px rgba(60, 64, 67, 0.2),
-    inset 0 1px 0 rgba(255, 255, 255, 0.5);
+  background: #0f766e;
+  border-color: #0f766e;
+  color: #ffffff;
+  box-shadow: 0 6px 14px -2px rgba(13, 148, 136, 0.25);
 }
 
 .bezent-empty-state__primary-action:active {
@@ -133,17 +130,18 @@
   font: inherit;
   font-size: var(--font-button-size, var(--font-size-md, 13px));
   font-weight: var(--font-weight-medium, 500);
-  border-radius: var(--radius-md);
-  border: 1px solid var(--border-default);
+  border-radius: 10px;
+  border: 1px solid #e9eaf4;
   cursor: pointer;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  background: transparent;
+  background: #ffffff;
   color: var(--text-primary);
   transition:
     background-color 150ms ease,
-    border-color 150ms ease;
+    border-color 150ms ease,
+    color 150ms ease;
   outline: none;
 }
 
@@ -154,7 +152,9 @@
 }
 
 .bezent-empty-state__secondary-action:hover {
-  background: var(--bg-hover);
+  background: #f0fdfa;
+  border-color: #99f6e4;
+  color: #0f766e;
 }
 
 .bezent-empty-state__tagline {
@@ -173,41 +173,39 @@
   width: 18px;
   height: 2px;
   border-radius: 1px;
-  /* Old value was a one-off literal (#E9D0FD light / translucent purple
-     dark) not shared with any other UI element. `--accent-soft` is the
-     closest existing semantic token (#EAD7FD light / #C88BFA dark) —
-     visually equivalent for an 18×2px decorative dash; not worth a new
-     single-use token for the small exact difference. */
-  background: var(--accent-soft);
+  background: #99f6e4;
   margin-bottom: 8px;
 }
 
 .bezent-empty-state__primary-action:focus-visible,
 .bezent-empty-state__secondary-action:focus-visible {
-  outline: 2px solid var(--border-focus);
+  outline: 2px solid #14b8a6;
   outline-offset: 2px;
 }
 
 /* ── Dark Mode Empty State Accents ───────────────────────────────────── */
 
 [data-theme='dark'] .bezent-empty-state__tagline {
-  color: #38bdf8;
+  color: #5eead4;
   letter-spacing: 0.14em;
   opacity: 0.9;
 }
 
 [data-theme='dark'] .bezent-empty-state__tagline-dash {
-  background: #1683ff;
-  box-shadow: 0 0 8px rgba(22, 131, 255, 0.6);
+  background: #14b8a6;
+  box-shadow: 0 0 8px rgba(20, 184, 166, 0.5);
 }
 
 [data-theme='dark'] .bezent-empty-state__primary-action {
-  background: linear-gradient(135deg, #1683ff 0%, #0353b3 100%);
-  color: #ffffff;
-  box-shadow: 0 4px 14px rgba(22, 131, 255, 0.4);
+  background: #14b8a6;
+  border-color: #14b8a6;
+  color: #042f2e;
+  box-shadow: 0 4px 14px rgba(20, 184, 166, 0.25);
 }
 
 [data-theme='dark'] .bezent-empty-state__primary-action:hover {
-  background: linear-gradient(135deg, #38bdf8 0%, #1683ff 100%);
-  box-shadow: 0 6px 18px rgba(56, 189, 248, 0.5);
+  background: #2dd4bf;
+  border-color: #2dd4bf;
+  color: #042f2e;
+  box-shadow: 0 6px 18px rgba(45, 212, 191, 0.35);
 }
