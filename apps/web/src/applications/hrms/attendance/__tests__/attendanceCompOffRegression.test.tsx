@@ -17,7 +17,7 @@ describe('BEZENT HRMS — Attendance Comp-Off V1.0 Regression & Runtime Defense 
     );
 
     expect(html).toContain('Comp-Off');
-    expect(html).toContain('Attendance › Comp-Off');
+    expect(html).toContain('Attendance › Requests › Comp-Off');
     expect(html).toContain('Track comp-off earned, used and expired for each employee.');
     expect(html).toContain('Run Expiry Check');
     expect(html).toContain('Export');

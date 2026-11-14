@@ -639,7 +639,7 @@ export function AttendanceExceptionsPage() {
     <Page>
       {/* ── Compact Header ── */}
       <PageHeader
-        breadcrumbs={<span>Attendance / Exceptions</span>}
+        breadcrumbs={<span>Attendance › Exceptions</span>}
         title="Exceptions"
         actions={
           <Inline gap="sm" align="center">

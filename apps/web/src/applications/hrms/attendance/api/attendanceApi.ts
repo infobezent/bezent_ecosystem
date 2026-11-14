@@ -86,6 +86,7 @@ export async function fetchAttendanceOverview(
     startDate?: string;
     endDate?: string;
     month?: string;
+    departmentId?: string;
   },
 ): Promise<AttendanceOverviewKpis> {
   const query = new URLSearchParams();
@@ -94,6 +95,7 @@ export async function fetchAttendanceOverview(
   if (options?.startDate) query.set('startDate', options.startDate);
   if (options?.endDate) query.set('endDate', options.endDate);
   if (options?.month) query.set('month', options.month);
+  if (options?.departmentId) query.set('departmentId', options.departmentId);
 
   const qs = query.toString();
   const url = `${appConfig.apiBaseUrl}/hrms/attendance/overview${qs ? `?${qs}` : ''}`;

@@ -70,7 +70,7 @@ describe('BEZENT HRMS — Attendance Exceptions V1.0 Frontend Page', () => {
     );
 
     expect(html).toContain('Exceptions');
-    expect(html).toContain('Attendance / Exceptions');
+    expect(html).toContain('Attendance › Exceptions');
     expect(html).toContain('Today');
     expect(html).toContain('Export');
   });
