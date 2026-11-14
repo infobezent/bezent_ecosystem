@@ -20,7 +20,7 @@
 }
 
 .bezent-pane--scroll-y:focus-visible {
-  outline: 2px solid #14b8a6;
+  outline: 2px solid var(--teal-500);
   outline-offset: 2px;
 }
 
@@ -306,7 +306,7 @@
 
 .bezent-toolbox-item:hover:not(.is-disabled) .bezent-toolbox-item__add {
   opacity: 1;
-  color: #0d9488;
+  color: var(--teal-600);
 }
 
 .bezent-toolbox-search {
@@ -555,14 +555,14 @@
 }
 
 .bezent-properties-tab:hover {
-  color: #0f766e;
-  background-color: #f0fdfa;
+  color: var(--teal-700);
+  background-color: var(--teal-50);
 }
 
 .bezent-properties-tab.is-active {
-  color: #0f766e;
-  border-bottom-color: #14b8a6;
-  background-color: #f0fdfa;
+  color: var(--teal-700);
+  border-bottom-color: var(--teal-500);
+  background-color: var(--teal-50);
 }
 
 .bezent-inspector-preview-box {
@@ -579,7 +579,7 @@
 }
 
 .bezent-canvas-field-wrapper.is-drop-target {
-  outline: 2px dashed #14b8a6;
+  outline: 2px dashed var(--teal-500);
   outline-offset: 2px;
   border-radius: var(--radius-sm);
 }
@@ -611,17 +611,17 @@
   min-height: 44px;
   padding: 10px 16px;
   margin-top: 10px;
-  border: 1.5px dashed #14b8a6;
-  background-color: #f0fdfa;
-  color: #0f766e;
+  border: 1.5px dashed var(--teal-500);
+  background-color: var(--teal-50);
+  color: var(--teal-700);
   opacity: 1;
 }
 
 .bezent-subgroup-dropzone:hover,
 .bezent-subgroup-dropzone.is-over {
-  border-color: #14b8a6;
-  background-color: #f0fdfa;
-  color: #0f766e;
+  border-color: var(--teal-500);
+  background-color: var(--teal-50);
+  color: var(--teal-700);
   opacity: 1;
   min-height: 44px;
   padding: 10px 16px;
@@ -638,7 +638,7 @@
   align-items: center;
   gap: 8px;
   background-color: var(--bg-surface, #ffffff);
-  border: 1.5px solid #14b8a6;
+  border: 1.5px solid var(--teal-500);
   border-radius: var(--radius-sm);
   padding: 6px 12px;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
@@ -677,8 +677,8 @@
 }
 
 .bezent-subgroup-dropzone--empty.is-active-drag {
-  border-color: #14b8a6;
-  background-color: #f0fdfa;
+  border-color: var(--teal-500);
+  background-color: var(--teal-50);
   opacity: 1;
 }
 
@@ -717,7 +717,7 @@
 }
 
 .bezent-inline-edit-trigger:hover {
-  color: #0d9488;
+  color: var(--teal-600);
   background-color: rgba(20, 184, 166, 0.1);
   opacity: 1;
 }
@@ -736,7 +736,7 @@
   line-height: inherit;
   color: var(--text-primary, #0f172a);
   background-color: var(--bg-surface, #ffffff);
-  border: 1px solid #14b8a6;
+  border: 1px solid var(--teal-500);
   border-radius: var(--radius-xs, 3px);
   padding: 2px 8px;
   outline: none;
@@ -765,13 +765,13 @@
 }
 
 .bezent-inline-edit-btn--confirm {
-  background-color: #f0fdfa;
-  color: #0f766e;
-  border-color: #99f6e4;
+  background-color: var(--teal-50);
+  color: var(--teal-700);
+  border-color: var(--teal-200);
 }
 
 .bezent-inline-edit-btn--confirm:hover {
-  background-color: #0d9488;
+  background-color: var(--teal-600);
   color: #ffffff;
 }
 
@@ -816,15 +816,15 @@
 }
 
 .bezent-left-mode-btn:hover {
-  color: #0f766e;
-  background-color: #f0fdfa;
+  color: var(--teal-700);
+  background-color: var(--teal-50);
 }
 
 .bezent-left-mode-btn.is-active {
   background-color: var(--bg-surface, #ffffff);
-  color: #0f766e;
+  color: var(--teal-700);
   font-weight: 600;
-  border-color: #99f6e4;
+  border-color: var(--teal-200);
   box-shadow: 0 1px 2px rgba(20, 184, 166, 0.08);
 }
 
@@ -878,9 +878,9 @@
 }
 
 .bezent-structure-item.is-active {
-  background-color: #f0fdfa;
-  border-color: #14b8a6;
-  color: #0f766e;
+  background-color: var(--teal-50);
+  border-color: var(--teal-500);
+  color: var(--teal-700);
   font-weight: 600;
 }
 
@@ -909,14 +909,14 @@
 }
 
 .bezent-structure-handle.is-draggable:hover {
-  background-color: #f0fdfa;
-  color: #0f766e;
+  background-color: var(--teal-50);
+  color: var(--teal-700);
 }
 
 .bezent-structure-handle.is-draggable:active,
 .bezent-structure-handle.is-dragging {
   cursor: grabbing !important;
-  color: #0d9488;
+  color: var(--teal-600);
 }
 
 .bezent-structure-handle.is-locked {
@@ -927,13 +927,13 @@
 .bezent-structure-item.is-dragging {
   opacity: 0.4;
   border-style: dashed;
-  border-color: #14b8a6;
+  border-color: var(--teal-500);
 }
 
 .bezent-structure-item.is-drop-target {
-  border-color: #14b8a6;
-  background-color: #f0fdfa;
-  box-shadow: 0 0 0 1px #14b8a6;
+  border-color: var(--teal-500);
+  background-color: var(--teal-50);
+  box-shadow: 0 0 0 1px var(--teal-500);
 }
 
 .bezent-structure-num {
@@ -949,9 +949,9 @@
 }
 
 .bezent-structure-item.is-active .bezent-structure-num {
-  background-color: #ccfbf1;
-  color: #0f766e;
-  border-color: #99f6e4;
+  background-color: var(--teal-100);
+  color: var(--teal-700);
+  border-color: var(--teal-200);
 }
 
 .bezent-structure-name {
@@ -1021,9 +1021,9 @@
 }
 
 .bezent-canvas-tab-btn.is-active {
-  color: #0d9488;
+  color: var(--teal-600);
   font-weight: 600;
-  border-bottom-color: #14b8a6;
+  border-bottom-color: var(--teal-500);
 }
 
 .bezent-canvas-tab-btn__num {
@@ -1033,7 +1033,7 @@
 }
 
 .bezent-canvas-tab-btn.is-active .bezent-canvas-tab-btn__num {
-  color: #0d9488;
+  color: var(--teal-600);
 }
 
 /* Section Card in Canvas */
@@ -1049,8 +1049,8 @@
 }
 
 .bezent-canvas-section-card.is-selected {
-  border-color: #14b8a6;
-  box-shadow: 0 0 0 1.5px #14b8a6;
+  border-color: var(--teal-500);
+  box-shadow: 0 0 0 1.5px var(--teal-500);
 }
 
 .bezent-canvas-section-card__header {
@@ -1085,7 +1085,7 @@
   background-color: transparent;
   border: 1px dashed #cbd5e1;
   border-radius: 10px;
-  color: #0d9488;
+  color: var(--teal-600);
   font-size: 12.5px;
   font-weight: 500;
   cursor: pointer;
@@ -1093,8 +1093,8 @@
 }
 
 .bezent-add-custom-field-btn:hover {
-  background-color: #f0fdfa;
-  border-color: #14b8a6;
+  background-color: var(--teal-50);
+  border-color: var(--teal-500);
 }
 
 /* Right Inspector Notices & Info Card */
@@ -1104,9 +1104,9 @@
   gap: 10px;
   padding: 12px;
   border-radius: 12px;
-  background-color: #f0fdfa;
-  border: 1px solid #99f6e4;
-  color: #0f766e;
+  background-color: var(--teal-50);
+  border: 1px solid var(--teal-200);
+  color: var(--teal-700);
 }
 
 .bezent-inspector-notice__icon {
@@ -1116,8 +1116,8 @@
   width: 28px;
   height: 28px;
   border-radius: 50%;
-  background-color: #ccfbf1;
-  color: #0f766e;
+  background-color: var(--teal-100);
+  color: var(--teal-700);
   flex-shrink: 0;
 }
 
@@ -1129,7 +1129,7 @@
 
 .bezent-inspector-notice__desc {
   font-size: 11.5px;
-  color: #0d9488;
+  color: var(--teal-600);
   margin-top: 2px;
   line-height: 1.35;
 }
@@ -1279,9 +1279,9 @@
 }
 
 .bezent-structure-form-root.is-active {
-  background-color: #f0fdfa;
-  border-color: #14b8a6;
-  box-shadow: 0 0 0 1px #14b8a6;
+  background-color: var(--teal-50);
+  border-color: var(--teal-500);
+  box-shadow: 0 0 0 1px var(--teal-500);
 }
 
 .bezent-structure-form-root__label {
@@ -1294,7 +1294,7 @@
 }
 
 .bezent-structure-form-root.is-active .bezent-structure-form-root__label {
-  color: #0f766e;
+  color: var(--teal-700);
 }
 
 /* ─── Context-Sensitive Inspector Header (replaces permanent tab strip) ──── */

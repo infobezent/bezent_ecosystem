@@ -199,7 +199,7 @@
 .bezent-checkbox-label input[type='checkbox'] {
   width: 16px;
   height: 16px;
-  accent-color: #14b8a6;
+  accent-color: var(--teal-500);
   cursor: pointer;
 }
 
@@ -220,7 +220,7 @@
 }
 
 .bezent-radio-label input[type='radio'] {
-  accent-color: #14b8a6;
+  accent-color: var(--teal-500);
   cursor: pointer;
 }
 
@@ -248,9 +248,9 @@
   width: 72px;
   height: 72px;
   border-radius: 9999px;
-  background: linear-gradient(180deg, #f0fdfa 0%, #ffffff 100%);
-  color: #0f766e;
-  border: 1.5px solid #99f6e4;
+  background: linear-gradient(180deg, var(--teal-50) 0%, #ffffff 100%);
+  color: var(--teal-700);
+  border: 1.5px solid var(--teal-200);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -265,7 +265,7 @@
 
 .bezent-photo-placeholder:hover {
   transform: translateY(-2px) scale(1.04);
-  border-color: #14b8a6;
+  border-color: var(--teal-500);
   box-shadow: 0 8px 18px rgba(20, 184, 166, 0.18);
 }
 

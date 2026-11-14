@@ -309,7 +309,7 @@
 }
 
 .cal-mini__cell.is-selected {
-  outline: 2px solid var(--border-focus, #1a73e8);
+  outline: 2px solid var(--border-focus, var(--blue-interactive));
 }
 
 /* Search for People Input */
@@ -368,7 +368,7 @@
   height: 16px;
   border-radius: 4px;
   cursor: pointer;
-  accent-color: #1a73e8;
+  accent-color: var(--blue-interactive);
 }
 
 .cal-check-green {
@@ -449,7 +449,7 @@
 }
 
 .cal-page__day-badge.is-today-badge {
-  background: #1a73e8;
+  background: var(--blue-interactive);
   color: #ffffff;
   font-weight: 700;
 }
@@ -569,8 +569,8 @@
 
 .cal-page__event-block--accent {
   background: #e8f0fe;
-  border-left: 4px solid #1a73e8;
-  color: #1a73e8;
+  border-left: 4px solid var(--blue-interactive);
+  color: var(--blue-interactive);
 }
 
 .cal-page__event-block--success {
@@ -682,7 +682,7 @@
 
 .cal-modal__chip--accent {
   background: #e8f0fe;
-  color: #1a73e8;
+  color: var(--blue-interactive);
 }
 
 .cal-modal__chip--success {
@@ -765,7 +765,7 @@
 }
 
 .cal-modal__input:focus {
-  border-color: var(--border-focus, #1a73e8);
+  border-color: var(--border-focus, var(--blue-interactive));
 }
 
 .cal-modal__footer {

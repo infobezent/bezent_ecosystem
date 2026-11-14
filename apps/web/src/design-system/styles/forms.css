@@ -27,9 +27,9 @@
 [data-theme='dark'] {
   --bezent-btn-sec-bg: rgba(20, 184, 166, 0.16);
   --bezent-btn-sec-hover: rgba(20, 184, 166, 0.25);
-  --bezent-btn-sec-text: #5eead4;
-  --bezent-toggle-active-bg: #14b8a6;
-  --bezent-toggle-active-hover: #2dd4bf;
+  --bezent-btn-sec-text: var(--teal-300);
+  --bezent-toggle-active-bg: var(--teal-500);
+  --bezent-toggle-active-hover: var(--teal-400);
 }
 
 /* ─── 2. Core Form Field & Control Primitives ─────────────────────────────── */
@@ -102,7 +102,7 @@
 .personal-info__input:hover:not(:disabled):not([readonly]),
 .working-hours-section__input:hover:not(:disabled):not([readonly]),
 .accounts-section__input:hover:not(:disabled):not([readonly]) {
-  border-color: #5eead4;
+  border-color: var(--teal-300);
 }
 
 .employee-registration__input:focus,
@@ -113,7 +113,7 @@
 .skills-section__input:focus,
 .emergency-contact-section__input:focus {
   outline: none;
-  border-color: #14b8a6;
+  border-color: var(--teal-500);
   box-shadow: 0 0 0 3px rgba(20, 184, 166, 0.12);
 }
 
@@ -166,14 +166,14 @@
 .employee-registration__select:hover:not(:disabled),
 .working-hours-section__select:hover:not(:disabled),
 .accounts-section__select:hover:not(:disabled) {
-  border-color: #5eead4;
+  border-color: var(--teal-300);
 }
 
 .employee-registration__select:focus,
 .working-hours-section__select:focus,
 .accounts-section__select:focus {
   outline: none;
-  border-color: #14b8a6;
+  border-color: var(--teal-500);
   box-shadow: 0 0 0 3px rgba(20, 184, 166, 0.14);
 }
 
@@ -265,13 +265,13 @@
 
 .employee-registration__textarea:hover:not(:disabled),
 .emergency-contact-section__textarea:hover:not(:disabled) {
-  border-color: #5eead4;
+  border-color: var(--teal-300);
 }
 
 .employee-registration__textarea:focus,
 .emergency-contact-section__textarea:focus {
   outline: none;
-  border-color: #14b8a6;
+  border-color: var(--teal-500);
   box-shadow: 0 0 0 3px rgba(20, 184, 166, 0.14);
 }
 
@@ -291,8 +291,8 @@
   width: 40px;
   height: 40px;
   border-radius: 10px;
-  background: var(--bezent-btn-sec-bg, #f0fdfa);
-  color: var(--bezent-btn-sec-text, #0f766e);
+  background: var(--bezent-btn-sec-bg, var(--teal-50));
+  color: var(--bezent-btn-sec-text, var(--teal-700));
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1054,8 +1054,8 @@
 }
 
 .documents-section__photo-placeholder-box:hover {
-  background: #f0fdfa;
-  border-color: #14b8a6;
+  background: var(--teal-50);
+  border-color: var(--teal-500);
 }
 
 .documents-section__photo-placeholder-text {
@@ -1089,13 +1089,13 @@
 }
 
 .working-hours-section__day-chip:hover {
-  border-color: #14b8a6;
-  background: #f0fdfa;
+  border-color: var(--teal-500);
+  background: var(--teal-50);
 }
 
 .working-hours-section__day-chip--active {
-  background: var(--bezent-toggle-active-bg, #0d9488);
-  border-color: var(--bezent-toggle-active-bg, #0d9488);
+  background: var(--bezent-toggle-active-bg, var(--teal-600));
+  border-color: var(--bezent-toggle-active-bg, var(--teal-600));
   color: #ffffff;
 }
 
@@ -1298,12 +1298,12 @@
 }
 
 .online-access-section__module-card:hover {
-  border-color: #14b8a6;
+  border-color: var(--teal-500);
 }
 
 .online-access-section__module-card--active {
-  border-color: #14b8a6;
-  background: #f0fdfa;
+  border-color: var(--teal-500);
+  background: var(--teal-50);
 }
 
 .online-access-section__module-name {
@@ -2288,9 +2288,9 @@
 
 .onboarding-page__drafts-btn:hover,
 .bezent-btn-draft:hover {
-  background: #f0fdfa;
-  border-color: #14b8a6;
-  color: #0f766e;
+  background: var(--teal-50);
+  border-color: var(--teal-500);
+  color: var(--teal-700);
 }
 
 .onboarding-page__btn-content {
@@ -2490,9 +2490,9 @@
   width: 28px;
   height: 28px;
   padding: 0;
-  background: var(--bezent-btn-sec-bg, #f0fdfa);
-  color: var(--bezent-btn-sec-text, #0f766e);
-  border: 1px solid #99f6e4;
+  background: var(--bezent-btn-sec-bg, var(--teal-50));
+  color: var(--bezent-btn-sec-text, var(--teal-700));
+  border: 1px solid var(--teal-200);
   border-radius: 8px;
   cursor: pointer;
   transition: all 0.15s ease;
@@ -2500,12 +2500,12 @@
 }
 
 .admin-builder-action-btn:hover:not(:disabled) {
-  background: var(--bezent-btn-sec-hover, #ccfbf1);
-  color: var(--bezent-btn-sec-text, #0f766e);
+  background: var(--bezent-btn-sec-hover, var(--teal-100));
+  color: var(--bezent-btn-sec-text, var(--teal-700));
 }
 
 .admin-builder-action-btn:active:not(:disabled) {
-  background: #99f6e4;
+  background: var(--teal-200);
 }
 
 .admin-builder-action-btn:disabled {
@@ -2545,7 +2545,7 @@
 
 [data-theme='dark'] .admin-builder-action-btn {
   background: var(--bezent-btn-sec-bg, rgba(20, 184, 166, 0.16));
-  color: var(--bezent-btn-sec-text, #5eead4);
+  color: var(--bezent-btn-sec-text, var(--teal-300));
 }
 
 [data-theme='dark'] .admin-builder-action-btn:hover:not(:disabled) {

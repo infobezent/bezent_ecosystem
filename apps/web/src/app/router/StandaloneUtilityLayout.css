@@ -127,7 +127,7 @@
 }
 
 .standalone-header__profile.is-active {
-  box-shadow: 0 0 0 3px var(--border-focus, #1a73e8);
+  box-shadow: 0 0 0 3px var(--border-focus, var(--blue-interactive));
 }
 
 .standalone-header__profile:focus-visible {

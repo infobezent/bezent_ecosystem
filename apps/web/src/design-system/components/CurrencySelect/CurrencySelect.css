@@ -39,7 +39,7 @@
 .bezent-currency-select-trigger:focus-visible,
 .bezent-currency-select-trigger.is-open {
   outline: none;
-  border-color: var(--primary-accent, #1a73e8);
+  border-color: var(--primary-accent, var(--blue-interactive));
   box-shadow: 0 0 0 2px var(--focus-ring, rgba(26, 115, 232, 0.2));
 }
 
@@ -118,7 +118,7 @@
 }
 
 .bezent-currency-select-search input:focus {
-  border-color: var(--primary-accent, #1a73e8);
+  border-color: var(--primary-accent, var(--blue-interactive));
 }
 
 .bezent-currency-select-list {

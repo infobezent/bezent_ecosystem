@@ -25,6 +25,21 @@
   --pastel-blush: #ffe5ea;
   --pastel-butter: #ffe8dc;
 
+  /* Teal accent ramp (Workforce / Attendance pastel cards, success and active states).
+     Mode-independent: dark rules override surfaces, not the ramp itself. */
+  --teal-50: #f0fdfa;
+  --teal-100: #ccfbf1;
+  --teal-200: #99f6e4;
+  --teal-300: #5eead4;
+  --teal-400: #2dd4bf;
+  --teal-500: #14b8a6;
+  --teal-600: #0d9488;
+  --teal-700: #0f766e;
+
+  /* Blue accents still in use alongside --action-blue; consolidation is a design decision. */
+  --blue-600: #2563eb;
+  --blue-interactive: #1a73e8;
+
   --pastel-mint-text: #159a68;
   --pastel-sky-text: #1e3a8a;
   --pastel-blush-text: #e45163;
@@ -43,7 +58,6 @@
   --card-hover-bg: #f8fafc;
   --card-shadow: 0 4px 18px rgba(31, 45, 75, 0.045);
   --card-hover-shadow: 0 6px 24px rgba(31, 45, 75, 0.08);
-  --card-radius: 14px;
   --bg-header: var(--app-canvas);
   --bg-sidebar: var(--app-canvas);
   --bg-footer: var(--app-canvas);
@@ -361,7 +375,6 @@
   --card-hover-border: rgba(56, 189, 248, 0.45);
   --card-shadow: 0 4px 20px rgba(2, 11, 28, 0.5);
   --card-hover-shadow: 0 4px 20px rgba(2, 11, 28, 0.6), 0 0 0 1px rgba(56, 189, 248, 0.25);
-  --card-radius: 8px;
   --bg-header: #020b1c;
   --bg-sidebar: #020b1c;
   --bg-footer: #020b1c;

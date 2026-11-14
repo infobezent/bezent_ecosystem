@@ -29,7 +29,7 @@
 }
 
 .bezent-intl-phone-box.is-focused {
-  border-color: var(--primary-accent, #1a73e8);
+  border-color: var(--primary-accent, var(--blue-interactive));
   box-shadow: 0 0 0 2px var(--focus-ring, rgba(26, 115, 232, 0.2));
 }
 
@@ -132,7 +132,7 @@
 }
 
 .bezent-intl-phone-search input:focus {
-  border-color: var(--primary-accent, #1a73e8);
+  border-color: var(--primary-accent, var(--blue-interactive));
 }
 
 .bezent-intl-phone-list {
