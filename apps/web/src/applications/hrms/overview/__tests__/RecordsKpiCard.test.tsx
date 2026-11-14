@@ -37,12 +37,7 @@ describe('RecordsKpiCard – File Folders Stack Design', () => {
 
   it('renders all four folder categories with accessible labels', () => {
     const html = renderToStaticMarkup(
-      <RecordsKpiCard
-        verifiedCount={96}
-        pendingCount={18}
-        expiringCount={10}
-        expiredCount={4}
-      />,
+      <RecordsKpiCard verifiedCount={96} pendingCount={18} expiringCount={10} expiredCount={4} />,
     );
 
     expect(html).toContain('Verified Records: 96 records');
@@ -53,11 +48,7 @@ describe('RecordsKpiCard – File Folders Stack Design', () => {
 
   it('displays verified details in floating tooltip when verified folder is hovered', () => {
     const html = renderToStaticMarkup(
-      <RecordsKpiCard
-        total={128}
-        verifiedCount={96}
-        hoveredFolder="verified"
-      />,
+      <RecordsKpiCard total={128} verifiedCount={96} hoveredFolder="verified" />,
     );
 
     expect(html).toContain('bezent-kpi-records-tooltip is-visible');
@@ -67,11 +58,7 @@ describe('RecordsKpiCard – File Folders Stack Design', () => {
 
   it('displays pending verification details when pending folder is hovered', () => {
     const html = renderToStaticMarkup(
-      <RecordsKpiCard
-        total={128}
-        pendingCount={18}
-        hoveredFolder="pending"
-      />,
+      <RecordsKpiCard total={128} pendingCount={18} hoveredFolder="pending" />,
     );
 
     expect(html).toContain('bezent-kpi-records-tooltip is-visible');
@@ -81,11 +68,7 @@ describe('RecordsKpiCard – File Folders Stack Design', () => {
 
   it('displays expiring soon details when expiring folder is hovered', () => {
     const html = renderToStaticMarkup(
-      <RecordsKpiCard
-        total={128}
-        expiringCount={10}
-        hoveredFolder="expiring"
-      />,
+      <RecordsKpiCard total={128} expiringCount={10} hoveredFolder="expiring" />,
     );
 
     expect(html).toContain('bezent-kpi-records-tooltip is-visible');
@@ -95,11 +78,7 @@ describe('RecordsKpiCard – File Folders Stack Design', () => {
 
   it('displays expired records details when expired folder is hovered', () => {
     const html = renderToStaticMarkup(
-      <RecordsKpiCard
-        total={128}
-        expiredCount={4}
-        hoveredFolder="expired"
-      />,
+      <RecordsKpiCard total={128} expiredCount={4} hoveredFolder="expired" />,
     );
 
     expect(html).toContain('bezent-kpi-records-tooltip is-visible');

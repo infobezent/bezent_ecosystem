@@ -72,7 +72,7 @@ export const RecordsKpiCard: React.FC<RecordsKpiCardProps> = ({
   const effectiveExpired = expiredCount !== undefined ? expiredCount : DEFAULT_EXPIRED_COUNT;
 
   const computedTotal = effectiveVerified + effectivePending + effectiveExpiring + effectiveExpired;
-  const effectiveTotal = total !== undefined ? total : (computedTotal || DEFAULT_RECORDS_TOTAL);
+  const effectiveTotal = total !== undefined ? total : computedTotal || DEFAULT_RECORDS_TOTAL;
 
   const getPercentage = (count: number) => {
     if (effectiveTotal <= 0) return 0;
@@ -211,13 +211,7 @@ export const RecordsKpiCard: React.FC<RecordsKpiCardProps> = ({
             </defs>
 
             {/* Subtle Ground Contact Shadow */}
-            <ellipse
-              cx={29}
-              cy={53}
-              rx={23}
-              ry={3}
-              className="bezent-kpi-folder-ground-shadow"
-            />
+            <ellipse cx={29} cy={53} rx={23} ry={3} className="bezent-kpi-folder-ground-shadow" />
 
             {/* ── Folder 1 (Back, Top-Left): Expired Records (Coral Orange) ── */}
             <g
@@ -264,14 +258,7 @@ export const RecordsKpiCard: React.FC<RecordsKpiCardProps> = ({
                     rx={2}
                     className="bezent-kpi-folder-doc-paper doc-card"
                   />
-                  <rect
-                    x={9}
-                    y={14}
-                    width={7}
-                    height={1.6}
-                    rx={0.8}
-                    className="doc-badge"
-                  />
+                  <rect x={9} y={14} width={7} height={1.6} rx={0.8} className="doc-badge" />
                   <rect
                     x={9}
                     y={17.2}
@@ -346,14 +333,7 @@ export const RecordsKpiCard: React.FC<RecordsKpiCardProps> = ({
                     rx={2}
                     className="bezent-kpi-folder-doc-paper doc-card"
                   />
-                  <rect
-                    x={9}
-                    y={14}
-                    width={7}
-                    height={1.6}
-                    rx={0.8}
-                    className="doc-badge"
-                  />
+                  <rect x={9} y={14} width={7} height={1.6} rx={0.8} className="doc-badge" />
                   <rect
                     x={9}
                     y={17.2}
@@ -428,14 +408,7 @@ export const RecordsKpiCard: React.FC<RecordsKpiCardProps> = ({
                     rx={2}
                     className="bezent-kpi-folder-doc-paper doc-card"
                   />
-                  <rect
-                    x={9}
-                    y={14}
-                    width={7}
-                    height={1.6}
-                    rx={0.8}
-                    className="doc-badge"
-                  />
+                  <rect x={9} y={14} width={7} height={1.6} rx={0.8} className="doc-badge" />
                   <rect
                     x={9}
                     y={17.2}
@@ -510,14 +483,7 @@ export const RecordsKpiCard: React.FC<RecordsKpiCardProps> = ({
                     rx={2}
                     className="bezent-kpi-folder-doc-paper doc-card"
                   />
-                  <rect
-                    x={9}
-                    y={14}
-                    width={7}
-                    height={1.6}
-                    rx={0.8}
-                    className="doc-badge"
-                  />
+                  <rect x={9} y={14} width={7} height={1.6} rx={0.8} className="doc-badge" />
                   <rect
                     x={9}
                     y={17.2}

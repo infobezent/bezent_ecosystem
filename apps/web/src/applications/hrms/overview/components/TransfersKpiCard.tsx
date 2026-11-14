@@ -66,29 +66,18 @@ export const TransfersKpiCard: React.FC<TransfersKpiCardProps> = ({
   const activeHovered = hoveredNode !== undefined ? hoveredNode : internalHovered;
 
   const effectiveTotal =
-    total !== undefined
-      ? total
-      : transferTypes?.reduce((sum, t) => sum + (t.count || 0), 0) ?? 0;
+    total !== undefined ? total : (transferTypes?.reduce((sum, t) => sum + (t.count || 0), 0) ?? 0);
 
-  const effectivePending =
-    pendingApproval !== undefined
-      ? pendingApproval
-      : 0;
+  const effectivePending = pendingApproval !== undefined ? pendingApproval : 0;
 
   const effectiveApproved =
-    approved !== undefined
-      ? approved
-      : Math.max(0, effectiveTotal - effectivePending);
+    approved !== undefined ? approved : Math.max(0, effectiveTotal - effectivePending);
 
   const approvedPercent =
-    effectiveTotal > 0
-      ? Math.round((effectiveApproved / effectiveTotal) * 100)
-      : 0;
+    effectiveTotal > 0 ? Math.round((effectiveApproved / effectiveTotal) * 100) : 0;
 
   const pendingPercent =
-    effectiveTotal > 0
-      ? Math.round((effectivePending / effectiveTotal) * 100)
-      : 0;
+    effectiveTotal > 0 ? Math.round((effectivePending / effectiveTotal) * 100) : 0;
 
   const fromLabel =
     locationDetails?.fromLocation ||
@@ -124,9 +113,7 @@ export const TransfersKpiCard: React.FC<TransfersKpiCardProps> = ({
     activeHovered === 'incoming' ||
     activeHovered === 'to';
 
-  const isCenterHovered =
-    activeHovered === 'center' ||
-    activeHovered === 'total';
+  const isCenterHovered = activeHovered === 'center' || activeHovered === 'total';
 
   const hasHover = isTopHovered || isBottomHovered || isCenterHovered;
 
@@ -348,4 +335,3 @@ export const TransfersKpiCard: React.FC<TransfersKpiCardProps> = ({
     </div>
   );
 };
-

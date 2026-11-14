@@ -52,9 +52,7 @@ describe('PromotionsKpiCard – Ascending Career Steps Design', () => {
   });
 
   it('displays promotion details in floating tooltip when a step is hovered', () => {
-    const html = renderToStaticMarkup(
-      <PromotionsKpiCard total={12} hoveredNode="designation" />,
-    );
+    const html = renderToStaticMarkup(<PromotionsKpiCard total={12} hoveredNode="designation" />);
 
     expect(html).toContain('bezent-kpi-promotion-tooltip is-visible');
     expect(html).toContain('Designation Change: 4 promotions');

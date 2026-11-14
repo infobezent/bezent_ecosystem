@@ -1,10 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { renderToStaticMarkup } from 'react-dom/server';
 import React from 'react';
-import {
-  OffboardingKpiCard,
-  type ExitProcessStageItem,
-} from '../components/OffboardingKpiCard';
+import { OffboardingKpiCard, type ExitProcessStageItem } from '../components/OffboardingKpiCard';
 
 describe('OffboardingKpiCard – Circular Departure Ring Design (Option A)', () => {
   it('renders Left Section with Offboarding heading and total value', () => {
@@ -44,9 +41,7 @@ describe('OffboardingKpiCard – Circular Departure Ring Design (Option A)', () 
   });
 
   it('displays stage details in floating tooltip when an arc is hovered', () => {
-    const html = renderToStaticMarkup(
-      <OffboardingKpiCard total={15} hoveredNode="clearance" />,
-    );
+    const html = renderToStaticMarkup(<OffboardingKpiCard total={15} hoveredNode="clearance" />);
 
     expect(html).toContain('bezent-kpi-offboarding-tooltip is-visible');
     expect(html).toContain('Clearance: In Progress, 3 employees');

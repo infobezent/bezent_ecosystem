@@ -154,23 +154,17 @@ const MOCK_EMPLOYEES: EmployeeRecord[] = [
 
 describe('WorkforceCompositionCard', () => {
   it('renders card header with title and icon on unified row cleanly', () => {
-    const html = renderToStaticMarkup(
-      <WorkforceCompositionCard employees={MOCK_EMPLOYEES} />,
-    );
+    const html = renderToStaticMarkup(<WorkforceCompositionCard employees={MOCK_EMPLOYEES} />);
 
     expect(html).toContain('Workforce Composition');
     expect(html).toContain('bezent-wf-comp-icon-badge');
-    expect(html).not.toContain(
-      'Explore your workforce structure and employee demographics.',
-    );
+    expect(html).not.toContain('Explore your workforce structure and employee demographics.');
     // 4 active employees in donut chart center
     expect(html).toContain('4');
   });
 
   it('renders both Dropdown 1 (Composition By) and Dropdown 2 (Filter By) selection controls', () => {
-    const html = renderToStaticMarkup(
-      <WorkforceCompositionCard employees={MOCK_EMPLOYEES} />,
-    );
+    const html = renderToStaticMarkup(<WorkforceCompositionCard employees={MOCK_EMPLOYEES} />);
 
     // Dropdown labels
     expect(html).toContain('Composition By');
@@ -189,10 +183,7 @@ describe('WorkforceCompositionCard', () => {
 
   it('renders Gender composition as donut chart with legend and percentages by default', () => {
     const html = renderToStaticMarkup(
-      <WorkforceCompositionCard
-        employees={MOCK_EMPLOYEES}
-        selectedDimension="gender"
-      />,
+      <WorkforceCompositionCard employees={MOCK_EMPLOYEES} selectedDimension="gender" />,
     );
 
     // Donut visualization SVG
@@ -205,10 +196,7 @@ describe('WorkforceCompositionCard', () => {
 
   it('renders Age Group composition as donut chart with legend and percentages', () => {
     const html = renderToStaticMarkup(
-      <WorkforceCompositionCard
-        employees={MOCK_EMPLOYEES}
-        selectedDimension="age_group"
-      />,
+      <WorkforceCompositionCard employees={MOCK_EMPLOYEES} selectedDimension="age_group" />,
     );
 
     expect(html).toContain('Under 25');
@@ -222,10 +210,7 @@ describe('WorkforceCompositionCard', () => {
 
   it('renders Experience composition as donut chart with legend and percentages', () => {
     const html = renderToStaticMarkup(
-      <WorkforceCompositionCard
-        employees={MOCK_EMPLOYEES}
-        selectedDimension="experience"
-      />,
+      <WorkforceCompositionCard employees={MOCK_EMPLOYEES} selectedDimension="experience" />,
     );
 
     expect(html).toContain('0–2 Years');
@@ -239,10 +224,7 @@ describe('WorkforceCompositionCard', () => {
 
   it('renders Tenure composition as donut chart with legend and percentages', () => {
     const html = renderToStaticMarkup(
-      <WorkforceCompositionCard
-        employees={MOCK_EMPLOYEES}
-        selectedDimension="tenure"
-      />,
+      <WorkforceCompositionCard employees={MOCK_EMPLOYEES} selectedDimension="tenure" />,
     );
 
     expect(html).toContain('Under 6 Months');
@@ -256,10 +238,7 @@ describe('WorkforceCompositionCard', () => {
 
   it('renders Employment Status composition as donut chart with canonical stages', () => {
     const html = renderToStaticMarkup(
-      <WorkforceCompositionCard
-        employees={MOCK_EMPLOYEES}
-        selectedDimension="employment_status"
-      />,
+      <WorkforceCompositionCard employees={MOCK_EMPLOYEES} selectedDimension="employment_status" />,
     );
 
     expect(html).toContain('bezent-wf-comp-donut-svg');
@@ -270,10 +249,7 @@ describe('WorkforceCompositionCard', () => {
 
   it('renders clean composition view without cluttered bottom insights', () => {
     const html = renderToStaticMarkup(
-      <WorkforceCompositionCard
-        employees={MOCK_EMPLOYEES}
-        selectedDimension="gender"
-      />,
+      <WorkforceCompositionCard employees={MOCK_EMPLOYEES} selectedDimension="gender" />,
     );
 
     expect(html).not.toContain('bezent-wf-comp-insights-row');
@@ -294,18 +270,14 @@ describe('WorkforceCompositionCard', () => {
   });
 
   it('renders skeleton loading state cleanly when loading is true', () => {
-    const html = renderToStaticMarkup(
-      <WorkforceCompositionCard loading={true} />,
-    );
+    const html = renderToStaticMarkup(<WorkforceCompositionCard loading={true} />);
 
     expect(html).toContain('bezent-wf-comp-skeleton-wrap');
     expect(html).toContain('bezent-wf-comp-skeleton-row');
   });
 
   it('renders empty state when there are no eligible active employees', () => {
-    const html = renderToStaticMarkup(
-      <WorkforceCompositionCard employees={[]} loading={false} />,
-    );
+    const html = renderToStaticMarkup(<WorkforceCompositionCard employees={[]} loading={false} />);
 
     expect(html).toContain('No workforce records found');
     expect(html).toContain(
@@ -316,10 +288,7 @@ describe('WorkforceCompositionCard', () => {
   it('renders error state with retry option when error is present', () => {
     const onRetry = vi.fn();
     const html = renderToStaticMarkup(
-      <WorkforceCompositionCard
-        error="Failed to connect to HRMS database"
-        onRetry={onRetry}
-      />,
+      <WorkforceCompositionCard error="Failed to connect to HRMS database" onRetry={onRetry} />,
     );
 
     expect(html).toContain('Unable to load composition data');

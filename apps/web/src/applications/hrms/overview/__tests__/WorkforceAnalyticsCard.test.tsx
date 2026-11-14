@@ -91,9 +91,7 @@ describe('WorkforceAnalyticsCard – Single Card with Dynamic Views', () => {
 
     expect(html).toContain('Workforce Analytics');
     expect(html).toContain('bezent-wf-analytics-card__icon');
-    expect(html).not.toContain(
-      'Understand workforce distribution, growth and retention trends.',
-    );
+    expect(html).not.toContain('Understand workforce distribution, growth and retention trends.');
   });
 
   it('renders Dropdown 1 (Analytics Category) with Distribution, Growth, and Retention options', () => {
@@ -106,9 +104,7 @@ describe('WorkforceAnalyticsCard – Single Card with Dynamic Views', () => {
   });
 
   it('renders Dropdown 2 (Distribution By) when Distribution category is selected', () => {
-    const html = renderToStaticMarkup(
-      <WorkforceAnalyticsCard selectedCategory="distribution" />,
-    );
+    const html = renderToStaticMarkup(<WorkforceAnalyticsCard selectedCategory="distribution" />);
 
     expect(html).toContain('Distribution By');
     expect(html).toContain('Department');
@@ -134,10 +130,7 @@ describe('WorkforceAnalyticsCard – Single Card with Dynamic Views', () => {
 
   it('renders View B: Growth with Time Period filter and clean trend line chart', () => {
     const html = renderToStaticMarkup(
-      <WorkforceAnalyticsCard
-        employees={MOCK_EMPLOYEES}
-        selectedCategory="growth"
-      />,
+      <WorkforceAnalyticsCard employees={MOCK_EMPLOYEES} selectedCategory="growth" />,
     );
 
     // Time Period dropdown
@@ -152,10 +145,7 @@ describe('WorkforceAnalyticsCard – Single Card with Dynamic Views', () => {
 
   it('renders View C: Retention with Time Period filter and clean trend line chart', () => {
     const html = renderToStaticMarkup(
-      <WorkforceAnalyticsCard
-        employees={MOCK_EMPLOYEES}
-        selectedCategory="retention"
-      />,
+      <WorkforceAnalyticsCard employees={MOCK_EMPLOYEES} selectedCategory="retention" />,
     );
 
     // Time Period dropdown
@@ -174,9 +164,7 @@ describe('WorkforceAnalyticsCard – Single Card with Dynamic Views', () => {
   });
 
   it('renders empty state when there are no employee records', () => {
-    const html = renderToStaticMarkup(
-      <WorkforceAnalyticsCard employees={[]} loading={false} />,
-    );
+    const html = renderToStaticMarkup(<WorkforceAnalyticsCard employees={[]} loading={false} />);
 
     expect(html).toContain('No Employee Data Available');
   });
@@ -184,10 +172,7 @@ describe('WorkforceAnalyticsCard – Single Card with Dynamic Views', () => {
   it('renders error state with retry option when error prop is passed', () => {
     const onRetry = vi.fn();
     const html = renderToStaticMarkup(
-      <WorkforceAnalyticsCard
-        error="Unable to fetch analytics data"
-        onRetry={onRetry}
-      />,
+      <WorkforceAnalyticsCard error="Unable to fetch analytics data" onRetry={onRetry} />,
     );
 
     expect(html).toContain('Failed to load workforce analytics');

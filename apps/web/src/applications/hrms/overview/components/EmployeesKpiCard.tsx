@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { BezentIcon } from '../../../../design-system/icons';
 
-export type WorkforceStatusId = 'active' | 'probation' | 'pending' | 'separated' | 'center' | 'total';
+export type WorkforceStatusId =
+  'active' | 'probation' | 'pending' | 'separated' | 'center' | 'total';
 
 export interface WorkforceStatusSegment {
   id: WorkforceStatusId;

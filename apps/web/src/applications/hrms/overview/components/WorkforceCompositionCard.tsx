@@ -35,8 +35,8 @@ export interface WorkforceCompositionCardProps {
   /** Filter change callback */
   onFilterChange?: (filter: string) => void;
   /** Backwards compatibility props */
-  selectedOption?: any;
-  onOptionChange?: (opt: any) => void;
+  selectedOption?: unknown;
+  onOptionChange?: (opt: unknown) => void;
 }
 
 // Approved enterprise color palette (NO PURPLE)
