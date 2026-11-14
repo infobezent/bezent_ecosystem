@@ -85,21 +85,15 @@ describe('PromotionsPage', () => {
     expect(html).not.toContain('Import');
   });
 
-  it('renders the 4 KPI Summary Cards using Workforce tinted cards', () => {
+  it('renders without summary cards matching the employee directory layout', () => {
     const html = renderToStaticMarkup(
       <MemoryRouter>
         <PromotionsPage />
       </MemoryRouter>,
     );
 
-    expect(html).toContain('Total Promotions');
-    expect(html).toContain('Pending Approval');
-    expect(html).toContain('Upcoming Promotions');
-    expect(html).toContain('Completed Promotions');
-    expect(html).toContain('bezent-kpi-card--blue');
-    expect(html).toContain('bezent-kpi-card--amber');
-    expect(html).toContain('bezent-kpi-card--purple');
-    expect(html).toContain('bezent-kpi-card--green');
+    expect(html).not.toContain('Total Promotions');
+    expect(html).not.toContain('bezent-kpi-card');
   });
 
   it('renders search input and toolbar controls', () => {

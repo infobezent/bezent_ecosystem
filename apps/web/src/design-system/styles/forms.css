@@ -17,11 +17,11 @@
   --form-font-size-badge: 12px;
 
   /* Theme Button & Toggle Palette */
-  --bezent-btn-sec-bg: #f0fdfa;
-  --bezent-btn-sec-hover: #ccfbf1;
-  --bezent-btn-sec-text: #0f766e;
-  --bezent-toggle-active-bg: #0d9488;
-  --bezent-toggle-active-hover: #0f766e;
+  --bezent-btn-sec-bg: #c2e7ff;
+  --bezent-btn-sec-hover: #a8dbfc;
+  --bezent-btn-sec-text: #071e49;
+  --bezent-toggle-active-bg: #071e49;
+  --bezent-toggle-active-hover: #041430;
 }
 
 [data-theme='dark'] {
@@ -2341,17 +2341,17 @@
 .onboarding-page__tab--active,
 .onboarding-page__tab.is-active,
 .bezent-filter-tab.is-active {
-  background: #f0fdfa;
-  color: #0f766e !important;
-  border-color: #99f6e4;
-  box-shadow: 0 1px 3px rgba(20, 184, 166, 0.12);
+  background: #edf5fd;
+  color: #041e49 !important;
+  border-color: #a8dbfc;
+  box-shadow: 0 1px 3px rgba(4, 30, 73, 0.12);
 }
 
 .onboarding-page__tab--active:hover,
 .onboarding-page__tab.is-active:hover,
 .bezent-filter-tab.is-active:hover {
-  background: #ccfbf1;
-  color: #0f766e !important;
+  background: #c2e7ff;
+  color: #041e49 !important;
 }
 
 .onboarding-page__tab-count,
@@ -2367,8 +2367,8 @@
 .onboarding-page__tab--active .onboarding-page__tab-count,
 .onboarding-page__tab.is-active .bezent-filter-tab-count,
 .bezent-filter-tab.is-active .bezent-filter-tab-count {
-  background: #ccfbf1;
-  color: #0f766e;
+  background: #c2e7ff;
+  color: #041e49;
 }
 
 [data-theme='dark'] .onboarding-page__tabs,
@@ -2385,16 +2385,16 @@
 [data-theme='dark'] .onboarding-page__tab--active,
 [data-theme='dark'] .onboarding-page__tab.is-active,
 [data-theme='dark'] .bezent-filter-tab.is-active {
-  background: rgba(20, 184, 166, 0.16);
-  color: #5eead4 !important;
-  border-color: rgba(45, 212, 191, 0.35);
+  background: rgba(22, 131, 255, 0.16);
+  color: #7fc4fd !important;
+  border-color: rgba(127, 196, 253, 0.35);
 }
 
 [data-theme='dark'] .onboarding-page__tab--active .onboarding-page__tab-count,
 [data-theme='dark'] .onboarding-page__tab.is-active .bezent-filter-tab-count,
 [data-theme='dark'] .bezent-filter-tab.is-active .bezent-filter-tab-count {
-  background: rgba(20, 184, 166, 0.25);
-  color: #5eead4;
+  background: rgba(22, 131, 255, 0.25);
+  color: #7fc4fd;
 }
 
 /* Person Table Cell */

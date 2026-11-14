@@ -89,10 +89,10 @@ export const OffboardingKpiCard: React.FC<OffboardingKpiCardProps> = ({
   const effectivePendingClearance =
     pendingClearance !== undefined ? pendingClearance : DEFAULT_PENDING_CLEARANCE;
 
-  // Proportional arc distribution across a 285° span with 5° gaps (viewBox="0 0 60 60", R=21)
+  // Proportional arc distribution across a 285° span with 26° gaps (viewBox="0 0 60 60", R=21)
   // Opening is at top-right between 295° and 345°
   const totalArcSpan = 285;
-  const gap = 5;
+  const gap = 26;
   const numStages = effectiveStages.length || 4;
   const totalGaps = (numStages - 1) * gap;
   const availableSpan = Math.max(60, totalArcSpan - totalGaps);
@@ -168,24 +168,9 @@ export const OffboardingKpiCard: React.FC<OffboardingKpiCardProps> = ({
     iconModifierClass = 'bezent-kpi-departure-icon--center';
   }
 
-  let dynamicColorModifier = 'bezent-exec-kpi-card--red';
-  if (hoveredArc) {
-    if (hoveredArc.id === 'notice_period') {
-      dynamicColorModifier = 'bezent-exec-kpi-card--dynamic-probation';
-    } else if (hoveredArc.id === 'handover') {
-      dynamicColorModifier = 'bezent-exec-kpi-card--dynamic-pending';
-    } else if (hoveredArc.id === 'clearance') {
-      dynamicColorModifier = 'bezent-exec-kpi-card--dynamic-probation';
-    } else {
-      dynamicColorModifier = 'bezent-exec-kpi-card--dynamic-separated';
-    }
-  } else if (isArrowHovered) {
-    dynamicColorModifier = 'bezent-exec-kpi-card--dynamic-separated';
-  }
-
   return (
     <div
-      className={`bezent-exec-kpi-card bezent-exec-kpi-card--offboarding ${dynamicColorModifier}`}
+      className="bezent-exec-kpi-card bezent-exec-kpi-card--offboarding"
       onClick={onClick}
       role="region"
       aria-label="Employees in Offboarding"
