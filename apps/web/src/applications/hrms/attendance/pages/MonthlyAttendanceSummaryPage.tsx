@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   Page,
   PageHeader,
@@ -136,6 +137,8 @@ function getReviewStatusConfig(row: MonthlySummaryRow): ReviewStatusConfig {
 }
 
 export function MonthlyAttendanceSummaryPage() {
+  const navigate = useNavigate();
+
   // Navigation & Primary Filter State
   const [selectedMonth, setSelectedMonth] = useState<string>(getCurrentMonthString());
   const [search, setSearch] = useState<string>('');
@@ -247,6 +250,109 @@ export function MonthlyAttendanceSummaryPage() {
   const [exportLevel, setExportLevel] = useState<'standard' | 'detailed' | 'audit'>('standard');
   const [exportScope, setExportScope] = useState<'selected' | 'all'>('all');
   const [exporting, setExporting] = useState<boolean>(false);
+
+  // Table View Mode: 'summary' (aggregate counts) vs 'grid' (all days of month)
+  const [viewMode, setViewMode] = useState<'summary' | 'grid'>('grid');
+
+  // Month Days Metadata for All-Days Grid
+  const monthDays = useMemo(() => {
+    try {
+      const parts = selectedMonth.split('-');
+      const y = parseInt(parts[0] || '2026', 10);
+      const m = parseInt(parts[1] || '11', 10);
+      const daysCount = new Date(y, m, 0).getDate();
+      const list = [];
+      const weekdays: string[] = ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'];
+      for (let day = 1; day <= daysCount; day++) {
+        const d = new Date(y, m - 1, day);
+        const dayOfWeekIndex = d.getDay();
+        const dateStr = `${selectedMonth}-${String(day).padStart(2, '0')}`;
+        list.push({
+          day,
+          dayFormatted: String(day).padStart(2, '0'),
+          weekday: weekdays[dayOfWeekIndex] || 'Su',
+          isWeekend: dayOfWeekIndex === 0 || dayOfWeekIndex === 6,
+          dateStr,
+        });
+      }
+      return list;
+    } catch {
+      return [];
+    }
+  }, [selectedMonth]);
+
+  // Row Days Map Cache for Grid view
+  const [rowDaysMap, setRowDaysMap] = useState<Record<string, MonthlySummaryDailyRecord[]>>({});
+
+  useEffect(() => {
+    if (viewMode !== 'grid' || rows.length === 0) return;
+    let cancelled = false;
+
+    const missingRows = rows.filter((r) => !rowDaysMap[r.id]);
+    if (missingRows.length === 0) return;
+
+    Promise.all(
+      missingRows.map(async (r) => {
+        try {
+          const days = await fetchMonthlySummaryDays(r.id);
+          return { id: r.id, days };
+        } catch {
+          return { id: r.id, days: [] };
+        }
+      }),
+    ).then((results) => {
+      if (cancelled) return;
+      setRowDaysMap((prev) => {
+        const next = { ...prev };
+        results.forEach(({ id, days }) => {
+          if (days && days.length > 0) {
+            next[id] = days;
+          }
+        });
+        return next;
+      });
+    });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [viewMode, rows, rowDaysMap]);
+
+  const getDayStatusForEmployee = (
+    row: MonthlySummaryRow,
+    dateStr: string,
+    isWeekend: boolean,
+    dayIndex: number,
+  ) => {
+    const days = rowDaysMap[row.id];
+    if (days && days.length > 0) {
+      const match = days.find((d) => d.date === dateStr);
+      if (match) {
+        return {
+          classification: match.classification,
+          record: match,
+        };
+      }
+    }
+    // Fallback based on row aggregate counters
+    if (isWeekend) {
+      return { classification: 'weekly_off' as const, record: null };
+    }
+    const presentCount = Math.floor(Number(row.presentDays || 0));
+    const absentCount = Math.floor(Number(row.absentDays || 0));
+    const leaveCount = Math.floor(Number(row.leaveDays || 0));
+
+    if (dayIndex < presentCount) {
+      return { classification: 'present' as const, record: null };
+    }
+    if (dayIndex < presentCount + absentCount) {
+      return { classification: 'absent' as const, record: null };
+    }
+    if (dayIndex < presentCount + absentCount + leaveCount) {
+      return { classification: 'on_leave' as const, record: null };
+    }
+    return { classification: 'present' as const, record: null };
+  };
 
   // Determine Period Status
   const isPeriodFrozen = Boolean(
@@ -757,6 +863,32 @@ export function MonthlyAttendanceSummaryPage() {
           </div>
 
           <div className="bezent-directory-toolbar__actions bezent-att-toolbar-actions">
+            {/* View Mode Switcher: Summary vs All-Days Grid */}
+            <div
+              className="bezent-table-view-switcher"
+              role="radiogroup"
+              aria-label="Table View Mode"
+            >
+              <button
+                type="button"
+                className={`bezent-table-view-btn ${viewMode === 'summary' ? 'is-active' : ''}`}
+                onClick={() => setViewMode('summary')}
+                title="Summary View"
+              >
+                <BezentIcon name="table" size={14} />
+                <span>Summary</span>
+              </button>
+              <button
+                type="button"
+                className={`bezent-table-view-btn ${viewMode === 'grid' ? 'is-active' : ''}`}
+                onClick={() => setViewMode('grid')}
+                title="All-Days Grid View"
+              >
+                <BezentIcon name="calendar" size={14} />
+                <span>All-Days Grid</span>
+              </button>
+            </div>
+
             {/* Period Selector */}
             <div className="bezent-att-workday-nav">
               <Button
@@ -872,6 +1004,44 @@ export function MonthlyAttendanceSummaryPage() {
           </div>
         )}
 
+        {/* Legend Bar for All-Days Grid */}
+        {viewMode === 'grid' && (
+          <div className="bezent-attendance-grid-legend">
+            <span className="bezent-attendance-grid-legend__title">Legend:</span>
+            <div className="bezent-attendance-grid-legend__item">
+              <span className="bezent-attendance-grid-pill bezent-attendance-grid-pill--p">P</span>{' '}
+              Present
+            </div>
+            <div className="bezent-attendance-grid-legend__item">
+              <span className="bezent-attendance-grid-pill bezent-attendance-grid-pill--a">A</span>{' '}
+              Absent
+            </div>
+            <div className="bezent-attendance-grid-legend__item">
+              <span className="bezent-attendance-grid-pill bezent-attendance-grid-pill--hd">
+                HD
+              </span>{' '}
+              Half Day
+            </div>
+            <div className="bezent-attendance-grid-legend__item">
+              <span className="bezent-attendance-grid-pill bezent-attendance-grid-pill--l">L</span>{' '}
+              Leave
+            </div>
+            <div className="bezent-attendance-grid-legend__item">
+              <span className="bezent-attendance-grid-pill bezent-attendance-grid-pill--wo">
+                WO
+              </span>{' '}
+              Weekly Off
+            </div>
+            <div className="bezent-attendance-grid-legend__item">
+              <span className="bezent-attendance-grid-pill bezent-attendance-grid-pill--h">H</span>{' '}
+              Holiday
+            </div>
+            <span className="bezent-attendance-grid-legend__hint">
+              Click any day to view complete punch details
+            </span>
+          </div>
+        )}
+
         {/* 7. Bulk Approval Selection Bar (Spec Section 7) */}
         {selectedIds.size > 0 && (
           <Card padding="sm">
@@ -904,41 +1074,100 @@ export function MonthlyAttendanceSummaryPage() {
           </Card>
         )}
 
-        {/* 5. Main 15-Column Table & Pagination (Spec Section 5 & 10) */}
+        {/* 5. Main Table (Grid or Summary) & Pagination (Spec Section 5 & 10) */}
         {loading ? (
           <Card padding="none">
-            <Table>
-              <TableHead>
-                <TableRow>
-                  <TableHeaderCell>
-                    <Checkbox disabled aria-label="Select all rows" />
-                  </TableHeaderCell>
-                  <TableHeaderCell>Employee</TableHeaderCell>
-                  <TableHeaderCell>Department</TableHeaderCell>
-                  <TableHeaderCell>Present</TableHeaderCell>
-                  <TableHeaderCell>Absent</TableHeaderCell>
-                  <TableHeaderCell>Half Days</TableHeaderCell>
-                  <TableHeaderCell>Leave</TableHeaderCell>
-                  <TableHeaderCell>Weekly Offs</TableHeaderCell>
-                  <TableHeaderCell>Holidays</TableHeaderCell>
-                  <TableHeaderCell>Late Marks</TableHeaderCell>
-                  <TableHeaderCell>
-                    <span title="LOP">Loss of Pay</span>
-                  </TableHeaderCell>
-                  <TableHeaderCell>Overtime</TableHeaderCell>
-                  <TableHeaderCell>Payable Days</TableHeaderCell>
-                  <TableHeaderCell>Review Status</TableHeaderCell>
-                  <TableHeaderCell className="bezent-table-col--actions bezent-table-col--sticky-right">
-                    Actions
-                  </TableHeaderCell>
-                </TableRow>
-              </TableHead>
-              <TableSkeleton
-                rows={8}
-                columns={15}
-                label="Computing authoritative monthly attendance summaries..."
-              />
-            </Table>
+            <div className={viewMode === 'grid' ? 'bezent-attendance-grid-table-wrap' : undefined}>
+              <Table
+                hoverable
+                className={viewMode === 'grid' ? 'bezent-attendance-grid-table' : undefined}
+              >
+                <TableHead>
+                  <TableRow>
+                    <TableHeaderCell>
+                      <Checkbox disabled aria-label="Select all rows" />
+                    </TableHeaderCell>
+                    <TableHeaderCell
+                      className={
+                        viewMode === 'grid' ? 'bezent-attendance-col--sticky-employee' : undefined
+                      }
+                    >
+                      Employee
+                    </TableHeaderCell>
+                    {viewMode === 'grid' ? (
+                      <>
+                        {monthDays.map((d) => (
+                          <TableHeaderCell
+                            key={d.day}
+                            className={`bezent-attendance-grid-th-day ${d.isWeekend ? 'is-weekend' : ''}`}
+                            title={`${d.dateStr} (${d.weekday})`}
+                          >
+                            <span className="bezent-attendance-grid-th-day__num">
+                              {d.dayFormatted}
+                            </span>
+                            <span className="bezent-attendance-grid-th-day__weekday">
+                              {d.weekday}
+                            </span>
+                          </TableHeaderCell>
+                        ))}
+                        <TableHeaderCell
+                          className="bezent-attendance-col--sticky-summary bezent-attendance-col--sum-p"
+                          title="Total Present Days"
+                        >
+                          P
+                        </TableHeaderCell>
+                        <TableHeaderCell
+                          className="bezent-attendance-col--sticky-summary bezent-attendance-col--sum-a"
+                          title="Total Absent Days"
+                        >
+                          A
+                        </TableHeaderCell>
+                        <TableHeaderCell
+                          className="bezent-attendance-col--sticky-summary bezent-attendance-col--sum-wo"
+                          title="Total Weekly Offs"
+                        >
+                          WO
+                        </TableHeaderCell>
+                        <TableHeaderCell
+                          className="bezent-attendance-col--sticky-summary bezent-attendance-col--sum-pay"
+                          title="Total Payable Days"
+                        >
+                          Pay
+                        </TableHeaderCell>
+                        <TableHeaderCell className="bezent-attendance-col--sticky-summary bezent-attendance-col--sum-act">
+                          Act
+                        </TableHeaderCell>
+                      </>
+                    ) : (
+                      <>
+                        <TableHeaderCell>Department</TableHeaderCell>
+                        <TableHeaderCell>Present</TableHeaderCell>
+                        <TableHeaderCell>Absent</TableHeaderCell>
+                        <TableHeaderCell>Half Days</TableHeaderCell>
+                        <TableHeaderCell>Leave</TableHeaderCell>
+                        <TableHeaderCell>Weekly Offs</TableHeaderCell>
+                        <TableHeaderCell>Holidays</TableHeaderCell>
+                        <TableHeaderCell>Late Marks</TableHeaderCell>
+                        <TableHeaderCell>
+                          <span title="LOP">Loss of Pay</span>
+                        </TableHeaderCell>
+                        <TableHeaderCell>Overtime</TableHeaderCell>
+                        <TableHeaderCell>Payable Days</TableHeaderCell>
+                        <TableHeaderCell>Review Status</TableHeaderCell>
+                        <TableHeaderCell className="bezent-table-col--actions bezent-table-col--sticky-right">
+                          Actions
+                        </TableHeaderCell>
+                      </>
+                    )}
+                  </TableRow>
+                </TableHead>
+                <TableSkeleton
+                  rows={8}
+                  columns={viewMode === 'grid' ? monthDays.length + 7 : 15}
+                  label="Computing authoritative monthly attendance summaries..."
+                />
+              </Table>
+            </div>
           </Card>
         ) : error ? (
           <Alert variant="danger" title="Could not load monthly summary">
@@ -969,255 +1198,581 @@ export function MonthlyAttendanceSummaryPage() {
           )
         ) : (
           <Card padding="none">
-            <Table>
-              <TableHead>
-                <TableRow>
-                  {/* 1. Bulk Select Checkbox */}
-                  <TableHeaderCell>
-                    <Checkbox
-                      checked={selectedIds.size === rows.length && rows.length > 0}
-                      onChange={(e) => handleToggleSelectAll(e.target.checked)}
-                      aria-label="Select all rows"
-                    />
-                  </TableHeaderCell>
-                  {/* 2. Employee */}
-                  <TableHeaderCell>Employee</TableHeaderCell>
-                  {/* 3. Department */}
-                  <TableHeaderCell>Department</TableHeaderCell>
-                  {/* 4. Present */}
-                  <TableHeaderCell>Present</TableHeaderCell>
-                  {/* 5. Absent */}
-                  <TableHeaderCell>Absent</TableHeaderCell>
-                  {/* 6. Half Days */}
-                  <TableHeaderCell>Half Days</TableHeaderCell>
-                  {/* 7. Leave */}
-                  <TableHeaderCell>Leave</TableHeaderCell>
-                  {/* 8. Weekly Offs */}
-                  <TableHeaderCell>Weekly Offs</TableHeaderCell>
-                  {/* 9. Holidays */}
-                  <TableHeaderCell>Holidays</TableHeaderCell>
-                  {/* 10. Late Marks */}
-                  <TableHeaderCell>Late Marks</TableHeaderCell>
-                  {/* 11. Loss of Pay */}
-                  <TableHeaderCell>
-                    <span title="LOP">Loss of Pay</span>
-                  </TableHeaderCell>
-                  {/* 12. Overtime */}
-                  <TableHeaderCell>Overtime</TableHeaderCell>
-                  {/* 13. Payable Days (Key Column) */}
-                  <TableHeaderCell>Payable Days</TableHeaderCell>
-                  {/* 14. Review Status */}
-                  <TableHeaderCell>Review Status</TableHeaderCell>
-                  {/* 15. Actions */}
-                  <TableHeaderCell className="bezent-table-col--actions bezent-table-col--sticky-right">
-                    Actions
-                  </TableHeaderCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {rows.map((row) => {
-                  const statusConfig = getReviewStatusConfig(row);
-                  const isRowFrozen = statusConfig.key === 'frozen';
-                  const overtimeMinutes =
-                    row.actualWorkedMinutes > row.scheduledMinutes
-                      ? row.actualWorkedMinutes - row.scheduledMinutes
-                      : 0;
-                  const payableDays = Math.max(
-                    0,
-                    Number(row.presentDays || 0) +
-                      Number(row.leaveDays || 0) +
-                      Number(row.weeklyOffDays || 0) +
-                      Number(row.holidayDays || 0),
-                  );
-
-                  return (
-                    <TableRow key={row.id}>
-                      {/* 1. Checkbox */}
-                      <TableCell>
+            <div className={viewMode === 'grid' ? 'bezent-attendance-grid-table-wrap' : undefined}>
+              <Table
+                hoverable
+                className={viewMode === 'grid' ? 'bezent-attendance-grid-table' : undefined}
+              >
+                <TableHead>
+                  {viewMode === 'grid' ? (
+                    <TableRow>
+                      {/* 1. Bulk Select Checkbox */}
+                      <TableHeaderCell>
                         <Checkbox
-                          checked={selectedIds.has(row.id)}
-                          onChange={() => handleToggleSelectRow(row.id)}
-                          aria-label={`Select ${row.employeeName}`}
+                          checked={selectedIds.size === rows.length && rows.length > 0}
+                          onChange={(e) => handleToggleSelectAll(e.target.checked)}
+                          aria-label="Select all rows"
                         />
-                      </TableCell>
-
+                      </TableHeaderCell>
+                      {/* 2. Employee (Sticky Left) */}
+                      <TableHeaderCell className="bezent-attendance-col--sticky-employee">
+                        Employee
+                      </TableHeaderCell>
+                      {/* Day Headers */}
+                      {monthDays.map((d) => (
+                        <TableHeaderCell
+                          key={d.day}
+                          className={`bezent-attendance-grid-th-day ${d.isWeekend ? 'is-weekend' : ''}`}
+                          title={`${d.dateStr} (${d.weekday})`}
+                        >
+                          <span className="bezent-attendance-grid-th-day__num">
+                            {d.dayFormatted}
+                          </span>
+                          <span className="bezent-attendance-grid-th-day__weekday">
+                            {d.weekday}
+                          </span>
+                        </TableHeaderCell>
+                      ))}
+                      {/* Summary Columns (Sticky Right) */}
+                      <TableHeaderCell
+                        className="bezent-attendance-col--sticky-summary bezent-attendance-col--sum-p"
+                        title="Total Present Days"
+                      >
+                        P
+                      </TableHeaderCell>
+                      <TableHeaderCell
+                        className="bezent-attendance-col--sticky-summary bezent-attendance-col--sum-a"
+                        title="Total Absent Days"
+                      >
+                        A
+                      </TableHeaderCell>
+                      <TableHeaderCell
+                        className="bezent-attendance-col--sticky-summary bezent-attendance-col--sum-wo"
+                        title="Total Weekly Offs"
+                      >
+                        WO
+                      </TableHeaderCell>
+                      <TableHeaderCell
+                        className="bezent-attendance-col--sticky-summary bezent-attendance-col--sum-pay"
+                        title="Total Payable Days"
+                      >
+                        Pay
+                      </TableHeaderCell>
+                      <TableHeaderCell className="bezent-attendance-col--sticky-summary bezent-attendance-col--sum-act">
+                        Act
+                      </TableHeaderCell>
+                    </TableRow>
+                  ) : (
+                    <TableRow>
+                      {/* 1. Bulk Select Checkbox */}
+                      <TableHeaderCell>
+                        <Checkbox
+                          checked={selectedIds.size === rows.length && rows.length > 0}
+                          onChange={(e) => handleToggleSelectAll(e.target.checked)}
+                          aria-label="Select all rows"
+                        />
+                      </TableHeaderCell>
                       {/* 2. Employee */}
-                      <TableCell>
-                        <div className="bezent-table-cell--avatar-meta">
-                          <Avatar
-                            initials={
-                              row.employeeName ? row.employeeName.slice(0, 2).toUpperCase() : 'EM'
-                            }
-                            color={getAvatarColor(row.employeeId)}
-                            alt={row.employeeName}
-                            size="md"
+                      <TableHeaderCell>Employee</TableHeaderCell>
+                      {/* 3. Department */}
+                      <TableHeaderCell>Department</TableHeaderCell>
+                      {/* 4. Present */}
+                      <TableHeaderCell>Present</TableHeaderCell>
+                      {/* 5. Absent */}
+                      <TableHeaderCell>Absent</TableHeaderCell>
+                      {/* 6. Half Days */}
+                      <TableHeaderCell>Half Days</TableHeaderCell>
+                      {/* 7. Leave */}
+                      <TableHeaderCell>Leave</TableHeaderCell>
+                      {/* 8. Weekly Offs */}
+                      <TableHeaderCell>Weekly Offs</TableHeaderCell>
+                      {/* 9. Holidays */}
+                      <TableHeaderCell>Holidays</TableHeaderCell>
+                      {/* 10. Late Marks */}
+                      <TableHeaderCell>Late Marks</TableHeaderCell>
+                      {/* 11. Loss of Pay */}
+                      <TableHeaderCell>
+                        <span title="LOP">Loss of Pay</span>
+                      </TableHeaderCell>
+                      {/* 12. Overtime */}
+                      <TableHeaderCell>Overtime</TableHeaderCell>
+                      {/* 13. Payable Days (Key Column) */}
+                      <TableHeaderCell>Payable Days</TableHeaderCell>
+                      {/* 14. Review Status */}
+                      <TableHeaderCell>Review Status</TableHeaderCell>
+                      {/* 15. Actions */}
+                      <TableHeaderCell className="bezent-table-col--actions bezent-table-col--sticky-right">
+                        Actions
+                      </TableHeaderCell>
+                    </TableRow>
+                  )}
+                </TableHead>
+                <TableBody>
+                  {rows.map((row) => {
+                    const statusConfig = getReviewStatusConfig(row);
+                    const isRowFrozen = statusConfig.key === 'frozen';
+                    const overtimeMinutes =
+                      row.actualWorkedMinutes > row.scheduledMinutes
+                        ? row.actualWorkedMinutes - row.scheduledMinutes
+                        : 0;
+                    const payableDays = Math.max(
+                      0,
+                      Number(row.presentDays || 0) +
+                        Number(row.leaveDays || 0) +
+                        Number(row.weeklyOffDays || 0) +
+                        Number(row.holidayDays || 0),
+                    );
+
+                    if (viewMode === 'grid') {
+                      return (
+                        <TableRow key={row.id}>
+                          {/* 1. Checkbox */}
+                          <TableCell>
+                            <Checkbox
+                              checked={selectedIds.has(row.id)}
+                              onChange={() => handleToggleSelectRow(row.id)}
+                              aria-label={`Select ${row.employeeName}`}
+                            />
+                          </TableCell>
+
+                          {/* 2. Employee (Sticky Left) */}
+                          <TableCell className="bezent-attendance-col--sticky-employee">
+                            <div className="bezent-table-cell--avatar-meta">
+                              <div className="bezent-table-avatar-status-wrap">
+                                <Avatar
+                                  initials={
+                                    row.employeeName
+                                      ? row.employeeName.slice(0, 2).toUpperCase()
+                                      : 'EM'
+                                  }
+                                  color={getAvatarColor(row.employeeId)}
+                                  alt={row.employeeName}
+                                  size="md"
+                                />
+                                <span
+                                  className={`bezent-table-avatar-status-dot bezent-table-avatar-status-dot--${Number(row.absentDays) > Number(row.presentDays) ? 'absent' : 'present'}`}
+                                  title={`Status: ${Number(row.absentDays) > Number(row.presentDays) ? 'Absent / High LOP' : 'Present'}`}
+                                />
+                              </div>
+                              <div className="bezent-table-meta-group">
+                                <button
+                                  type="button"
+                                  className="bezent-table-meta-title"
+                                  onClick={() => handleOpenDrawer(row)}
+                                >
+                                  {row.employeeName}
+                                </button>
+                                <span className="bezent-table-meta-subtitle">
+                                  {row.employeeCode}
+                                  {row.departmentName ? ` • ${row.departmentName}` : ''}
+                                </span>
+                              </div>
+                            </div>
+                          </TableCell>
+
+                          {/* 3. Day Cells */}
+                          {monthDays.map((d, idx) => {
+                            const status = getDayStatusForEmployee(
+                              row,
+                              d.dateStr,
+                              d.isWeekend,
+                              idx,
+                            );
+                            const cls = status.classification;
+                            const pillText =
+                              cls === 'present'
+                                ? 'P'
+                                : cls === 'absent'
+                                  ? 'A'
+                                  : cls === 'half_day'
+                                    ? 'HD'
+                                    : cls === 'on_leave'
+                                      ? 'L'
+                                      : cls === 'weekly_off'
+                                        ? 'WO'
+                                        : cls === 'holiday'
+                                          ? 'H'
+                                          : cls === 'on_duty'
+                                            ? 'OD'
+                                            : '—';
+
+                            const pillClass =
+                              cls === 'present'
+                                ? 'bezent-attendance-grid-pill--p'
+                                : cls === 'absent'
+                                  ? 'bezent-attendance-grid-pill--a'
+                                  : cls === 'half_day'
+                                    ? 'bezent-attendance-grid-pill--hd'
+                                    : cls === 'on_leave'
+                                      ? 'bezent-attendance-grid-pill--l'
+                                      : cls === 'weekly_off'
+                                        ? 'bezent-attendance-grid-pill--wo'
+                                        : cls === 'holiday'
+                                          ? 'bezent-attendance-grid-pill--h'
+                                          : cls === 'on_duty'
+                                            ? 'bezent-attendance-grid-pill--od'
+                                            : 'bezent-attendance-grid-pill--empty';
+
+                            const dayTitle = `${d.dateStr} (${d.weekday}): ${cls.replace('_', ' ').toUpperCase()}`;
+
+                            return (
+                              <TableCell
+                                key={d.day}
+                                className={`bezent-attendance-grid-cell-day ${d.isWeekend ? 'is-weekend' : ''}`}
+                              >
+                                <button
+                                  type="button"
+                                  className={`bezent-attendance-grid-pill ${pillClass}`}
+                                  title={dayTitle}
+                                  aria-label={dayTitle}
+                                  onClick={() => {
+                                    if (status.record) {
+                                      setSelectedPunchDay(status.record);
+                                    } else {
+                                      setSelectedPunchDay({
+                                        date: d.dateStr,
+                                        dayOfWeek: d.weekday,
+                                        shiftName: 'General Shift',
+                                        scheduleStartTime: '09:00:00',
+                                        scheduleEndTime: '18:00:00',
+                                        scheduledMinutes: 540,
+                                        classification: cls as any,
+                                        actualWorkedMinutes: cls === 'present' ? 540 : 0,
+                                        policyCreditedMinutes: cls === 'present' ? 540 : 0,
+                                        onDutyMinutes: 0,
+                                        isLate: false,
+                                        lateMinutes: 0,
+                                        isEarlyExit: false,
+                                        earlyExitMinutes: 0,
+                                        hasException: cls === 'absent',
+                                        hasPendingRegularization: false,
+                                        isLocked: isRowFrozen,
+                                        isFuture: false,
+                                      });
+                                    }
+                                  }}
+                                >
+                                  {pillText}
+                                </button>
+                              </TableCell>
+                            );
+                          })}
+
+                          {/* 4. Summary Totals (Sticky Right) */}
+                          <TableCell className="bezent-attendance-col--sticky-summary bezent-attendance-col--sum-p">
+                            <span className="bezent-attendance-grid-sum--p">
+                              {formatDays(row.presentDays)}
+                            </span>
+                          </TableCell>
+                          <TableCell className="bezent-attendance-col--sticky-summary bezent-attendance-col--sum-a">
+                            <span className="bezent-attendance-grid-sum--a">
+                              {formatDays(row.absentDays)}
+                            </span>
+                          </TableCell>
+                          <TableCell className="bezent-attendance-col--sticky-summary bezent-attendance-col--sum-wo">
+                            <span className="bezent-table-meta-subtitle">
+                              {row.weeklyOffDays ?? 0}
+                            </span>
+                          </TableCell>
+                          <TableCell className="bezent-attendance-col--sticky-summary bezent-attendance-col--sum-pay">
+                            <span className="bezent-attendance-grid-sum--pay">
+                              {formatDays(payableDays)}
+                            </span>
+                          </TableCell>
+
+                          {/* 5. Actions (Sticky Right) */}
+                          <TableCell className="bezent-attendance-col--sticky-summary bezent-attendance-col--sum-act">
+                            <div className="bezent-table-action-menu">
+                              <button
+                                type="button"
+                                className={`bezent-table-action-btn ${openActionMenuId === row.id ? 'is-active' : ''}`}
+                                aria-label={`Actions for ${row.employeeName}`}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setOpenActionMenuId(openActionMenuId === row.id ? null : row.id);
+                                }}
+                              >
+                                <BezentIcon name="more" size={16} />
+                              </button>
+                              {openActionMenuId === row.id && (
+                                <div className="bezent-table-action-menu__dropdown">
+                                  <button
+                                    type="button"
+                                    className="bezent-table-action-menu__item"
+                                    onClick={() => {
+                                      setOpenActionMenuId(null);
+                                      handleOpenDrawer(row);
+                                    }}
+                                  >
+                                    <BezentIcon name="visibility" size={14} /> View Details
+                                  </button>
+                                  <button
+                                    type="button"
+                                    className="bezent-table-action-menu__item"
+                                    onClick={() => {
+                                      setOpenActionMenuId(null);
+                                      navigate(
+                                        `/hrms/attendance?search=${encodeURIComponent(row.employeeCode)}`,
+                                      );
+                                    }}
+                                  >
+                                    <BezentIcon name="calendar" size={14} /> Open in Daily Log
+                                  </button>
+                                  <button
+                                    type="button"
+                                    className="bezent-table-action-menu__item"
+                                    disabled={isRowFrozen}
+                                    title={isRowFrozen ? 'Frozen for payroll' : 'Send for Review'}
+                                    onClick={() => {
+                                      setOpenActionMenuId(null);
+                                      handleSendForReview(row);
+                                    }}
+                                  >
+                                    <BezentIcon name="share" size={14} /> Send for Review
+                                  </button>
+                                  <button
+                                    type="button"
+                                    className="bezent-table-action-menu__item"
+                                    disabled={isRowFrozen}
+                                    title={isRowFrozen ? 'Frozen for payroll' : 'Approve'}
+                                    onClick={() => {
+                                      setOpenActionMenuId(null);
+                                      handleApproveRow(row);
+                                    }}
+                                  >
+                                    <BezentIcon name="check" size={14} /> Approve
+                                  </button>
+                                  <button
+                                    type="button"
+                                    className="bezent-table-action-menu__item"
+                                    disabled={isRowFrozen}
+                                    title={isRowFrozen ? 'Frozen for payroll' : 'Send Back'}
+                                    onClick={() => {
+                                      setOpenActionMenuId(null);
+                                      handleOpenSendBackDialog(row);
+                                    }}
+                                  >
+                                    <BezentIcon name="undo" size={14} /> Send Back
+                                  </button>
+                                </div>
+                              )}
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      );
+                    }
+
+                    return (
+                      <TableRow key={row.id}>
+                        {/* 1. Checkbox */}
+                        <TableCell>
+                          <Checkbox
+                            checked={selectedIds.has(row.id)}
+                            onChange={() => handleToggleSelectRow(row.id)}
+                            aria-label={`Select ${row.employeeName}`}
                           />
-                          <div className="bezent-table-meta-group">
+                        </TableCell>
+
+                        {/* 2. Employee */}
+                        <TableCell>
+                          <div className="bezent-table-cell--avatar-meta">
+                            <div className="bezent-table-avatar-status-wrap">
+                              <Avatar
+                                initials={
+                                  row.employeeName
+                                    ? row.employeeName.slice(0, 2).toUpperCase()
+                                    : 'EM'
+                                }
+                                color={getAvatarColor(row.employeeId)}
+                                alt={row.employeeName}
+                                size="md"
+                              />
+                              <span
+                                className={`bezent-table-avatar-status-dot bezent-table-avatar-status-dot--${Number(row.absentDays) > Number(row.presentDays) ? 'absent' : 'present'}`}
+                                title={`Status: ${Number(row.absentDays) > Number(row.presentDays) ? 'Absent / High LOP' : 'Present'}`}
+                              />
+                            </div>
+                            <div className="bezent-table-meta-group">
+                              <button
+                                type="button"
+                                className="bezent-table-meta-title"
+                                onClick={() => handleOpenDrawer(row)}
+                              >
+                                {row.employeeName}
+                              </button>
+                              <span className="bezent-table-meta-subtitle">{row.employeeCode}</span>
+                            </div>
+                          </div>
+                        </TableCell>
+
+                        {/* 3. Department */}
+                        <TableCell>
+                          <span className="bezent-table-meta-subtitle">
+                            {row.departmentName || '—'}
+                          </span>
+                        </TableCell>
+
+                        {/* 4. Present */}
+                        <TableCell>
+                          <span className="bezent-table-meta-title">
+                            {formatDays(row.presentDays)}
+                          </span>
+                        </TableCell>
+
+                        {/* 5. Absent */}
+                        <TableCell>
+                          <span className="bezent-table-meta-title">
+                            {formatDays(row.absentDays)}
+                          </span>
+                        </TableCell>
+
+                        {/* 6. Half Days */}
+                        <TableCell>
+                          <span className="bezent-table-meta-title">
+                            {formatDays((row as unknown as { halfDays?: number }).halfDays ?? 0)}
+                          </span>
+                        </TableCell>
+
+                        {/* 7. Leave */}
+                        <TableCell>
+                          <span className="bezent-table-meta-title">
+                            {formatDays(row.leaveDays)}
+                          </span>
+                        </TableCell>
+
+                        {/* 8. Weekly Offs */}
+                        <TableCell>
+                          <span className="bezent-table-meta-title">
+                            {row.weeklyOffDays ? String(row.weeklyOffDays) : '—'}
+                          </span>
+                        </TableCell>
+
+                        {/* 9. Holidays */}
+                        <TableCell>
+                          <span className="bezent-table-meta-title">
+                            {row.holidayDays ? String(row.holidayDays) : '—'}
+                          </span>
+                        </TableCell>
+
+                        {/* 10. Late Marks */}
+                        <TableCell>
+                          <span className="bezent-table-meta-title">
+                            {row.lateOccurrences ? String(row.lateOccurrences) : '—'}
+                          </span>
+                        </TableCell>
+
+                        {/* 11. Loss of Pay */}
+                        <TableCell>
+                          <span className="bezent-table-meta-title">
+                            {formatDays(row.absentDays)}
+                          </span>
+                        </TableCell>
+
+                        {/* 12. Overtime */}
+                        <TableCell>
+                          <span className="bezent-table-meta-title">
+                            {formatOvertime(overtimeMinutes)}
+                          </span>
+                        </TableCell>
+
+                        {/* 13. Payable Days (Key Column) */}
+                        <TableCell>
+                          <span className="bezent-table-meta-title">
+                            <strong>{formatDays(payableDays)}</strong>
+                          </span>
+                        </TableCell>
+
+                        {/* 14. Review Status */}
+                        <TableCell>
+                          <span title={statusConfig.tooltip}>
+                            <Badge variant={statusConfig.variant}>{statusConfig.label}</Badge>
+                          </span>
+                        </TableCell>
+
+                        {/* 15. Actions (Spec Section 6) */}
+                        <TableCell className="bezent-table-col--actions bezent-table-col--sticky-right">
+                          <div className="bezent-table-action-menu">
                             <button
                               type="button"
-                              className="bezent-table-meta-title"
-                              onClick={() => handleOpenDrawer(row)}
+                              className={`bezent-table-action-btn ${openActionMenuId === row.id ? 'is-active' : ''}`}
+                              aria-label={`Actions for ${row.employeeName}`}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setOpenActionMenuId(openActionMenuId === row.id ? null : row.id);
+                              }}
                             >
-                              {row.employeeName}
+                              <BezentIcon name="more" size={16} />
                             </button>
-                            <span className="bezent-table-meta-subtitle">{row.employeeCode}</span>
+                            {openActionMenuId === row.id && (
+                              <div className="bezent-table-action-menu__dropdown">
+                                <button
+                                  type="button"
+                                  className="bezent-table-action-menu__item"
+                                  onClick={() => {
+                                    setOpenActionMenuId(null);
+                                    handleOpenDrawer(row);
+                                  }}
+                                >
+                                  <BezentIcon name="visibility" size={14} /> View Details
+                                </button>
+                                <button
+                                  type="button"
+                                  className="bezent-table-action-menu__item"
+                                  onClick={() => {
+                                    setOpenActionMenuId(null);
+                                    navigate(
+                                      `/hrms/attendance?search=${encodeURIComponent(row.employeeCode)}`,
+                                    );
+                                  }}
+                                >
+                                  <BezentIcon name="calendar" size={14} /> Open in Daily Log
+                                </button>
+                                <button
+                                  type="button"
+                                  className="bezent-table-action-menu__item"
+                                  disabled={isRowFrozen}
+                                  title={isRowFrozen ? 'Frozen for payroll' : 'Send for Review'}
+                                  onClick={() => {
+                                    setOpenActionMenuId(null);
+                                    handleSendForReview(row);
+                                  }}
+                                >
+                                  <BezentIcon name="share" size={14} /> Send for Review
+                                </button>
+                                <button
+                                  type="button"
+                                  className="bezent-table-action-menu__item"
+                                  disabled={isRowFrozen}
+                                  title={isRowFrozen ? 'Frozen for payroll' : 'Approve'}
+                                  onClick={() => {
+                                    setOpenActionMenuId(null);
+                                    handleApproveRow(row);
+                                  }}
+                                >
+                                  <BezentIcon name="check" size={14} /> Approve
+                                </button>
+                                <button
+                                  type="button"
+                                  className="bezent-table-action-menu__item"
+                                  disabled={isRowFrozen}
+                                  title={isRowFrozen ? 'Frozen for payroll' : 'Send Back'}
+                                  onClick={() => {
+                                    setOpenActionMenuId(null);
+                                    handleOpenSendBackDialog(row);
+                                  }}
+                                >
+                                  <BezentIcon name="undo" size={14} /> Send Back
+                                </button>
+                              </div>
+                            )}
                           </div>
-                        </div>
-                      </TableCell>
-
-                      {/* 3. Department */}
-                      <TableCell>
-                        <span className="bezent-table-meta-subtitle">
-                          {row.departmentName || '—'}
-                        </span>
-                      </TableCell>
-
-                      {/* 4. Present */}
-                      <TableCell>
-                        <span className="bezent-table-meta-title">
-                          {formatDays(row.presentDays)}
-                        </span>
-                      </TableCell>
-
-                      {/* 5. Absent */}
-                      <TableCell>
-                        <span className="bezent-table-meta-title">
-                          {formatDays(row.absentDays)}
-                        </span>
-                      </TableCell>
-
-                      {/* 6. Half Days */}
-                      <TableCell>
-                        <span className="bezent-table-meta-title">
-                          {formatDays((row as unknown as { halfDays?: number }).halfDays ?? 0)}
-                        </span>
-                      </TableCell>
-
-                      {/* 7. Leave */}
-                      <TableCell>
-                        <span className="bezent-table-meta-title">{formatDays(row.leaveDays)}</span>
-                      </TableCell>
-
-                      {/* 8. Weekly Offs */}
-                      <TableCell>
-                        <span className="bezent-table-meta-title">
-                          {row.weeklyOffDays ? String(row.weeklyOffDays) : '—'}
-                        </span>
-                      </TableCell>
-
-                      {/* 9. Holidays */}
-                      <TableCell>
-                        <span className="bezent-table-meta-title">
-                          {row.holidayDays ? String(row.holidayDays) : '—'}
-                        </span>
-                      </TableCell>
-
-                      {/* 10. Late Marks */}
-                      <TableCell>
-                        <span className="bezent-table-meta-title">
-                          {row.lateOccurrences ? String(row.lateOccurrences) : '—'}
-                        </span>
-                      </TableCell>
-
-                      {/* 11. Loss of Pay */}
-                      <TableCell>
-                        <span className="bezent-table-meta-title">
-                          {formatDays(row.absentDays)}
-                        </span>
-                      </TableCell>
-
-                      {/* 12. Overtime */}
-                      <TableCell>
-                        <span className="bezent-table-meta-title">
-                          {formatOvertime(overtimeMinutes)}
-                        </span>
-                      </TableCell>
-
-                      {/* 13. Payable Days (Key Column) */}
-                      <TableCell>
-                        <span className="bezent-table-meta-title">
-                          <strong>{formatDays(payableDays)}</strong>
-                        </span>
-                      </TableCell>
-
-                      {/* 14. Review Status */}
-                      <TableCell>
-                        <span title={statusConfig.tooltip}>
-                          <Badge variant={statusConfig.variant}>{statusConfig.label}</Badge>
-                        </span>
-                      </TableCell>
-
-                      {/* 15. Actions (Spec Section 6) */}
-                      <TableCell className="bezent-table-col--actions bezent-table-col--sticky-right">
-                        <div className="bezent-table-action-menu">
-                          <button
-                            type="button"
-                            className={`bezent-table-action-btn ${openActionMenuId === row.id ? 'is-active' : ''}`}
-                            aria-label={`Actions for ${row.employeeName}`}
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              setOpenActionMenuId(openActionMenuId === row.id ? null : row.id);
-                            }}
-                          >
-                            <BezentIcon name="more" size={16} />
-                          </button>
-                          {openActionMenuId === row.id && (
-                            <div className="bezent-table-action-menu__dropdown">
-                              <button
-                                type="button"
-                                className="bezent-table-action-menu__item"
-                                onClick={() => {
-                                  setOpenActionMenuId(null);
-                                  handleOpenDrawer(row);
-                                }}
-                              >
-                                <BezentIcon name="visibility" size={14} /> View Details
-                              </button>
-                              <button
-                                type="button"
-                                className="bezent-table-action-menu__item"
-                                disabled={isRowFrozen}
-                                title={isRowFrozen ? 'Frozen for payroll' : 'Send for Review'}
-                                onClick={() => {
-                                  setOpenActionMenuId(null);
-                                  handleSendForReview(row);
-                                }}
-                              >
-                                <BezentIcon name="share" size={14} /> Send for Review
-                              </button>
-                              <button
-                                type="button"
-                                className="bezent-table-action-menu__item"
-                                disabled={isRowFrozen}
-                                title={isRowFrozen ? 'Frozen for payroll' : 'Approve'}
-                                onClick={() => {
-                                  setOpenActionMenuId(null);
-                                  handleApproveRow(row);
-                                }}
-                              >
-                                <BezentIcon name="check" size={14} /> Approve
-                              </button>
-                              <button
-                                type="button"
-                                className="bezent-table-action-menu__item"
-                                disabled={isRowFrozen}
-                                title={isRowFrozen ? 'Frozen for payroll' : 'Send Back'}
-                                onClick={() => {
-                                  setOpenActionMenuId(null);
-                                  handleOpenSendBackDialog(row);
-                                }}
-                              >
-                                <BezentIcon name="undo" size={14} /> Send Back
-                              </button>
-                            </div>
-                          )}
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  );
-                })}
-              </TableBody>
-            </Table>
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })}
+                </TableBody>
+              </Table>
+            </div>
 
             {/* Table Footer: Clean Records Summary & Enterprise Pagination */}
             <div className="bezent-att-table-footer">
