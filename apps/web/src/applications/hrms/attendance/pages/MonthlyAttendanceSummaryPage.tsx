@@ -1084,7 +1084,11 @@ export function MonthlyAttendanceSummaryPage() {
               >
                 <TableHead>
                   <TableRow>
-                    <TableHeaderCell>
+                    <TableHeaderCell
+                      className={
+                        viewMode === 'grid' ? 'bezent-attendance-col--sticky-checkbox' : undefined
+                      }
+                    >
                       <Checkbox disabled aria-label="Select all rows" />
                     </TableHeaderCell>
                     <TableHeaderCell
@@ -1111,30 +1115,30 @@ export function MonthlyAttendanceSummaryPage() {
                           </TableHeaderCell>
                         ))}
                         <TableHeaderCell
-                          className="bezent-attendance-col--sticky-summary bezent-attendance-col--sum-p"
+                          className="bezent-attendance-col--sum-col"
                           title="Total Present Days"
                         >
                           P
                         </TableHeaderCell>
                         <TableHeaderCell
-                          className="bezent-attendance-col--sticky-summary bezent-attendance-col--sum-a"
+                          className="bezent-attendance-col--sum-col"
                           title="Total Absent Days"
                         >
                           A
                         </TableHeaderCell>
                         <TableHeaderCell
-                          className="bezent-attendance-col--sticky-summary bezent-attendance-col--sum-wo"
+                          className="bezent-attendance-col--sum-col"
                           title="Total Weekly Offs"
                         >
                           WO
                         </TableHeaderCell>
                         <TableHeaderCell
-                          className="bezent-attendance-col--sticky-summary bezent-attendance-col--sum-pay"
+                          className="bezent-attendance-col--sum-col bezent-attendance-col--sum-pay"
                           title="Total Payable Days"
                         >
                           Pay
                         </TableHeaderCell>
-                        <TableHeaderCell className="bezent-attendance-col--sticky-summary bezent-attendance-col--sum-act">
+                        <TableHeaderCell className="bezent-attendance-col--sum-col bezent-attendance-col--sum-act">
                           Act
                         </TableHeaderCell>
                       </>
@@ -1206,8 +1210,8 @@ export function MonthlyAttendanceSummaryPage() {
                 <TableHead>
                   {viewMode === 'grid' ? (
                     <TableRow>
-                      {/* 1. Bulk Select Checkbox */}
-                      <TableHeaderCell>
+                      {/* 1. Bulk Select Checkbox (Sticky Left) */}
+                      <TableHeaderCell className="bezent-attendance-col--sticky-checkbox">
                         <Checkbox
                           checked={selectedIds.size === rows.length && rows.length > 0}
                           onChange={(e) => handleToggleSelectAll(e.target.checked)}
@@ -1233,32 +1237,32 @@ export function MonthlyAttendanceSummaryPage() {
                           </span>
                         </TableHeaderCell>
                       ))}
-                      {/* Summary Columns (Sticky Right) */}
+                      {/* Summary Columns */}
                       <TableHeaderCell
-                        className="bezent-attendance-col--sticky-summary bezent-attendance-col--sum-p"
+                        className="bezent-attendance-col--sum-col"
                         title="Total Present Days"
                       >
                         P
                       </TableHeaderCell>
                       <TableHeaderCell
-                        className="bezent-attendance-col--sticky-summary bezent-attendance-col--sum-a"
+                        className="bezent-attendance-col--sum-col"
                         title="Total Absent Days"
                       >
                         A
                       </TableHeaderCell>
                       <TableHeaderCell
-                        className="bezent-attendance-col--sticky-summary bezent-attendance-col--sum-wo"
+                        className="bezent-attendance-col--sum-col"
                         title="Total Weekly Offs"
                       >
                         WO
                       </TableHeaderCell>
                       <TableHeaderCell
-                        className="bezent-attendance-col--sticky-summary bezent-attendance-col--sum-pay"
+                        className="bezent-attendance-col--sum-col bezent-attendance-col--sum-pay"
                         title="Total Payable Days"
                       >
                         Pay
                       </TableHeaderCell>
-                      <TableHeaderCell className="bezent-attendance-col--sticky-summary bezent-attendance-col--sum-act">
+                      <TableHeaderCell className="bezent-attendance-col--sum-col bezent-attendance-col--sum-act">
                         Act
                       </TableHeaderCell>
                     </TableRow>
@@ -1326,8 +1330,8 @@ export function MonthlyAttendanceSummaryPage() {
                     if (viewMode === 'grid') {
                       return (
                         <TableRow key={row.id}>
-                          {/* 1. Checkbox */}
-                          <TableCell>
+                          {/* 1. Checkbox (Sticky Left) */}
+                          <TableCell className="bezent-attendance-col--sticky-checkbox">
                             <Checkbox
                               checked={selectedIds.has(row.id)}
                               onChange={() => handleToggleSelectRow(row.id)}
@@ -1458,30 +1462,30 @@ export function MonthlyAttendanceSummaryPage() {
                             );
                           })}
 
-                          {/* 4. Summary Totals (Sticky Right) */}
-                          <TableCell className="bezent-attendance-col--sticky-summary bezent-attendance-col--sum-p">
+                          {/* 4. Summary Totals */}
+                          <TableCell className="bezent-attendance-col--sum-col">
                             <span className="bezent-attendance-grid-sum--p">
                               {formatDays(row.presentDays)}
                             </span>
                           </TableCell>
-                          <TableCell className="bezent-attendance-col--sticky-summary bezent-attendance-col--sum-a">
+                          <TableCell className="bezent-attendance-col--sum-col">
                             <span className="bezent-attendance-grid-sum--a">
                               {formatDays(row.absentDays)}
                             </span>
                           </TableCell>
-                          <TableCell className="bezent-attendance-col--sticky-summary bezent-attendance-col--sum-wo">
+                          <TableCell className="bezent-attendance-col--sum-col">
                             <span className="bezent-table-meta-subtitle">
                               {row.weeklyOffDays ?? 0}
                             </span>
                           </TableCell>
-                          <TableCell className="bezent-attendance-col--sticky-summary bezent-attendance-col--sum-pay">
+                          <TableCell className="bezent-attendance-col--sum-col bezent-attendance-col--sum-pay">
                             <span className="bezent-attendance-grid-sum--pay">
                               {formatDays(payableDays)}
                             </span>
                           </TableCell>
 
-                          {/* 5. Actions (Sticky Right) */}
-                          <TableCell className="bezent-attendance-col--sticky-summary bezent-attendance-col--sum-act">
+                          {/* 5. Actions */}
+                          <TableCell className="bezent-attendance-col--sum-col bezent-attendance-col--sum-act">
                             <div className="bezent-table-action-menu">
                               <button
                                 type="button"
