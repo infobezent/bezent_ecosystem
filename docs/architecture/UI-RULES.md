@@ -53,6 +53,16 @@ deliberately, inventoried and classified, per
 [UI-MIGRATION.md](UI-MIGRATION.md) — not copy-pasted piecemeal outside that
 process.
 
+## Rule 5 — Standard Loading States & Zero Cumulative Layout Shift (CLS)
+
+Every page displaying tabular records or directory data must preserve the table shell during network loading:
+
+- **No table wiping:** Do not conditionally replace `<Card><Table>...</Table></Card>` with a detached `<LoadingState>` spinner.
+- **Preserve structural headers:** `<PageHeader>`, `<Toolbar>`, and `<TableHead>` must remain visible and stable.
+- **Use `<TableSkeleton>`:** The table body renders `<TableSkeleton rows={N} columns={M} label="..." />` with animated shimmering placeholders.
+- **Accessible label:** `<TableSkeleton>` emits an accessible `<tr className="bezent-sr-only"><td colSpan={columns}>{label}</td></tr>` to support screen readers and existing test assertions.
+- **Workspace bootstrapping:** Route and workspace permission checks use `<LoadingState variant="branded" label="Initializing BEZENT Workspace…" />`, fixed to the viewport center.
+
 ## Phase 0 status
 
 The current placeholder page (`app/router/DevPlaceholderPage.tsx`) and its

@@ -284,7 +284,9 @@ async function main() {
 
   await db.insert(attendancePunches).values(punchesToInsert);
 
-  console.log(`[Seed Punches] Successfully inserted ${punchesToInsert.length} punches for ${workday}!`);
+  console.log(
+    `[Seed Punches] Successfully inserted ${punchesToInsert.length} punches for ${workday}!`,
+  );
   process.exit(0);
 }
 
