@@ -16056,9 +16056,27 @@
   gap: 14px;
 }
 
-.bezent-attendance-drawer-header__avatar-wrap {
+.bezent-attendance-drawer-header__avatar-wrap,
+.bezent-table-avatar-status-wrap {
   position: relative;
   display: inline-flex;
+  flex-shrink: 0;
+}
+
+.bezent-table-avatar-status-dot {
+  position: absolute;
+  bottom: -1px;
+  right: -1px;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  border: 2px solid var(--bg-surface, #ffffff);
+  box-sizing: border-box;
+  flex-shrink: 0;
+  transition:
+    transform 0.15s ease,
+    background-color 0.15s ease;
+  pointer-events: none;
 }
 
 .bezent-attendance-drawer-header__status-dot {
@@ -16069,14 +16087,81 @@
   height: 12px;
   border-radius: 50%;
   border: 2px solid var(--bg-surface, #ffffff);
+  box-sizing: border-box;
+  flex-shrink: 0;
+  transition:
+    transform 0.15s ease,
+    background-color 0.15s ease;
 }
 
-.bezent-attendance-drawer-header__status-dot.is-present {
+/* Status Indicator Colors — Present (Green) */
+.bezent-table-avatar-status-dot.is-present,
+.bezent-table-avatar-status-dot--present,
+.bezent-attendance-drawer-header__status-dot.is-present,
+.bezent-attendance-drawer-header__status-dot--present {
   background: var(--color-success, #22c55e);
 }
 
-.bezent-attendance-drawer-header__status-dot.is-absent {
+/* Status Indicator Colors — Absent (Red) */
+.bezent-table-avatar-status-dot.is-absent,
+.bezent-table-avatar-status-dot--absent,
+.bezent-attendance-drawer-header__status-dot.is-absent,
+.bezent-attendance-drawer-header__status-dot--absent {
   background: var(--color-danger, #ef4444);
+}
+
+/* Status Indicator Colors — Half Day / Pending (Amber) */
+.bezent-table-avatar-status-dot.is-half-day,
+.bezent-table-avatar-status-dot--half_day,
+.bezent-table-avatar-status-dot--pending,
+.bezent-attendance-drawer-header__status-dot.is-half-day,
+.bezent-attendance-drawer-header__status-dot--half_day,
+.bezent-attendance-drawer-header__status-dot--pending {
+  background: var(--color-warning, #f59e0b);
+}
+
+/* Status Indicator Colors — On Leave (Purple) */
+.bezent-table-avatar-status-dot.is-on-leave,
+.bezent-table-avatar-status-dot--on_leave,
+.bezent-attendance-drawer-header__status-dot.is-on-leave,
+.bezent-attendance-drawer-header__status-dot--on_leave {
+  background: #8b5cf6;
+}
+
+/* Status Indicator Colors — Work From Home / On Duty (Sky Blue) */
+.bezent-table-avatar-status-dot.is-wfh,
+.bezent-table-avatar-status-dot--work_from_home,
+.bezent-table-avatar-status-dot--on_duty,
+.bezent-attendance-drawer-header__status-dot.is-wfh,
+.bezent-attendance-drawer-header__status-dot--work_from_home,
+.bezent-attendance-drawer-header__status-dot--on_duty {
+  background: var(--color-info, #3b82f6);
+}
+
+/* Status Indicator Colors — Missed Punch / Incomplete (Red) */
+.bezent-table-avatar-status-dot--missing_punch,
+.bezent-table-avatar-status-dot--incomplete,
+.bezent-attendance-drawer-header__status-dot--missing_punch,
+.bezent-attendance-drawer-header__status-dot--incomplete {
+  background: var(--color-danger, #ef4444);
+}
+
+/* Status Indicator Colors — Holiday / Weekly Off / Not Checked In (Neutral Slate Gray) */
+.bezent-table-avatar-status-dot.is-holiday,
+.bezent-table-avatar-status-dot--holiday,
+.bezent-table-avatar-status-dot--weekly_off,
+.bezent-table-avatar-status-dot--not_checked_in,
+.bezent-attendance-drawer-header__status-dot.is-holiday,
+.bezent-attendance-drawer-header__status-dot--holiday,
+.bezent-attendance-drawer-header__status-dot--weekly_off,
+.bezent-attendance-drawer-header__status-dot--not_checked_in {
+  background: #94a3b8;
+}
+
+/* Fallback default neutral */
+.bezent-table-avatar-status-dot:not([class*='--']),
+.bezent-attendance-drawer-header__status-dot:not([class*='--']):not(.is-present):not(.is-absent) {
+  background: #94a3b8;
 }
 
 .bezent-attendance-drawer-header__meta {
@@ -16344,7 +16429,8 @@
 }
 
 /* ── Dark Theme Support ────────────────────────────────────────────────── */
-[data-theme='dark'] .bezent-attendance-drawer-header__status-dot {
+[data-theme='dark'] .bezent-attendance-drawer-header__status-dot,
+[data-theme='dark'] .bezent-table-avatar-status-dot {
   border-color: var(--bg-surface, #1e293b);
 }
 

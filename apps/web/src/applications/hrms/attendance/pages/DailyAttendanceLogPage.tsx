@@ -1149,12 +1149,19 @@ export function DailyAttendanceLogPage() {
                       {/* 1. Employee */}
                       <TableCell>
                         <div className="bezent-table-cell--avatar-meta">
-                          <Avatar
-                            initials={initials}
-                            color={getAvatarColor(item.employeeId)}
-                            size="md"
-                            alt={`${item.firstName} ${item.lastName ?? ''}`}
-                          />
+                          <div className="bezent-table-avatar-status-wrap">
+                            <Avatar
+                              initials={initials}
+                              color={getAvatarColor(item.employeeId)}
+                              size="md"
+                              alt={`${item.firstName} ${item.lastName ?? ''}`}
+                            />
+                            <span
+                              className={`bezent-table-avatar-status-dot bezent-table-avatar-status-dot--${(item.status || '').toLowerCase()}`}
+                              title={`Status: ${STATUS_CONFIG[item.status]?.label || item.status}`}
+                              aria-label={`Status: ${STATUS_CONFIG[item.status]?.label || item.status}`}
+                            />
+                          </div>
                           <div className="bezent-table-meta-group">
                             <button
                               type="button"
@@ -1381,8 +1388,9 @@ export function DailyAttendanceLogPage() {
                     )}
                   />
                   <span
-                    className={`bezent-attendance-drawer-header__status-dot ${drawerDetail.attendanceSummary.status === 'present' ? 'is-present' : 'is-absent'}`}
-                    title={drawerDetail.attendanceSummary.status}
+                    className={`bezent-attendance-drawer-header__status-dot bezent-attendance-drawer-header__status-dot--${(drawerDetail.attendanceSummary.status || '').toLowerCase()} ${drawerDetail.attendanceSummary.status === 'present' ? 'is-present' : 'is-absent'}`}
+                    title={`Status: ${STATUS_CONFIG[drawerDetail.attendanceSummary.status]?.label || drawerDetail.attendanceSummary.status}`}
+                    aria-label={`Status: ${STATUS_CONFIG[drawerDetail.attendanceSummary.status]?.label || drawerDetail.attendanceSummary.status}`}
                   />
                 </div>
                 <div className="bezent-attendance-drawer-header__meta">
