@@ -1064,11 +1064,7 @@ export function AttendanceRegularizationPage() {
                 </TableHeaderCell>
               </TableRow>
             </TableHead>
-            <TableSkeleton
-              rows={8}
-              columns={11}
-              label="Loading regularization workspace..."
-            />
+            <TableSkeleton rows={8} columns={11} label="Loading regularization workspace..." />
           </Table>
         ) : error ? (
           <Alert variant="danger" title="Error Loading Requests">

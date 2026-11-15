@@ -1085,11 +1085,7 @@ export function AttendanceOnDutyPage() {
                 </TableHeaderCell>
               </TableRow>
             </TableHead>
-            <TableSkeleton
-              rows={8}
-              columns={11}
-              label="Loading On-Duty workspace..."
-            />
+            <TableSkeleton rows={8} columns={11} label="Loading On-Duty workspace..." />
           </Table>
         ) : error ? (
           <Alert variant="danger" title="Error Loading Requests">

@@ -1160,11 +1160,7 @@ export function AttendanceCompOffPage() {
                     </TableHeaderCell>
                   </TableRow>
                 </TableHead>
-                <TableSkeleton
-                  rows={8}
-                  columns={8}
-                  label="Loading comp-off records..."
-                />
+                <TableSkeleton rows={8} columns={8} label="Loading comp-off records..." />
               </Table>
             </div>
           </Card>

@@ -1163,11 +1163,7 @@ export function AttendanceOvertimePage() {
                     </TableHeaderCell>
                   </TableRow>
                 </TableHead>
-                <TableSkeleton
-                  rows={8}
-                  columns={12}
-                  label="Loading overtime records..."
-                />
+                <TableSkeleton rows={8} columns={12} label="Loading overtime records..." />
               </Table>
             </div>
           </Card>

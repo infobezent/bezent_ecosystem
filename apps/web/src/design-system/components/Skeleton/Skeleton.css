@@ -46,7 +46,8 @@
 }
 
 @keyframes bezentSkeletonPulse {
-  0%, 100% {
+  0%,
+  100% {
     opacity: 1;
   }
   50% {
@@ -76,22 +77,50 @@
 }
 
 /* ── Width Modifiers ── */
-.bezent-skeleton--w-full { width: 100%; }
-.bezent-skeleton--w-3xs { width: 24px; }
-.bezent-skeleton--w-2xs { width: 40px; }
-.bezent-skeleton--w-xs { width: 60px; }
-.bezent-skeleton--w-sm { width: 100px; }
-.bezent-skeleton--w-md { width: 160px; }
-.bezent-skeleton--w-lg { width: 240px; }
-.bezent-skeleton--w-xl { width: 320px; }
+.bezent-skeleton--w-full {
+  width: 100%;
+}
+.bezent-skeleton--w-3xs {
+  width: 24px;
+}
+.bezent-skeleton--w-2xs {
+  width: 40px;
+}
+.bezent-skeleton--w-xs {
+  width: 60px;
+}
+.bezent-skeleton--w-sm {
+  width: 100px;
+}
+.bezent-skeleton--w-md {
+  width: 160px;
+}
+.bezent-skeleton--w-lg {
+  width: 240px;
+}
+.bezent-skeleton--w-xl {
+  width: 320px;
+}
 
 /* ── Height Modifiers ── */
-.bezent-skeleton--h-xs { height: 10px; }
-.bezent-skeleton--h-sm { height: 14px; }
-.bezent-skeleton--h-md { height: 20px; }
-.bezent-skeleton--h-lg { height: 32px; }
-.bezent-skeleton--h-xl { height: 40px; }
-.bezent-skeleton--h-full { height: 100%; }
+.bezent-skeleton--h-xs {
+  height: 10px;
+}
+.bezent-skeleton--h-sm {
+  height: 14px;
+}
+.bezent-skeleton--h-md {
+  height: 20px;
+}
+.bezent-skeleton--h-lg {
+  height: 32px;
+}
+.bezent-skeleton--h-xl {
+  height: 40px;
+}
+.bezent-skeleton--h-full {
+  height: 100%;
+}
 
 /* ── Table Skeleton Helper ── */
 .bezent-table-skeleton-row td {
