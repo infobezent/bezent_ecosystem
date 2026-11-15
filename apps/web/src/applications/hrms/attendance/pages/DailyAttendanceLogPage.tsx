@@ -1149,19 +1149,12 @@ export function DailyAttendanceLogPage() {
                       {/* 1. Employee */}
                       <TableCell>
                         <div className="bezent-table-cell--avatar-meta">
-                          <div className="bezent-table-avatar-status-wrap">
-                            <Avatar
-                              initials={initials}
-                              color={getAvatarColor(item.employeeId)}
-                              size="md"
-                              alt={`${item.firstName} ${item.lastName ?? ''}`}
-                            />
-                            <span
-                              className={`bezent-table-avatar-status-dot bezent-table-avatar-status-dot--${(item.status || '').toLowerCase()}`}
-                              title={`Status: ${STATUS_CONFIG[item.status]?.label || item.status}`}
-                              aria-label={`Status: ${STATUS_CONFIG[item.status]?.label || item.status}`}
-                            />
-                          </div>
+                          <Avatar
+                            initials={initials}
+                            color={getAvatarColor(item.employeeId)}
+                            size="md"
+                            alt={`${item.firstName} ${item.lastName ?? ''}`}
+                          />
                           <div className="bezent-table-meta-group">
                             <button
                               type="button"

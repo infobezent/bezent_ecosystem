@@ -1370,22 +1370,16 @@ export function MonthlyAttendanceSummaryPage() {
                           {/* 2. Employee (Sticky Left) */}
                           <TableCell className="bezent-attendance-col--sticky-employee">
                             <div className="bezent-table-cell--avatar-meta">
-                              <div className="bezent-table-avatar-status-wrap">
-                                <Avatar
-                                  initials={
-                                    row.employeeName
-                                      ? row.employeeName.slice(0, 2).toUpperCase()
-                                      : 'EM'
-                                  }
-                                  color={getAvatarColor(row.employeeId)}
-                                  alt={row.employeeName}
-                                  size="md"
-                                />
-                                <span
-                                  className={`bezent-table-avatar-status-dot bezent-table-avatar-status-dot--${Number(row.absentDays) > Number(row.presentDays) ? 'absent' : 'present'}`}
-                                  title={`Status: ${Number(row.absentDays) > Number(row.presentDays) ? 'Absent / High LOP' : 'Present'}`}
-                                />
-                              </div>
+                              <Avatar
+                                initials={
+                                  row.employeeName
+                                    ? row.employeeName.slice(0, 2).toUpperCase()
+                                    : 'EM'
+                                }
+                                color={getAvatarColor(row.employeeId)}
+                                alt={row.employeeName}
+                                size="md"
+                              />
                               <div className="bezent-table-meta-group">
                                 <button
                                   type="button"
@@ -1621,22 +1615,14 @@ export function MonthlyAttendanceSummaryPage() {
                         {/* 2. Employee */}
                         <TableCell>
                           <div className="bezent-table-cell--avatar-meta">
-                            <div className="bezent-table-avatar-status-wrap">
-                              <Avatar
-                                initials={
-                                  row.employeeName
-                                    ? row.employeeName.slice(0, 2).toUpperCase()
-                                    : 'EM'
-                                }
-                                color={getAvatarColor(row.employeeId)}
-                                alt={row.employeeName}
-                                size="md"
-                              />
-                              <span
-                                className={`bezent-table-avatar-status-dot bezent-table-avatar-status-dot--${Number(row.absentDays) > Number(row.presentDays) ? 'absent' : 'present'}`}
-                                title={`Status: ${Number(row.absentDays) > Number(row.presentDays) ? 'Absent / High LOP' : 'Present'}`}
-                              />
-                            </div>
+                            <Avatar
+                              initials={
+                                row.employeeName ? row.employeeName.slice(0, 2).toUpperCase() : 'EM'
+                              }
+                              color={getAvatarColor(row.employeeId)}
+                              alt={row.employeeName}
+                              size="md"
+                            />
                             <div className="bezent-table-meta-group">
                               <button
                                 type="button"
