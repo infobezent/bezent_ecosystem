@@ -1371,23 +1371,124 @@ export function DailyAttendanceLogPage() {
           size="drawer"
           title={
             drawerDetail ? (
-              <Inline gap="sm" align="center">
-                <Avatar
-                  initials={`${drawerDetail.employee.firstName[0]}${drawerDetail.employee.lastName?.[0] ?? ''}`}
-                  size="md"
-                />
-                <Stack gap="none">
-                  <span>
-                    {drawerDetail.employee.firstName} {drawerDetail.employee.lastName ?? ''}
+              <div className="bezent-attendance-drawer-header">
+                <div className="bezent-attendance-drawer-header__avatar-wrap">
+                  <Avatar
+                    initials={`${drawerDetail.employee.firstName[0]}${drawerDetail.employee.lastName?.[0] ?? ''}`}
+                    size="md"
+                    color={getAvatarColor(
+                      drawerDetail.employee.id || drawerDetail.employee.employeeCode,
+                    )}
+                  />
+                  <span
+                    className={`bezent-attendance-drawer-header__status-dot ${drawerDetail.attendanceSummary.status === 'present' ? 'is-present' : 'is-absent'}`}
+                    title={drawerDetail.attendanceSummary.status}
+                  />
+                </div>
+                <div className="bezent-attendance-drawer-header__meta">
+                  <div className="bezent-attendance-drawer-header__title-row">
+                    <span className="bezent-attendance-drawer-header__name">
+                      {drawerDetail.employee.firstName} {drawerDetail.employee.lastName ?? ''}
+                    </span>
+                    <span className="bezent-attendance-drawer-header__code">
+                      {drawerDetail.employee.employeeCode}
+                    </span>
+                  </div>
+                  <span className="bezent-attendance-drawer-header__sub">
+                    {drawerDetail.employee.departmentName ?? 'Department'} •{' '}
+                    {formatShiftName(drawerDetail.employee.assignedShift.scheduleRef)} (
+                    {drawerDetail.employee.assignedShift.startTime} -{' '}
+                    {drawerDetail.employee.assignedShift.endTime})
                   </span>
-                  <span className="bezent-card__desc">
-                    {drawerDetail.employee.employeeCode} •{' '}
-                    {drawerDetail.employee.departmentName ?? 'Department'}
-                  </span>
-                </Stack>
-              </Inline>
+                </div>
+              </div>
             ) : (
               'Employee Attendance Details'
+            )
+          }
+          headerBottom={
+            drawerDetail && (
+              <div className="bezent-attendance-drawer-tabs">
+                <button
+                  type="button"
+                  className={`bezent-attendance-drawer-tab ${drawerTab === 'summary' ? 'is-active' : ''}`}
+                  onClick={() => setDrawerTab('summary')}
+                >
+                  <span>Summary</span>
+                </button>
+                <button
+                  type="button"
+                  className={`bezent-attendance-drawer-tab ${drawerTab === 'timeline' ? 'is-active' : ''}`}
+                  onClick={() => setDrawerTab('timeline')}
+                >
+                  <span>Punches</span>
+                  <span className="bezent-attendance-drawer-tab__badge">
+                    {drawerDetail.punchTimeline.length}
+                  </span>
+                </button>
+                <button
+                  type="button"
+                  className={`bezent-attendance-drawer-tab ${drawerTab === 'records' ? 'is-active' : ''}`}
+                  onClick={() => setDrawerTab('records')}
+                >
+                  <span>Related Records</span>
+                </button>
+                <button
+                  type="button"
+                  className={`bezent-attendance-drawer-tab ${drawerTab === 'history' ? 'is-active' : ''}`}
+                  onClick={() => setDrawerTab('history')}
+                >
+                  <span>History &amp; Provenance</span>
+                </button>
+              </div>
+            )
+          }
+          footer={
+            drawerDetail && (
+              <div className="bezent-attendance-drawer-footer">
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  onClick={() => handleRecalculateSingle(drawerDetail.employee.id)}
+                >
+                  <BezentIcon name="clock" size={14} />
+                  Recalculate Day
+                </Button>
+                <Button
+                  variant="primary"
+                  size="sm"
+                  onClick={() => {
+                    handleOpenManualEntry({
+                      id: drawerDetail.attendanceSummary.id,
+                      employeeId: drawerDetail.employee.id,
+                      employeeCode: drawerDetail.employee.employeeCode,
+                      firstName: drawerDetail.employee.firstName,
+                      lastName: drawerDetail.employee.lastName,
+                      departmentId: null,
+                      departmentName: drawerDetail.employee.departmentName,
+                      designationId: null,
+                      designationName: drawerDetail.employee.designationName,
+                      date: drawerDetail.employee.workday,
+                      checkInTime: drawerDetail.attendanceSummary.checkInTime,
+                      checkOutTime: drawerDetail.attendanceSummary.checkOutTime,
+                      status: drawerDetail.attendanceSummary.status,
+                      workLocation: 'office',
+                      workedMinutes: drawerDetail.attendanceSummary.workedMinutes,
+                      lateMinutes: drawerDetail.attendanceSummary.lateMinutes,
+                      earlyMinutes: drawerDetail.attendanceSummary.earlyMinutes,
+                      isLate: drawerDetail.attendanceSummary.isLate,
+                      isEarlyExit: drawerDetail.attendanceSummary.isEarlyExit,
+                      isMissingPunch: drawerDetail.attendanceSummary.isMissingPunch,
+                      isRegularized: drawerDetail.attendanceSummary.isRegularized,
+                      shiftScheduleRef: drawerDetail.employee.assignedShift.scheduleRef,
+                      notes: null,
+                    });
+                  }}
+                >
+                  <BezentIcon name="edit" size={14} />
+                  Adjust Attendance
+                </Button>
+              </div>
             )
           }
         >
@@ -1402,161 +1503,122 @@ export function DailyAttendanceLogPage() {
             />
           ) : (
             <Stack gap="md">
-              {/* Drawer Navigation Tabs */}
-              <Inline gap="xs" align="center">
-                <Button
-                  variant={drawerTab === 'summary' ? 'primary' : 'secondary'}
-                  size="sm"
-                  onClick={() => setDrawerTab('summary')}
-                >
-                  Summary
-                </Button>
-                <Button
-                  variant={drawerTab === 'timeline' ? 'primary' : 'secondary'}
-                  size="sm"
-                  onClick={() => setDrawerTab('timeline')}
-                >
-                  Punches ({drawerDetail.punchTimeline.length})
-                </Button>
-                <Button
-                  variant={drawerTab === 'records' ? 'primary' : 'secondary'}
-                  size="sm"
-                  onClick={() => setDrawerTab('records')}
-                >
-                  Related Records
-                </Button>
-                <Button
-                  variant={drawerTab === 'history' ? 'primary' : 'secondary'}
-                  size="sm"
-                  onClick={() => setDrawerTab('history')}
-                >
-                  History & Provenance
-                </Button>
-              </Inline>
-
               {/* Section 1 & 2: Employee & Attendance Summary */}
               {drawerTab === 'summary' && (
                 <Stack gap="md">
-                  <Card padding="sm">
-                    <Stack gap="xs">
-                      <strong>Workday & Shift Assignment</strong>
-                      <Grid columns={2} gap="sm">
-                        <Stack gap="none">
-                          <span className="bezent-card__desc">Workday</span>
-                          <span>{drawerDetail.employee.workday}</span>
-                        </Stack>
-                        <Stack gap="none">
-                          <span className="bezent-card__desc">Assigned Shift</span>
-                          <span>
-                            {formatShiftName(drawerDetail.employee.assignedShift.scheduleRef)}
-                          </span>
-                        </Stack>
-                        <Stack gap="none">
-                          <span className="bezent-card__desc">Shift Window</span>
-                          <span>
-                            {drawerDetail.employee.assignedShift.startTime} -{' '}
-                            {drawerDetail.employee.assignedShift.endTime}
-                          </span>
-                        </Stack>
-                        <Stack gap="none">
-                          <span className="bezent-card__desc">Location / Timezone</span>
-                          <span>
-                            {drawerDetail.employee.locationName ?? 'Office'} (
-                            {drawerDetail.employee.timeZone})
-                          </span>
-                        </Stack>
-                      </Grid>
-                    </Stack>
-                  </Card>
+                  {/* Hero Metric Overview Card */}
+                  <div className="bezent-attendance-drawer-hero">
+                    <div className="bezent-attendance-drawer-hero__left">
+                      <span className="bezent-attendance-drawer-hero__eyebrow">
+                        Today's Attendance
+                      </span>
+                      <div className="bezent-attendance-drawer-hero__hours">
+                        {formatWorkedHours(drawerDetail.attendanceSummary.workedMinutes)}
+                        <span className="bezent-attendance-drawer-hero__shift-target">
+                          / 9h shift
+                        </span>
+                      </div>
+                    </div>
+                    <div className="bezent-attendance-drawer-hero__right">
+                      {renderStatusBadge(drawerDetail.attendanceSummary.status)}
+                    </div>
+                  </div>
 
-                  <Card padding="sm">
-                    <Stack gap="xs">
-                      <strong>Attendance Calculation Summary</strong>
-                      <Grid columns={2} gap="sm">
-                        <Stack gap="none">
-                          <span className="bezent-card__desc">Attendance Status</span>
-                          <span>{renderStatusBadge(drawerDetail.attendanceSummary.status)}</span>
-                        </Stack>
-                        <Stack gap="none">
-                          <span className="bezent-card__desc">Processing State</span>
-                          <span>
-                            {renderReviewStateBadge(drawerDetail.attendanceSummary.processingState)}
-                          </span>
-                        </Stack>
-                        <Stack gap="none">
-                          <span className="bezent-card__desc">Check In</span>
-                          <span>{drawerDetail.attendanceSummary.checkInTime ?? '—'}</span>
-                        </Stack>
-                        <Stack gap="none">
-                          <span className="bezent-card__desc">Check Out</span>
-                          <span>{drawerDetail.attendanceSummary.checkOutTime ?? '—'}</span>
-                        </Stack>
-                        <Stack gap="none">
-                          <span className="bezent-card__desc">Net Worked Hours</span>
+                  {/* Card 1: Shift & Schedule Tile Grid */}
+                  <div className="bezent-attendance-drawer-card">
+                    <div className="bezent-attendance-drawer-card__header">
+                      <span className="bezent-attendance-drawer-card__title">
+                        <BezentIcon name="clock" size={16} />
+                        Workday &amp; Shift Assignment
+                      </span>
+                      <span className="bezent-attendance-drawer-card__date">
+                        {drawerDetail.employee.workday}
+                      </span>
+                    </div>
+                    <div className="bezent-attendance-drawer-grid">
+                      <div className="bezent-attendance-drawer-tile">
+                        <span className="bezent-attendance-drawer-tile__label">Assigned Shift</span>
+                        <span className="bezent-attendance-drawer-tile__value">
+                          {formatShiftName(drawerDetail.employee.assignedShift.scheduleRef)}
+                        </span>
+                      </div>
+                      <div className="bezent-attendance-drawer-tile">
+                        <span className="bezent-attendance-drawer-tile__label">Shift Window</span>
+                        <span className="bezent-attendance-drawer-tile__value">
+                          {drawerDetail.employee.assignedShift.startTime} —{' '}
+                          {drawerDetail.employee.assignedShift.endTime}
+                        </span>
+                      </div>
+                      <div className="bezent-attendance-drawer-tile">
+                        <span className="bezent-attendance-drawer-tile__label">
+                          Location / Timezone
+                        </span>
+                        <span className="bezent-attendance-drawer-tile__value">
+                          {drawerDetail.employee.locationName ?? 'Office'} (
+                          {drawerDetail.employee.timeZone})
+                        </span>
+                      </div>
+                      <div className="bezent-attendance-drawer-tile">
+                        <span className="bezent-attendance-drawer-tile__label">Workday Date</span>
+                        <span className="bezent-attendance-drawer-tile__value font-mono">
+                          {drawerDetail.employee.workday}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Card 2: Attendance Intelligence & Calculations */}
+                  <div className="bezent-attendance-drawer-card">
+                    <div className="bezent-attendance-drawer-card__header">
+                      <span className="bezent-attendance-drawer-card__title">
+                        <BezentIcon name="attendance" size={16} />
+                        Attendance Calculation Summary
+                      </span>
+                      {renderReviewStateBadge(drawerDetail.attendanceSummary.processingState)}
+                    </div>
+                    <div className="bezent-attendance-drawer-grid">
+                      <div className="bezent-attendance-drawer-tile">
+                        <span className="bezent-attendance-drawer-tile__label">First Check In</span>
+                        <span className="bezent-attendance-drawer-tile__value">
+                          {drawerDetail.attendanceSummary.checkInTime ?? '—'}
+                        </span>
+                      </div>
+                      <div className="bezent-attendance-drawer-tile">
+                        <span className="bezent-attendance-drawer-tile__label">Last Check Out</span>
+                        <span className="bezent-attendance-drawer-tile__value">
+                          {drawerDetail.attendanceSummary.checkOutTime ?? '—'}
+                        </span>
+                      </div>
+                      <div className="bezent-attendance-drawer-tile">
+                        <span className="bezent-attendance-drawer-tile__label">
+                          Net Worked Hours
+                        </span>
+                        <span className="bezent-attendance-drawer-tile__value">
                           <strong>
                             {formatWorkedHours(drawerDetail.attendanceSummary.workedMinutes)}
                           </strong>
-                        </Stack>
-                        <Stack gap="none">
-                          <span className="bezent-card__desc">Effective Policy</span>
-                          <span>
-                            {drawerDetail.attendanceSummary.effectivePolicy?.policyName ??
-                              'Standard Policy'}{' '}
-                            (v
-                            {drawerDetail.attendanceSummary.effectivePolicy?.version ?? 1})
-                          </span>
-                        </Stack>
-                      </Grid>
-
-                      <Stack gap="none">
-                        <span className="bezent-card__desc">Active Indicators</span>
-                        {renderIndicators(drawerDetail.attendanceSummary.indicators)}
-                      </Stack>
-                    </Stack>
-                  </Card>
-
-                  <Inline gap="sm" justify="end">
-                    <Button
-                      variant="secondary"
-                      size="sm"
-                      onClick={() => handleRecalculateSingle(drawerDetail.employee.id)}
-                    >
-                      Recalculate Day
-                    </Button>
-                    <Button
-                      variant="primary"
-                      size="sm"
-                      onClick={() => {
-                        handleOpenManualEntry({
-                          id: drawerDetail.attendanceSummary.id,
-                          employeeId: drawerDetail.employee.id,
-                          employeeCode: drawerDetail.employee.employeeCode,
-                          firstName: drawerDetail.employee.firstName,
-                          lastName: drawerDetail.employee.lastName,
-                          departmentId: null,
-                          departmentName: drawerDetail.employee.departmentName,
-                          designationId: null,
-                          designationName: drawerDetail.employee.designationName,
-                          date: drawerDetail.employee.workday,
-                          checkInTime: drawerDetail.attendanceSummary.checkInTime,
-                          checkOutTime: drawerDetail.attendanceSummary.checkOutTime,
-                          status: drawerDetail.attendanceSummary.status,
-                          workLocation: 'office',
-                          workedMinutes: drawerDetail.attendanceSummary.workedMinutes,
-                          lateMinutes: drawerDetail.attendanceSummary.lateMinutes,
-                          earlyMinutes: drawerDetail.attendanceSummary.earlyMinutes,
-                          isLate: drawerDetail.attendanceSummary.isLate,
-                          isEarlyExit: drawerDetail.attendanceSummary.isEarlyExit,
-                          isMissingPunch: drawerDetail.attendanceSummary.isMissingPunch,
-                          isRegularized: drawerDetail.attendanceSummary.isRegularized,
-                          shiftScheduleRef: drawerDetail.employee.assignedShift.scheduleRef,
-                          notes: null,
-                        });
-                      }}
-                    >
-                      Adjust Attendance
-                    </Button>
-                  </Inline>
+                        </span>
+                      </div>
+                      <div className="bezent-attendance-drawer-tile">
+                        <span className="bezent-attendance-drawer-tile__label">
+                          Effective Policy
+                        </span>
+                        <span className="bezent-attendance-drawer-tile__value">
+                          {drawerDetail.attendanceSummary.effectivePolicy?.policyName ??
+                            'Standard Policy'}{' '}
+                          (v{drawerDetail.attendanceSummary.effectivePolicy?.version ?? 1})
+                        </span>
+                      </div>
+                      <div className="bezent-attendance-drawer-tile bezent-attendance-drawer-tile--full-width">
+                        <span className="bezent-attendance-drawer-tile__label">
+                          Active Indicators
+                        </span>
+                        <div className="bezent-attendance-drawer-tile__value">
+                          {renderIndicators(drawerDetail.attendanceSummary.indicators)}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
                 </Stack>
               )}
 
@@ -1570,25 +1632,30 @@ export function DailyAttendanceLogPage() {
                       description="No physical, biometric, or mobile punches were registered for this employee on this date."
                     />
                   ) : (
-                    drawerDetail.punchTimeline.map((punch, idx) => (
-                      <Card key={punch.id ?? idx} padding="sm">
-                        <Inline justify="between" align="center">
-                          <Inline gap="sm" align="center">
-                            <Badge variant={punch.punchType === 'in' ? 'success' : 'neutral'}>
-                              {punch.punchType.toUpperCase()}
-                            </Badge>
-                            <Stack gap="none">
-                              <strong>{new Date(punch.punchTime).toLocaleTimeString()}</strong>
-                              <span className="bezent-card__desc">
-                                Source: {punch.source} • Location: {punch.workLocation}
-                              </span>
-                            </Stack>
+                    <div className="bezent-punch-timeline">
+                      {drawerDetail.punchTimeline.map((punch, idx) => (
+                        <div key={punch.id ?? idx} className="bezent-punch-timeline__item">
+                          <span
+                            className={`bezent-punch-timeline__dot ${punch.punchType === 'out' ? 'is-out' : ''}`}
+                          />
+                          <Inline justify="between" align="center">
+                            <Inline gap="sm" align="center">
+                              <Badge variant={punch.punchType === 'in' ? 'success' : 'neutral'}>
+                                {punch.punchType.toUpperCase()}
+                              </Badge>
+                              <Stack gap="none">
+                                <strong>{new Date(punch.punchTime).toLocaleTimeString()}</strong>
+                                <span className="bezent-card__desc">
+                                  Source: {punch.source} • Location: {punch.workLocation}
+                                </span>
+                              </Stack>
+                            </Inline>
+                            {punch.isDuplicate && <Badge variant="warning">Duplicate</Badge>}
                           </Inline>
-                          {punch.isDuplicate && <Badge variant="warning">Duplicate</Badge>}
-                        </Inline>
-                        {punch.notes && <p className="bezent-card__desc">{punch.notes}</p>}
-                      </Card>
-                    ))
+                          {punch.notes && <p className="bezent-card__desc">{punch.notes}</p>}
+                        </div>
+                      ))}
+                    </div>
                   )}
                 </Stack>
               )}
