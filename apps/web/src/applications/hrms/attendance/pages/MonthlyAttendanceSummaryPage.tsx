@@ -1115,30 +1115,30 @@ export function MonthlyAttendanceSummaryPage() {
                           </TableHeaderCell>
                         ))}
                         <TableHeaderCell
-                          className="bezent-attendance-col--sum-col"
+                          className="bezent-attendance-col--sticky-right bezent-attendance-col--sum-p"
                           title="Total Present Days"
                         >
                           P
                         </TableHeaderCell>
                         <TableHeaderCell
-                          className="bezent-attendance-col--sum-col"
+                          className="bezent-attendance-col--sticky-right bezent-attendance-col--sum-a"
                           title="Total Absent Days"
                         >
                           A
                         </TableHeaderCell>
                         <TableHeaderCell
-                          className="bezent-attendance-col--sum-col"
+                          className="bezent-attendance-col--sticky-right bezent-attendance-col--sum-wo"
                           title="Total Weekly Offs"
                         >
                           WO
                         </TableHeaderCell>
                         <TableHeaderCell
-                          className="bezent-attendance-col--sum-col bezent-attendance-col--sum-pay"
+                          className="bezent-attendance-col--sticky-right bezent-attendance-col--sum-pay"
                           title="Total Payable Days"
                         >
                           Pay
                         </TableHeaderCell>
-                        <TableHeaderCell className="bezent-attendance-col--sum-col bezent-attendance-col--sum-act">
+                        <TableHeaderCell className="bezent-attendance-col--sticky-right bezent-attendance-col--sum-act">
                           Act
                         </TableHeaderCell>
                       </>
@@ -1237,32 +1237,32 @@ export function MonthlyAttendanceSummaryPage() {
                           </span>
                         </TableHeaderCell>
                       ))}
-                      {/* Summary Columns */}
+                      {/* Summary Columns (Sticky Right Rail) */}
                       <TableHeaderCell
-                        className="bezent-attendance-col--sum-col"
+                        className="bezent-attendance-col--sticky-right bezent-attendance-col--sum-p"
                         title="Total Present Days"
                       >
                         P
                       </TableHeaderCell>
                       <TableHeaderCell
-                        className="bezent-attendance-col--sum-col"
+                        className="bezent-attendance-col--sticky-right bezent-attendance-col--sum-a"
                         title="Total Absent Days"
                       >
                         A
                       </TableHeaderCell>
                       <TableHeaderCell
-                        className="bezent-attendance-col--sum-col"
+                        className="bezent-attendance-col--sticky-right bezent-attendance-col--sum-wo"
                         title="Total Weekly Offs"
                       >
                         WO
                       </TableHeaderCell>
                       <TableHeaderCell
-                        className="bezent-attendance-col--sum-col bezent-attendance-col--sum-pay"
+                        className="bezent-attendance-col--sticky-right bezent-attendance-col--sum-pay"
                         title="Total Payable Days"
                       >
                         Pay
                       </TableHeaderCell>
-                      <TableHeaderCell className="bezent-attendance-col--sum-col bezent-attendance-col--sum-act">
+                      <TableHeaderCell className="bezent-attendance-col--sticky-right bezent-attendance-col--sum-act">
                         Act
                       </TableHeaderCell>
                     </TableRow>
@@ -1462,30 +1462,30 @@ export function MonthlyAttendanceSummaryPage() {
                             );
                           })}
 
-                          {/* 4. Summary Totals */}
-                          <TableCell className="bezent-attendance-col--sum-col">
+                          {/* 4. Summary Totals (Sticky Right Rail) */}
+                          <TableCell className="bezent-attendance-col--sticky-right bezent-attendance-col--sum-p">
                             <span className="bezent-attendance-grid-sum--p">
                               {formatDays(row.presentDays)}
                             </span>
                           </TableCell>
-                          <TableCell className="bezent-attendance-col--sum-col">
+                          <TableCell className="bezent-attendance-col--sticky-right bezent-attendance-col--sum-a">
                             <span className="bezent-attendance-grid-sum--a">
                               {formatDays(row.absentDays)}
                             </span>
                           </TableCell>
-                          <TableCell className="bezent-attendance-col--sum-col">
+                          <TableCell className="bezent-attendance-col--sticky-right bezent-attendance-col--sum-wo">
                             <span className="bezent-table-meta-subtitle">
                               {row.weeklyOffDays ?? 0}
                             </span>
                           </TableCell>
-                          <TableCell className="bezent-attendance-col--sum-col bezent-attendance-col--sum-pay">
+                          <TableCell className="bezent-attendance-col--sticky-right bezent-attendance-col--sum-pay">
                             <span className="bezent-attendance-grid-sum--pay">
                               {formatDays(payableDays)}
                             </span>
                           </TableCell>
 
-                          {/* 5. Actions */}
-                          <TableCell className="bezent-attendance-col--sum-col bezent-attendance-col--sum-act">
+                          {/* 5. Actions (Sticky Right Rail) */}
+                          <TableCell className="bezent-attendance-col--sticky-right bezent-attendance-col--sum-act">
                             <div className="bezent-table-action-menu">
                               <button
                                 type="button"
