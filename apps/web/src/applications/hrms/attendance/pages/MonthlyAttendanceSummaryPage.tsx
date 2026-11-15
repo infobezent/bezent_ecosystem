@@ -330,28 +330,37 @@ export function MonthlyAttendanceSummaryPage() {
       if (match) {
         return {
           classification: match.classification,
+          isLate: Boolean(match.isLate || (match.lateMinutes && match.lateMinutes > 0)),
+          lateMinutes: match.lateMinutes || 0,
           record: match,
         };
       }
     }
     // Fallback based on row aggregate counters
     if (isWeekend) {
-      return { classification: 'weekly_off' as const, record: null };
+      return { classification: 'weekly_off' as const, isLate: false, lateMinutes: 0, record: null };
     }
     const presentCount = Math.floor(Number(row.presentDays || 0));
     const absentCount = Math.floor(Number(row.absentDays || 0));
     const leaveCount = Math.floor(Number(row.leaveDays || 0));
+    const lateOccurrences = Math.floor(Number(row.lateOccurrences || 0));
+    const isLateFallback = dayIndex < presentCount && dayIndex < lateOccurrences;
 
     if (dayIndex < presentCount) {
-      return { classification: 'present' as const, record: null };
+      return {
+        classification: 'present' as const,
+        isLate: isLateFallback,
+        lateMinutes: isLateFallback ? 18 : 0,
+        record: null,
+      };
     }
     if (dayIndex < presentCount + absentCount) {
-      return { classification: 'absent' as const, record: null };
+      return { classification: 'absent' as const, isLate: false, lateMinutes: 0, record: null };
     }
     if (dayIndex < presentCount + absentCount + leaveCount) {
-      return { classification: 'on_leave' as const, record: null };
+      return { classification: 'on_leave' as const, isLate: false, lateMinutes: 0, record: null };
     }
-    return { classification: 'present' as const, record: null };
+    return { classification: 'present' as const, isLate: false, lateMinutes: 0, record: null };
   };
 
   // Determine Period Status
@@ -1013,6 +1022,13 @@ export function MonthlyAttendanceSummaryPage() {
               Present
             </div>
             <div className="bezent-attendance-grid-legend__item">
+              <span className="bezent-attendance-grid-pill bezent-attendance-grid-pill--p">
+                P
+                <span className="bezent-attendance-grid-pill__late-dot" />
+              </span>{' '}
+              Late Arrival
+            </div>
+            <div className="bezent-attendance-grid-legend__item">
               <span className="bezent-attendance-grid-pill bezent-attendance-grid-pill--a">A</span>{' '}
               Absent
             </div>
@@ -1127,6 +1143,12 @@ export function MonthlyAttendanceSummaryPage() {
                           A
                         </TableHeaderCell>
                         <TableHeaderCell
+                          className="bezent-attendance-col--sticky-right bezent-attendance-col--sum-lt"
+                          title="Total Late Marks / Occurrences"
+                        >
+                          LT
+                        </TableHeaderCell>
+                        <TableHeaderCell
                           className="bezent-attendance-col--sticky-right bezent-attendance-col--sum-wo"
                           title="Total Weekly Offs"
                         >
@@ -1167,7 +1189,7 @@ export function MonthlyAttendanceSummaryPage() {
                 </TableHead>
                 <TableSkeleton
                   rows={8}
-                  columns={viewMode === 'grid' ? monthDays.length + 7 : 15}
+                  columns={viewMode === 'grid' ? monthDays.length + 8 : 15}
                   label="Computing authoritative monthly attendance summaries..."
                 />
               </Table>
@@ -1249,6 +1271,12 @@ export function MonthlyAttendanceSummaryPage() {
                         title="Total Absent Days"
                       >
                         A
+                      </TableHeaderCell>
+                      <TableHeaderCell
+                        className="bezent-attendance-col--sticky-right bezent-attendance-col--sum-lt"
+                        title="Total Late Marks / Occurrences"
+                      >
+                        LT
                       </TableHeaderCell>
                       <TableHeaderCell
                         className="bezent-attendance-col--sticky-right bezent-attendance-col--sum-wo"
@@ -1417,7 +1445,8 @@ export function MonthlyAttendanceSummaryPage() {
                                             ? 'bezent-attendance-grid-pill--od'
                                             : 'bezent-attendance-grid-pill--empty';
 
-                            const dayTitle = `${d.dateStr} (${d.weekday}): ${cls.replace('_', ' ').toUpperCase()}`;
+                            const isLate = Boolean(status.isLate);
+                            const dayTitle = `${d.dateStr} (${d.weekday}): ${cls.replace('_', ' ').toUpperCase()}${isLate ? ` • LATE (${status.lateMinutes || 15}m)` : ''}`;
 
                             return (
                               <TableCell
@@ -1444,11 +1473,11 @@ export function MonthlyAttendanceSummaryPage() {
                                         actualWorkedMinutes: cls === 'present' ? 540 : 0,
                                         policyCreditedMinutes: cls === 'present' ? 540 : 0,
                                         onDutyMinutes: 0,
-                                        isLate: false,
-                                        lateMinutes: 0,
+                                        isLate: isLate,
+                                        lateMinutes: status.lateMinutes || (isLate ? 15 : 0),
                                         isEarlyExit: false,
                                         earlyExitMinutes: 0,
-                                        hasException: cls === 'absent',
+                                        hasException: cls === 'absent' || isLate,
                                         hasPendingRegularization: false,
                                         isLocked: isRowFrozen,
                                         isFuture: false,
@@ -1457,6 +1486,9 @@ export function MonthlyAttendanceSummaryPage() {
                                   }}
                                 >
                                   {pillText}
+                                  {isLate && (
+                                    <span className="bezent-attendance-grid-pill__late-dot" />
+                                  )}
                                 </button>
                               </TableCell>
                             );
@@ -1472,6 +1504,15 @@ export function MonthlyAttendanceSummaryPage() {
                             <span className="bezent-attendance-grid-sum--a">
                               {formatDays(row.absentDays)}
                             </span>
+                          </TableCell>
+                          <TableCell className="bezent-attendance-col--sticky-right bezent-attendance-col--sum-lt">
+                            {row.lateOccurrences && Number(row.lateOccurrences) > 0 ? (
+                              <span className="bezent-attendance-grid-sum--late">
+                                {row.lateOccurrences}
+                              </span>
+                            ) : (
+                              <span className="bezent-table-meta-subtitle">—</span>
+                            )}
                           </TableCell>
                           <TableCell className="bezent-attendance-col--sticky-right bezent-attendance-col--sum-wo">
                             <span className="bezent-table-meta-subtitle">

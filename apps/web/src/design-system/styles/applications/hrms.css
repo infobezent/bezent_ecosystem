@@ -16586,7 +16586,7 @@
 }
 
 .bezent-attendance-grid-table {
-  min-width: 1720px;
+  min-width: 1780px;
   width: max-content;
   table-layout: fixed;
   border-collapse: separate;
@@ -16648,6 +16648,7 @@
 
 /* Status Pill in Grid Cells */
 .bezent-attendance-grid-pill {
+  position: relative;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -16662,6 +16663,24 @@
     transform 0.12s ease,
     box-shadow 0.12s ease;
   user-select: none;
+}
+
+.bezent-attendance-grid-pill__late-dot {
+  position: absolute;
+  top: -2px;
+  right: -2px;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background-color: #f59e0b;
+  border: 1.5px solid #ffffff;
+  box-shadow: 0 0 2px rgba(0, 0, 0, 0.25);
+  pointer-events: none;
+}
+
+[data-theme='dark'] .bezent-attendance-grid-pill__late-dot {
+  border-color: #1e293b;
+  background-color: #fbbf24;
 }
 
 .bezent-attendance-grid-pill:hover {
@@ -16778,7 +16797,7 @@ thead .bezent-attendance-col--sticky-right {
 }
 
 .bezent-attendance-col--sum-p {
-  right: 184px;
+  right: 228px;
   width: 44px;
   min-width: 44px;
   max-width: 44px;
@@ -16787,6 +16806,13 @@ thead .bezent-attendance-col--sticky-right {
 }
 
 .bezent-attendance-col--sum-a {
+  right: 184px;
+  width: 44px;
+  min-width: 44px;
+  max-width: 44px;
+}
+
+.bezent-attendance-col--sum-lt {
   right: 140px;
   width: 44px;
   min-width: 44px;
@@ -16831,6 +16857,25 @@ thead .bezent-attendance-col--sticky-right {
 .bezent-attendance-grid-sum--a {
   font-weight: 700;
   color: var(--color-danger, #b91c1c);
+}
+
+.bezent-attendance-grid-sum--late {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1px 6px;
+  border-radius: 10px;
+  font-size: 11px;
+  font-weight: 700;
+  background-color: #fef3c7;
+  color: #b45309;
+  border: 1px solid #fde68a;
+}
+
+[data-theme='dark'] .bezent-attendance-grid-sum--late {
+  background-color: rgba(245, 158, 11, 0.2);
+  color: #fde68a;
+  border-color: rgba(245, 158, 11, 0.35);
 }
 
 .bezent-attendance-grid-sum--pay {
