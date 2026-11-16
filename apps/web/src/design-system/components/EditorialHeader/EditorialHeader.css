@@ -65,7 +65,7 @@
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.8px;
-  color: var(--accent-interactive, #1a73e8);
+  color: var(--accent-interactive, var(--blue-interactive));
 }
 
 .bezent-editorial-header__title-row {

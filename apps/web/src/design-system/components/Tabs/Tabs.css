@@ -66,7 +66,7 @@
 }
 
 .bezent-tabs--underline .bezent-tab.is-active::after {
-  background: #1a73e8;
+  background: var(--blue-interactive);
 }
 
 /* Pills variant */
@@ -113,7 +113,7 @@
 }
 
 .bezent-tab:focus-visible {
-  outline: 2px solid var(--accent-interactive, #1a73e8);
+  outline: 2px solid var(--accent-interactive, var(--blue-interactive));
   outline-offset: 2px;
 }
 

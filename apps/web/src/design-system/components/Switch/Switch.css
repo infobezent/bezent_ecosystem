@@ -52,8 +52,8 @@
 
 /* ── Checked State ── */
 .bezent-switch-input:checked + .bezent-switch-track {
-  background: #14b8a6;
-  border-color: #14b8a6;
+  background: var(--teal-500);
+  border-color: var(--teal-500);
 }
 
 .bezent-switch-input:checked + .bezent-switch-track .bezent-switch-thumb {
@@ -62,7 +62,7 @@
 
 /* ── Focus Visible ── */
 .bezent-switch-input:focus-visible + .bezent-switch-track {
-  outline: 2px solid #14b8a6;
+  outline: 2px solid var(--teal-500);
   outline-offset: 2px;
   box-shadow: 0 0 0 3px rgba(20, 184, 166, 0.16);
 }

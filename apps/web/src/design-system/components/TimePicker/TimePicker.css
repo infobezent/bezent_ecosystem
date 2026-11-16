@@ -30,11 +30,11 @@
 }
 
 .bezent-time-picker-box:hover:not(.is-disabled) {
-  border-color: #5eead4;
+  border-color: var(--teal-300);
 }
 
 .bezent-time-picker-wrapper.is-focused .bezent-time-picker-box {
-  border-color: #14b8a6;
+  border-color: var(--teal-500);
   box-shadow: 0 0 0 3px rgba(20, 184, 166, 0.14);
 }
 
@@ -94,9 +94,9 @@
 
 .bezent-time-segment-input:focus,
 .bezent-time-segment-input.is-active {
-  background: #f0fdfa;
-  border-color: #5eead4;
-  color: #0f766e;
+  background: var(--teal-50);
+  border-color: var(--teal-300);
+  color: var(--teal-700);
   font-weight: 600;
 }
 
@@ -151,12 +151,12 @@
 }
 
 .bezent-time-step-btn:hover {
-  background: #f0fdfa;
-  border-color: #5eead4;
-  color: #0f766e;
+  background: var(--teal-50);
+  border-color: var(--teal-300);
+  color: var(--teal-700);
 }
 
 .bezent-time-step-btn:active {
-  background: #ccfbf1;
+  background: var(--teal-100);
   color: #115e59;
 }

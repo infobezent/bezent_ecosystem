@@ -171,7 +171,7 @@
 }
 
 .ess-hero-profile-link {
-  color: #1a73e8;
+  color: var(--blue-interactive);
   font-size: 12.5px;
   font-weight: 500;
   text-decoration: none;
@@ -243,7 +243,7 @@
 
 /* Primary Check In Pill Button */
 .ess-hero-btn-checkin {
-  background-color: #3978f6;
+  background-color: var(--action-blue);
   color: #ffffff;
   box-shadow: 0 2px 8px rgba(57, 120, 246, 0.25);
 }
@@ -262,14 +262,14 @@
 /* Secondary Check Out Pill Button */
 .ess-hero-btn-checkout {
   background-color: #ffffff;
-  color: #3978f6;
+  color: var(--action-blue);
   border: 1.5px solid #dcebff;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
 }
 
 .ess-hero-btn-checkout:hover:not(:disabled) {
   background-color: #f0f5ff;
-  border-color: #3978f6;
+  border-color: var(--action-blue);
   color: #2864db;
   transform: translateY(-1px);
 }
@@ -338,7 +338,7 @@
 
 .ess-glass-icon-blue {
   background-color: #dcebff;
-  color: #3978f6;
+  color: var(--action-blue);
 }
 
 .ess-glass-icon-green {
@@ -500,7 +500,7 @@
 .ess-glass-break-link {
   font-size: 11.5px;
   font-weight: 600;
-  color: #1a73e8;
+  color: var(--blue-interactive);
   cursor: pointer;
   background: none;
   border: none;
@@ -544,7 +544,7 @@
   height: 32px;
   border-radius: 8px;
   background: #dcebff;
-  color: #3978f6;
+  color: var(--action-blue);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -599,7 +599,7 @@
 .ess-briefing-action-btn {
   font-size: 13px;
   font-weight: 600;
-  color: #3978f6;
+  color: var(--action-blue);
   text-decoration: none;
   background: none;
   border: none;
@@ -949,7 +949,7 @@
 .bezent-attendance-calendar__day:hover:not(:disabled) {
   transform: translateY(-2px);
   box-shadow: 0 4px 14px rgba(32, 40, 58, 0.08);
-  border-color: #3978f6;
+  border-color: var(--action-blue);
 }
 
 .bezent-attendance-calendar__tile:disabled,
@@ -960,7 +960,7 @@
 /* Accessible focus ring */
 .bezent-attendance-calendar__tile:focus-visible,
 .bezent-attendance-calendar__day:focus-visible {
-  outline: 2px solid #3978f6;
+  outline: 2px solid var(--action-blue);
   outline-offset: 1px;
   z-index: 3;
 }
@@ -985,7 +985,7 @@
 .bezent-attendance-calendar__tile-today-pill {
   font-size: 9px;
   font-weight: 700;
-  background-color: #3978f6;
+  background-color: var(--action-blue);
   color: #ffffff;
   padding: 1.5px 5px;
   border-radius: 4px;
@@ -998,7 +998,7 @@
   width: 6px;
   height: 6px;
   border-radius: 50%;
-  background-color: #3978f6;
+  background-color: var(--action-blue);
   display: inline-block;
   flex-shrink: 0;
 }
@@ -1101,7 +1101,7 @@
   color: var(--text-primary, #202938);
 }
 .bezent-attendance-calendar__tile--holiday .bezent-attendance-calendar__tile-status {
-  color: #3978f6;
+  color: var(--action-blue);
 }
 
 /* Weekly Off: neutral soft background */
@@ -1269,15 +1269,15 @@
 /* ── Today & Selection Highlights ── */
 .bezent-attendance-calendar__tile--today,
 .bezent-attendance-calendar__day--today {
-  border: 2px solid #3978f6;
+  border: 2px solid var(--action-blue);
 }
 
 .bezent-attendance-calendar__tile--selected,
 .bezent-attendance-calendar__day--selected {
-  outline: 2px solid #3978f6;
+  outline: 2px solid var(--action-blue);
   outline-offset: -1px;
   box-shadow:
-    0 0 0 1px #3978f6,
+    0 0 0 1px var(--action-blue),
     0 4px 14px rgba(57, 120, 246, 0.15);
   z-index: 2;
 }
@@ -1403,7 +1403,7 @@
 }
 
 .bezent-attendance-calendar__legend-dot--holiday {
-  background-color: #3978f6;
+  background-color: var(--action-blue);
 }
 
 .bezent-attendance-calendar__legend-dot--weekly-off {
@@ -1436,7 +1436,7 @@
   align-items: center;
   justify-content: center;
   padding: 18px 14px 16px 14px;
-  border-radius: 18px;
+  border-radius: var(--radius-card);
   text-align: center;
   gap: 6px;
   min-height: 126px;
@@ -1518,7 +1518,7 @@
   color: #1d57c7;
 }
 .bezent-attendance-summary__card--worked .bezent-attendance-summary__label {
-  color: #3978f6;
+  color: var(--action-blue);
 }
 
 .bezent-attendance-summary__card--missing-punch {
@@ -1663,7 +1663,7 @@
   height: 38px;
   border-radius: 8px;
   background: #e8f1ff;
-  color: #3978f6;
+  color: var(--action-blue);
   flex-shrink: 0;
 }
 
@@ -1706,7 +1706,7 @@
 .ess-attendance-today-card {
   background: var(--bg-surface, #ffffff);
   border: 1px solid var(--border-default, #e4e9f2);
-  border-radius: 20px;
+  border-radius: var(--radius-card);
   padding: 22px 24px;
   display: flex;
   flex-direction: column;
@@ -1756,7 +1756,7 @@
   width: auto;
   height: auto;
   background: transparent !important;
-  color: #3978f6;
+  color: var(--action-blue);
   box-shadow: none !important;
 }
 
@@ -1885,7 +1885,7 @@
   font-size: 14px;
   font-weight: 700;
   border-radius: 10px;
-  background: #3978f6;
+  background: var(--action-blue);
   color: #ffffff;
   box-shadow: 0 4px 14px rgba(57, 120, 246, 0.28);
 }
@@ -2160,7 +2160,7 @@
 .onboarding-page__drafts-btn:hover,
 .bezent-btn-draft:hover {
   background: var(--bg-surface-secondary, #f0f4f9);
-  border-color: var(--border-focus, #1a73e8);
+  border-color: var(--border-focus, var(--blue-interactive));
   color: var(--brand-primary, #041e49);
 }
 
@@ -2275,7 +2275,7 @@
 .ess-profile-header-card {
   background: var(--color-surface, #ffffff);
   border: 1px solid var(--border-default, #dde3ea);
-  border-radius: 14px;
+  border-radius: var(--radius-card);
   padding: 14px 20px;
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
   transition: all 0.2s ease;
@@ -2512,7 +2512,7 @@
   height: 28px;
   border-radius: 6px;
   background: rgba(26, 115, 232, 0.08);
-  color: var(--accent-interactive, #1a73e8);
+  color: var(--accent-interactive, var(--blue-interactive));
   flex-shrink: 0;
 }
 
@@ -3598,7 +3598,7 @@
 }
 
 .ess-timesheets-grid-table th.is-today {
-  color: var(--primary-accent, #1a73e8);
+  color: var(--primary-accent, var(--blue-interactive));
   font-weight: 700;
   background: rgba(26, 115, 232, 0.06);
 }
@@ -3705,7 +3705,7 @@
 
 .ess-timesheets-empty-cell:hover {
   background: var(--bg-hover, #f1f5f9);
-  color: var(--primary-accent, #1a73e8);
+  color: var(--primary-accent, var(--blue-interactive));
 }
 
 .ess-timesheets-row-total {
@@ -3726,7 +3726,7 @@
 }
 
 .ess-timesheets-grand-total {
-  color: var(--primary-accent, #1a73e8);
+  color: var(--primary-accent, var(--blue-interactive));
   font-size: 14px;
 }
 
@@ -3848,7 +3848,7 @@
 .ess-timesheets-day-total {
   font-weight: 700;
   font-size: 13px;
-  color: var(--primary-accent, #1a73e8);
+  color: var(--primary-accent, var(--blue-interactive));
 }
 
 @media (max-width: 768px) {
@@ -3909,7 +3909,7 @@
 .ess-timesheets-project-chip-btn {
   background: none;
   border: none;
-  color: var(--primary-accent, #1a73e8);
+  color: var(--primary-accent, var(--blue-interactive));
   cursor: pointer;
   font-size: 11px;
   text-decoration: underline;
@@ -4063,7 +4063,7 @@
 .ess-panel-header-link {
   font-size: 12.5px;
   font-weight: 600;
-  color: var(--action-blue, #3978f6);
+  color: var(--action-blue, var(--action-blue));
   background: none;
   border: none;
   cursor: pointer;
@@ -4167,7 +4167,7 @@
 }
 
 .ess-quick-action-tile:focus-visible {
-  outline: 2px solid var(--action-blue, #3978f6);
+  outline: 2px solid var(--action-blue, var(--action-blue));
   outline-offset: 1px;
 }
 
@@ -4206,7 +4206,7 @@
 .ess-quick-action-tile--blue .ess-quick-action-icon-wrap {
   background: transparent;
   box-shadow: none;
-  color: #2563eb;
+  color: var(--blue-600);
 }
 
 /* 2. Fresh Mint (Regularize) */
@@ -4473,7 +4473,7 @@
 .ess-action-item-card {
   background: #f8fafc;
   border: 1px solid var(--border-default, #e5eaf2);
-  border-radius: 12px;
+  border-radius: var(--radius-card);
   padding: 12px 16px;
   display: flex;
   align-items: center;
@@ -4545,7 +4545,7 @@
 
 .ess-action-priority-badge--info {
   background-color: #dcebff;
-  color: #3978f6;
+  color: var(--action-blue);
   border: 1px solid #bbddfb;
 }
 
@@ -4581,7 +4581,7 @@
 }
 
 .ess-leave-quota-card {
-  border-radius: 12px;
+  border-radius: var(--radius-card);
   padding: 14px 10px;
   display: flex;
   flex-direction: column;
@@ -4637,7 +4637,7 @@
 .ess-next-leave-card {
   background: #f8fafc;
   border: 1px solid var(--border-default, #e5eaf2);
-  border-radius: 12px;
+  border-radius: var(--radius-card);
   padding: 12px 16px;
   display: flex;
   align-items: center;
@@ -4662,7 +4662,7 @@
   height: 32px;
   border-radius: 8px;
   background: var(--pastel-blue, #dcebff);
-  color: var(--action-blue, #3978f6);
+  color: var(--action-blue, var(--action-blue));
   display: flex;
   align-items: center;
   justify-content: center;
@@ -4683,7 +4683,7 @@
 }
 
 .ess-apply-leave-btn {
-  background-color: var(--action-blue, #3978f6);
+  background-color: var(--action-blue, var(--action-blue));
   color: #ffffff;
   border: none;
   border-radius: 8px;
@@ -4724,7 +4724,7 @@
   height: 48px;
   border-radius: 12px;
   background-color: var(--pastel-blue, #dcebff);
-  color: var(--action-blue, #3978f6);
+  color: var(--action-blue, var(--action-blue));
   display: flex;
   align-items: center;
   justify-content: center;
@@ -4812,11 +4812,11 @@
 .ess-btn-secondary:hover {
   background: #f8fafc;
   border-color: #bbddfb;
-  color: var(--action-blue, #3978f6);
+  color: var(--action-blue, var(--action-blue));
 }
 
 .ess-btn-primary {
-  background-color: var(--action-blue, #3978f6);
+  background-color: var(--action-blue, var(--action-blue));
   color: #ffffff;
   border: none;
   border-radius: 9px;
@@ -4859,7 +4859,7 @@
 .ess-feed-filter-btn:hover {
   background: #ffffff;
   border-color: #bbddfb;
-  color: var(--action-blue, #3978f6);
+  color: var(--action-blue, var(--action-blue));
 }
 
 .ess-feed-filter-btn.is-active {
@@ -4877,7 +4877,7 @@
 .ess-feed-post-card {
   background: #f8fafc;
   border: 1px solid var(--border-default, #e5eaf2);
-  border-radius: 12px;
+  border-radius: var(--radius-card);
   padding: 16px;
   display: flex;
   flex-direction: column;
@@ -4914,7 +4914,7 @@
   height: 36px;
   border-radius: 50%;
   background-color: var(--pastel-blue, #dcebff);
-  color: var(--action-blue, #3978f6);
+  color: var(--action-blue, var(--action-blue));
   display: flex;
   align-items: center;
   justify-content: center;
@@ -4992,7 +4992,7 @@
 .ess-feed-action-btn:hover {
   background: var(--pastel-blue, #dcebff);
   border-color: #bbddfb;
-  color: var(--action-blue, #3978f6);
+  color: var(--action-blue, var(--action-blue));
 }
 
 .ess-feed-action-btn.is-liked {
@@ -5011,7 +5011,7 @@
 .ess-event-card {
   background: #f8fafc;
   border: 1px solid var(--border-default, #e5eaf2);
-  border-radius: 12px;
+  border-radius: var(--radius-card);
   padding: 10px 14px;
   display: flex;
   align-items: center;
@@ -5112,7 +5112,7 @@
 .ess-learning-percent {
   font-size: 13px;
   font-weight: 700;
-  color: var(--action-blue, #3978f6);
+  color: var(--action-blue, var(--action-blue));
 }
 
 .ess-learning-sub {
@@ -5187,7 +5187,7 @@
 .ess-team-member-card {
   background: #f8fafc;
   border: 1px solid var(--border-default, #e5eaf2);
-  border-radius: 12px;
+  border-radius: var(--radius-card);
   padding: 10px 14px;
   display: flex;
   align-items: center;
@@ -5218,7 +5218,7 @@
   height: 34px;
   border-radius: 50%;
   background-color: var(--pastel-blue, #dcebff);
-  color: var(--action-blue, #3978f6);
+  color: var(--action-blue, var(--action-blue));
   display: flex;
   align-items: center;
   justify-content: center;
@@ -5573,7 +5573,7 @@
 }
 
 .attendance-clay-dot--blue {
-  background: linear-gradient(135deg, #60a5fa 0%, #2563eb 100%);
+  background: linear-gradient(135deg, #60a5fa 0%, var(--blue-600) 100%);
 }
 .attendance-clay-dot--green {
   background: linear-gradient(135deg, #34d399 0%, #059669 100%);
@@ -5641,7 +5641,7 @@
 
 /* ── 2. Four Primary 3D Statistic Cards (Compact Borderless 3D Clay Objects) ── */
 .attendance-clay-card {
-  border-radius: 20px !important;
+  border-radius: var(--radius-card) !important;
   padding: 14px 18px 12px 18px !important;
   display: flex !important;
   flex-direction: column !important;
@@ -5760,7 +5760,7 @@
   background: #e11d48;
 }
 .attendance-clay-card__dot--blue {
-  background: #2563eb;
+  background: var(--blue-600);
 }
 
 /* 3D Embossed Squircle Icon Button (Matching Screenshot) */
@@ -6042,7 +6042,7 @@
 
 /* ── 5. Monthly Payroll Readiness Clay Panels (Borderless Clay Objects) ── */
 .attendance-clay-readiness-card {
-  border-radius: 18px;
+  border-radius: var(--radius-card);
   padding: 16px 20px;
   display: flex;
   flex-direction: column;
@@ -6156,10 +6156,6 @@
 }
 
 .bezent-wf-title-row .bezent-page-header__title {
-  font-size: 24px;
-  font-weight: 750;
-  letter-spacing: -0.025em;
-  color: #20263a;
   margin: 0;
 }
 
@@ -6546,7 +6542,7 @@
 /* Card 2: Onboarding (Inflow) */
 .bezent-kpi-sub-pill--onboarding {
   background: #eff6ff;
-  color: #2563eb;
+  color: var(--blue-600);
   border: none;
 }
 .bezent-kpi-sub-pill--onboarding .bezent-kpi-sub-pill-dot {
@@ -6739,7 +6735,7 @@
 
 .bezent-exec-kpi-card__icon-badge--blue {
   background: #e8f2ff;
-  color: #2563eb;
+  color: var(--blue-600);
   border: 1px solid #dbeafe;
 }
 
@@ -7310,7 +7306,7 @@
 }
 
 .bezent-kpi-activity-bar--hovered {
-  fill: #2563eb !important;
+  fill: var(--blue-600) !important;
   opacity: 1 !important;
   filter: drop-shadow(0 1px 3px rgba(0, 0, 0, 0.15));
 }
@@ -7379,7 +7375,7 @@
 .bezent-kpi-arrival-arc--w2,
 .bezent-kpi-onboarding-node--verification .bezent-kpi-arrival-arc,
 .bezent-kpi-onboarding-node--w2 .bezent-kpi-arrival-arc {
-  stroke: #2563eb;
+  stroke: var(--blue-600);
 }
 
 .bezent-kpi-arrival-arc--step-2,
@@ -7475,7 +7471,7 @@
 }
 
 .bezent-kpi-arrival-arrow-stem {
-  stroke: #2563eb;
+  stroke: var(--blue-600);
   stroke-width: 4.8;
   stroke-linecap: round;
   transition:
@@ -7484,7 +7480,7 @@
 }
 
 .bezent-kpi-arrival-arrowhead {
-  fill: #2563eb;
+  fill: var(--blue-600);
   transition:
     fill 0.2s ease,
     filter 0.2s ease;
@@ -7505,12 +7501,12 @@
 
 .bezent-kpi-arrival-arrow-group:hover .bezent-kpi-arrival-arrow-stem,
 .bezent-kpi-arrival-arrow-group.is-hovered .bezent-kpi-arrival-arrow-stem {
-  stroke: #2563eb;
+  stroke: var(--blue-600);
 }
 
 .bezent-kpi-arrival-arrow-group:hover .bezent-kpi-arrival-arrowhead,
 .bezent-kpi-arrival-arrow-group.is-hovered .bezent-kpi-arrival-arrowhead {
-  fill: #2563eb;
+  fill: var(--blue-600);
 }
 
 [data-theme='dark'] .bezent-kpi-arrival-arrow-group:hover,
@@ -7597,7 +7593,7 @@
 }
 
 .bezent-kpi-arrival-icon--induction {
-  color: #2563eb;
+  color: var(--blue-600);
 }
 
 [data-theme='dark'] .bezent-kpi-arrival-icon--induction {
@@ -7613,7 +7609,7 @@
 }
 
 .bezent-kpi-arrival-icon--arrow {
-  color: #2563eb;
+  color: var(--blue-600);
 }
 
 [data-theme='dark'] .bezent-kpi-arrival-icon--arrow {
@@ -8725,13 +8721,13 @@
 }
 
 .bezent-kpi-folder-item--expiring .folder-back {
-  fill: #14b8a6;
+  fill: var(--teal-500);
 }
 .bezent-kpi-folder-item--expiring .folder-front {
-  fill: #0d9488;
+  fill: var(--teal-600);
 }
 .bezent-kpi-folder-item--expiring .doc-badge {
-  fill: #14b8a6;
+  fill: var(--teal-500);
 }
 
 .bezent-kpi-folder-item--verified .folder-back {
@@ -9021,7 +9017,7 @@
 
 /* Transfers Segments */
 .bezent-kpi-transfer-segment--branch {
-  fill: #2563eb;
+  fill: var(--blue-600);
 }
 .bezent-kpi-transfer-segment--location {
   fill: #10b981;
@@ -9030,7 +9026,7 @@
   fill: #f59e0b;
 }
 .bezent-kpi-transfer-segment--designation {
-  fill: #0d9488;
+  fill: var(--teal-600);
 }
 .bezent-kpi-transfer-segment--empty {
   fill: #e2e8f0;
@@ -9096,7 +9092,7 @@
 .bezent-wf-mega-card {
   background: #ffffff;
   border: 1px solid #e9eaf4;
-  border-radius: 18px;
+  border-radius: var(--radius-card);
   padding: 22px 26px;
   box-shadow:
     0 4px 20px -2px rgba(32, 45, 75, 0.035),
@@ -9144,7 +9140,7 @@
   align-items: center;
   justify-content: center;
   background: #e8f2ff;
-  color: #2563eb;
+  color: var(--blue-600);
   border: 1px solid #dbeafe;
   flex-shrink: 0;
 }
@@ -9233,7 +9229,7 @@
   border: none;
   font-size: 13px;
   font-weight: 600;
-  color: #2563eb;
+  color: var(--blue-600);
   cursor: pointer;
   padding: 4px 8px;
   border-radius: 6px;
@@ -9289,7 +9285,7 @@
   position: relative;
   background: #ffffff;
   border: 1px solid #e9eaf4;
-  border-radius: 20px;
+  border-radius: var(--radius-card);
   padding: 22px 24px;
   display: flex;
   flex-direction: column;
@@ -9357,7 +9353,7 @@
 
 .bezent-wf-feature-card__icon--blue {
   background: #eff6ff;
-  color: #2563eb;
+  color: var(--blue-600);
   border: 1px solid #dbeafe;
 }
 
@@ -9807,7 +9803,7 @@
   height: 36px;
   border-radius: 10px;
   background: #eff6ff;
-  color: #2563eb;
+  color: var(--blue-600);
   border: 1px solid #dbeafe;
   display: inline-flex;
   align-items: center;
@@ -10177,14 +10173,14 @@
 }
 
 .bezent-wf-trend-tooltip-val-teal {
-  fill: #2dd4bf;
+  fill: var(--teal-400);
   font-size: 11.5px;
   font-weight: 600;
   font-family: inherit;
 }
 
 .bezent-wf-trend-tooltip-val-sec {
-  fill: #2dd4bf;
+  fill: var(--teal-400);
   font-size: 11.5px;
   font-weight: 600;
   font-family: inherit;
@@ -10227,7 +10223,7 @@
 }
 
 .bezent-wf-legend-dot--emerald {
-  background: #0d9488;
+  background: var(--teal-600);
 }
 
 .bezent-wf-legend-dot--slate {
@@ -10243,11 +10239,11 @@
 }
 
 .bezent-wf-legend-dot--blue {
-  background: #2563eb;
+  background: var(--blue-600);
 }
 
 .bezent-wf-series-line--joiners {
-  stroke: #0d9488;
+  stroke: var(--teal-600);
   stroke-width: 2.85;
   stroke-linecap: round;
   stroke-linejoin: round;
@@ -10268,7 +10264,7 @@
 }
 
 .bezent-wf-series-line--retention {
-  stroke: #0d9488;
+  stroke: var(--teal-600);
   stroke-width: 2.85;
   stroke-linecap: round;
   stroke-linejoin: round;
@@ -10600,7 +10596,7 @@
   height: 36px;
   border-radius: 10px;
   background: #eff6ff;
-  color: #2563eb;
+  color: var(--blue-600);
   border: 1px solid #dbeafe;
   display: inline-flex;
   align-items: center;
@@ -11105,7 +11101,7 @@
   height: 36px;
   border-radius: 10px;
   background: #eff6ff;
-  color: #2563eb;
+  color: var(--blue-600);
   border: 1px solid #dbeafe;
   display: inline-flex;
   align-items: center;
@@ -11159,7 +11155,7 @@
 .bezent-wf-card-header-link {
   font-size: 12.5px;
   font-weight: 600;
-  color: #2563eb;
+  color: var(--blue-600);
   background: transparent;
   border: none;
   cursor: pointer;
@@ -11236,7 +11232,7 @@
 }
 
 .bezent-wf-plan-stat-val--blue {
-  color: #2563eb;
+  color: var(--blue-600);
 }
 
 [data-theme='dark'] .bezent-wf-plan-stat-val--blue {
@@ -11263,7 +11259,7 @@
 
 .bezent-wf-plan-ratio-text {
   font-weight: 600;
-  color: #2563eb;
+  color: var(--blue-600);
   font-variant-numeric: tabular-nums;
 }
 
@@ -11331,7 +11327,7 @@
 
 .bezent-wf-plan-sec-pill--blue {
   background: #eff6ff;
-  color: #2563eb;
+  color: var(--blue-600);
 }
 
 [data-theme='dark'] .bezent-wf-plan-sec-pill--amber {
@@ -11608,7 +11604,7 @@
 
 .bezent-wf-drawer-meta-pill--blue {
   background: #eff6ff;
-  color: #2563eb;
+  color: var(--blue-600);
 }
 
 [data-theme='dark'] .bezent-wf-drawer-meta-pill--amber {
@@ -11715,7 +11711,7 @@
 
 .bezent-wf-planning-stat-icon--blue {
   background: #eff6ff;
-  color: #2563eb;
+  color: var(--blue-600);
   border: 1px solid #dbeafe;
 }
 
@@ -11767,7 +11763,7 @@
 .bezent-wf-planning-mini-fill {
   height: 100%;
   border-radius: 999px;
-  background: linear-gradient(90deg, #3b82f6, #2563eb);
+  background: linear-gradient(90deg, #3b82f6, var(--blue-600));
   transition: width 0.4s ease;
 }
 
@@ -11926,7 +11922,7 @@
 }
 .bezent-wf-chip-icon--teal {
   background: #eff6ff;
-  color: #2563eb;
+  color: var(--blue-600);
   border: 1px solid #dbeafe;
 }
 
@@ -12110,7 +12106,7 @@
 }
 
 .bezent-wf-dept-bar-track .bezent-progress-bar__fill--primary {
-  background: linear-gradient(90deg, #3b82f6, #2563eb);
+  background: linear-gradient(90deg, #3b82f6, var(--blue-600));
   border-radius: 999px;
 }
 
@@ -12255,7 +12251,7 @@
   height: 24px;
   border-radius: 999px;
   background: #eff6ff;
-  color: #2563eb;
+  color: var(--blue-600);
   font-size: 10.5px;
   font-weight: 750;
   display: inline-flex;
@@ -12503,7 +12499,7 @@
 
 .bezent-wf-priority-pill--low {
   background: #eff6ff;
-  color: #2563eb;
+  color: var(--blue-600);
   border: 1px solid #bfdbfe;
 }
 
@@ -12884,7 +12880,7 @@
 
 .bezent-wf-pillar--blue .bezent-wf-pillar-volume {
   background: #eef6ff;
-  color: #2563eb;
+  color: var(--blue-600);
 }
 
 .bezent-wf-pillar--green .bezent-wf-pillar-volume {
@@ -13054,7 +13050,7 @@
 }
 
 .bezent-wf-action-item:focus-visible {
-  outline: 2px solid #2563eb;
+  outline: 2px solid var(--blue-600);
   outline-offset: 2px;
 }
 
@@ -13113,7 +13109,7 @@
 
 .bezent-wf-action-icon--blue {
   background: #eff6ff;
-  color: #2563eb;
+  color: var(--blue-600);
 }
 
 [data-theme='dark'] .bezent-wf-action-icon--blue {
@@ -13122,13 +13118,13 @@
 }
 
 .bezent-wf-action-icon--teal {
-  background: #f0fdfa;
-  color: #0f766e;
+  background: var(--teal-50);
+  color: var(--teal-700);
 }
 
 [data-theme='dark'] .bezent-wf-action-icon--teal {
   background: rgba(20, 184, 166, 0.2);
-  color: #2dd4bf;
+  color: var(--teal-400);
 }
 
 .bezent-wf-action-icon--purple {
@@ -13239,7 +13235,7 @@
 
 .bezent-wf-action-priority--attention {
   background: #eff6ff;
-  color: #2563eb;
+  color: var(--blue-600);
 }
 
 [data-theme='dark'] .bezent-wf-action-priority--attention {
@@ -13262,8 +13258,8 @@
   width: 42px;
   height: 42px;
   border-radius: 12px;
-  background: #f0fdfa;
-  color: #0f766e;
+  background: var(--teal-50);
+  color: var(--teal-700);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -13272,7 +13268,7 @@
 
 [data-theme='dark'] .bezent-wf-action-empty-icon {
   background: rgba(20, 184, 166, 0.2);
-  color: #2dd4bf;
+  color: var(--teal-400);
 }
 
 .bezent-wf-action-empty-title {
@@ -13353,7 +13349,7 @@
 
 .bezent-wf-timeline-dot--blue {
   background: #eff6ff;
-  color: #2563eb;
+  color: var(--blue-600);
 }
 
 [data-theme='dark'] .bezent-wf-timeline-dot--blue {
@@ -13363,14 +13359,14 @@
 
 .bezent-wf-timeline-dot--green,
 .bezent-wf-timeline-dot--teal {
-  background: #f0fdfa;
-  color: #0f766e;
+  background: var(--teal-50);
+  color: var(--teal-700);
 }
 
 [data-theme='dark'] .bezent-wf-timeline-dot--green,
 [data-theme='dark'] .bezent-wf-timeline-dot--teal {
   background: rgba(20, 184, 166, 0.2);
-  color: #2dd4bf;
+  color: var(--teal-400);
 }
 
 .bezent-wf-timeline-dot--amber {
@@ -13483,7 +13479,7 @@
 .bezent-wf-mascot-card {
   background: linear-gradient(135deg, #f0fdf4 0%, #e6f8f0 100%);
   border: 1px solid #d1fae5;
-  border-radius: 18px;
+  border-radius: var(--radius-card);
   padding: 22px 20px;
   display: flex;
   flex-direction: column;

@@ -280,7 +280,7 @@
 .bezent-modal__header--brand .bezent-btn-draft:hover {
   background: #f0f4f9;
   color: #041e49;
-  border-color: #1a73e8;
+  border-color: var(--blue-interactive);
 }
 
 .bezent-modal--workspace .bezent-modal__close-btn {
@@ -291,7 +291,7 @@
 
 .bezent-modal--workspace .bezent-modal__close-btn:hover {
   background: var(--bg-hover, #c2e7ff);
-  border-color: var(--border-focus, #1a73e8);
+  border-color: var(--border-focus, var(--blue-interactive));
   color: var(--icon-active, #041e49);
 }
 
