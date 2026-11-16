@@ -3790,14 +3790,14 @@
 }
 
 .bezent-att-cal-day {
-  min-height: 64px;
-  border-radius: 8px;
-  border: 1px solid #e2e8f0;
+  min-height: 48px;
+  border-radius: 7px;
+  border: 1px solid #edf2f7;
   background: #ffffff;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  padding: 5px 6px;
+  padding: 6px 7px 5px;
   cursor: pointer;
   position: relative;
   transition: all 0.15s ease;
@@ -3806,9 +3806,10 @@
 }
 
 .bezent-att-cal-day:hover {
-  border-color: #94a3b8;
+  border-color: #cbd5e1;
   background: #f8fafc;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+  z-index: 10;
 }
 
 .bezent-att-cal-day.is-empty {
@@ -3855,6 +3856,72 @@
   box-shadow: 0 0 0 1.5px #3b82f6 !important;
 }
 
+/* Floating Hover Tooltip: Hidden at rest, reveals ONLY on hovering */
+.bezent-att-cal-day-hover-tooltip {
+  position: absolute;
+  bottom: calc(100% + 6px);
+  left: 50%;
+  transform: translateX(-50%) translateY(2px);
+  background: #0f172a;
+  color: #ffffff;
+  font-size: 10px;
+  font-weight: 600;
+  padding: 3px 8px;
+  border-radius: 6px;
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  visibility: hidden;
+  transition:
+    opacity 0.15s ease,
+    transform 0.15s ease;
+  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.2);
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  z-index: 30;
+}
+
+.bezent-att-cal-day-hover-tooltip::after {
+  content: '';
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border-width: 4px;
+  border-style: solid;
+  border-color: #0f172a transparent transparent transparent;
+}
+
+.bezent-att-cal-day:hover .bezent-att-cal-day-hover-tooltip,
+.bezent-att-cal-day:focus-visible .bezent-att-cal-day-hover-tooltip {
+  opacity: 1;
+  visibility: visible;
+  transform: translateX(-50%) translateY(0);
+}
+
+.bezent-att-cal-hover-present {
+  color: #34d399;
+}
+
+.bezent-att-cal-hover-divider {
+  color: #64748b;
+}
+
+.bezent-att-cal-hover-absent {
+  color: #f87171;
+}
+
+[data-theme='dark'] .bezent-att-cal-day-hover-tooltip {
+  background: #1e293b;
+  border: 1px solid #334155;
+  color: #f8fafc;
+}
+
+[data-theme='dark'] .bezent-att-cal-day-hover-tooltip::after {
+  border-color: #334155 transparent transparent transparent;
+}
+
 .bezent-att-cal-day-top {
   display: flex;
   align-items: center;
@@ -3884,11 +3951,11 @@
   font-size: 9.5px;
   font-weight: 600;
   text-align: center;
-  padding: 2px 4px;
-  border-radius: 4px;
+  padding: 1px 4px;
+  border-radius: 3px;
   line-height: 1;
   align-self: center;
-  margin-top: 4px;
+  margin-top: 2px;
 }
 
 .bezent-att-cal-day-chip.is-weekend {
@@ -3911,82 +3978,37 @@
   color: #4ade80;
 }
 
+/* Very simple pastel colours for the mini progress bar graph */
 .bezent-att-cal-day-graph {
   width: 100%;
-  margin: 3px 0 2px;
+  margin-top: auto;
+  padding-top: 2px;
 }
 
 .bezent-att-cal-day-bar-svg {
   width: 100%;
-  height: 4.5px;
+  height: 3.5px;
   display: block;
-  border-radius: 2.5px;
+  border-radius: 2px;
   overflow: hidden;
 }
 
+/* Soft pastel blush for absent */
 .bezent-att-cal-day-bar-absent {
-  fill: #fca5a5;
+  fill: #fecdd3;
 }
 
+/* Soft pastel mint for present */
 .bezent-att-cal-day-bar-present {
-  fill: #10b981;
+  fill: #6ee7b7;
 }
 
 [data-theme='dark'] .bezent-att-cal-day-bar-absent {
-  fill: #f43f5e;
+  fill: rgba(244, 63, 94, 0.45);
 }
 
 [data-theme='dark'] .bezent-att-cal-day-bar-present {
-  fill: #059669;
-}
-
-.bezent-att-cal-day-metrics {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  width: 100%;
-  gap: 2px;
-}
-
-.bezent-att-cal-day-metric {
-  display: inline-flex;
-  align-items: center;
-  gap: 2px;
-  font-size: 9px;
-  font-weight: 700;
-  font-variant-numeric: tabular-nums;
-  line-height: 1;
-}
-
-.bezent-att-cal-day-metric.is-present {
-  color: #047857;
-}
-
-.bezent-att-cal-day-metric.is-absent {
-  color: #be123c;
-}
-
-[data-theme='dark'] .bezent-att-cal-day-metric.is-present {
-  color: #34d399;
-}
-
-[data-theme='dark'] .bezent-att-cal-day-metric.is-absent {
-  color: #fb7185;
-}
-
-.bezent-att-cal-day-metric-dot {
-  width: 3.5px;
-  height: 3.5px;
-  border-radius: 50%;
-  flex-shrink: 0;
-}
-
-.bezent-att-cal-day-metric-dot.is-present {
-  background: #10b981;
-}
-
-.bezent-att-cal-day-metric-dot.is-absent {
-  background: #f43f5e;
+  fill: #10b981;
 }
 
 .bezent-att-cal-selected-strip {

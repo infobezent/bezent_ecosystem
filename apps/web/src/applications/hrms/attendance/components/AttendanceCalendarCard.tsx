@@ -268,6 +268,21 @@ export const AttendanceCalendarCard: React.FC<AttendanceCalendarCardProps> = ({
                           : `${day.presentPct}% Present · ${day.absentPct}% Absent`
                     }`}
                   >
+                    {/* Hover Tooltip: Displays percentage metrics ONLY on hovering */}
+                    {!day.isWeekend && !day.isFuture && (
+                      <div
+                        className="bezent-att-cal-day-hover-tooltip"
+                        role="tooltip"
+                        aria-hidden="true"
+                      >
+                        <span className="bezent-att-cal-hover-present">
+                          {day.presentPct}% Present
+                        </span>
+                        <span className="bezent-att-cal-hover-divider">·</span>
+                        <span className="bezent-att-cal-hover-absent">{day.absentPct}% Absent</span>
+                      </div>
+                    )}
+
                     {/* Top: Date Number and Today Tag */}
                     <div className="bezent-att-cal-day-top">
                       <span className="bezent-att-cal-day-num">{day.dayNum}</span>
@@ -276,59 +291,39 @@ export const AttendanceCalendarCard: React.FC<AttendanceCalendarCardProps> = ({
                       )}
                     </div>
 
-                    {/* Content: Weekend / Plan or Graph + Present & Absent % */}
+                    {/* Content: Weekend / Plan or Small Pastel Bar Graph */}
                     {day.isWeekend ? (
                       <div className="bezent-att-cal-day-chip is-weekend">Off</div>
                     ) : day.isFuture ? (
                       <div className="bezent-att-cal-day-chip is-future">Plan</div>
                     ) : (
-                      <>
-                        {/* Small Graph: Two-Segment Horizontal Bar */}
-                        <div className="bezent-att-cal-day-graph" aria-hidden="true">
-                          <svg
-                            viewBox="0 0 100 5"
-                            className="bezent-att-cal-day-bar-svg"
-                            preserveAspectRatio="none"
-                          >
+                      /* Very simple pastel mini progress bar graph */
+                      <div className="bezent-att-cal-day-graph" aria-hidden="true">
+                        <svg
+                          viewBox="0 0 100 4"
+                          className="bezent-att-cal-day-bar-svg"
+                          preserveAspectRatio="none"
+                        >
+                          <rect
+                            x="0"
+                            y="0"
+                            width="100"
+                            height="4"
+                            rx="2"
+                            className="bezent-att-cal-day-bar-absent"
+                          />
+                          {day.presentPct > 0 && (
                             <rect
                               x="0"
                               y="0"
-                              width="100"
-                              height="5"
-                              rx="2.5"
-                              className="bezent-att-cal-day-bar-absent"
+                              width={day.presentPct}
+                              height="4"
+                              rx="2"
+                              className="bezent-att-cal-day-bar-present"
                             />
-                            {day.presentPct > 0 && (
-                              <rect
-                                x="0"
-                                y="0"
-                                width={day.presentPct}
-                                height="5"
-                                rx="2.5"
-                                className="bezent-att-cal-day-bar-present"
-                              />
-                            )}
-                          </svg>
-                        </div>
-
-                        {/* Present and Absent Metrics */}
-                        <div className="bezent-att-cal-day-metrics">
-                          <span
-                            className="bezent-att-cal-day-metric is-present"
-                            title={`Present: ${day.presentPct}%`}
-                          >
-                            <span className="bezent-att-cal-day-metric-dot is-present" />
-                            P: {day.presentPct}%
-                          </span>
-                          <span
-                            className="bezent-att-cal-day-metric is-absent"
-                            title={`Absent: ${day.absentPct}%`}
-                          >
-                            <span className="bezent-att-cal-day-metric-dot is-absent" />
-                            A: {day.absentPct}%
-                          </span>
-                        </div>
-                      </>
+                          )}
+                        </svg>
+                      </div>
                     )}
                   </button>
                 );

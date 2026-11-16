@@ -39,28 +39,28 @@ describe('AttendanceCalendarCard Component', () => {
     expect(html).toContain('role="grid"');
   });
 
-  it('renders the small graph with present percent and absent percent inside each calendar date box', () => {
+  it('renders the small pastel graph and shows present/absent percent on hovering', () => {
     const html = renderToStaticMarkup(
       <MemoryRouter>
         <AttendanceCalendarCard overviewData={mockOverviewData} />
       </MemoryRouter>,
     );
 
-    // Confirms presence of the small graph in each date box
+    // Confirms presence of the small pastel bar graph in each date box
     expect(html).toContain('bezent-att-cal-day-graph');
     expect(html).toContain('bezent-att-cal-day-bar-svg');
     expect(html).toContain('bezent-att-cal-day-bar-present');
     expect(html).toContain('bezent-att-cal-day-bar-absent');
 
-    // Confirms presence of P: and A: metric labels inside each date card
-    expect(html).toContain('P:');
-    expect(html).toContain('A:');
-    expect(html).toContain('bezent-att-cal-day-metrics');
-
-    // Confirms presence of the selected day summary strip with its rates
-    expect(html).toContain('bezent-att-cal-graph');
+    // Confirms presence of the hover tooltip displaying percentages on hover
+    expect(html).toContain('bezent-att-cal-day-hover-tooltip');
+    expect(html).toContain('bezent-att-cal-hover-present');
+    expect(html).toContain('bezent-att-cal-hover-absent');
     expect(html).toContain('88% Present');
     expect(html).toContain('12% Absent');
+
+    // Confirms no raw metric clutter at rest
+    expect(html).not.toContain('bezent-att-cal-day-metrics');
   });
 
   it('renders loading skeleton cleanly', () => {
