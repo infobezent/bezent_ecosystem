@@ -2016,12 +2016,15 @@
 /* ── 4. Attendance Trends Card & Chart ── */
 .bezent-att-trends-card {
   background: #ffffff !important;
-  border: 0.8px solid #e9eaf4 !important;
+  border: 1px solid #e9eaf4 !important;
   border-radius: var(--radius-card) !important;
   display: flex !important;
   flex-direction: column !important;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02) !important;
+  box-shadow:
+    0 1px 3px rgba(0, 0, 0, 0.03),
+    0 1px 2px rgba(0, 0, 0, 0.02) !important;
   overflow: hidden;
+  transition: border-color 0.15s ease;
 }
 
 [data-theme='dark'] .bezent-att-trends-card {
@@ -2052,24 +2055,25 @@
 .bezent-att-trends-title-group {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
 }
 
 .bezent-att-trends-icon {
-  width: 28px;
-  height: 28px;
+  width: 32px;
+  height: 32px;
   border-radius: 8px;
-  background: #f1f5f9;
-  color: #334155;
+  background: #ecfdf5;
+  color: #047857;
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
+  transition: all 0.15s ease;
 }
 
 [data-theme='dark'] .bezent-att-trends-icon {
-  background: #334155;
-  color: #cbd5e1;
+  background: rgba(16, 185, 129, 0.15);
+  color: #6ee7b7;
 }
 
 .bezent-att-trends-title {
@@ -2078,6 +2082,7 @@
   color: #0f172a !important;
   letter-spacing: -0.015em;
   margin: 0 !important;
+  line-height: 1.25;
 }
 
 [data-theme='dark'] .bezent-att-trends-title {
@@ -2087,6 +2092,9 @@
 .bezent-att-trends-subtitle {
   font-size: 11.5px;
   color: #64748b;
+  margin: 2px 0 0 0;
+  font-weight: 450;
+  line-height: 1.3;
 }
 
 [data-theme='dark'] .bezent-att-trends-subtitle {
@@ -2105,8 +2113,8 @@
   gap: 6px;
   background: #f8fafc;
   border: 1px solid #e2e8f0;
-  border-radius: 6px;
-  padding: 4px 8px;
+  border-radius: 7px;
+  padding: 4px 9px;
   font-size: 11.5px;
   font-weight: 600;
   color: #475569;
@@ -2116,19 +2124,20 @@
 }
 
 .bezent-att-legend-btn:hover {
-  background: #f1f5f9;
+  background: #ffffff;
   color: #0f172a;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
 }
 
 .bezent-att-legend-btn.is-muted {
-  opacity: 0.4;
+  opacity: 0.35;
   background: transparent;
   border-color: transparent;
 }
 
 [data-theme='dark'] .bezent-att-legend-btn {
-  background: #334155;
-  border-color: #475569;
+  background: #0f172a;
+  border-color: #334155;
   color: #cbd5e1;
 }
 
@@ -2149,7 +2158,7 @@
   background: #10b981;
 }
 .bezent-att-legend-pill--absent {
-  background: #ef4444;
+  background: #f43f5e;
 }
 .bezent-att-legend-pill--late {
   background: #f59e0b;
@@ -2164,35 +2173,67 @@
   flex: 1;
   display: flex;
   flex-direction: column;
+  justify-content: space-between;
   gap: 14px;
 }
 
 .bezent-att-trends-summary-strip {
   background: #f8fafc;
-  border: 1px solid #f1f5f9;
-  border-radius: 8px;
-  padding: 8px 14px;
+  border: 1px solid #edf2f7;
+  border-radius: 10px;
+  padding: 10px 18px;
   display: flex;
   align-items: center;
-  justify-content: space-around;
-  gap: 12px;
+  justify-content: space-between;
+  gap: 16px;
+  transition: all 0.15s ease;
 }
 
 [data-theme='dark'] .bezent-att-trends-summary-strip {
-  background: #253347;
-  border-color: #334155;
+  background: #141e2e;
+  border-color: #243248;
 }
 
 .bezent-att-summary-item {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
+  flex: 1;
+}
+
+.bezent-att-summary-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.bezent-att-summary-dot.is-present {
+  background: #10b981;
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.15);
+}
+
+.bezent-att-summary-dot.is-absent {
+  background: #f43f5e;
+  box-shadow: 0 0 0 3px rgba(244, 63, 94, 0.15);
+}
+
+.bezent-att-summary-dot.is-late {
+  background: #f59e0b;
+  box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.15);
+}
+
+.bezent-att-summary-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
 }
 
 .bezent-att-summary-label {
-  font-size: 11.5px;
-  font-weight: 500;
+  font-size: 11px;
+  font-weight: 550;
   color: #64748b;
+  letter-spacing: -0.01em;
 }
 
 [data-theme='dark'] .bezent-att-summary-label {
@@ -2200,10 +2241,11 @@
 }
 
 .bezent-att-summary-val {
-  font-size: 12.5px;
-  font-weight: 700;
+  font-size: 14px;
+  font-weight: 750;
   color: #0f172a;
   font-variant-numeric: tabular-nums;
+  line-height: 1.2;
 }
 
 [data-theme='dark'] .bezent-att-summary-val {
@@ -2214,7 +2256,7 @@
   color: #047857 !important;
 }
 .bezent-att-summary-val--absent {
-  color: #b91c1c !important;
+  color: #be123c !important;
 }
 .bezent-att-summary-val--late {
   color: #b45309 !important;
@@ -2232,8 +2274,9 @@
 
 .bezent-att-summary-divider {
   width: 1px;
-  height: 16px;
+  height: 24px;
   background: #e2e8f0;
+  flex-shrink: 0;
 }
 
 [data-theme='dark'] .bezent-att-summary-divider {
@@ -2242,38 +2285,45 @@
 
 .bezent-att-chart-container {
   width: 100%;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
   position: relative;
+  min-height: 250px;
 }
 
 .bezent-att-trend-svg {
   width: 100%;
-  height: 190px;
+  height: auto;
+  min-height: 240px;
+  max-height: 320px;
   display: block;
   overflow: visible;
 }
 
 .bezent-att-trend-gridline {
-  stroke: #f1f5f9;
+  stroke: #edf2f7;
   stroke-width: 1;
 }
 
 [data-theme='dark'] .bezent-att-trend-gridline {
-  stroke: #334155;
+  stroke: #243248;
 }
 
 .bezent-att-trend-guideline {
   stroke: #94a3b8;
   stroke-dasharray: 3 3;
-  stroke-width: 1;
+  stroke-width: 1.2;
 }
 
 .bezent-att-trend-baseline {
   stroke: #e2e8f0;
-  stroke-width: 1;
+  stroke-width: 1.2;
 }
 
 [data-theme='dark'] .bezent-att-trend-baseline {
-  stroke: #475569;
+  stroke: #334155;
 }
 
 .bezent-att-trend-axis-label {
@@ -2281,33 +2331,85 @@
   fill: #94a3b8;
   font-family: inherit;
   font-variant-numeric: tabular-nums;
+  font-weight: 500;
+}
+
+.bezent-att-trend-axis-label--active {
+  fill: #2563eb !important;
+  font-weight: 750 !important;
+}
+
+[data-theme='dark'] .bezent-att-trend-axis-label--active {
+  fill: #60a5fa !important;
 }
 
 .bezent-att-line {
   fill: none;
   stroke-linecap: round;
   stroke-linejoin: round;
+  transition: stroke-width 0.15s ease;
 }
 
 .bezent-att-line--present {
   stroke: #10b981;
-  stroke-width: 2.2;
+  stroke-width: 2.8;
+  filter: drop-shadow(0 2px 6px rgba(16, 185, 129, 0.25));
 }
 
 .bezent-att-line--absent {
-  stroke: #ef4444;
-  stroke-width: 2;
-  stroke-dasharray: 4 2;
+  stroke: #f43f5e;
+  stroke-width: 2.4;
+  filter: drop-shadow(0 2px 5px rgba(244, 63, 94, 0.2));
 }
 
 .bezent-att-line--late {
   stroke: #f59e0b;
+  stroke-width: 2.2;
+  filter: drop-shadow(0 2px 5px rgba(245, 158, 11, 0.2));
+}
+
+.bezent-att-node {
   stroke-width: 2;
+  fill: #ffffff;
+  transition: all 0.15s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.bezent-att-node--present {
+  stroke: #10b981;
+}
+
+.bezent-att-node--absent {
+  stroke: #f43f5e;
+}
+
+.bezent-att-node--late {
+  stroke: #f59e0b;
+}
+
+[data-theme='dark'] .bezent-att-node {
+  fill: #1e293b;
+}
+
+.bezent-att-halo {
+  fill: currentColor;
+  opacity: 0.22;
+  pointer-events: none;
+}
+
+.bezent-att-halo--present {
+  color: #10b981;
+}
+
+.bezent-att-halo--absent {
+  color: #f43f5e;
+}
+
+.bezent-att-halo--late {
+  color: #f59e0b;
 }
 
 .bezent-att-dot {
-  r: 3.5;
-  stroke-width: 1.5;
+  stroke-width: 2;
   stroke: #ffffff;
 }
 
@@ -2315,14 +2417,14 @@
   fill: #10b981;
 }
 .bezent-att-dot--absent {
-  fill: #ef4444;
+  fill: #f43f5e;
 }
 .bezent-att-dot--late {
   fill: #f59e0b;
 }
 
 [data-theme='dark'] .bezent-att-dot {
-  stroke: #1e293b;
+  stroke: #0f172a;
 }
 
 .bezent-att-trend-tracker {
@@ -2331,54 +2433,105 @@
 
 .bezent-att-tooltip-bg {
   fill: #0f172a;
-  stroke: #334155;
+  stroke: rgba(255, 255, 255, 0.12);
   stroke-width: 1;
-  rx: 6;
-  ry: 6;
+  rx: 8;
+  ry: 8;
 }
 
 [data-theme='dark'] .bezent-att-tooltip-bg {
-  fill: #1e293b;
-  stroke: #475569;
+  fill: #0f172a;
+  stroke: #334155;
 }
 
 .bezent-att-tooltip-title {
   fill: #f8fafc;
-  font-size: 11px;
+  font-size: 11.5px;
   font-weight: 700;
+  letter-spacing: -0.01em;
 }
 
 .bezent-att-tooltip-line {
-  stroke: #334155;
-  stroke-width: 0.5;
+  stroke: rgba(255, 255, 255, 0.1);
+  stroke-width: 0.8;
 }
 
 .bezent-att-tooltip-label {
   fill: #94a3b8;
-  font-size: 10px;
+  font-size: 10.5px;
+  font-weight: 500;
 }
 
 .bezent-att-tooltip-val--present {
   fill: #34d399;
-  font-size: 10.5px;
-  font-weight: 700;
+  font-size: 11px;
+  font-weight: 750;
 }
 
 .bezent-att-tooltip-val--absent {
   fill: #f87171;
-  font-size: 10.5px;
-  font-weight: 700;
+  font-size: 11px;
+  font-weight: 750;
 }
 
 .bezent-att-tooltip-val--late {
   fill: #fbbf24;
-  font-size: 10.5px;
-  font-weight: 700;
+  font-size: 11px;
+  font-weight: 750;
+}
+
+.bezent-att-trends-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: 10px;
+  border-top: 1px solid #f1f5f9;
+  font-size: 11px;
+  color: #64748b;
+}
+
+[data-theme='dark'] .bezent-att-trends-footer {
+  border-top-color: #334155;
+  color: #94a3b8;
+}
+
+.bezent-att-trends-footer-left {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-weight: 500;
+}
+
+.bezent-att-trends-footer-pulse {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #10b981;
+  box-shadow: 0 0 0 2.5px rgba(16, 185, 129, 0.2);
+}
+
+.bezent-att-trends-footer-text {
+  font-size: 11.5px;
+  color: #64748b;
+  font-weight: 500;
+}
+
+[data-theme='dark'] .bezent-att-trends-footer-text {
+  color: #94a3b8;
+}
+
+.bezent-att-trends-footer-hint {
+  font-size: 11px;
+  color: #94a3b8;
+}
+
+[data-theme='dark'] .bezent-att-trends-footer-hint {
+  color: #64748b;
 }
 
 .bezent-att-trends-skeleton {
   width: 100%;
-  height: 190px;
+  height: 240px;
   background: #f1f5f9;
   border-radius: 8px;
   animation: bezent-pulse 1.4s ease-in-out infinite;
