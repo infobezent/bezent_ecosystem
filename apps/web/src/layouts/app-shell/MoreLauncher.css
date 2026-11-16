@@ -295,7 +295,7 @@
 }
 
 .more-launcher__section-title.is-accent {
-  color: var(--accent-interactive, #1a73e8);
+  color: var(--accent-interactive, var(--blue-interactive));
 }
 
 .more-launcher__muted {
@@ -318,7 +318,7 @@
   font-family: inherit;
   font-size: 12px;
   font-weight: 600;
-  color: var(--accent-interactive, #1a73e8);
+  color: var(--accent-interactive, var(--blue-interactive));
   transition: color 0.15s ease;
 }
 

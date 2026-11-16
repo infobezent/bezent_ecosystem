@@ -11,6 +11,7 @@ import {
   TableHead,
   TableHeaderCell,
   TableRow,
+  TableSkeleton,
 } from '../../../../design-system/components';
 import type { EmployeeActionListItem } from '../api/employeeAdministrationApi';
 import {
@@ -49,7 +50,24 @@ export function ActionQueue({
   onCreate,
 }: ActionQueueProps) {
   if (status === 'loading') {
-    return <LoadingState label="Loading employee actions…" minHeight="md" />;
+    return (
+      <Table hoverable aria-label="Employee actions">
+        <TableHead>
+          <TableRow>
+            <TableHeaderCell>Employee</TableHeaderCell>
+            <TableHeaderCell>Employee ID</TableHeaderCell>
+            <TableHeaderCell>Action Type</TableHeaderCell>
+            <TableHeaderCell>Current → New</TableHeaderCell>
+            <TableHeaderCell>Effective Date</TableHeaderCell>
+            <TableHeaderCell>Status</TableHeaderCell>
+            <TableHeaderCell>Requested By</TableHeaderCell>
+            <TableHeaderCell>Updated</TableHeaderCell>
+            <TableHeaderCell>Actions</TableHeaderCell>
+          </TableRow>
+        </TableHead>
+        <TableSkeleton rows={8} columns={9} label="Loading employee actions…" />
+      </Table>
+    );
   }
 
   if (status === 'error') {

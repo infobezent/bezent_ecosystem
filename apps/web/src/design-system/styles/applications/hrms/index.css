@@ -1,0 +1,13 @@
+/* ==========================================================================
+   BEZENT Design System — HRMS Application Stylesheet (entry)
+   Centralized styles for the HRMS business application, including
+   Employee Self-Service (ESS), Attendance, Onboarding, and HR Administration.
+   All styles conform to BEZENT design tokens and support Light / Dark themes.
+   ========================================================================== */
+
+/* One stylesheet per HRMS module. Order is kept stable; do not reorder without checking overrides. */
+@import './ess.css';
+@import './attendance.css';
+@import './workforce.css';
+@import './onboarding.css';
+@import './settings.css';

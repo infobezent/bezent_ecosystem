@@ -50,11 +50,10 @@
   --font-display-line-height: var(--line-height-tight);
   --font-display-spacing: var(--letter-spacing-tight);
 
-  --font-page-title-size: var(--font-size-xl);
-  /* 18 */
-  --font-page-title-weight: var(--font-weight-semibold);
+  --font-page-title-size: 24px;
+  --font-page-title-weight: var(--font-weight-bold);
   --font-page-title-line-height: var(--line-height-tight);
-  --font-page-title-spacing: var(--letter-spacing-tight);
+  --font-page-title-spacing: -0.025em;
 
   --font-metric-size: var(--font-size-3xl);
   /* 26 */
@@ -133,7 +132,7 @@
   --form-font-size-input: var(--font-form-input-size);
   --form-font-size-hint: var(--font-form-helper-size);
   --form-font-size-subtitle: var(--font-section-title-size);
-  --form-font-size-title: var(--font-page-title-size);
+  --form-font-size-title: var(--font-size-xl);
   --form-font-size-card-title: var(--font-card-title-size);
   --form-font-size-badge: var(--font-size-xs);
   --form-font-size-section-label: var(--font-size-sm);

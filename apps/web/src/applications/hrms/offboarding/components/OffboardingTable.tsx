@@ -15,6 +15,7 @@ import {
   TableHead,
   TableHeaderCell,
   TableRow,
+  TableSkeleton,
 } from '../../../../design-system/components';
 import { BezentIcon } from '../../../../design-system/icons';
 import type { EmployeeActionListItem } from '../../employee-administration/api/employeeAdministrationApi';
@@ -93,7 +94,22 @@ export const OffboardingTable: React.FC<OffboardingTableProps> = ({
   }, [activeMenuId]);
 
   if (status === 'loading') {
-    return <LoadingState label="Loading offboarding records…" minHeight="md" />;
+    return (
+      <Table hoverable aria-label="Offboarding directory">
+        <TableHead>
+          <TableRow>
+            <TableHeaderCell>Employee</TableHeaderCell>
+            <TableHeaderCell>Employee ID</TableHeaderCell>
+            <TableHeaderCell>Exit Type</TableHeaderCell>
+            <TableHeaderCell>Last Working Day</TableHeaderCell>
+            <TableHeaderCell>Notice Status</TableHeaderCell>
+            <TableHeaderCell>Status</TableHeaderCell>
+            <TableHeaderCell align="right">Actions</TableHeaderCell>
+          </TableRow>
+        </TableHead>
+        <TableSkeleton rows={8} columns={7} label="Loading offboarding records…" />
+      </Table>
+    );
   }
 
   if (status === 'error') {

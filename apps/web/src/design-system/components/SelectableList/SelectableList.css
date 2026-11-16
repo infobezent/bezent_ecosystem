@@ -39,17 +39,17 @@
 }
 
 .bezent-selectable-list__item:hover:not(.is-disabled):not(.is-selected) {
-  background: #f0fdfa;
+  background: var(--teal-50);
 }
 
 .bezent-selectable-list__item.is-selected {
-  background: #f0fdfa;
-  border-color: #99f6e4;
-  color: #0f766e;
+  background: var(--teal-50);
+  border-color: var(--teal-200);
+  color: var(--teal-700);
 }
 
 .bezent-selectable-list__item:focus-visible {
-  outline: 2px solid #14b8a6;
+  outline: 2px solid var(--teal-500);
   outline-offset: 1px;
 }
 

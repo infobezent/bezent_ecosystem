@@ -81,9 +81,9 @@
 
 /* Variants using Workforce SaaS pastel-outline tokens */
 .bezent-status-pill--success {
-  background: #f0fdfa;
-  color: #0f766e;
-  border-color: #ccfbf1;
+  background: var(--teal-50);
+  color: var(--teal-700);
+  border-color: var(--teal-100);
 }
 
 .bezent-status-pill--warning {
@@ -112,7 +112,7 @@
 
 [data-theme='dark'] .bezent-status-pill--success {
   background: rgba(20, 184, 166, 0.16);
-  color: #5eead4;
+  color: var(--teal-300);
   border-color: rgba(45, 212, 191, 0.35);
 }
 

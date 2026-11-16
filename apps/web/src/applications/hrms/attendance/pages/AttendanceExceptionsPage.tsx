@@ -26,6 +26,7 @@ import {
   Alert,
   LoadingState,
   EmptyState,
+  TableSkeleton,
 } from '../../../../design-system/components';
 import { BezentIcon } from '../../../../design-system/icons';
 import {
@@ -639,7 +640,7 @@ export function AttendanceExceptionsPage() {
     <Page>
       {/* ── Compact Header ── */}
       <PageHeader
-        breadcrumbs={<span>Attendance / Exceptions</span>}
+        breadcrumbs={<span>Attendance › Exceptions</span>}
         title="Exceptions"
         actions={
           <Inline gap="sm" align="center">
@@ -974,7 +975,26 @@ export function AttendanceExceptionsPage() {
         {/* ── Exceptions Table: Exactly 10 Data Columns ── */}
         <Card padding="none">
           {loading ? (
-            <LoadingState label="Loading exception cases..." />
+            <Table>
+              <TableHead>
+                <TableRow>
+                  <TableHeaderCell>
+                    <Checkbox disabled aria-label="Select all cases on visible page" />
+                  </TableHeaderCell>
+                  <TableHeaderCell>Employee</TableHeaderCell>
+                  <TableHeaderCell>Workday</TableHeaderCell>
+                  <TableHeaderCell>Exception</TableHeaderCell>
+                  <TableHeaderCell>Severity</TableHeaderCell>
+                  <TableHeaderCell>Source</TableHeaderCell>
+                  <TableHeaderCell>Assigned To</TableHeaderCell>
+                  <TableHeaderCell>Detected At</TableHeaderCell>
+                  <TableHeaderCell>Status</TableHeaderCell>
+                  <TableHeaderCell>Related Record</TableHeaderCell>
+                  <TableHeaderCell>Actions</TableHeaderCell>
+                </TableRow>
+              </TableHead>
+              <TableSkeleton rows={8} columns={11} label="Loading exception cases..." />
+            </Table>
           ) : error ? (
             <Alert variant="danger">{error}</Alert>
           ) : items.length === 0 ? (

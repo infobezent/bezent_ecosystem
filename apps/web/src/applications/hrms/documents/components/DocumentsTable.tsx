@@ -12,6 +12,7 @@ import {
   TableHead,
   TableHeaderCell,
   TableRow,
+  TableSkeleton,
 } from '../../../../design-system/components';
 import type { EmployeeDocument } from '../api/documentsApi';
 import { formatDate } from '../../employees/model/employeeModel';
@@ -44,7 +45,23 @@ export function DocumentsTable({
   onOpenEmployee,
 }: DocumentsTableProps) {
   if (status === 'loading') {
-    return <LoadingState label="Loading documents…" minHeight="md" />;
+    return (
+      <Table hoverable aria-label="Employee documents">
+        <TableHead>
+          <TableRow>
+            <TableHeaderCell>Employee</TableHeaderCell>
+            <TableHeaderCell>Document</TableHeaderCell>
+            <TableHeaderCell>Category</TableHeaderCell>
+            <TableHeaderCell>Department</TableHeaderCell>
+            <TableHeaderCell>Expiry</TableHeaderCell>
+            <TableHeaderCell>Status</TableHeaderCell>
+            <TableHeaderCell>Updated</TableHeaderCell>
+            <TableHeaderCell>Actions</TableHeaderCell>
+          </TableRow>
+        </TableHead>
+        <TableSkeleton rows={8} columns={8} label="Loading documents…" />
+      </Table>
+    );
   }
 
   if (status === 'error') {

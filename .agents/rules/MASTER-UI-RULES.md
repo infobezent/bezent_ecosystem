@@ -232,7 +232,21 @@ Avoid:
 - Random gradients, Excessive decorative graphics
 - Unnecessary animations, Visually inconsistent components
 
-================================================== 13. IMPLEMENTATION RULE
+================================================== 13. STANDARD LOADING STATES & ZERO-CLS TABLE SKELETONS
+==================================================
+
+Whenever creating or modifying ANY page that loads data, ALL agents and developers MUST follow the Zero-CLS Table Skeleton rule:
+
+1. NEVER replace an entire table, directory, or page with an isolated spinner/LoadingState.
+2. ALWAYS preserve the structural framework:
+   - PageHeader & navigation tabs remain visible.
+   - Search input, filters, date pickers, and toolbars remain visible and interactive.
+   - Table card and `<TableHead>` column headers remain visible.
+3. ALWAYS render `<TableSkeleton rows={8} columns={N} label="Loading [feature]…" />` in the table body while loading.
+4. Pass an accessible `label` prop to `<TableSkeleton>` to satisfy screen readers and unit tests.
+5. For metric/overview cards, pass `loading={loading}` to card components or render `<Skeleton>` placeholders so cards do not collapse or shift layout.
+
+================================================== 14. IMPLEMENTATION RULE
 ==================================================
 
 Before creating anything new, ask:
@@ -242,7 +256,7 @@ If NO: → Create the smallest possible component that matches the existing BEZE
 
 Never introduce a completely new design system.
 
-================================================== 14. FINAL VALIDATION
+================================================== 15. FINAL VALIDATION
 ==================================================
 
 Before completing any task, verify:
@@ -250,6 +264,7 @@ Before completing any task, verify:
 ✓ Existing UI patterns are reused.
 ✓ Existing navigation names are preserved.
 ✓ Existing layouts are respected.
+✓ Standard TableSkeleton is used for loading tables (Zero CLS).
 ✓ No unrelated modules were modified.
 ✓ No backend was created or modified.
 ✓ No database changes were made.

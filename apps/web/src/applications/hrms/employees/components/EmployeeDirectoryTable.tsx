@@ -17,6 +17,7 @@ import {
   TableHead,
   TableHeaderCell,
   TableRow,
+  TableSkeleton,
 } from '../../../../design-system/components';
 import { BezentIcon } from '../../../../design-system/icons';
 import type { EmployeeRecord } from '../api/employeesApi';
@@ -112,7 +113,22 @@ export function EmployeeDirectoryTable({
   };
 
   if (status === 'loading') {
-    return <LoadingState label="Loading employees…" minHeight="md" />;
+    return (
+      <Table hoverable aria-label="Employees">
+        <TableHead>
+          <TableRow>
+            <TableHeaderCell>Employee</TableHeaderCell>
+            <TableHeaderCell>Department</TableHeaderCell>
+            <TableHeaderCell>Work Location</TableHeaderCell>
+            <TableHeaderCell>Employment</TableHeaderCell>
+            <TableHeaderCell>Joined Date</TableHeaderCell>
+            <TableHeaderCell>Status</TableHeaderCell>
+            <TableHeaderCell className="bezent-table-col--actions">Actions</TableHeaderCell>
+          </TableRow>
+        </TableHead>
+        <TableSkeleton rows={8} columns={7} label="Loading employees…" />
+      </Table>
+    );
   }
 
   if (status === 'error') {

@@ -11,6 +11,7 @@ import {
   TableHead,
   TableHeaderCell,
   TableRow,
+  TableSkeleton,
 } from '../../../../design-system/components';
 import type { EmployeeActionListItem } from '../../employee-administration/api/employeeAdministrationApi';
 import {
@@ -43,7 +44,21 @@ export function EmploymentHistory({
   onOpenAction,
 }: EmploymentHistoryProps) {
   if (status === 'loading') {
-    return <LoadingState label="Loading employment history…" minHeight="sm" />;
+    return (
+      <Table hoverable aria-label="Employment history">
+        <TableHead>
+          <TableRow>
+            <TableHeaderCell>Action</TableHeaderCell>
+            <TableHeaderCell>Previous → New</TableHeaderCell>
+            <TableHeaderCell>Effective Date</TableHeaderCell>
+            <TableHeaderCell>Status</TableHeaderCell>
+            <TableHeaderCell>Updated</TableHeaderCell>
+            <TableHeaderCell>Actions</TableHeaderCell>
+          </TableRow>
+        </TableHead>
+        <TableSkeleton rows={4} columns={6} label="Loading employment history…" />
+      </Table>
+    );
   }
 
   if (status === 'error') {

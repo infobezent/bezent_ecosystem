@@ -123,9 +123,9 @@ describe('BEZENT HRMS — Overtime V1.0 Frontend Page', () => {
     );
 
     expect(html).toContain('Overtime');
-    expect(html).toContain('Attendance › Overtime');
+    expect(html).toContain('Attendance › Requests');
     expect(html).toContain('Review overtime hours and choose how each record is settled.');
-    expect(html).toContain('Period:');
+    expect(html).toContain('bezent-date-range-trigger');
     expect(html).toContain('Export');
   });
 

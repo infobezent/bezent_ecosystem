@@ -40,11 +40,11 @@
   height: 100%;
   border-radius: 9999px;
   transition: width 0.35s cubic-bezier(0.16, 1, 0.3, 1);
-  background-color: #14b8a6;
+  background-color: var(--teal-500);
 }
 
 .bezent-progress-bar__fill--success {
-  background-color: #14b8a6;
+  background-color: var(--teal-500);
 }
 
 .bezent-progress-bar__fill--warning {

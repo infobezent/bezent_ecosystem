@@ -211,7 +211,7 @@ describe('BEZENT HRMS — Attendance Overview V1.0 Frontend Page', () => {
     vi.spyOn(attendanceApi, 'fetchAttendanceOverview').mockResolvedValue(mockOverviewData);
   });
 
-  it('renders initial page structure and quick action navigation without crashing', () => {
+  it('renders initial page structure, header and global filters without crashing', () => {
     const html = renderToStaticMarkup(
       <MemoryRouter>
         <AttendanceOverviewPage />
@@ -219,10 +219,25 @@ describe('BEZENT HRMS — Attendance Overview V1.0 Frontend Page', () => {
     );
 
     expect(html).toContain('Attendance Overview');
-    expect(html).toContain('Workforce operations, exception triage, and monthly payroll readiness');
-    expect(html).toContain('Daily Attendance');
-    expect(html).toContain('Regularization Queue');
-    expect(html).toContain('Monthly Summary');
+    expect(html).toContain('Monitor daily attendance and manage workforce attendance activities.');
+    expect(html).toContain('All Branches');
+    expect(html).toContain('All Departments');
+    expect(html).toContain('All Shifts');
+    expect(html).toContain('Today');
+    expect(html).toContain('Scheduled Workforce');
+    expect(html).toContain('Present Today');
+    expect(html).toContain('Absent');
+    expect(html).toContain('On Approved Leave');
+    expect(html).toContain('Exceptions &amp; Queue');
+    expect(html).toContain('Attendance Trends');
+    expect(html).toContain('Late Arrival');
+    expect(html).toContain('Average Attendance');
+    expect(html).toContain('Attendance Distribution');
+    expect(html).toContain('Department Average');
+    expect(html).toContain('Needs Attention');
+    expect(html).toContain('Payroll Readiness');
+    expect(html).toContain('Attendance Insights');
+    expect(html).toContain('Attendance Calendar');
   });
 
   it('renders processing health card with wrapping description and truthful blocking exception labels', () => {

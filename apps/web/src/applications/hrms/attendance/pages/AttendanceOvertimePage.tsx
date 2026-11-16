@@ -32,14 +32,26 @@ import {
   TableCell,
   TableHeaderCell,
   Button,
+  IconButton,
   SearchInput,
   Badge,
   Modal,
   Alert,
   LoadingState,
   EmptyState,
+  TableSkeleton,
 } from '../../../../design-system/components';
 import { BezentIcon } from '../../../../design-system/icons';
+import { AttendanceSectionTabs } from '../components/AttendanceSectionTabs';
+import { RequestStatStrip } from '../components/RequestStatStrip';
+import { getMonthRange } from '../components/AttendanceDateRangeControl';
+import { AttendanceDateRangeControl } from '../components/AttendanceDateRangeControl';
+import { getDemoOvertimeRequests } from '../model/demoOvertimeCompOff';
+import {
+  RequestFilterPanel,
+  type RequestFilterField,
+  type RequestFilterValues,
+} from '../components/RequestFilterPanel';
 import {
   fetchOvertimeOverview,
   fetchOvertimeRequests,
@@ -200,24 +212,34 @@ function getSettlementLabel(item: OvertimeRequestItem): string {
 
 // ── Main Page Component ──────────────────────────────────────────────────────
 
+const OT_FILTER_DEFAULTS: RequestFilterValues = {
+  status: 'all',
+  dayType: 'all',
+  settlement: 'all',
+  department: 'all',
+};
+
 export function AttendanceOvertimePage() {
   // ── 1. Page Header & Period State (Spec Section 1) ──────────────────────────
-  const [selectedYear, setSelectedYear] = useState(() => new Date().getFullYear());
-  const [selectedMonth, setSelectedMonth] = useState(() => new Date().getMonth() + 1); // 1-12
+  const [range, setRange] = useState(() => getMonthRange());
   const isLockedMonth = useMemo(() => {
-    // If selected period is before the current month, treat as locked for payroll demo
+    // A period that ends before the current month is treated as locked for payroll
     const now = new Date();
-    const currentYear = now.getFullYear();
-    const currentMonth = now.getMonth() + 1;
-    if (selectedYear < currentYear) return true;
-    if (selectedYear === currentYear && selectedMonth < currentMonth) return true;
-    return false;
-  }, [selectedYear, selectedMonth]);
+    const currentMonthStart = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-01`;
+    return range.endDate < currentMonthStart;
+  }, [range]);
 
   const monthLabel = useMemo(() => {
-    const d = new Date(selectedYear, selectedMonth - 1, 1);
-    return d.toLocaleString('en-US', { month: 'long', year: 'numeric' });
-  }, [selectedYear, selectedMonth]);
+    const fmt = (iso: string) =>
+      new Date(`${iso}T00:00:00`).toLocaleDateString('en-US', {
+        month: 'short',
+        day: '2-digit',
+        year: 'numeric',
+      });
+    return range.startDate === range.endDate
+      ? fmt(range.startDate)
+      : `${fmt(range.startDate)} – ${fmt(range.endDate)}`;
+  }, [range]);
 
   // ── 3. Filters State (Spec Section 3) ──────────────────────────────────────
   const [search, setSearch] = useState('');
@@ -241,6 +263,7 @@ export function AttendanceOvertimePage() {
 
   const [items, setItems] = useState<OvertimeRequestItem[]>([]);
   const [totalCount, setTotalCount] = useState(0);
+  const [usingDemo, setUsingDemo] = useState(false);
   const [metrics, setMetrics] = useState<OvertimeOverviewMetrics | null>(null);
   const [policy, setPolicy] = useState<OvertimePolicyItem | null>(null);
 
@@ -284,10 +307,8 @@ export function AttendanceOvertimePage() {
       setLoading(true);
       setError(null);
 
-      // Period dates
-      const startOfMonth = `${selectedYear}-${String(selectedMonth).padStart(2, '0')}-01`;
-      const lastDay = new Date(selectedYear, selectedMonth, 0).getDate();
-      const endOfMonth = `${selectedYear}-${String(selectedMonth).padStart(2, '0')}-${String(lastDay).padStart(2, '0')}`;
+      const startOfMonth = range.startDate;
+      const endOfMonth = range.endDate;
 
       // Parallel fetch overview metrics, policies, and requests
       const [overviewRes, policiesRes, requestsRes] = await Promise.all([
@@ -305,6 +326,28 @@ export function AttendanceOvertimePage() {
         }),
       ]);
 
+      // Nothing recorded yet: show sample requests so the page can be reviewed.
+      const noLiveData = !(requestsRes.items?.length ?? 0) && !(requestsRes.meta?.total ?? 0);
+      if (noLiveData) {
+        const q = search.trim().toLowerCase();
+        const demo = getDemoOvertimeRequests().filter((d) => {
+          if (d.workDate < startOfMonth || d.workDate > endOfMonth) return false;
+          if (statusFilter === 'pending' && d.status !== 'pending_approval') return false;
+          if (statusFilter === 'approved' && d.status !== 'approved') return false;
+          if (statusFilter === 'rejected' && d.status !== 'rejected') return false;
+          if (settlementFilter === 'payable' && d.allocatedPayableMinutes <= 0) return false;
+          if (settlementFilter === 'comp_off' && d.allocatedCompOffMinutes <= 0) return false;
+          if (departmentFilter !== 'all' && d.departmentName !== departmentFilter) return false;
+          if (q && !`${d.employeeName} ${d.employeeCode}`.toLowerCase().includes(q)) return false;
+          return true;
+        });
+        setUsingDemo(true);
+        setMetrics(null);
+        setItems(demo);
+        setTotalCount(demo.length);
+        return;
+      }
+      setUsingDemo(false);
       setMetrics(overviewRes);
       if (policiesRes && policiesRes.length > 0 && policiesRes[0]) {
         setPolicy(policiesRes[0]);
@@ -316,16 +359,7 @@ export function AttendanceOvertimePage() {
     } finally {
       setLoading(false);
     }
-  }, [
-    selectedYear,
-    selectedMonth,
-    statusFilter,
-    settlementFilter,
-    departmentFilter,
-    search,
-    page,
-    limit,
-  ]);
+  }, [range, statusFilter, settlementFilter, departmentFilter, search, page, limit]);
 
   useEffect(() => {
     loadData();
@@ -427,6 +461,67 @@ export function AttendanceOvertimePage() {
   }, [statusFilter, dayTypeFilter, settlementFilter, departmentFilter]);
 
   const hasActiveFilters = Boolean(search || activeFilterCount > 0);
+
+  const appliedPanelFilters: RequestFilterValues = useMemo(
+    () => ({
+      status: statusFilter,
+      dayType: dayTypeFilter,
+      settlement: settlementFilter,
+      department: departmentFilter,
+    }),
+    [statusFilter, dayTypeFilter, settlementFilter, departmentFilter],
+  );
+
+  const handleApplyPanelFilters = (v: RequestFilterValues) => {
+    setStatusFilter(v.status ?? 'all');
+    setDayTypeFilter(v.dayType ?? 'all');
+    setSettlementFilter(v.settlement ?? 'all');
+    setDepartmentFilter(v.department ?? 'all');
+    setPage(1);
+  };
+
+  const filterFields: RequestFilterField[] = useMemo(
+    () => [
+      {
+        key: 'status',
+        label: 'Status',
+        options: [
+          { value: 'all', label: 'All statuses' },
+          { value: 'pending', label: 'Pending' },
+          { value: 'approved', label: 'Approved' },
+          { value: 'rejected', label: 'Rejected' },
+        ],
+      },
+      {
+        key: 'dayType',
+        label: 'Day Type',
+        options: [
+          { value: 'all', label: 'All day types' },
+          { value: 'weekday', label: 'Weekday' },
+          { value: 'weekly_off', label: 'Weekly Off' },
+          { value: 'holiday', label: 'Holiday' },
+        ],
+      },
+      {
+        key: 'settlement',
+        label: 'Settlement',
+        options: [
+          { value: 'all', label: 'All settlements' },
+          { value: 'payable', label: 'Pay in Payroll' },
+          { value: 'comp_off', label: 'Convert to Comp-Off' },
+        ],
+      },
+      {
+        key: 'department',
+        label: 'Department',
+        options: [
+          { value: 'all', label: 'All departments' },
+          ...departmentOptions.map((d) => ({ value: d, label: d })),
+        ],
+      },
+    ],
+    [departmentOptions],
+  );
 
   const handleResetFilters = () => {
     setSearch('');
@@ -653,66 +748,22 @@ export function AttendanceOvertimePage() {
     <Page maxWidth="default" gap="md">
       {/* ── 1. Page Header (Spec Section 1) ── */}
       <PageHeader
-        eyebrow="Attendance › Overtime"
-        title="Overtime"
+        eyebrow="Attendance › Requests"
+        title="Requests"
         subtitle="Review overtime hours and choose how each record is settled."
         actions={
-          <Inline gap="sm" align="center">
-            {/* Period Selector (Spec Section 1) */}
-            <Inline gap="xs" align="center">
-              <span className="bezent-table-meta-subtitle">Period:</span>
-              <div className="bezent-month-navigator">
-                <button
-                  type="button"
-                  className="bezent-month-navigator__btn"
-                  aria-label="Previous month"
-                  onClick={() => {
-                    if (selectedMonth === 1) {
-                      setSelectedYear((y) => y - 1);
-                      setSelectedMonth(12);
-                    } else {
-                      setSelectedMonth((m) => m - 1);
-                    }
-                  }}
-                >
-                  <BezentIcon name="chevronLeft" size={16} />
-                </button>
-                <span className="bezent-month-navigator__label">{monthLabel}</span>
-                <button
-                  type="button"
-                  className="bezent-month-navigator__btn"
-                  aria-label="Next month"
-                  onClick={() => {
-                    if (selectedMonth === 12) {
-                      setSelectedYear((y) => y + 1);
-                      setSelectedMonth(1);
-                    } else {
-                      setSelectedMonth((m) => m + 1);
-                    }
-                  }}
-                >
-                  <BezentIcon name="chevronRight" size={16} />
-                </button>
-              </div>
-            </Inline>
-
-            {/* Export Button */}
-            <Button
-              variant="outline"
-              size="md"
-              leftIcon={<BezentIcon name="download" size={16} />}
-              onClick={() => {
-                setBannerMessage({
-                  type: 'info',
-                  text: 'Exporting overtime records for ' + monthLabel + '...',
-                });
-              }}
-            >
-              Export
-            </Button>
-          </Inline>
+          <AttendanceDateRangeControl
+            startDate={range.startDate}
+            endDate={range.endDate}
+            onChange={(r) => {
+              setRange(r);
+              setPage(1);
+            }}
+          />
         }
       />
+
+      <AttendanceSectionTabs group="requests" />
 
       <Stack gap="md">
         {/* Banner Notification */}
@@ -736,99 +787,57 @@ export function AttendanceOvertimePage() {
           </Alert>
         )}
 
-        {/* ── 2. Summary Cards (Spec Section 2) ── */}
-        <Grid columns={estimatedCost !== null ? 5 : 4} gap="sm">
-          {/* Card 1: Pending Approval */}
-          <div
-            className={`bezent-kpi-card bezent-kpi-card--amber ${statusFilter === 'pending' ? 'is-active' : ''}`}
-            onClick={() => {
-              setStatusFilter((curr) => (curr === 'pending' ? 'all' : 'pending'));
-              setPage(1);
-            }}
-            title="Waiting for approval"
-            role="button"
-            tabIndex={0}
-          >
-            <div className="bezent-kpi-card__header">
-              <span className="bezent-kpi-card__title">Pending Approval</span>
-            </div>
-            <div className="bezent-kpi-card__value-row">
-              <span className="bezent-kpi-card__value">{pendingCount}</span>
-            </div>
-          </div>
-
-          {/* Card 2: Approved Hours */}
-          <div
-            className={`bezent-kpi-card bezent-kpi-card--green ${statusFilter === 'approved' ? 'is-active' : ''}`}
-            onClick={() => {
-              setStatusFilter((curr) => (curr === 'approved' ? 'all' : 'approved'));
-              setPage(1);
-            }}
-            title="Total approved overtime hours"
-            role="button"
-            tabIndex={0}
-          >
-            <div className="bezent-kpi-card__header">
-              <span className="bezent-kpi-card__title">Approved Hours</span>
-            </div>
-            <div className="bezent-kpi-card__value-row">
-              <span className="bezent-kpi-card__value">{approvedHoursTotal}</span>
-            </div>
-          </div>
-
-          {/* Card 3: Paid in Payroll */}
-          <div
-            className={`bezent-kpi-card bezent-kpi-card--blue ${settlementFilter === 'payable' ? 'is-active' : ''}`}
-            onClick={() => {
-              setSettlementFilter((curr) => (curr === 'payable' ? 'all' : 'payable'));
-              setPage(1);
-            }}
-            title="Overtime hours allocated to payroll"
-            role="button"
-            tabIndex={0}
-          >
-            <div className="bezent-kpi-card__header">
-              <span className="bezent-kpi-card__title">Paid in Payroll</span>
-            </div>
-            <div className="bezent-kpi-card__value-row">
-              <span className="bezent-kpi-card__value">{paidInPayrollHours}</span>
-            </div>
-          </div>
-
-          {/* Card 4: Converted to Comp-Off */}
-          <div
-            className={`bezent-kpi-card bezent-kpi-card--purple ${settlementFilter === 'comp_off' ? 'is-active' : ''}`}
-            onClick={() => {
-              setSettlementFilter((curr) => (curr === 'comp_off' ? 'all' : 'comp_off'));
-              setPage(1);
-            }}
-            title="Overtime hours converted to comp-off"
-            role="button"
-            tabIndex={0}
-          >
-            <div className="bezent-kpi-card__header">
-              <span className="bezent-kpi-card__title">Converted to Comp-Off</span>
-            </div>
-            <div className="bezent-kpi-card__value-row">
-              <span className="bezent-kpi-card__value">{convertedToCompOffHours}</span>
-            </div>
-          </div>
-
-          {/* Card 5: Estimated Cost (Conditional) */}
-          {estimatedCost !== null && (
-            <div
-              className="bezent-kpi-card bezent-kpi-card--red"
-              title="Estimated total overtime cost in INR"
-            >
-              <div className="bezent-kpi-card__header">
-                <span className="bezent-kpi-card__title">Estimated Cost</span>
-              </div>
-              <div className="bezent-kpi-card__value-row">
-                <span className="bezent-kpi-card__value">{formatCurrency(estimatedCost)}</span>
-              </div>
-            </div>
-          )}
-        </Grid>
+        {/* ── 2. Summary cards (same KPI cards as Workforce overview) ── */}
+        <RequestStatStrip
+          ariaLabel="Overtime summary"
+          stats={[
+            {
+              label: 'Pending Approval',
+              value: pendingCount,
+              tone: 'warning',
+              onClick: () => {
+                setStatusFilter((curr) => (curr === 'pending' ? 'all' : 'pending'));
+                setPage(1);
+              },
+            },
+            {
+              label: 'Approved Hours',
+              value: approvedHoursTotal,
+              tone: 'success',
+              onClick: () => {
+                setStatusFilter((curr) => (curr === 'approved' ? 'all' : 'approved'));
+                setPage(1);
+              },
+            },
+            {
+              label: 'Paid in Payroll',
+              value: paidInPayrollHours,
+              tone: 'info',
+              onClick: () => {
+                setSettlementFilter((curr) => (curr === 'payable' ? 'all' : 'payable'));
+                setPage(1);
+              },
+            },
+            {
+              label: 'Converted to Comp-Off',
+              value: convertedToCompOffHours,
+              tone: 'neutral',
+              onClick: () => {
+                setSettlementFilter((curr) => (curr === 'comp_off' ? 'all' : 'comp_off'));
+                setPage(1);
+              },
+            },
+            ...(estimatedCost !== null
+              ? [
+                  {
+                    label: 'Estimated Cost',
+                    value: formatCurrency(estimatedCost),
+                    tone: 'danger' as const,
+                  },
+                ]
+              : []),
+          ]}
+        />
 
         {/* ── 3. Filter Bar (Spec Section 3 — Workforce Directory Pattern) ── */}
         <div className="bezent-directory-toolbar">
@@ -859,153 +868,15 @@ export function AttendanceOvertimePage() {
                 )}
               </Button>
 
-              {/* Floating Filter Panel */}
-              {isFilterPanelOpen && (
-                <div className="bezent-filter-panel" onClick={(e) => e.stopPropagation()}>
-                  <div className="bezent-filter-panel__header-compact">
-                    <span className="bezent-filter-panel__title">Filters</span>
-                    <button
-                      type="button"
-                      className="bezent-filter-panel__close-btn"
-                      onClick={() => setIsFilterPanelOpen(false)}
-                      aria-label="Close filters"
-                    >
-                      <BezentIcon name="x" size={16} />
-                    </button>
-                  </div>
-
-                  <div className="bezent-filter-panel__body-compact">
-                    <div className="bezent-filter-grid--vertical">
-                      {/* Status Filter */}
-                      <div className="bezent-filter-form-group--full">
-                        <label className="bezent-filter-label" htmlFor="filter-status">
-                          Status
-                        </label>
-                        <div className="bezent-filter-select-wrap">
-                          <select
-                            id="filter-status"
-                            className="bezent-filter-select-control"
-                            value={statusFilter}
-                            onChange={(e) => {
-                              setStatusFilter(e.target.value);
-                              setPage(1);
-                            }}
-                          >
-                            <option value="all">All</option>
-                            <option value="pending">Pending</option>
-                            <option value="approved">Approved</option>
-                            <option value="rejected">Rejected</option>
-                          </select>
-                          <span className="bezent-filter-select-chevron">
-                            <BezentIcon name="chevronDown" size={16} />
-                          </span>
-                        </div>
-                      </div>
-
-                      {/* Day Type Filter */}
-                      <div className="bezent-filter-form-group--full">
-                        <label className="bezent-filter-label" htmlFor="filter-day-type">
-                          Day Type
-                        </label>
-                        <div className="bezent-filter-select-wrap">
-                          <select
-                            id="filter-day-type"
-                            className="bezent-filter-select-control"
-                            value={dayTypeFilter}
-                            onChange={(e) => {
-                              setDayTypeFilter(e.target.value);
-                              setPage(1);
-                            }}
-                          >
-                            <option value="all">All</option>
-                            <option value="weekday">Weekday</option>
-                            <option value="weekly_off">Weekly Off</option>
-                            <option value="holiday">Holiday</option>
-                          </select>
-                          <span className="bezent-filter-select-chevron">
-                            <BezentIcon name="chevronDown" size={16} />
-                          </span>
-                        </div>
-                      </div>
-
-                      {/* Settlement Filter */}
-                      <div className="bezent-filter-form-group--full">
-                        <label className="bezent-filter-label" htmlFor="filter-settlement">
-                          Settlement
-                        </label>
-                        <div className="bezent-filter-select-wrap">
-                          <select
-                            id="filter-settlement"
-                            className="bezent-filter-select-control"
-                            value={settlementFilter}
-                            onChange={(e) => {
-                              setSettlementFilter(e.target.value);
-                              setPage(1);
-                            }}
-                          >
-                            <option value="all">All</option>
-                            <option value="payable">Pay in Payroll</option>
-                            <option value="comp_off">Convert to Comp-Off</option>
-                          </select>
-                          <span className="bezent-filter-select-chevron">
-                            <BezentIcon name="chevronDown" size={16} />
-                          </span>
-                        </div>
-                      </div>
-
-                      {/* Department Filter */}
-                      <div className="bezent-filter-form-group--full">
-                        <label className="bezent-filter-label" htmlFor="filter-dept">
-                          Department
-                        </label>
-                        <div className="bezent-filter-select-wrap">
-                          <select
-                            id="filter-dept"
-                            className="bezent-filter-select-control"
-                            value={departmentFilter}
-                            onChange={(e) => {
-                              setDepartmentFilter(e.target.value);
-                              setPage(1);
-                            }}
-                          >
-                            <option value="all">All Departments</option>
-                            {departmentOptions.map((dept) => (
-                              <option key={dept} value={dept}>
-                                {dept}
-                              </option>
-                            ))}
-                          </select>
-                          <span className="bezent-filter-select-chevron">
-                            <BezentIcon name="chevronDown" size={16} />
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Panel Footer */}
-                  <div className="bezent-filter-panel__footer-compact">
-                    <button
-                      type="button"
-                      className="bezent-filter-panel__clear-btn"
-                      onClick={handleResetFilters}
-                      disabled={!hasActiveFilters}
-                    >
-                      Clear all
-                    </button>
-                    <div className="bezent-filter-panel__footer-actions">
-                      <Button
-                        variant="primary"
-                        size="sm"
-                        shape="rounded"
-                        onClick={() => setIsFilterPanelOpen(false)}
-                      >
-                        Apply Filters
-                      </Button>
-                    </div>
-                  </div>
-                </div>
-              )}
+              <RequestFilterPanel
+                isOpen={isFilterPanelOpen}
+                onClose={() => setIsFilterPanelOpen(false)}
+                title="Filter Overtime"
+                fields={filterFields}
+                appliedValues={appliedPanelFilters}
+                defaults={OT_FILTER_DEFAULTS}
+                onApply={handleApplyPanelFilters}
+              />
             </div>
 
             {hasActiveFilters && (
@@ -1014,7 +885,22 @@ export function AttendanceOvertimePage() {
               </Button>
             )}
 
+            {usingDemo && <span className="bezent-records-badge">Sample data</span>}
             <span className="bezent-records-badge">{totalCount} Records</span>
+
+            <IconButton
+              label="Export"
+              variant="ghost"
+              tooltipDirection="down"
+              onClick={() => {
+                setBannerMessage({
+                  type: 'info',
+                  text: 'Exporting overtime records for ' + monthLabel + '...',
+                });
+              }}
+            >
+              <BezentIcon name="download" size={18} />
+            </IconButton>
           </div>
         </div>
 
@@ -1136,7 +1022,33 @@ export function AttendanceOvertimePage() {
 
         {/* ── 6. Table & Content States (Spec Section 6 & 13) ── */}
         {loading ? (
-          <LoadingState label="Loading overtime records..." />
+          <Card variant="default">
+            <div className="bezent-table-scroll-container">
+              <Table>
+                <TableHead>
+                  <TableRow>
+                    <TableHeaderCell className="bezent-table-col--checkbox">
+                      <input type="checkbox" disabled aria-label="Select all" />
+                    </TableHeaderCell>
+                    <TableHeaderCell>Employee</TableHeaderCell>
+                    <TableHeaderCell>Date</TableHeaderCell>
+                    <TableHeaderCell>Day Type</TableHeaderCell>
+                    <TableHeaderCell>Timing</TableHeaderCell>
+                    <TableHeaderCell>Requested</TableHeaderCell>
+                    <TableHeaderCell>Approved</TableHeaderCell>
+                    <TableHeaderCell>Rate</TableHeaderCell>
+                    <TableHeaderCell>Estimated Amount</TableHeaderCell>
+                    <TableHeaderCell>Settlement</TableHeaderCell>
+                    <TableHeaderCell>Status</TableHeaderCell>
+                    <TableHeaderCell className="bezent-table-col--sticky-right bezent-table-col--actions">
+                      Actions
+                    </TableHeaderCell>
+                  </TableRow>
+                </TableHead>
+                <TableSkeleton rows={8} columns={12} label="Loading overtime records..." />
+              </Table>
+            </div>
+          </Card>
         ) : error ? (
           <EmptyState
             title="Could not load overtime"
@@ -1168,9 +1080,9 @@ export function AttendanceOvertimePage() {
             />
           )
         ) : (
-          <Card variant="default">
+          <Card padding="none">
             <div className="bezent-table-scroll-container">
-              <Table>
+              <Table compact hoverable className="bezent-table--workspace">
                 <TableHead>
                   <TableRow>
                     {/* 1. Checkbox */}
@@ -1182,25 +1094,14 @@ export function AttendanceOvertimePage() {
                         aria-label="Select all overtime records on page"
                       />
                     </TableHeaderCell>
-                    {/* 2. Employee */}
-                    <TableHeaderCell>Employee</TableHeaderCell>
-                    {/* 3. Date */}
+                    <TableHeaderCell className="bezent-table-col--employee">
+                      Employee
+                    </TableHeaderCell>
                     <TableHeaderCell>Date</TableHeaderCell>
-                    {/* 4. Day Type */}
-                    <TableHeaderCell>Day Type</TableHeaderCell>
-                    {/* 5. Timing */}
                     <TableHeaderCell>Timing</TableHeaderCell>
-                    {/* 6. Requested */}
-                    <TableHeaderCell>Requested</TableHeaderCell>
-                    {/* 7. Approved */}
-                    <TableHeaderCell>Approved</TableHeaderCell>
-                    {/* 8. Rate */}
-                    <TableHeaderCell>Rate</TableHeaderCell>
-                    {/* 9. Estimated Amount */}
-                    <TableHeaderCell>Estimated Amount</TableHeaderCell>
-                    {/* 10. Settlement */}
+                    <TableHeaderCell>Hours</TableHeaderCell>
+                    <TableHeaderCell>Amount</TableHeaderCell>
                     <TableHeaderCell>Settlement</TableHeaderCell>
-                    {/* 11. Status */}
                     <TableHeaderCell>Status</TableHeaderCell>
                     {/* 12. Actions (Sticky Right) */}
                     <TableHeaderCell className="bezent-table-col--sticky-right bezent-table-col--actions">
@@ -1246,109 +1147,86 @@ export function AttendanceOvertimePage() {
                           />
                         </TableCell>
 
-                        {/* 2. Employee */}
-                        <TableCell>
-                          <Inline gap="sm" align="center">
+                        {/* Employee */}
+                        <TableCell className="bezent-table-col--employee">
+                          <div className="bezent-table-cell--avatar-meta">
                             <span className="bezent-avatar bezent-avatar--sm">
                               {item.employeeName.charAt(0).toUpperCase()}
                             </span>
-                            <Stack gap="none">
-                              <span className="bezent-table-primary-text">{item.employeeName}</span>
+                            <div className="bezent-table-meta-group">
+                              <span className="bezent-table-meta-title">{item.employeeName}</span>
                               <span className="bezent-table-meta-subtitle">
                                 {item.employeeCode || item.employeeId}
+                                {item.departmentName ? ` · ${item.departmentName}` : ''}
                               </span>
-                            </Stack>
-                          </Inline>
+                            </div>
+                          </div>
                         </TableCell>
 
-                        {/* 3. Date */}
+                        {/* Date + day type */}
                         <TableCell>
-                          <span className="bezent-table-primary-text">
-                            {formatDate(item.workDate)}
-                          </span>
-                        </TableCell>
-
-                        {/* 4. Day Type (Spec Section 5) */}
-                        <TableCell>
-                          <Badge
-                            variant={
-                              dayTypeUi === 'Holiday'
-                                ? 'danger'
-                                : dayTypeUi === 'Weekly Off'
-                                  ? 'info'
-                                  : 'neutral'
-                            }
-                            size="sm"
-                          >
-                            {dayTypeUi}
-                          </Badge>
-                        </TableCell>
-
-                        {/* 5. Timing (Spec Section 5) */}
-                        <TableCell>
-                          <span className="bezent-table-primary-text">{timingUi}</span>
-                        </TableCell>
-
-                        {/* 6. Requested */}
-                        <TableCell>
-                          <Inline gap="xs" align="center">
-                            <span className="bezent-table-primary-text">
-                              {formatMinutes(item.requestedOtMinutes)}
+                          <div className="bezent-table-meta-group">
+                            <span className="bezent-table-meta-title">
+                              {formatDate(item.workDate)}
                             </span>
-                            {exceedsDaily && (
-                              <span
-                                className="bezent-warning-icon-wrap"
-                                tabIndex={0}
-                                role="img"
-                                aria-label="Daily limit warning"
-                                title={`Exceeds the daily overtime limit of ${formatMinutes(dailyCap)}.`}
-                              >
-                                <BezentIcon name="alertTriangle" size={14} />
+                            <span className="bezent-table-meta-subtitle">{dayTypeUi}</span>
+                          </div>
+                        </TableCell>
+
+                        {/* Timing */}
+                        <TableCell>
+                          <span className="bezent-table-meta-title">{timingUi}</span>
+                        </TableCell>
+
+                        {/* Hours: requested, with approved beneath */}
+                        <TableCell>
+                          <div className="bezent-table-meta-group">
+                            <Inline gap="xs" align="center">
+                              <span className="bezent-table-meta-title">
+                                {formatMinutes(item.requestedOtMinutes)}
                               </span>
-                            )}
-                            {exceedsMonthly && !exceedsDaily && (
-                              <span
-                                className="bezent-warning-icon-wrap"
-                                tabIndex={0}
-                                role="img"
-                                aria-label="Monthly limit warning"
-                                title={`Exceeds the monthly overtime limit of ${formatMinutes(monthlyCap)}.`}
-                              >
-                                <BezentIcon name="alertTriangle" size={14} />
-                              </span>
-                            )}
-                          </Inline>
+                              {(exceedsDaily || exceedsMonthly) && (
+                                <span
+                                  className="bezent-warning-icon-wrap"
+                                  tabIndex={0}
+                                  role="img"
+                                  aria-label={
+                                    exceedsDaily ? 'Daily limit warning' : 'Monthly limit warning'
+                                  }
+                                  title={
+                                    exceedsDaily
+                                      ? `Exceeds the daily overtime limit of ${formatMinutes(dailyCap)}.`
+                                      : `Exceeds the monthly overtime limit of ${formatMinutes(monthlyCap)}.`
+                                  }
+                                >
+                                  <BezentIcon name="alertTriangle" size={14} />
+                                </span>
+                              )}
+                            </Inline>
+                            <span className="bezent-table-meta-subtitle">
+                              {item.approvedOtMinutes > 0
+                                ? `${formatMinutes(item.approvedOtMinutes)} approved`
+                                : 'Not approved yet'}
+                            </span>
+                          </div>
                         </TableCell>
 
-                        {/* 7. Approved */}
+                        {/* Amount, with rate beneath */}
                         <TableCell>
-                          <span className="bezent-table-primary-text">
-                            {item.approvedOtMinutes > 0
-                              ? formatMinutes(item.approvedOtMinutes)
-                              : '—'}
-                          </span>
+                          <div className="bezent-table-meta-group">
+                            <span className="bezent-table-meta-title">
+                              {formatCurrency(estimatedItemAmount)}
+                            </span>
+                            <span className="bezent-table-meta-subtitle">{rateLabel} rate</span>
+                          </div>
                         </TableCell>
 
-                        {/* 8. Rate (Spec Section 6) */}
+                        {/* Settlement */}
                         <TableCell>
-                          <Badge variant="neutral" size="sm">
-                            {rateLabel}
-                          </Badge>
+                          <span className="bezent-table-meta-title">{settlementText}</span>
                         </TableCell>
 
-                        {/* 9. Estimated Amount (Spec Section 6) */}
-                        <TableCell>
-                          <span className="bezent-table-primary-text">
-                            {formatCurrency(estimatedItemAmount)}
-                          </span>
-                        </TableCell>
-
-                        {/* 10. Settlement (Spec Section 6) */}
-                        <TableCell>
-                          <span className="bezent-table-primary-text">{settlementText}</span>
-                        </TableCell>
-
-                        {/* 11. Status (Spec Section 4) */}
+                        {/* Status */}
                         <TableCell>
                           <span title={statusMeta.tooltip}>
                             <Badge variant={statusMeta.variant} size="sm">

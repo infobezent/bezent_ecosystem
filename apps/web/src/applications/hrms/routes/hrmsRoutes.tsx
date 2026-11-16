@@ -179,18 +179,8 @@ export const hrmsRoutes: RouteObject[] = [
                 <AttendanceOverviewPage />
               ) : isAttendance && child.id === 'daily-log' ? (
                 <DailyAttendanceLogPage />
-              ) : isAttendance && child.id === 'monthly-summary' ? (
-                <MonthlyAttendanceSummaryPage />
-              ) : isAttendance && child.id === 'punch-logs' ? (
-                <PunchLogsPage />
               ) : isAttendance && child.id === 'regularization' ? (
                 <AttendanceRegularizationPage />
-              ) : isAttendance && child.id === 'on-duty' ? (
-                <AttendanceOnDutyPage />
-              ) : isAttendance && child.id === 'overtime' ? (
-                <AttendanceOvertimePage />
-              ) : isAttendance && child.id === 'comp-off' ? (
-                <AttendanceCompOffPage />
               ) : isAttendance && child.id === 'exceptions' ? (
                 <AttendanceExceptionsPage />
               ) : isAttendance && child.id === 'reports' ? (
@@ -247,6 +237,40 @@ export const hrmsRoutes: RouteObject[] = [
       {
         path: 'attendance/policies',
         element: <Navigate to="/hrms/settings?module=attendance" replace />,
+      },
+      // Attendance sub-nav consolidation (10 -> 5 flyout items): monthly-summary,
+      // punch-logs, on-duty, overtime and comp-off are no longer entries in
+      // hrmsNavigation's attendance.children (so the flyout groups them under
+      // the "Attendance" / "Requests" hubs — see AttendanceSectionTabs), but
+      // their routes and page components are unchanged.
+      {
+        path: 'attendance/monthly-summary',
+        element: <MonthlyAttendanceSummaryPage />,
+      },
+      {
+        path: 'attendance/punch-logs',
+        element: <PunchLogsPage />,
+      },
+      {
+        path: 'attendance/on-duty',
+        element: <AttendanceOnDutyPage />,
+      },
+      {
+        path: 'attendance/overtime',
+        element: <AttendanceOvertimePage />,
+      },
+      {
+        path: 'attendance/comp-off',
+        element: <AttendanceCompOffPage />,
+      },
+      // Hub entry points for the "Attendance" and "Requests" nav items.
+      {
+        path: 'attendance/records',
+        element: <Navigate to="/hrms/attendance/daily-log" replace />,
+      },
+      {
+        path: 'attendance/requests',
+        element: <Navigate to="/hrms/attendance/regularization" replace />,
       },
       // Bulk Employee Import & History
       {
