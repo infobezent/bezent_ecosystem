@@ -33,6 +33,7 @@ import {
   TableCell,
   TableHeaderCell,
   Button,
+  IconButton,
   SearchInput,
   Badge,
   Modal,
@@ -44,6 +45,15 @@ import {
 } from '../../../../design-system/components';
 import { BezentIcon } from '../../../../design-system/icons';
 import { AttendanceSectionTabs } from '../components/AttendanceSectionTabs';
+import { RequestStatStrip } from '../components/RequestStatStrip';
+import {
+  RequestFilterPanel,
+  type RequestFilterField,
+  type RequestFilterValues,
+} from '../components/RequestFilterPanel';
+import { getDemoCompOffRequests } from '../model/demoOvertimeCompOff';
+import { getMonthRange } from '../components/AttendanceDateRangeControl';
+import { AttendanceDateRangeControl } from '../components/AttendanceDateRangeControl';
 import {
   fetchCompOffOverview,
   fetchCompOffRequests,
@@ -232,6 +242,8 @@ interface EmployeeBalanceRow {
 
 type CompOffActiveTab = 'earnings' | 'balances' | 'handoff';
 
+const CO_FILTER_DEFAULTS: RequestFilterValues = { status: 'all', source: 'all', department: 'all' };
+
 export function AttendanceCompOffPage() {
   // ── 2. Active Tab State (Spec Section 2) ────────────────────────────────────
   const [activeTab, setActiveTab] = useState<CompOffActiveTab>('earnings');
@@ -248,9 +260,11 @@ export function AttendanceCompOffPage() {
   const [requests, setRequests] = useState<CompOffRequestItem[]>([]);
   const [entitlements, setEntitlements] = useState<CompOffEntitlementItem[]>([]);
   const [handoffs, setHandoffs] = useState<CompOffHandoffItem[]>([]);
+  const [usingDemo, setUsingDemo] = useState(false);
 
   // ── 4. Filter Bar State (Spec Section 4) ───────────────────────────────────
   const [search, setSearch] = useState('');
+  const [range, setRange] = useState(() => getMonthRange());
   const [statusFilter, setStatusFilter] = useState('all');
   const [sourceFilter, setSourceFilter] = useState('all'); // all | overtime | weekly_off | holiday | manual
   const [departmentFilter, setDepartmentFilter] = useState('all');
@@ -337,7 +351,13 @@ export function AttendanceCompOffPage() {
       ]);
 
       setMetrics(overviewRes);
-      setRequests(requestsRes.items || []);
+      // Nothing recorded yet: show sample requests so the page can be reviewed.
+      const noLiveData =
+        !(requestsRes.items?.length ?? 0) &&
+        !(entitlementsRes.items?.length ?? 0) &&
+        !(handoffsRes.items?.length ?? 0);
+      setUsingDemo(noLiveData);
+      setRequests(noLiveData ? getDemoCompOffRequests() : requestsRes.items || []);
       setEntitlements(entitlementsRes.items || []);
       setHandoffs(handoffsRes.items || []);
     } catch (err: unknown) {
@@ -464,6 +484,8 @@ export function AttendanceCompOffPage() {
   // ── Tab Filtering Logic ────────────────────────────────────────────────────
   const filteredRequests = useMemo(() => {
     return requests.filter((item) => {
+      const worked = (item.workDate || '').slice(0, 10);
+      if (worked && (worked < range.startDate || worked > range.endDate)) return false;
       if (search.trim()) {
         const q = search.trim().toLowerCase();
         const matchesName = item.employeeName?.toLowerCase().includes(q);
@@ -493,7 +515,7 @@ export function AttendanceCompOffPage() {
       }
       return true;
     });
-  }, [requests, search, statusFilter, sourceFilter, departmentFilter]);
+  }, [range, requests, search, statusFilter, sourceFilter, departmentFilter]);
 
   const filteredBalances = useMemo(() => {
     return employeeBalances.filter((row) => {
@@ -544,6 +566,69 @@ export function AttendanceCompOffPage() {
   }, [statusFilter, sourceFilter, departmentFilter]);
 
   const hasActiveFilters = Boolean(search || activeFilterCount > 0);
+
+  const appliedPanelFilters: RequestFilterValues = useMemo(
+    () => ({ status: statusFilter, source: sourceFilter, department: departmentFilter }),
+    [statusFilter, sourceFilter, departmentFilter],
+  );
+
+  const handleApplyPanelFilters = (v: RequestFilterValues) => {
+    setStatusFilter(v.status ?? 'all');
+    setSourceFilter(v.source ?? 'all');
+    setDepartmentFilter(v.department ?? 'all');
+  };
+
+  const filterFields: RequestFilterField[] = useMemo(() => {
+    const fields: RequestFilterField[] = [];
+    if (activeTab === 'earnings') {
+      fields.push({
+        key: 'status',
+        label: 'Status',
+        options: [
+          { value: 'all', label: 'All statuses' },
+          { value: 'pending', label: 'Pending' },
+          { value: 'available', label: 'Available' },
+          { value: 'used', label: 'Used' },
+          { value: 'expiring_soon', label: 'Expiring Soon' },
+          { value: 'expired', label: 'Expired' },
+          { value: 'revoked', label: 'Revoked' },
+          { value: 'rejected', label: 'Rejected' },
+        ],
+      });
+      fields.push({
+        key: 'source',
+        label: 'Earned From',
+        options: [
+          { value: 'all', label: 'All sources' },
+          { value: 'overtime', label: 'Overtime' },
+          { value: 'weekly_off', label: 'Weekly Off Work' },
+          { value: 'holiday', label: 'Holiday Work' },
+          { value: 'manual', label: 'Manual Grant' },
+        ],
+      });
+    }
+    if (activeTab === 'handoff') {
+      fields.push({
+        key: 'status',
+        label: 'Sync Status',
+        options: [
+          { value: 'all', label: 'All statuses' },
+          { value: 'synced', label: 'Synced' },
+          { value: 'pending', label: 'Pending' },
+          { value: 'failed', label: 'Failed' },
+        ],
+      });
+    }
+    fields.push({
+      key: 'department',
+      label: 'Department',
+      options: [
+        { value: 'all', label: 'All departments' },
+        ...departmentOptions.map((d) => ({ value: d, label: d })),
+      ],
+    });
+    return fields;
+  }, [activeTab, departmentOptions]);
 
   const handleResetFilters = () => {
     setSearch('');
@@ -743,52 +828,15 @@ export function AttendanceCompOffPage() {
     <Page maxWidth="default" gap="md">
       {/* ── 1. Page Header (Spec Section 1) ── */}
       <PageHeader
-        eyebrow="Attendance › Requests › Comp-Off"
-        title="Comp-Off"
+        eyebrow="Attendance › Requests"
+        title="Requests"
         subtitle="Track comp-off earned, used and expired for each employee."
         actions={
-          <Inline gap="sm" align="center">
-            {/* Manual Grant Button */}
-            <Button
-              variant="outline"
-              size="md"
-              leftIcon={<BezentIcon name="check" size={16} />}
-              onClick={() => {
-                setGrantEmployeeId('');
-                setGrantDays(1.0);
-                setGrantReason('');
-                setGrantValidationError(null);
-                setGrantModalOpen(true);
-              }}
-            >
-              Grant Comp-Off
-            </Button>
-
-            {/* Export Button */}
-            <Button
-              variant="outline"
-              size="md"
-              leftIcon={<BezentIcon name="download" size={16} />}
-              onClick={() => {
-                setBannerMessage({
-                  type: 'info',
-                  text: 'Exporting Comp-Off records...',
-                });
-              }}
-            >
-              Export
-            </Button>
-
-            {/* Primary Action: Run Expiry Check */}
-            <Button
-              variant="primary"
-              size="md"
-              leftIcon={<BezentIcon name="clock" size={16} />}
-              onClick={() => setExpiryCheckModalOpen(true)}
-            >
-              Run Expiry Check
-            </Button>
-          </Inline>
+          <AttendanceDateRangeControl
+            startDate={range.startDate}
+            endDate={range.endDate}
+            onChange={setRange}
+          />
         }
       />
 
@@ -803,78 +851,32 @@ export function AttendanceCompOffPage() {
         )}
 
         {/* ── 3. Summary Cards (Spec Section 3) ── */}
-        <Grid columns={5} gap="sm">
-          {/* Card 1: Pending Approval */}
-          <div
-            className={`bezent-kpi-card ${statusFilter === 'pending' ? 'is-active' : ''}`}
-            onClick={() => {
-              setActiveTab('earnings');
-              setStatusFilter((curr) => (curr === 'pending' ? 'all' : 'pending'));
-            }}
-            title="Waiting for approval"
-            role="button"
-            tabIndex={0}
-          >
-            <div className="bezent-kpi-card__header">
-              <span className="bezent-kpi-card__title">Pending Approval</span>
-            </div>
-            <div className="bezent-kpi-card__value-row">
-              <span className="bezent-kpi-card__value">{pendingCount}</span>
-            </div>
-          </div>
-
-          {/* Card 2: Earned This Month */}
-          <div className="bezent-kpi-card" title="Comp-off earned in the current cycle">
-            <div className="bezent-kpi-card__header">
-              <span className="bezent-kpi-card__title">Earned This Month</span>
-            </div>
-            <div className="bezent-kpi-card__value-row">
-              <span className="bezent-kpi-card__value">{earnedThisMonth}</span>
-            </div>
-          </div>
-
-          {/* Card 3: Used This Month */}
-          <div className="bezent-kpi-card" title="Comp-off utilized as leave this month">
-            <div className="bezent-kpi-card__header">
-              <span className="bezent-kpi-card__title">Used This Month</span>
-            </div>
-            <div className="bezent-kpi-card__value-row">
-              <span className="bezent-kpi-card__value">{usedThisMonth}</span>
-            </div>
-          </div>
-
-          {/* Card 4: Expiring Soon */}
-          <div
-            className={`bezent-kpi-card ${statusFilter === 'expiring_soon' ? 'is-active' : ''}`}
-            onClick={() => {
-              setActiveTab('earnings');
-              setStatusFilter((curr) => (curr === 'expiring_soon' ? 'all' : 'expiring_soon'));
-            }}
-            title="Comp-off that will expire within the next 30 days."
-            role="button"
-            tabIndex={0}
-          >
-            <div className="bezent-kpi-card__header">
-              <span className="bezent-kpi-card__title">Expiring Soon</span>
-            </div>
-            <div className="bezent-kpi-card__value-row">
-              <span className="bezent-kpi-card__value">{expiringSoonCount}</span>
-            </div>
-          </div>
-
-          {/* Card 5: Expired This Month */}
-          <div
-            className="bezent-kpi-card"
-            title="Comp-off credits that reached validity expiration this month"
-          >
-            <div className="bezent-kpi-card__header">
-              <span className="bezent-kpi-card__title">Expired This Month</span>
-            </div>
-            <div className="bezent-kpi-card__value-row">
-              <span className="bezent-kpi-card__value">{expiredThisMonth}</span>
-            </div>
-          </div>
-        </Grid>
+        <RequestStatStrip
+          ariaLabel="Comp-Off summary"
+          stats={[
+            {
+              label: 'Pending Approval',
+              value: pendingCount,
+              tone: 'warning',
+              onClick: () => {
+                setActiveTab('earnings');
+                setStatusFilter((curr) => (curr === 'pending' ? 'all' : 'pending'));
+              },
+            },
+            { label: 'Earned This Month', value: earnedThisMonth, tone: 'success' },
+            { label: 'Used This Month', value: usedThisMonth, tone: 'info' },
+            {
+              label: 'Expiring Soon',
+              value: expiringSoonCount,
+              tone: 'warning',
+              onClick: () => {
+                setActiveTab('earnings');
+                setStatusFilter((curr) => (curr === 'expiring_soon' ? 'all' : 'expiring_soon'));
+              },
+            },
+            { label: 'Expired This Month', value: expiredThisMonth, tone: 'danger' },
+          ]}
+        />
 
         {/* ── 2. Tabs Navigation (Spec Section 2) ── */}
         <Tabs
@@ -919,152 +921,15 @@ export function AttendanceCompOffPage() {
                 )}
               </Button>
 
-              {/* Floating Filter Panel */}
-              {isFilterPanelOpen && (
-                <div className="bezent-filter-panel" onClick={(e) => e.stopPropagation()}>
-                  <div className="bezent-filter-panel__header-compact">
-                    <span className="bezent-filter-panel__title">Filters</span>
-                    <button
-                      type="button"
-                      className="bezent-filter-panel__close-btn"
-                      onClick={() => setIsFilterPanelOpen(false)}
-                      aria-label="Close filters"
-                    >
-                      <BezentIcon name="x" size={16} />
-                    </button>
-                  </div>
-
-                  <div className="bezent-filter-panel__body-compact">
-                    <div className="bezent-filter-grid--vertical">
-                      {/* Status Filter (Context-aware per tab) */}
-                      {activeTab === 'earnings' && (
-                        <div className="bezent-filter-form-group--full">
-                          <label className="bezent-filter-label" htmlFor="filter-status-earnings">
-                            Status
-                          </label>
-                          <div className="bezent-filter-select-wrap">
-                            <select
-                              id="filter-status-earnings"
-                              className="bezent-filter-select-control"
-                              value={statusFilter}
-                              onChange={(e) => setStatusFilter(e.target.value)}
-                            >
-                              <option value="all">All</option>
-                              <option value="pending">Pending</option>
-                              <option value="available">Available</option>
-                              <option value="used">Used</option>
-                              <option value="expiring_soon">Expiring Soon</option>
-                              <option value="expired">Expired</option>
-                              <option value="revoked">Revoked</option>
-                              <option value="rejected">Rejected</option>
-                            </select>
-                            <span className="bezent-filter-select-chevron">
-                              <BezentIcon name="chevronDown" size={16} />
-                            </span>
-                          </div>
-                        </div>
-                      )}
-
-                      {activeTab === 'handoff' && (
-                        <div className="bezent-filter-form-group--full">
-                          <label className="bezent-filter-label" htmlFor="filter-status-handoff">
-                            Sync Status
-                          </label>
-                          <div className="bezent-filter-select-wrap">
-                            <select
-                              id="filter-status-handoff"
-                              className="bezent-filter-select-control"
-                              value={statusFilter}
-                              onChange={(e) => setStatusFilter(e.target.value)}
-                            >
-                              <option value="all">All</option>
-                              <option value="synced">Synced</option>
-                              <option value="pending">Pending</option>
-                              <option value="failed">Failed</option>
-                            </select>
-                            <span className="bezent-filter-select-chevron">
-                              <BezentIcon name="chevronDown" size={16} />
-                            </span>
-                          </div>
-                        </div>
-                      )}
-
-                      {/* Earned From Source Filter (Earnings tab) */}
-                      {activeTab === 'earnings' && (
-                        <div className="bezent-filter-form-group--full">
-                          <label className="bezent-filter-label" htmlFor="filter-source">
-                            Earned From
-                          </label>
-                          <div className="bezent-filter-select-wrap">
-                            <select
-                              id="filter-source"
-                              className="bezent-filter-select-control"
-                              value={sourceFilter}
-                              onChange={(e) => setSourceFilter(e.target.value)}
-                            >
-                              <option value="all">All</option>
-                              <option value="overtime">Overtime</option>
-                              <option value="weekly_off">Weekly Off Work</option>
-                              <option value="holiday">Holiday Work</option>
-                              <option value="manual">Manual Grant</option>
-                            </select>
-                            <span className="bezent-filter-select-chevron">
-                              <BezentIcon name="chevronDown" size={16} />
-                            </span>
-                          </div>
-                        </div>
-                      )}
-
-                      {/* Department Filter */}
-                      <div className="bezent-filter-form-group--full">
-                        <label className="bezent-filter-label" htmlFor="filter-dept">
-                          Department
-                        </label>
-                        <div className="bezent-filter-select-wrap">
-                          <select
-                            id="filter-dept"
-                            className="bezent-filter-select-control"
-                            value={departmentFilter}
-                            onChange={(e) => setDepartmentFilter(e.target.value)}
-                          >
-                            <option value="all">All Departments</option>
-                            {departmentOptions.map((dept) => (
-                              <option key={dept} value={dept}>
-                                {dept}
-                              </option>
-                            ))}
-                          </select>
-                          <span className="bezent-filter-select-chevron">
-                            <BezentIcon name="chevronDown" size={16} />
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Panel Footer */}
-                  <div className="bezent-filter-panel__footer-compact">
-                    <button
-                      type="button"
-                      className="bezent-filter-panel__clear-btn"
-                      onClick={handleResetFilters}
-                      disabled={!hasActiveFilters}
-                    >
-                      Clear all
-                    </button>
-                    <div className="bezent-filter-panel__footer-actions">
-                      <Button
-                        variant="primary"
-                        size="sm"
-                        shape="rounded"
-                        onClick={() => setIsFilterPanelOpen(false)}
-                      >
-                        Apply Filters
-                      </Button>
-                    </div>
-                  </div>
-                </div>
-              )}
+              <RequestFilterPanel
+                isOpen={isFilterPanelOpen}
+                onClose={() => setIsFilterPanelOpen(false)}
+                title="Filter Comp-Off"
+                fields={filterFields}
+                appliedValues={appliedPanelFilters}
+                defaults={CO_FILTER_DEFAULTS}
+                onApply={handleApplyPanelFilters}
+              />
             </div>
 
             {hasActiveFilters && (
@@ -1073,6 +938,7 @@ export function AttendanceCompOffPage() {
               </Button>
             )}
 
+            {usingDemo && <span className="bezent-records-badge">Sample data</span>}
             <span className="bezent-records-badge">
               {activeTab === 'earnings'
                 ? `${filteredRequests.length} Records`
@@ -1080,6 +946,42 @@ export function AttendanceCompOffPage() {
                   ? `${filteredBalances.length} Employees`
                   : `${filteredHandoffs.length} Records`}
             </span>
+
+            <IconButton
+              label="Run Expiry Check"
+              variant="ghost"
+              tooltipDirection="down"
+              onClick={() => setExpiryCheckModalOpen(true)}
+            >
+              <BezentIcon name="clock" size={18} />
+            </IconButton>
+            <IconButton
+              label="Export"
+              variant="ghost"
+              tooltipDirection="down"
+              onClick={() => {
+                setBannerMessage({
+                  type: 'info',
+                  text: 'Exporting Comp-Off records...',
+                });
+              }}
+            >
+              <BezentIcon name="download" size={18} />
+            </IconButton>
+            <IconButton
+              label="Grant Comp-Off"
+              variant="solid"
+              tooltipDirection="down"
+              onClick={() => {
+                setGrantEmployeeId('');
+                setGrantDays(1.0);
+                setGrantReason('');
+                setGrantValidationError(null);
+                setGrantModalOpen(true);
+              }}
+            >
+              <BezentIcon name="add" size={18} />
+            </IconButton>
           </div>
         </div>
 
@@ -1192,9 +1094,9 @@ export function AttendanceCompOffPage() {
               />
             )
           ) : (
-            <Card variant="default">
+            <Card padding="none">
               <div className="bezent-table-scroll-container">
-                <Table>
+                <Table compact hoverable className="bezent-table--workspace">
                   <TableHead>
                     <TableRow>
                       <TableHeaderCell>Employee</TableHeaderCell>
@@ -1389,9 +1291,9 @@ export function AttendanceCompOffPage() {
               />
             )
           ) : (
-            <Card variant="default">
+            <Card padding="none">
               <div className="bezent-table-scroll-container">
-                <Table>
+                <Table compact hoverable className="bezent-table--workspace">
                   <TableHead>
                     <TableRow>
                       <TableHeaderCell>Employee</TableHeaderCell>
@@ -1496,9 +1398,9 @@ export function AttendanceCompOffPage() {
             />
           )
         ) : (
-          <Card variant="default">
+          <Card padding="none">
             <div className="bezent-table-scroll-container">
-              <Table>
+              <Table compact hoverable className="bezent-table--workspace">
                 <TableHead>
                   <TableRow>
                     <TableHeaderCell>Employee</TableHeaderCell>

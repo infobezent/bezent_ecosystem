@@ -180,7 +180,28 @@ The existing global `AppShell` (`apps/web/src/layouts/app-shell`) is authoritati
 - **PROHIBITED:** Bypassing this rule by writing `style={{ ... }}` or declaring inline style objects. Enforced by ESLint.
 - **PROHIBITED:** Moving business-specific CSS selectors into Design System CSS files merely to satisfy the rule (e.g., `.onboarding-card`, `.employee-form`, `.hr-settings-grid`). Design System CSS must remain domain-neutral and reusable across any business application.
 
-### 3. Loading State & Zero-CLS Shimmer Skeleton Invariant (MANDATORY FOR ALL AGENTS)
+### 3. HRMS Stylesheet Layout (where existing HRMS CSS lives)
+
+The legacy HRMS-specific styles are centralized in `apps/web/src/design-system/styles/applications/hrms/`, **one file per module**. This is the only place HRMS module styles may live. It is loaded once, by `apps/web/src/applications/hrms/index.ts`, through `hrms/index.css`.
+
+| File                  | Contents                                                                                                                                                                             |
+| --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `hrms/ess.css`        | Employee Self-Service: attendance hero and workspace, profile, change requests, privacy, timesheets, dashboard (`ess-*` classes)                                                     |
+| `hrms/attendance.css` | Attendance module: monthly calendar and snapshot, attendance overview (`bezent-att-*`, `bezent-attendance-*`, `attendance-clay-*`)                                                   |
+| `hrms/workforce.css`  | Workforce module: overview dashboard, KPI cards, analytics, composition, planning/alerts, drawer details, talent pipeline, lifecycle, action center (`bezent-wf-*`, `bezent-exec-*`) |
+| `hrms/onboarding.css` | Onboarding and candidate registration workspace                                                                                                                                      |
+| `hrms/settings.css`   | Settings and administration customization builder                                                                                                                                    |
+
+Rules for agents:
+
+- Put new or changed HRMS styles in the file of the module that owns the screen. Do **not** create a new `.css` file, and do **not** add `.css` files under `apps/web/src/applications/**` (Section 2 still applies).
+- Do **not** recreate a single `hrms.css` and do **not** reorder the `@import` lines in `hrms/index.css`. Rules rely on cascade order and some use `!important`.
+- Selectors must be module-prefixed (for example `bezent-wf-*`, `bezent-att-*`, `ess-*`). No class is shared between module files, so keep it that way.
+- Match the Workforce reference style, and use tokens instead of raw values: `var(--radius-card)` for card radius, `--font-page-title-*` for page titles, `--teal-*`, `--blue-600`, `--blue-interactive` and `--action-blue` for colours. Do not add new raw teal or blue hex values.
+- Some sections were moved by position, not by checking each rule (for example the drawer details and talent pipeline blocks are in `workforce.css`). If one clearly belongs to another module, move it only with approval.
+- Generic, reusable styles do not belong here. They go in `design-system/components/**` or `design-system/tokens/**` (Article 8).
+
+### 4. Loading State & Zero-CLS Shimmer Skeleton Invariant (MANDATORY FOR ALL AGENTS)
 
 Whenever creating a new page or modifying an existing page across any business application or domain, **all human developers and AI coding agents (Antigravity, Claude Code, Cursor, etc.) MUST strictly enforce the Zero-CLS Loading experience**:
 

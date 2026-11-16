@@ -89,8 +89,8 @@ describe('BEZENT HRMS — Attendance On-Duty V1.0 Frontend Workspace', () => {
       </MemoryRouter>,
     );
 
-    expect(html).toContain('On-Duty (OD)');
-    expect(html).toContain('Attendance › Requests › On-Duty');
+    expect(html).toContain('Requests');
+    expect(html).toContain('Attendance › Requests');
     expect(html).toContain('Export');
     expect(html).toContain('New Request');
   });
@@ -117,10 +117,8 @@ describe('BEZENT HRMS — Attendance On-Duty V1.0 Frontend Workspace', () => {
       </MemoryRouter>,
     );
 
-    expect(html).toContain('Search by name, employee code, request #, site...');
-    expect(html).toContain('All Approval Statuses');
-    expect(html).toContain('All OD Types');
-    expect(html).toContain('All Processing States');
-    expect(html).toContain('More Filters');
+    expect(html).toContain('Search by name, employee ID, request # or site...');
+    expect(html).toContain('Filters');
+    expect(html).toContain('Reset');
   });
 });

@@ -229,7 +229,7 @@ describe('HRMS Attendance Module V1 Frontend', () => {
           <AttendanceOnDutyPage />
         </MemoryRouter>,
       );
-      expect(html).toContain('On-Duty (OD)');
+      expect(html).toContain('Requests');
       expect(html).toContain('New Request');
     });
 

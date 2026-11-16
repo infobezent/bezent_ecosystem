@@ -464,15 +464,6 @@ export function OnboardingPage({ title = 'Onboarding', onAddNewHire }: Onboardin
           <PageHeader
             title={title}
             subtitle="Manage new hires from pre-joining through employee creation."
-            actions={
-              <Button
-                variant="primary"
-                leftIcon={<BezentIcon name="plusSign" size={16} />}
-                onClick={handleAddNewHire}
-              >
-                Add New Hire
-              </Button>
-            }
           />
 
           {/* Feedback alerts */}
