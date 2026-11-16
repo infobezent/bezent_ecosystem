@@ -19,7 +19,7 @@ interface CalendarDayAttendance {
   absentPct: number;
 }
 
-const WEEKDAY_NAMES = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
+const WEEKDAY_NAMES = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
 export const AttendanceCalendarCard: React.FC<AttendanceCalendarCardProps> = ({
   overviewData,
@@ -193,28 +193,30 @@ export const AttendanceCalendarCard: React.FC<AttendanceCalendarCardProps> = ({
 
         {/* Month Navigation Controls */}
         <div className="bezent-att-cal-nav">
-          <button
-            type="button"
-            className="bezent-att-cal-nav-btn"
-            onClick={handlePrevMonth}
-            title="Previous Month"
-            aria-label="Previous Month"
-          >
-            <BezentIcon name="chevronLeft" size={14} />
-          </button>
-          <span className="bezent-att-cal-month-label">{monthLabel}</span>
-          <button
-            type="button"
-            className="bezent-att-cal-nav-btn"
-            onClick={handleNextMonth}
-            title="Next Month"
-            aria-label="Next Month"
-          >
-            <BezentIcon name="chevronRight" size={14} />
-          </button>
+          <div className="bezent-att-cal-nav-pill">
+            <button
+              type="button"
+              className="bezent-att-cal-nav-btn"
+              onClick={handlePrevMonth}
+              title="Previous Month"
+              aria-label="Previous Month"
+            >
+              <BezentIcon name="chevronLeft" size={13} />
+            </button>
+            <span className="bezent-att-cal-month-label">{monthLabel}</span>
+            <button
+              type="button"
+              className="bezent-att-cal-nav-btn"
+              onClick={handleNextMonth}
+              title="Next Month"
+              aria-label="Next Month"
+            >
+              <BezentIcon name="chevronRight" size={13} />
+            </button>
+          </div>
           {!isCurrentMonth && (
             <Button
-              variant="ghost"
+              variant="secondary"
               size="sm"
               className="bezent-att-cal-today-btn"
               onClick={handleToday}
@@ -235,11 +237,18 @@ export const AttendanceCalendarCard: React.FC<AttendanceCalendarCardProps> = ({
             {/* 7-Column Calendar Grid */}
             <div className="bezent-att-cal-grid" role="grid" aria-label="Attendance Calendar">
               {/* Weekday headers */}
-              {WEEKDAY_NAMES.map((name, i) => (
-                <div key={i} className="bezent-att-cal-weekday" role="columnheader">
-                  {name}
-                </div>
-              ))}
+              {WEEKDAY_NAMES.map((name, i) => {
+                const isWeekendCol = i === 0 || i === 6;
+                return (
+                  <div
+                    key={i}
+                    className={`bezent-att-cal-weekday ${isWeekendCol ? 'is-weekend-col' : ''}`}
+                    role="columnheader"
+                  >
+                    {name}
+                  </div>
+                );
+              })}
 
               {/* Blank leading days */}
               {Array.from({ length: firstDayIndex }).map((_, i) => (
@@ -276,10 +285,14 @@ export const AttendanceCalendarCard: React.FC<AttendanceCalendarCardProps> = ({
                         aria-hidden="true"
                       >
                         <span className="bezent-att-cal-hover-present">
+                          <span className="bezent-att-cal-hover-dot is-present" />
                           {day.presentPct}% Present
                         </span>
                         <span className="bezent-att-cal-hover-divider">·</span>
-                        <span className="bezent-att-cal-hover-absent">{day.absentPct}% Absent</span>
+                        <span className="bezent-att-cal-hover-absent">
+                          <span className="bezent-att-cal-hover-dot is-absent" />
+                          {day.absentPct}% Absent
+                        </span>
                       </div>
                     )}
 
@@ -431,16 +444,20 @@ export const AttendanceCalendarCard: React.FC<AttendanceCalendarCardProps> = ({
             {/* Legend */}
             <div className="bezent-att-cal-legend">
               <div className="bezent-att-cal-legend-item">
-                <span className="bezent-att-cal-legend-dot is-high" />
-                <span>&gt;85% Present</span>
+                <span className="bezent-att-cal-legend-dot is-present" />
+                <span>Present Workforce</span>
               </div>
               <div className="bezent-att-cal-legend-item">
-                <span className="bezent-att-cal-legend-dot is-mid" />
-                <span>70–85% Present</span>
+                <span className="bezent-att-cal-legend-dot is-absent" />
+                <span>Absent Workforce</span>
               </div>
               <div className="bezent-att-cal-legend-item">
                 <span className="bezent-att-cal-legend-dot is-weekend" />
                 <span>Weekend / Off</span>
+              </div>
+              <div className="bezent-att-cal-legend-item">
+                <span className="bezent-att-cal-legend-dot is-future" />
+                <span>Scheduled Shift</span>
               </div>
             </div>
           </>
@@ -448,9 +465,12 @@ export const AttendanceCalendarCard: React.FC<AttendanceCalendarCardProps> = ({
       </div>
 
       <div className="bezent-att-cal-footer">
-        <span className="bezent-att-cal-footer-note">
-          {workingDays} Scheduled Workdays · {weekendDays} Weekend Days
-        </span>
+        <div className="bezent-att-cal-footer-stat">
+          <BezentIcon name="calendar" size={13} />
+          <span className="bezent-att-cal-footer-note">
+            {workingDays} Scheduled Workdays · {weekendDays} Weekend Days
+          </span>
+        </div>
         <Button
           variant="ghost"
           size="sm"
