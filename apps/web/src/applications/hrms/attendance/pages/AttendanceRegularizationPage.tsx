@@ -25,6 +25,7 @@ import {
   Alert,
   LoadingState,
   EmptyState,
+  TableSkeleton,
 } from '../../../../design-system/components';
 import { BezentIcon } from '../../../../design-system/icons';
 import { AttendanceSectionTabs } from '../components/AttendanceSectionTabs';
@@ -1031,7 +1032,40 @@ export function AttendanceRegularizationPage() {
 
         {/* 5. Ten-Column Data Table with Explicit Minimum Widths and Horizontal Scroll */}
         {loading ? (
-          <LoadingState label="Loading regularization workspace..." />
+          <Table compact hoverable className="bezent-table--workspace">
+            <TableHead>
+              <TableRow>
+                <TableHeaderCell className="bezent-table-col--select">
+                  <Checkbox disabled />
+                </TableHeaderCell>
+                <TableHeaderCell className="bezent-table-col--employee">Employee</TableHeaderCell>
+                <TableHeaderCell className="bezent-table-col--workday">Workday</TableHeaderCell>
+                <TableHeaderCell className="bezent-table-col--type">Request Type</TableHeaderCell>
+                <TableHeaderCell className="bezent-table-col--change">
+                  Requested Change
+                </TableHeaderCell>
+                <TableHeaderCell className="bezent-table-col--submitted">
+                  Submitted At
+                </TableHeaderCell>
+                <TableHeaderCell className="bezent-table-col--assigned">
+                  Assigned To
+                </TableHeaderCell>
+                <TableHeaderCell className="bezent-table-col--approval">
+                  Approval Status
+                </TableHeaderCell>
+                <TableHeaderCell className="bezent-table-col--application">
+                  Application Status
+                </TableHeaderCell>
+                <TableHeaderCell className="bezent-table-col--exception">
+                  Related Exception
+                </TableHeaderCell>
+                <TableHeaderCell className="bezent-table-col--actions bezent-table-col--sticky-right">
+                  Actions
+                </TableHeaderCell>
+              </TableRow>
+            </TableHead>
+            <TableSkeleton rows={8} columns={11} label="Loading regularization workspace..." />
+          </Table>
         ) : error ? (
           <Alert variant="danger" title="Error Loading Requests">
             {error}

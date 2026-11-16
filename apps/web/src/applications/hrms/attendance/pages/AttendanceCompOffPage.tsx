@@ -40,6 +40,7 @@ import {
   Alert,
   LoadingState,
   EmptyState,
+  TableSkeleton,
 } from '../../../../design-system/components';
 import { BezentIcon } from '../../../../design-system/icons';
 import { AttendanceSectionTabs } from '../components/AttendanceSectionTabs';
@@ -1142,7 +1143,27 @@ export function AttendanceCompOffPage() {
 
         {/* ── Content Per Tab ── */}
         {loading ? (
-          <LoadingState label="Loading comp-off records..." />
+          <Card variant="default">
+            <div className="bezent-table-scroll-container">
+              <Table>
+                <TableHead>
+                  <TableRow>
+                    <TableHeaderCell>Employee</TableHeaderCell>
+                    <TableHeaderCell>Earned On</TableHeaderCell>
+                    <TableHeaderCell>Earned From</TableHeaderCell>
+                    <TableHeaderCell>Hours Worked</TableHeaderCell>
+                    <TableHeaderCell>Credit</TableHeaderCell>
+                    <TableHeaderCell>Valid Until</TableHeaderCell>
+                    <TableHeaderCell>Status</TableHeaderCell>
+                    <TableHeaderCell className="bezent-table-col--sticky-right bezent-table-col--actions">
+                      Actions
+                    </TableHeaderCell>
+                  </TableRow>
+                </TableHead>
+                <TableSkeleton rows={8} columns={8} label="Loading comp-off records..." />
+              </Table>
+            </div>
+          </Card>
         ) : error ? (
           <EmptyState
             title="Could not load comp-off"

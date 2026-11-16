@@ -15,6 +15,7 @@ import {
   TableHead,
   TableHeaderCell,
   TableRow,
+  TableSkeleton,
 } from '../../../../design-system/components';
 import { BezentIcon } from '../../../../design-system/icons';
 import type { EmployeeActionListItem } from '../../employee-administration/api/employeeAdministrationApi';
@@ -94,7 +95,22 @@ export const TransfersTable: React.FC<TransfersTableProps> = ({
   }, [activeMenuId]);
 
   if (status === 'loading') {
-    return <LoadingState label="Loading transfer records…" minHeight="md" />;
+    return (
+      <Table hoverable aria-label="Transfers directory">
+        <TableHead>
+          <TableRow>
+            <TableHeaderCell>Employee</TableHeaderCell>
+            <TableHeaderCell>Employee ID</TableHeaderCell>
+            <TableHeaderCell>Current → New Department</TableHeaderCell>
+            <TableHeaderCell>Current → New Location</TableHeaderCell>
+            <TableHeaderCell>Effective Date</TableHeaderCell>
+            <TableHeaderCell>Status</TableHeaderCell>
+            <TableHeaderCell align="right">Actions</TableHeaderCell>
+          </TableRow>
+        </TableHead>
+        <TableSkeleton rows={8} columns={7} label="Loading transfer records…" />
+      </Table>
+    );
   }
 
   if (status === 'error') {

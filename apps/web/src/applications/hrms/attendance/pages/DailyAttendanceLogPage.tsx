@@ -7,7 +7,6 @@ import {
   Card,
   Stack,
   Inline,
-  Grid,
   Button,
   Badge,
   Table,
@@ -25,7 +24,7 @@ import {
   Alert,
   EmptyState,
   Avatar,
-  StatusBadge,
+  TableSkeleton,
 } from '../../../../design-system/components';
 import { BezentIcon } from '../../../../design-system/icons';
 import { AttendanceSectionTabs } from '../components/AttendanceSectionTabs';
@@ -607,6 +606,31 @@ export function DailyAttendanceLogPage() {
     );
   };
 
+  const getPaginationItems = (currentPage: number, total: number): (number | 'ellipsis')[] => {
+    if (total <= 7) {
+      return Array.from({ length: total }, (_, i) => i + 1);
+    }
+    const pages: (number | 'ellipsis')[] = [];
+    if (currentPage <= 4) {
+      for (let i = 1; i <= 5; i++) pages.push(i);
+      pages.push('ellipsis');
+      pages.push(total);
+    } else if (currentPage >= total - 3) {
+      pages.push(1);
+      pages.push('ellipsis');
+      for (let i = total - 4; i <= total; i++) pages.push(i);
+    } else {
+      pages.push(1);
+      pages.push('ellipsis');
+      pages.push(currentPage - 1);
+      pages.push(currentPage);
+      pages.push(currentPage + 1);
+      pages.push('ellipsis');
+      pages.push(total);
+    }
+    return pages;
+  };
+
   const appliedCount = countActiveAttendanceFilters(appliedFilters);
   const hasActiveFilters = Boolean(search.trim() || appliedCount > 0);
   const isMonthLocked = items.length > 0 && items.every((i) => i.processingState === 'locked');
@@ -622,91 +646,8 @@ export function DailyAttendanceLogPage() {
 
   return (
     <Page>
-      {/* ── Page Header (Spec Section 1) ── */}
-      <PageHeader
-        eyebrow="Attendance › Attendance › Daily"
-        title="Daily Attendance"
-        subtitle="Review and correct each employee’s attendance for the selected date."
-        actions={
-          <Inline gap="sm" align="center">
-            {/* Workday navigation */}
-            <Inline gap="xs" align="center">
-              <span className="bezent-filter-strip-label">Date:</span>
-              <Button
-                variant="outline"
-                size="md"
-                shape="rounded"
-                onClick={handlePrevDay}
-                aria-label="Previous workday"
-              >
-                <BezentIcon name="chevronLeft" size={14} />
-              </Button>
-              <Input
-                type="date"
-                aria-label="Date"
-                value={date}
-                onChange={(e) => {
-                  setDate(e.target.value);
-                  setPage(1);
-                }}
-              />
-              <Button
-                variant="outline"
-                size="md"
-                shape="rounded"
-                onClick={handleNextDay}
-                aria-label="Next workday"
-              >
-                <BezentIcon name="chevronRight" size={14} />
-              </Button>
-              <Button variant="outline" size="md" shape="rounded" onClick={handleToday}>
-                Today
-              </Button>
-            </Inline>
-
-            {/* Export & Actions */}
-            <Button
-              variant="secondary"
-              size="md"
-              shape="rounded"
-              leftIcon={<BezentIcon name="download" size={16} />}
-              onClick={() => downloadAttendanceCsv('daily', { date })}
-            >
-              Export
-            </Button>
-
-            {generalSettings?.manualEntryAllowed !== false && (
-              <Button
-                variant="secondary"
-                size="md"
-                shape="rounded"
-                onClick={() => handleOpenManualEntry()}
-              >
-                + Manual Entry
-              </Button>
-            )}
-
-            <Button
-              variant="primary"
-              size="md"
-              shape="rounded"
-              disabled={isMonthLocked || (counters.pendingReview === 0 && counters.scheduled === 0)}
-              title={
-                isMonthLocked
-                  ? 'Locked for payroll'
-                  : counters.pendingReview === 0 && counters.scheduled === 0
-                    ? 'Select a date with pending records to finalize.'
-                    : 'Finalize Day'
-              }
-              onClick={() => setFinalizeModalOpen(true)}
-            >
-              Finalize Day
-            </Button>
-          </Inline>
-        }
-      />
-
-      <AttendanceSectionTabs group="records" />
+      {/* ── Page Header ── */}
+      <PageHeader title="Attendance" actions={<AttendanceSectionTabs group="records" />} />
 
       <Stack gap="md">
         {/* Section 8: Locked Month Warning Banner */}
@@ -724,175 +665,22 @@ export function DailyAttendanceLogPage() {
           <Alert variant={bulkBannerMessage.type}>{bulkBannerMessage.text}</Alert>
         )}
 
-        {/* ── Summary Counters Strip (4 Spacious Cards matching Employee Directory) ── */}
-        <Grid columns={4} gap="md">
-          {/* Scheduled */}
-          <div
-            className={`bezent-kpi-card bezent-kpi-card--interactive bezent-kpi-card--blue ${appliedFilters.status === 'scheduled' ? 'is-active' : ''}`}
-            onClick={() => {
-              setAppliedFilters((curr) => ({
-                ...curr,
-                status: curr.status === 'scheduled' ? '' : 'scheduled',
-              }));
-              setPage(1);
-            }}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter' || e.key === ' ') {
-                e.preventDefault();
-                setAppliedFilters((curr) => ({
-                  ...curr,
-                  status: curr.status === 'scheduled' ? '' : 'scheduled',
-                }));
-                setPage(1);
-              }
-            }}
-            role="button"
-            tabIndex={0}
-            title="Filter by Scheduled"
-          >
-            <div className="bezent-kpi-card__icon bezent-kpi-card__icon--blue">
-              <BezentIcon name="workforce" size={20} />
+        {/* ── Unified Single-Line Attendance Toolbar ── */}
+        <div className="bezent-directory-toolbar bezent-att-directory-toolbar">
+          <div className="bezent-att-toolbar-left">
+            {/* 1. Compact Search Bar */}
+            <div className="bezent-att-search">
+              <SearchInput
+                value={search}
+                shape="rounded"
+                aria-label="Search by name or employee ID"
+                onChange={(e) => setSearch(e.target.value)}
+                onClear={() => setSearch('')}
+                placeholder="Search name or ID"
+              />
             </div>
-            <div className="bezent-kpi-card__info">
-              <p className="bezent-kpi-card__title">Scheduled</p>
-              <p className="bezent-kpi-card__value">{counters.scheduled}</p>
-              <p className="bezent-kpi-card__caption">Expected workforce</p>
-            </div>
-          </div>
 
-          {/* Present */}
-          <div
-            className={`bezent-kpi-card bezent-kpi-card--interactive bezent-kpi-card--green ${appliedFilters.status === 'present' ? 'is-active' : ''}`}
-            onClick={() => {
-              setAppliedFilters((curr) => ({
-                ...curr,
-                status: curr.status === 'present' ? '' : 'present',
-              }));
-              setPage(1);
-            }}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter' || e.key === ' ') {
-                e.preventDefault();
-                setAppliedFilters((curr) => ({
-                  ...curr,
-                  status: curr.status === 'present' ? '' : 'present',
-                }));
-                setPage(1);
-              }
-            }}
-            role="button"
-            tabIndex={0}
-            title="Filter by Present"
-          >
-            <div className="bezent-kpi-card__icon bezent-kpi-card__icon--green">
-              <BezentIcon name="check" size={20} />
-            </div>
-            <div className="bezent-kpi-card__info">
-              <p className="bezent-kpi-card__title">Present</p>
-              <p className="bezent-kpi-card__value">{counters.present}</p>
-              <p className="bezent-kpi-card__caption">Confirmed checked-in</p>
-            </div>
-          </div>
-
-          {/* Absent */}
-          <div
-            className={`bezent-kpi-card bezent-kpi-card--interactive bezent-kpi-card--red ${appliedFilters.status === 'absent' ? 'is-active' : ''}`}
-            onClick={() => {
-              setAppliedFilters((curr) => ({
-                ...curr,
-                status: curr.status === 'absent' ? '' : 'absent',
-              }));
-              setPage(1);
-            }}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter' || e.key === ' ') {
-                e.preventDefault();
-                setAppliedFilters((curr) => ({
-                  ...curr,
-                  status: curr.status === 'absent' ? '' : 'absent',
-                }));
-                setPage(1);
-              }
-            }}
-            role="button"
-            tabIndex={0}
-            title="Filter by Absent"
-          >
-            <div className="bezent-kpi-card__icon bezent-kpi-card__icon--red">
-              <BezentIcon name="close" size={20} />
-            </div>
-            <div className="bezent-kpi-card__info">
-              <p className="bezent-kpi-card__title">Absent</p>
-              <p className="bezent-kpi-card__value">{counters.absent}</p>
-              <p className="bezent-kpi-card__caption">Not checked-in</p>
-            </div>
-          </div>
-
-          {/* Pending Review */}
-          <div
-            className={`bezent-kpi-card bezent-kpi-card--interactive bezent-kpi-card--orange ${
-              appliedFilters.processingState === 'pending_processing' ||
-              appliedFilters.processingState === 'pending_review' ||
-              appliedFilters.status === 'pending_review'
-                ? 'is-active'
-                : ''
-            }`}
-            onClick={() => {
-              setAppliedFilters((curr) => ({
-                ...curr,
-                processingState:
-                  curr.processingState === 'pending_processing' ||
-                  curr.processingState === 'pending_review'
-                    ? ''
-                    : 'pending_processing',
-                status: curr.status === 'pending_review' ? '' : curr.status,
-              }));
-              setPage(1);
-            }}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter' || e.key === ' ') {
-                e.preventDefault();
-                setAppliedFilters((curr) => ({
-                  ...curr,
-                  processingState:
-                    curr.processingState === 'pending_processing' ||
-                    curr.processingState === 'pending_review'
-                      ? ''
-                      : 'pending_processing',
-                  status: curr.status === 'pending_review' ? '' : curr.status,
-                }));
-                setPage(1);
-              }
-            }}
-            role="button"
-            tabIndex={0}
-            title="Filter by Pending Review"
-          >
-            <div className="bezent-kpi-card__icon bezent-kpi-card__icon--orange">
-              <BezentIcon name="tasks" size={20} />
-            </div>
-            <div className="bezent-kpi-card__info">
-              <p className="bezent-kpi-card__title">Pending Review</p>
-              <p className="bezent-kpi-card__value">{counters.pendingReview}</p>
-              <p className="bezent-kpi-card__caption">Exceptions awaiting action</p>
-            </div>
-          </div>
-        </Grid>
-
-        {/* ── Search & Filter Toolbar directly below KPI Cards (Workforce Directory Pattern) ── */}
-        <div className="bezent-directory-toolbar">
-          <div className="bezent-directory-toolbar__search">
-            <SearchInput
-              value={search}
-              shape="rounded"
-              aria-label="Search by name or employee ID"
-              onChange={(e) => setSearch(e.target.value)}
-              onClear={() => setSearch('')}
-              placeholder="Search by name or employee ID"
-            />
-          </div>
-
-          <div className="bezent-directory-toolbar__actions">
+            {/* 2. Filters & Reset (Placed next to Search) */}
             <div className="bezent-filter-anchor">
               <Button
                 variant={appliedCount > 0 || isFilterPanelOpen ? 'secondary' : 'outline'}
@@ -928,10 +716,94 @@ export function DailyAttendanceLogPage() {
               leftIcon={<BezentIcon name="reset" size={16} />}
               onClick={handleResetFilters}
               disabled={!hasActiveFilters}
+              title="Reset all active filters"
             >
               Reset
             </Button>
+          </div>
 
+          <div className="bezent-directory-toolbar__actions bezent-att-toolbar-actions">
+            {/* 1. Date Navigation Controls (Swapped to right side) */}
+            <div className="bezent-att-workday-nav">
+              <Button
+                variant="outline"
+                size="md"
+                shape="rounded"
+                onClick={handlePrevDay}
+                aria-label="Previous workday"
+                title="Previous workday"
+              >
+                <BezentIcon name="chevronLeft" size={14} />
+              </Button>
+              <Input
+                type="date"
+                aria-label="Date"
+                value={date}
+                onChange={(e) => {
+                  setDate(e.target.value);
+                  setPage(1);
+                }}
+              />
+              <Button
+                variant="outline"
+                size="md"
+                shape="rounded"
+                onClick={handleNextDay}
+                aria-label="Next workday"
+                title="Next workday"
+              >
+                <BezentIcon name="chevronRight" size={14} />
+              </Button>
+              <Button variant="outline" size="md" shape="rounded" onClick={handleToday}>
+                Today
+              </Button>
+            </div>
+
+            {/* 2. Export: Icon Only per user instruction */}
+            <Button
+              variant="outline"
+              size="md"
+              shape="rounded"
+              onClick={() => downloadAttendanceCsv('daily', { date })}
+              aria-label="Export Daily Attendance CSV"
+              title="Export Daily Attendance CSV"
+            >
+              <BezentIcon name="download" size={16} />
+            </Button>
+
+            {/* 3. Manual Entry: Pencil Icon Only per user instruction */}
+            {generalSettings?.manualEntryAllowed !== false && (
+              <Button
+                variant="outline"
+                size="md"
+                shape="rounded"
+                onClick={() => handleOpenManualEntry()}
+                aria-label="Manual Attendance Entry"
+                title="Manual Attendance Entry"
+              >
+                <BezentIcon name="edit" size={16} />
+              </Button>
+            )}
+
+            {/* 4. Finalize Day */}
+            <Button
+              variant="primary"
+              size="md"
+              shape="rounded"
+              disabled={isMonthLocked || (counters.pendingReview === 0 && counters.scheduled === 0)}
+              title={
+                isMonthLocked
+                  ? 'Locked for payroll'
+                  : counters.pendingReview === 0 && counters.scheduled === 0
+                    ? 'Select a date with pending records to finalize.'
+                    : 'Finalize Day'
+              }
+              onClick={() => setFinalizeModalOpen(true)}
+            >
+              Finalize Day
+            </Button>
+
+            {/* 5. Records Badge */}
             <span className="bezent-records-badge">{totalCount} Records</span>
           </div>
         </div>
@@ -1122,7 +994,33 @@ export function DailyAttendanceLogPage() {
 
         {/* ── Table & Pagination (Spec Section 4 & 9) ── */}
         {loading ? (
-          <LoadingState label="Loading daily attendance records..." />
+          <Card padding="none">
+            <Table compact hoverable>
+              <TableHead>
+                <TableRow>
+                  <TableHeaderCell className="bezent-table-col--select">
+                    <Checkbox disabled aria-label="Select all" />
+                  </TableHeaderCell>
+                  <TableHeaderCell>Employee</TableHeaderCell>
+                  <TableHeaderCell>Shift</TableHeaderCell>
+                  <TableHeaderCell>In</TableHeaderCell>
+                  <TableHeaderCell>Out</TableHeaderCell>
+                  <TableHeaderCell>Hours</TableHeaderCell>
+                  <TableHeaderCell>Break</TableHeaderCell>
+                  <TableHeaderCell>Status</TableHeaderCell>
+                  <TableHeaderCell>Late</TableHeaderCell>
+                  <TableHeaderCell>Early Out</TableHeaderCell>
+                  <TableHeaderCell>Overtime</TableHeaderCell>
+                  <TableHeaderCell>Source</TableHeaderCell>
+                  <TableHeaderCell>Remarks</TableHeaderCell>
+                  <TableHeaderCell className="bezent-table-col--actions bezent-table-col--sticky-right">
+                    Actions
+                  </TableHeaderCell>
+                </TableRow>
+              </TableHead>
+              <TableSkeleton rows={8} columns={14} />
+            </Table>
+          </Card>
         ) : error ? (
           <Alert variant="danger" title="Could not load attendance">
             <Stack gap="xs">
@@ -1414,34 +1312,53 @@ export function DailyAttendanceLogPage() {
               </TableBody>
             </Table>
 
-            {/* Pagination Controls */}
-            <Toolbar
-              left={
-                <span className="bezent-card__desc">
-                  Showing {items.length} of {totalCount} records (Page {page} of {totalPages})
-                </span>
-              }
-              right={
-                <Inline gap="xs" align="center">
-                  <Button
-                    variant="secondary"
-                    size="sm"
+            {/* Table Footer: Clean Records Summary & Enterprise Pagination */}
+            <div className="bezent-att-table-footer">
+              <span className="bezent-att-table-footer-info" aria-live="polite">
+                {totalPages <= 1
+                  ? `Showing all ${items.length} ${items.length === 1 ? 'record' : 'records'}`
+                  : `Showing ${(page - 1) * limit + 1}–${Math.min(page * limit, totalCount)} of ${totalCount} records`}
+              </span>
+
+              {totalPages > 1 && (
+                <div className="bezent-pagination" role="navigation" aria-label="Pagination">
+                  <button
+                    type="button"
+                    className="bezent-pagination__btn"
                     disabled={page <= 1}
                     onClick={() => setPage((p) => Math.max(1, p - 1))}
+                    aria-label="Previous page"
                   >
-                    Previous
-                  </Button>
-                  <Button
-                    variant="secondary"
-                    size="sm"
+                    ‹
+                  </button>
+                  {getPaginationItems(page, totalPages).map((item, idx) =>
+                    item === 'ellipsis' ? (
+                      <span key={`ellipsis-${idx}`} className="bezent-pagination__ellipsis">
+                        …
+                      </span>
+                    ) : (
+                      <button
+                        key={`page-${item}`}
+                        type="button"
+                        className={`bezent-pagination__btn ${item === page ? 'is-active' : ''}`}
+                        onClick={() => setPage(item)}
+                      >
+                        {item}
+                      </button>
+                    ),
+                  )}
+                  <button
+                    type="button"
+                    className="bezent-pagination__btn"
                     disabled={page >= totalPages}
                     onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                    aria-label="Next page"
                   >
-                    Next
-                  </Button>
-                </Inline>
-              }
-            />
+                    ›
+                  </button>
+                </div>
+              )}
+            </div>
           </Card>
         )}
 
@@ -1453,23 +1370,125 @@ export function DailyAttendanceLogPage() {
           size="drawer"
           title={
             drawerDetail ? (
-              <Inline gap="sm" align="center">
-                <Avatar
-                  initials={`${drawerDetail.employee.firstName[0]}${drawerDetail.employee.lastName?.[0] ?? ''}`}
-                  size="md"
-                />
-                <Stack gap="none">
-                  <span>
-                    {drawerDetail.employee.firstName} {drawerDetail.employee.lastName ?? ''}
+              <div className="bezent-attendance-drawer-header">
+                <div className="bezent-attendance-drawer-header__avatar-wrap">
+                  <Avatar
+                    initials={`${drawerDetail.employee.firstName[0]}${drawerDetail.employee.lastName?.[0] ?? ''}`}
+                    size="md"
+                    color={getAvatarColor(
+                      drawerDetail.employee.id || drawerDetail.employee.employeeCode,
+                    )}
+                  />
+                  <span
+                    className={`bezent-attendance-drawer-header__status-dot bezent-attendance-drawer-header__status-dot--${(drawerDetail.attendanceSummary.status || '').toLowerCase()} ${drawerDetail.attendanceSummary.status === 'present' ? 'is-present' : 'is-absent'}`}
+                    title={`Status: ${STATUS_CONFIG[drawerDetail.attendanceSummary.status]?.label || drawerDetail.attendanceSummary.status}`}
+                    aria-label={`Status: ${STATUS_CONFIG[drawerDetail.attendanceSummary.status]?.label || drawerDetail.attendanceSummary.status}`}
+                  />
+                </div>
+                <div className="bezent-attendance-drawer-header__meta">
+                  <div className="bezent-attendance-drawer-header__title-row">
+                    <span className="bezent-attendance-drawer-header__name">
+                      {drawerDetail.employee.firstName} {drawerDetail.employee.lastName ?? ''}
+                    </span>
+                    <span className="bezent-attendance-drawer-header__code">
+                      {drawerDetail.employee.employeeCode}
+                    </span>
+                  </div>
+                  <span className="bezent-attendance-drawer-header__sub">
+                    {drawerDetail.employee.departmentName ?? 'Department'} •{' '}
+                    {formatShiftName(drawerDetail.employee.assignedShift.scheduleRef)} (
+                    {drawerDetail.employee.assignedShift.startTime} -{' '}
+                    {drawerDetail.employee.assignedShift.endTime})
                   </span>
-                  <span className="bezent-card__desc">
-                    {drawerDetail.employee.employeeCode} •{' '}
-                    {drawerDetail.employee.departmentName ?? 'Department'}
-                  </span>
-                </Stack>
-              </Inline>
+                </div>
+              </div>
             ) : (
               'Employee Attendance Details'
+            )
+          }
+          headerBottom={
+            drawerDetail && (
+              <div className="bezent-attendance-drawer-tabs">
+                <button
+                  type="button"
+                  className={`bezent-attendance-drawer-tab ${drawerTab === 'summary' ? 'is-active' : ''}`}
+                  onClick={() => setDrawerTab('summary')}
+                >
+                  <span>Summary</span>
+                </button>
+                <button
+                  type="button"
+                  className={`bezent-attendance-drawer-tab ${drawerTab === 'timeline' ? 'is-active' : ''}`}
+                  onClick={() => setDrawerTab('timeline')}
+                >
+                  <span>Punches</span>
+                  <span className="bezent-attendance-drawer-tab__badge">
+                    {drawerDetail.punchTimeline.length}
+                  </span>
+                </button>
+                <button
+                  type="button"
+                  className={`bezent-attendance-drawer-tab ${drawerTab === 'records' ? 'is-active' : ''}`}
+                  onClick={() => setDrawerTab('records')}
+                >
+                  <span>Related Records</span>
+                </button>
+                <button
+                  type="button"
+                  className={`bezent-attendance-drawer-tab ${drawerTab === 'history' ? 'is-active' : ''}`}
+                  onClick={() => setDrawerTab('history')}
+                >
+                  <span>History &amp; Provenance</span>
+                </button>
+              </div>
+            )
+          }
+          footer={
+            drawerDetail && (
+              <div className="bezent-attendance-drawer-footer">
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  onClick={() => handleRecalculateSingle(drawerDetail.employee.id)}
+                >
+                  <BezentIcon name="clock" size={14} />
+                  Recalculate Day
+                </Button>
+                <Button
+                  variant="primary"
+                  size="sm"
+                  onClick={() => {
+                    handleOpenManualEntry({
+                      id: drawerDetail.attendanceSummary.id,
+                      employeeId: drawerDetail.employee.id,
+                      employeeCode: drawerDetail.employee.employeeCode,
+                      firstName: drawerDetail.employee.firstName,
+                      lastName: drawerDetail.employee.lastName,
+                      departmentId: null,
+                      departmentName: drawerDetail.employee.departmentName,
+                      designationId: null,
+                      designationName: drawerDetail.employee.designationName,
+                      date: drawerDetail.employee.workday,
+                      checkInTime: drawerDetail.attendanceSummary.checkInTime,
+                      checkOutTime: drawerDetail.attendanceSummary.checkOutTime,
+                      status: drawerDetail.attendanceSummary.status,
+                      workLocation: 'office',
+                      workedMinutes: drawerDetail.attendanceSummary.workedMinutes,
+                      lateMinutes: drawerDetail.attendanceSummary.lateMinutes,
+                      earlyMinutes: drawerDetail.attendanceSummary.earlyMinutes,
+                      isLate: drawerDetail.attendanceSummary.isLate,
+                      isEarlyExit: drawerDetail.attendanceSummary.isEarlyExit,
+                      isMissingPunch: drawerDetail.attendanceSummary.isMissingPunch,
+                      isRegularized: drawerDetail.attendanceSummary.isRegularized,
+                      shiftScheduleRef: drawerDetail.employee.assignedShift.scheduleRef,
+                      notes: null,
+                    });
+                  }}
+                >
+                  <BezentIcon name="edit" size={14} />
+                  Adjust Attendance
+                </Button>
+              </div>
             )
           }
         >
@@ -1484,161 +1503,122 @@ export function DailyAttendanceLogPage() {
             />
           ) : (
             <Stack gap="md">
-              {/* Drawer Navigation Tabs */}
-              <Inline gap="xs" align="center">
-                <Button
-                  variant={drawerTab === 'summary' ? 'primary' : 'secondary'}
-                  size="sm"
-                  onClick={() => setDrawerTab('summary')}
-                >
-                  Summary
-                </Button>
-                <Button
-                  variant={drawerTab === 'timeline' ? 'primary' : 'secondary'}
-                  size="sm"
-                  onClick={() => setDrawerTab('timeline')}
-                >
-                  Punches ({drawerDetail.punchTimeline.length})
-                </Button>
-                <Button
-                  variant={drawerTab === 'records' ? 'primary' : 'secondary'}
-                  size="sm"
-                  onClick={() => setDrawerTab('records')}
-                >
-                  Related Records
-                </Button>
-                <Button
-                  variant={drawerTab === 'history' ? 'primary' : 'secondary'}
-                  size="sm"
-                  onClick={() => setDrawerTab('history')}
-                >
-                  History & Provenance
-                </Button>
-              </Inline>
-
               {/* Section 1 & 2: Employee & Attendance Summary */}
               {drawerTab === 'summary' && (
                 <Stack gap="md">
-                  <Card padding="sm">
-                    <Stack gap="xs">
-                      <strong>Workday & Shift Assignment</strong>
-                      <Grid columns={2} gap="sm">
-                        <Stack gap="none">
-                          <span className="bezent-card__desc">Workday</span>
-                          <span>{drawerDetail.employee.workday}</span>
-                        </Stack>
-                        <Stack gap="none">
-                          <span className="bezent-card__desc">Assigned Shift</span>
-                          <span>
-                            {formatShiftName(drawerDetail.employee.assignedShift.scheduleRef)}
-                          </span>
-                        </Stack>
-                        <Stack gap="none">
-                          <span className="bezent-card__desc">Shift Window</span>
-                          <span>
-                            {drawerDetail.employee.assignedShift.startTime} -{' '}
-                            {drawerDetail.employee.assignedShift.endTime}
-                          </span>
-                        </Stack>
-                        <Stack gap="none">
-                          <span className="bezent-card__desc">Location / Timezone</span>
-                          <span>
-                            {drawerDetail.employee.locationName ?? 'Office'} (
-                            {drawerDetail.employee.timeZone})
-                          </span>
-                        </Stack>
-                      </Grid>
-                    </Stack>
-                  </Card>
+                  {/* Hero Metric Overview Card */}
+                  <div className="bezent-attendance-drawer-hero">
+                    <div className="bezent-attendance-drawer-hero__left">
+                      <span className="bezent-attendance-drawer-hero__eyebrow">
+                        Today&apos;s Attendance
+                      </span>
+                      <div className="bezent-attendance-drawer-hero__hours">
+                        {formatWorkedHours(drawerDetail.attendanceSummary.workedMinutes)}
+                        <span className="bezent-attendance-drawer-hero__shift-target">
+                          / 9h shift
+                        </span>
+                      </div>
+                    </div>
+                    <div className="bezent-attendance-drawer-hero__right">
+                      {renderStatusBadge(drawerDetail.attendanceSummary.status)}
+                    </div>
+                  </div>
 
-                  <Card padding="sm">
-                    <Stack gap="xs">
-                      <strong>Attendance Calculation Summary</strong>
-                      <Grid columns={2} gap="sm">
-                        <Stack gap="none">
-                          <span className="bezent-card__desc">Attendance Status</span>
-                          <span>{renderStatusBadge(drawerDetail.attendanceSummary.status)}</span>
-                        </Stack>
-                        <Stack gap="none">
-                          <span className="bezent-card__desc">Processing State</span>
-                          <span>
-                            {renderReviewStateBadge(drawerDetail.attendanceSummary.processingState)}
-                          </span>
-                        </Stack>
-                        <Stack gap="none">
-                          <span className="bezent-card__desc">Check In</span>
-                          <span>{drawerDetail.attendanceSummary.checkInTime ?? '—'}</span>
-                        </Stack>
-                        <Stack gap="none">
-                          <span className="bezent-card__desc">Check Out</span>
-                          <span>{drawerDetail.attendanceSummary.checkOutTime ?? '—'}</span>
-                        </Stack>
-                        <Stack gap="none">
-                          <span className="bezent-card__desc">Net Worked Hours</span>
+                  {/* Card 1: Shift & Schedule Tile Grid */}
+                  <div className="bezent-attendance-drawer-card">
+                    <div className="bezent-attendance-drawer-card__header">
+                      <span className="bezent-attendance-drawer-card__title">
+                        <BezentIcon name="clock" size={16} />
+                        Workday &amp; Shift Assignment
+                      </span>
+                      <span className="bezent-attendance-drawer-card__date">
+                        {drawerDetail.employee.workday}
+                      </span>
+                    </div>
+                    <div className="bezent-attendance-drawer-grid">
+                      <div className="bezent-attendance-drawer-tile">
+                        <span className="bezent-attendance-drawer-tile__label">Assigned Shift</span>
+                        <span className="bezent-attendance-drawer-tile__value">
+                          {formatShiftName(drawerDetail.employee.assignedShift.scheduleRef)}
+                        </span>
+                      </div>
+                      <div className="bezent-attendance-drawer-tile">
+                        <span className="bezent-attendance-drawer-tile__label">Shift Window</span>
+                        <span className="bezent-attendance-drawer-tile__value">
+                          {drawerDetail.employee.assignedShift.startTime} —{' '}
+                          {drawerDetail.employee.assignedShift.endTime}
+                        </span>
+                      </div>
+                      <div className="bezent-attendance-drawer-tile">
+                        <span className="bezent-attendance-drawer-tile__label">
+                          Location / Timezone
+                        </span>
+                        <span className="bezent-attendance-drawer-tile__value">
+                          {drawerDetail.employee.locationName ?? 'Office'} (
+                          {drawerDetail.employee.timeZone})
+                        </span>
+                      </div>
+                      <div className="bezent-attendance-drawer-tile">
+                        <span className="bezent-attendance-drawer-tile__label">Workday Date</span>
+                        <span className="bezent-attendance-drawer-tile__value font-mono">
+                          {drawerDetail.employee.workday}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Card 2: Attendance Intelligence & Calculations */}
+                  <div className="bezent-attendance-drawer-card">
+                    <div className="bezent-attendance-drawer-card__header">
+                      <span className="bezent-attendance-drawer-card__title">
+                        <BezentIcon name="attendance" size={16} />
+                        Attendance Calculation Summary
+                      </span>
+                      {renderReviewStateBadge(drawerDetail.attendanceSummary.processingState)}
+                    </div>
+                    <div className="bezent-attendance-drawer-grid">
+                      <div className="bezent-attendance-drawer-tile">
+                        <span className="bezent-attendance-drawer-tile__label">First Check In</span>
+                        <span className="bezent-attendance-drawer-tile__value">
+                          {drawerDetail.attendanceSummary.checkInTime ?? '—'}
+                        </span>
+                      </div>
+                      <div className="bezent-attendance-drawer-tile">
+                        <span className="bezent-attendance-drawer-tile__label">Last Check Out</span>
+                        <span className="bezent-attendance-drawer-tile__value">
+                          {drawerDetail.attendanceSummary.checkOutTime ?? '—'}
+                        </span>
+                      </div>
+                      <div className="bezent-attendance-drawer-tile">
+                        <span className="bezent-attendance-drawer-tile__label">
+                          Net Worked Hours
+                        </span>
+                        <span className="bezent-attendance-drawer-tile__value">
                           <strong>
                             {formatWorkedHours(drawerDetail.attendanceSummary.workedMinutes)}
                           </strong>
-                        </Stack>
-                        <Stack gap="none">
-                          <span className="bezent-card__desc">Effective Policy</span>
-                          <span>
-                            {drawerDetail.attendanceSummary.effectivePolicy?.policyName ??
-                              'Standard Policy'}{' '}
-                            (v
-                            {drawerDetail.attendanceSummary.effectivePolicy?.version ?? 1})
-                          </span>
-                        </Stack>
-                      </Grid>
-
-                      <Stack gap="none">
-                        <span className="bezent-card__desc">Active Indicators</span>
-                        {renderIndicators(drawerDetail.attendanceSummary.indicators)}
-                      </Stack>
-                    </Stack>
-                  </Card>
-
-                  <Inline gap="sm" justify="end">
-                    <Button
-                      variant="secondary"
-                      size="sm"
-                      onClick={() => handleRecalculateSingle(drawerDetail.employee.id)}
-                    >
-                      Recalculate Day
-                    </Button>
-                    <Button
-                      variant="primary"
-                      size="sm"
-                      onClick={() => {
-                        handleOpenManualEntry({
-                          id: drawerDetail.attendanceSummary.id,
-                          employeeId: drawerDetail.employee.id,
-                          employeeCode: drawerDetail.employee.employeeCode,
-                          firstName: drawerDetail.employee.firstName,
-                          lastName: drawerDetail.employee.lastName,
-                          departmentId: null,
-                          departmentName: drawerDetail.employee.departmentName,
-                          designationId: null,
-                          designationName: drawerDetail.employee.designationName,
-                          date: drawerDetail.employee.workday,
-                          checkInTime: drawerDetail.attendanceSummary.checkInTime,
-                          checkOutTime: drawerDetail.attendanceSummary.checkOutTime,
-                          status: drawerDetail.attendanceSummary.status,
-                          workLocation: 'office',
-                          workedMinutes: drawerDetail.attendanceSummary.workedMinutes,
-                          lateMinutes: drawerDetail.attendanceSummary.lateMinutes,
-                          earlyMinutes: drawerDetail.attendanceSummary.earlyMinutes,
-                          isLate: drawerDetail.attendanceSummary.isLate,
-                          isEarlyExit: drawerDetail.attendanceSummary.isEarlyExit,
-                          isMissingPunch: drawerDetail.attendanceSummary.isMissingPunch,
-                          isRegularized: drawerDetail.attendanceSummary.isRegularized,
-                          shiftScheduleRef: drawerDetail.employee.assignedShift.scheduleRef,
-                          notes: null,
-                        });
-                      }}
-                    >
-                      Adjust Attendance
-                    </Button>
-                  </Inline>
+                        </span>
+                      </div>
+                      <div className="bezent-attendance-drawer-tile">
+                        <span className="bezent-attendance-drawer-tile__label">
+                          Effective Policy
+                        </span>
+                        <span className="bezent-attendance-drawer-tile__value">
+                          {drawerDetail.attendanceSummary.effectivePolicy?.policyName ??
+                            'Standard Policy'}{' '}
+                          (v{drawerDetail.attendanceSummary.effectivePolicy?.version ?? 1})
+                        </span>
+                      </div>
+                      <div className="bezent-attendance-drawer-tile bezent-attendance-drawer-tile--full-width">
+                        <span className="bezent-attendance-drawer-tile__label">
+                          Active Indicators
+                        </span>
+                        <div className="bezent-attendance-drawer-tile__value">
+                          {renderIndicators(drawerDetail.attendanceSummary.indicators)}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
                 </Stack>
               )}
 
@@ -1652,25 +1632,30 @@ export function DailyAttendanceLogPage() {
                       description="No physical, biometric, or mobile punches were registered for this employee on this date."
                     />
                   ) : (
-                    drawerDetail.punchTimeline.map((punch, idx) => (
-                      <Card key={punch.id ?? idx} padding="sm">
-                        <Inline justify="between" align="center">
-                          <Inline gap="sm" align="center">
-                            <Badge variant={punch.punchType === 'in' ? 'success' : 'neutral'}>
-                              {punch.punchType.toUpperCase()}
-                            </Badge>
-                            <Stack gap="none">
-                              <strong>{new Date(punch.punchTime).toLocaleTimeString()}</strong>
-                              <span className="bezent-card__desc">
-                                Source: {punch.source} • Location: {punch.workLocation}
-                              </span>
-                            </Stack>
+                    <div className="bezent-punch-timeline">
+                      {drawerDetail.punchTimeline.map((punch, idx) => (
+                        <div key={punch.id ?? idx} className="bezent-punch-timeline__item">
+                          <span
+                            className={`bezent-punch-timeline__dot ${punch.punchType === 'out' ? 'is-out' : ''}`}
+                          />
+                          <Inline justify="between" align="center">
+                            <Inline gap="sm" align="center">
+                              <Badge variant={punch.punchType === 'in' ? 'success' : 'neutral'}>
+                                {punch.punchType.toUpperCase()}
+                              </Badge>
+                              <Stack gap="none">
+                                <strong>{new Date(punch.punchTime).toLocaleTimeString()}</strong>
+                                <span className="bezent-card__desc">
+                                  Source: {punch.source} • Location: {punch.workLocation}
+                                </span>
+                              </Stack>
+                            </Inline>
+                            {punch.isDuplicate && <Badge variant="warning">Duplicate</Badge>}
                           </Inline>
-                          {punch.isDuplicate && <Badge variant="warning">Duplicate</Badge>}
-                        </Inline>
-                        {punch.notes && <p className="bezent-card__desc">{punch.notes}</p>}
-                      </Card>
-                    ))
+                          {punch.notes && <p className="bezent-card__desc">{punch.notes}</p>}
+                        </div>
+                      ))}
+                    </div>
                   )}
                 </Stack>
               )}

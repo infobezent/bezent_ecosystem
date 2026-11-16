@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react';
-import { Badge, type BadgeVariant } from './Badge';
+import type { BadgeVariant } from './Badge';
 
 export type EmploymentStatusKey =
   | 'active'

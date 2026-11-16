@@ -15,6 +15,7 @@ import {
   TableHead,
   TableHeaderCell,
   TableRow,
+  TableSkeleton,
 } from '../../../../design-system/components';
 import { BezentIcon } from '../../../../design-system/icons';
 import type { EmployeeActionListItem } from '../../employee-administration/api/employeeAdministrationApi';
@@ -94,7 +95,22 @@ export const PromotionsTable: React.FC<PromotionsTableProps> = ({
   }, [activeMenuId]);
 
   if (status === 'loading') {
-    return <LoadingState label="Loading promotion records…" minHeight="md" />;
+    return (
+      <Table hoverable aria-label="Promotions directory">
+        <TableHead>
+          <TableRow>
+            <TableHeaderCell>Employee</TableHeaderCell>
+            <TableHeaderCell>Employee ID</TableHeaderCell>
+            <TableHeaderCell>Current Role → Proposed Role</TableHeaderCell>
+            <TableHeaderCell>Department</TableHeaderCell>
+            <TableHeaderCell>Effective Date</TableHeaderCell>
+            <TableHeaderCell>Status</TableHeaderCell>
+            <TableHeaderCell align="right">Actions</TableHeaderCell>
+          </TableRow>
+        </TableHead>
+        <TableSkeleton rows={8} columns={7} label="Loading promotion records…" />
+      </Table>
+    );
   }
 
   if (status === 'error') {
