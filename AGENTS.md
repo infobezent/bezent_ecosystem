@@ -169,7 +169,7 @@ The existing global `AppShell` (`apps/web/src/layouts/app-shell`) is authoritati
 
 `apps/web/src/design-system/**` is the **ONLY** source for generic visual and layout primitives:
 
-- **Primitives:** `Button`, `IconButton`, `Input`, `SearchInput`, `Textarea`, `Select`, `Switch`, `Modal`, `Tabs`, `Table`, `Tooltip`, `Badge`, `Alert`, `Card`, `Avatar`, `EmptyState`.
+- **Primitives:** `Button`, `IconButton`, `Input`, `SearchInput`, `Textarea`, `Select`, `Switch`, `Modal`, `Tabs`, `Table`, `Tooltip`, `Badge`, `Alert`, `Card`, `Avatar`, `EmptyState`, `Skeleton`, `TableSkeleton`, `TopProgressBar`.
 - **Layout & Composition:** `Page`, `PageHeader`, `Section`, `Stack`, `Inline`, `Grid`, `FormSection`, `FormGrid`, `Actions`, `Toolbar`, `Divider`.
 
 ### 2. The Strict Zero Application CSS Rule
@@ -200,6 +200,65 @@ Rules for agents:
 - Match the Workforce reference style, and use tokens instead of raw values: `var(--radius-card)` for card radius, `--font-page-title-*` for page titles, `--teal-*`, `--blue-600`, `--blue-interactive` and `--action-blue` for colours. Do not add new raw teal or blue hex values.
 - Some sections were moved by position, not by checking each rule (for example the drawer details and talent pipeline blocks are in `workforce.css`). If one clearly belongs to another module, move it only with approval.
 - Generic, reusable styles do not belong here. They go in `design-system/components/**` or `design-system/tokens/**` (Article 8).
+
+### 4. Loading State & Zero-CLS Shimmer Skeleton Invariant (MANDATORY FOR ALL AGENTS)
+
+Whenever creating a new page or modifying an existing page across any business application or domain, **all human developers and AI coding agents (Antigravity, Claude Code, Cursor, etc.) MUST strictly enforce the Zero-CLS Loading experience**:
+
+1. **Table & Directory Pages (Zero Cumulative Layout Shift):**
+   - **STRICTLY PROHIBITED:** Wiping out the entire page or replacing a `<Table>` card with a detached `<LoadingState>` spinner while data is loading. This causes jarring layout jumps, destroys visual context, and collapses column widths.
+   - **MANDATORY PATTERN:**
+     - The page layout (`Page`, `PageHeader`, breadcrumbs, navigation tabs, action buttons) MUST remain visible and stable.
+     - The directory toolbar (`Toolbar`, search inputs, filter buttons, active chips) MUST remain visible and stable.
+     - The `<Table>` container and column headers (`<TableHead>`) MUST remain stably visible.
+     - The table body MUST render `<TableSkeleton rows={8} columns={N} label="Loading [feature]…" />`.
+     - The `label` prop is **mandatory** to preserve accessibility (emits `<tr className="bezent-sr-only"><td>{label}</td></tr>`) and ensure backwards-compatibility with unit test assertions.
+
+   ```tsx
+   // ❌ STRICTLY FORBIDDEN PATTERN:
+   {loading ? (
+     <LoadingState label="Loading records…" />
+   ) : (
+     <Card><Table hoverable><TableHead>...</TableHead><TableBody>...</TableBody></Table></Card>
+   )}
+
+   // ✅ MANDATORY AUTHORITATIVE PATTERN:
+   <Card>
+     <Table hoverable>
+       <TableHead>
+         <TableRow>
+           <TableHeaderCell>Name</TableHeaderCell>
+           <TableHeaderCell>Department</TableHeaderCell>
+           <TableHeaderCell>Status</TableHeaderCell>
+           <TableHeaderCell align="right">Actions</TableHeaderCell>
+         </TableRow>
+       </TableHead>
+       {loading ? (
+         <TableSkeleton rows={8} columns={4} label="Loading records…" />
+       ) : items.length === 0 ? (
+         <TableBody>
+           <TableRow>
+             <TableCell colSpan={4}>
+               <EmptyState title="No records found" ... />
+             </TableCell>
+           </TableRow>
+         </TableBody>
+       ) : (
+         <TableBody>
+           {items.map(item => (
+             <TableRow key={item.id}>...</TableRow>
+           ))}
+         </TableBody>
+       )}
+     </Table>
+   </Card>
+   ```
+
+2. **Overview, Dashboards & KPI Metric Cards:**
+   - Pages displaying summaries or metric cards must pass `loading={loading}` to card components or render `<Skeleton>` / `<CardSkeleton>` blocks so the grid layout never collapses or jumps.
+
+3. **Workspace Initialization & Root Gating:**
+   - App-level authentication and workspace permission checks (e.g. `RequireAuth`, `RequireHrmsWorkspace`) use `<LoadingState variant="branded" label="Initializing BEZENT Workspace…" />`, permanently centered via fixed viewport positioning to harmonize with `index.html`.
 
 ---
 
@@ -531,23 +590,24 @@ Coding agents must **STOP and report immediately** instead of guessing or procee
 
 ## Article 31 — Pre-Push Architecture Audit Checklist
 
-Before pushing any commit or opening a PR, every coding agent must complete this 15-point audit:
+Before pushing any commit or opening a PR, every coding agent must complete this 16-point audit:
 
 1. Did I change only the requested task scope?
 2. Did I search existing code before creating new files?
 3. Did I reuse existing Design System primitives?
 4. Did I introduce ANY application CSS files (`.css` in `applications/**`)? _(Must be NO)_
 5. Did I introduce ANY inline styling (`style={{ ... }}`)? _(Must be NO)_
-6. Did I create duplicate global UI or competing shells? _(Must be NO)_
-7. Did I maintain the canonical dependency direction?
-8. Did I modify another developer's owned area without coordination?
-9. Did I alter any API contract or payload unexpectedly?
-10. Did I alter DB schema or migrations without proper Drizzle migrations?
-11. Did I introduce silent mock fallbacks for failed APIs? _(Must be NO)_
-12. Did I enforce tenant and company isolation on all server queries?
-13. Did all validation checks pass (`typecheck`, `lint`, `format:check`, `test`, `build`)?
-14. Is the PR base branch confirmed to be `develop`?
-15. Is this PR still a single, coherent task?
+6. Did I preserve table headers/toolbars and use `<TableSkeleton>` for table loading states rather than an isolated spinner? _(Must be YES)_
+7. Did I create duplicate global UI or competing shells? _(Must be NO)_
+8. Did I maintain the canonical dependency direction?
+9. Did I modify another developer's owned area without coordination?
+10. Did I alter any API contract or payload unexpectedly?
+11. Did I alter DB schema or migrations without proper Drizzle migrations?
+12. Did I introduce silent mock fallbacks for failed APIs? _(Must be NO)_
+13. Did I enforce tenant and company isolation on all server queries?
+14. Did all validation checks pass (`typecheck`, `lint`, `format:check`, `test`, `build`)?
+15. Is the PR base branch confirmed to be `develop`?
+16. Is this PR still a single, coherent task?
 
 ---
 

@@ -19,6 +19,7 @@ import {
   Alert,
   LoadingState,
   EmptyState,
+  TableSkeleton,
   Tabs,
   Toolbar,
   Divider,
@@ -520,7 +521,22 @@ export function ShiftsPage({ initialShifts, initialAssignments }: ShiftsPageProp
             </Toolbar>
 
             {shiftsLoading ? (
-              <LoadingState label="Loading shifts from database…" />
+              <Card>
+                <Table>
+                  <thead>
+                    <tr>
+                      <th>Shift Name & Code</th>
+                      <th>Timings</th>
+                      <th>Working Days</th>
+                      <th>Breaks / Grace</th>
+                      <th>Type</th>
+                      <th>Status</th>
+                      <th>Actions</th>
+                    </tr>
+                  </thead>
+                  <TableSkeleton rows={6} columns={7} label="Loading shifts from database…" />
+                </Table>
+              </Card>
             ) : shiftsError ? (
               <Alert variant="danger">
                 <Inline justify="between" align="center">
@@ -659,7 +675,21 @@ export function ShiftsPage({ initialShifts, initialAssignments }: ShiftsPageProp
             </Toolbar>
 
             {assignmentsLoading ? (
-              <LoadingState label="Loading shift assignments…" />
+              <Card>
+                <Table>
+                  <thead>
+                    <tr>
+                      <th>Target & Scope</th>
+                      <th>Assigned Shift</th>
+                      <th>Timings</th>
+                      <th>Effective Period</th>
+                      <th>Status</th>
+                      <th>Actions</th>
+                    </tr>
+                  </thead>
+                  <TableSkeleton rows={6} columns={6} label="Loading shift assignments…" />
+                </Table>
+              </Card>
             ) : assignmentsError ? (
               <Alert variant="danger">
                 <Inline justify="between" align="center">

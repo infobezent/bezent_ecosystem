@@ -46,6 +46,7 @@ import {
   TableRow,
   TableHeaderCell,
   TableCell,
+  TableSkeleton,
 } from '../../../../design-system/components';
 import { BezentIcon } from '../../../../design-system/icons';
 import {
@@ -738,7 +739,24 @@ export function AttendanceReportsPage() {
 
             {/* ── 8. Loading, Empty, and Error States (Spec Section 8) ── */}
             {generating ? (
-              <LoadingState label="Generating report... This may take a moment for large date ranges." />
+              <Card variant="default">
+                <div className="bezent-table-scroll-container">
+                  <Table>
+                    <TableHead>
+                      <TableRow>
+                        {activeReport.columns.map((col) => (
+                          <TableHeaderCell key={col.id}>{col.label}</TableHeaderCell>
+                        ))}
+                      </TableRow>
+                    </TableHead>
+                    <TableSkeleton
+                      rows={8}
+                      columns={activeReport.columns.length}
+                      label="Generating report... This may take a moment for large date ranges."
+                    />
+                  </Table>
+                </div>
+              </Card>
             ) : generationError ? (
               <EmptyState
                 title="Could not generate report"

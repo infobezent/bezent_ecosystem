@@ -240,6 +240,80 @@
   border-color: rgba(127, 196, 253, 0.35);
 }
 
+/* ── Generic Segmented Toggle (Text & Mode Pills) ── */
+.bezent-segmented-toggle {
+  display: inline-flex;
+  align-items: center;
+  background-color: #f1f5f9;
+  padding: 3px;
+  border-radius: 10px;
+  border: 1px solid #e2e8f0;
+  gap: 2px;
+  height: 36px;
+  box-sizing: border-box;
+  user-select: none;
+  flex-shrink: 0;
+}
+
+.bezent-segmented-toggle__btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 28px;
+  padding: 0 12px;
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--text-secondary, #64748b);
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1;
+  border-radius: 8px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.16s cubic-bezier(0.16, 1, 0.3, 1);
+  outline: none;
+  font-family: inherit;
+}
+
+.bezent-segmented-toggle__btn:hover:not(.is-active) {
+  color: var(--text-primary, #1e293b);
+  background: rgba(255, 255, 255, 0.7);
+}
+
+.bezent-segmented-toggle__btn.is-active {
+  background-color: #ffffff;
+  color: #041e49;
+  font-weight: 600;
+  border-color: #cbd5e1;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.08);
+}
+
+.bezent-segmented-toggle__btn:focus-visible {
+  outline: 2px solid var(--accent-interactive, #1a73e8);
+  outline-offset: 2px;
+}
+
+[data-theme='dark'] .bezent-segmented-toggle {
+  background-color: #0f172a;
+  border-color: #334155;
+}
+
+[data-theme='dark'] .bezent-segmented-toggle__btn {
+  color: #94a3b8;
+}
+
+[data-theme='dark'] .bezent-segmented-toggle__btn:hover:not(.is-active) {
+  color: #f8fafc;
+  background: rgba(255, 255, 255, 0.06);
+}
+
+[data-theme='dark'] .bezent-segmented-toggle__btn.is-active {
+  background-color: #1e293b;
+  color: #38bdf8;
+  border-color: #475569;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+}
+
 [data-theme='dark'] .bezent-filter-tab.is-active .bezent-filter-tab-count,
 [data-theme='dark'] .bezent-filter-tab--active .bezent-filter-tab-count {
   background-color: rgba(22, 131, 255, 0.25);

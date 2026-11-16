@@ -1,5 +1,6 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Outlet, useLocation, useNavigate, useMatches, Navigate } from 'react-router-dom';
+import { TopProgressBar } from '../../design-system/components';
 import {
   AppShell,
   type ShellRailItem,
@@ -56,6 +57,19 @@ export function ShellLayout() {
   const { pathname } = useLocation();
   const navigate = useNavigate();
   const matches = useMatches();
+
+  // Subtle top progress bar on route navigation
+  const [isNavigating, setIsNavigating] = useState(false);
+  const prevPathRef = useRef(pathname);
+
+  useEffect(() => {
+    if (prevPathRef.current !== pathname) {
+      prevPathRef.current = pathname;
+      setIsNavigating(true);
+      const timer = setTimeout(() => setIsNavigating(false), 380);
+      return () => clearTimeout(timer);
+    }
+  }, [pathname]);
 
   // Resolve the active workspace variant from the most specific matched route handle.
   // Defaults to 'default' (floating card workspace) when no handle or override is specified.
@@ -284,6 +298,7 @@ export function ShellLayout() {
 
   return (
     <CustomFieldsProvider>
+      <TopProgressBar active={isNavigating} />
       <AppShell
         workspaceVariant={resolvedWorkspaceVariant}
         topNavSearch={

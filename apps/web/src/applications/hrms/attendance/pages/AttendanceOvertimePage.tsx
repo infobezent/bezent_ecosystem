@@ -39,6 +39,7 @@ import {
   Alert,
   LoadingState,
   EmptyState,
+  TableSkeleton,
 } from '../../../../design-system/components';
 import { BezentIcon } from '../../../../design-system/icons';
 import { AttendanceSectionTabs } from '../components/AttendanceSectionTabs';
@@ -1021,7 +1022,33 @@ export function AttendanceOvertimePage() {
 
         {/* ── 6. Table & Content States (Spec Section 6 & 13) ── */}
         {loading ? (
-          <LoadingState label="Loading overtime records..." />
+          <Card variant="default">
+            <div className="bezent-table-scroll-container">
+              <Table>
+                <TableHead>
+                  <TableRow>
+                    <TableHeaderCell className="bezent-table-col--checkbox">
+                      <input type="checkbox" disabled aria-label="Select all" />
+                    </TableHeaderCell>
+                    <TableHeaderCell>Employee</TableHeaderCell>
+                    <TableHeaderCell>Date</TableHeaderCell>
+                    <TableHeaderCell>Day Type</TableHeaderCell>
+                    <TableHeaderCell>Timing</TableHeaderCell>
+                    <TableHeaderCell>Requested</TableHeaderCell>
+                    <TableHeaderCell>Approved</TableHeaderCell>
+                    <TableHeaderCell>Rate</TableHeaderCell>
+                    <TableHeaderCell>Estimated Amount</TableHeaderCell>
+                    <TableHeaderCell>Settlement</TableHeaderCell>
+                    <TableHeaderCell>Status</TableHeaderCell>
+                    <TableHeaderCell className="bezent-table-col--sticky-right bezent-table-col--actions">
+                      Actions
+                    </TableHeaderCell>
+                  </TableRow>
+                </TableHead>
+                <TableSkeleton rows={8} columns={12} label="Loading overtime records..." />
+              </Table>
+            </div>
+          </Card>
         ) : error ? (
           <EmptyState
             title="Could not load overtime"

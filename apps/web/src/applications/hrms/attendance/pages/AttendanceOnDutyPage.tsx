@@ -25,6 +25,7 @@ import {
   Alert,
   LoadingState,
   EmptyState,
+  TableSkeleton,
 } from '../../../../design-system/components';
 import { BezentIcon } from '../../../../design-system/icons';
 import { AttendanceSectionTabs } from '../components/AttendanceSectionTabs';
@@ -979,7 +980,28 @@ export function AttendanceOnDutyPage() {
 
         {/* 5. Data table */}
         {loading ? (
-          <LoadingState label="Loading On-Duty workspace..." />
+          <Table compact hoverable className="bezent-table--workspace">
+            <TableHead>
+              <TableRow>
+                <TableHeaderCell className="bezent-table-col--select">
+                  <Checkbox disabled />
+                </TableHeaderCell>
+                <TableHeaderCell className="bezent-table-col--employee">Employee</TableHeaderCell>
+                <TableHeaderCell>Duty Period</TableHeaderCell>
+                <TableHeaderCell>OD Type</TableHeaderCell>
+                <TableHeaderCell>Duration</TableHeaderCell>
+                <TableHeaderCell>Location / Purpose</TableHeaderCell>
+                <TableHeaderCell>Submitted At</TableHeaderCell>
+                <TableHeaderCell>Assigned To</TableHeaderCell>
+                <TableHeaderCell>Approval Status</TableHeaderCell>
+                <TableHeaderCell>Processing Status</TableHeaderCell>
+                <TableHeaderCell className="bezent-table-col--actions bezent-table-col--sticky-right">
+                  Actions
+                </TableHeaderCell>
+              </TableRow>
+            </TableHead>
+            <TableSkeleton rows={8} columns={11} label="Loading On-Duty workspace..." />
+          </Table>
         ) : error ? (
           <Alert variant="danger" title="Error Loading Requests">
             {error}

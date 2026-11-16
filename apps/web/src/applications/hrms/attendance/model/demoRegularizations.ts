@@ -470,7 +470,7 @@ function toItem(s: DemoSeed): RegularizationItemV1 {
     approvalStatus: s.approval,
     applicationStatus: s.application,
     source: s.source,
-    assignedTo: s.reviewer ? `usr_demo_${s.reviewer.split(' ')[0].toLowerCase()}` : null,
+    assignedTo: s.reviewer ? `usr_demo_${(s.reviewer.split(' ')[0] ?? '').toLowerCase()}` : null,
     assignedToName: s.reviewer,
     assignedQueue: s.queue,
     relatedExceptionId: s.exception,

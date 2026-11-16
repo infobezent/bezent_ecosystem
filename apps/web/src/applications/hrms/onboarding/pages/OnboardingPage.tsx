@@ -25,6 +25,7 @@ import {
   TableHead,
   TableHeaderCell,
   TableRow,
+  TableSkeleton,
   Toolbar,
   type BadgeVariant,
 } from '../../../../design-system/components';
@@ -742,7 +743,22 @@ export function OnboardingPage({ title = 'Onboarding', onAddNewHire }: Onboardin
 
           {/* 4. Table / Content States */}
           {loading ? (
-            <LoadingState label="Loading new hire records…" fill />
+            <div className="bezent-table-card">
+              <Table hoverable aria-label="New Hires">
+                <TableHead>
+                  <TableRow>
+                    <TableHeaderCell>New Hire</TableHeaderCell>
+                    <TableHeaderCell>Department</TableHeaderCell>
+                    <TableHeaderCell>Work Location</TableHeaderCell>
+                    <TableHeaderCell>Employment</TableHeaderCell>
+                    <TableHeaderCell>Joined Date</TableHeaderCell>
+                    <TableHeaderCell>Status</TableHeaderCell>
+                    <TableHeaderCell className="bezent-table-col--actions">Actions</TableHeaderCell>
+                  </TableRow>
+                </TableHead>
+                <TableSkeleton rows={8} columns={7} label="Loading new hire records…" />
+              </Table>
+            </div>
           ) : cases.length === 0 ? (
             <EmptyState
               variant="onboarding"
