@@ -99,7 +99,7 @@ describe('BEZENT HRMS — Attendance Regularization V1.0 Frontend Workspace', ()
     );
 
     expect(html).toContain('Search by name, employee ID or request ID...');
-    expect(html).toContain('More Filters');
+    expect(html).toContain('Filters');
     expect(html).toContain('Loading regularization workspace...');
   });
 

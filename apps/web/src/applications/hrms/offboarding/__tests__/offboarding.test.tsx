@@ -89,8 +89,10 @@ describe('OffboardingPage', () => {
     expect(html).toContain(
       'Manage employee exits, notice periods, clearance, and exit formalities.',
     );
-    expect(html).toContain('Initiate Offboarding');
-    expect(html).toContain('Export');
+    // Primary actions live once, as toolbar icon buttons (not duplicated in the page header).
+    expect(html).toContain('aria-label="Initiate Exit"');
+    expect(html).toContain('aria-label="Export"');
+    expect(html).not.toContain('Initiate Offboarding');
     expect(html).not.toContain('Import');
   });
 

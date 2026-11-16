@@ -3827,3 +3827,20 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* Regularization: six KPI cards in one row (Workforce KPI card pattern) */
+.bezent-att-kpi-grid--six {
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+}
+
+@media (max-width: 1200px) {
+  .bezent-att-kpi-grid--six {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 768px) {
+  .bezent-att-kpi-grid--six {
+    grid-template-columns: 1fr 1fr;
+  }
+}

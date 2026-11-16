@@ -404,34 +404,7 @@ export function TransfersPage({
   return (
     <Page maxWidth="full" className="bezent-page" gap="md">
       {/* 1. Page Header */}
-      <PageHeader
-        title={title}
-        eyebrow="HRMS · Workforce"
-        subtitle={subtitle}
-        actions={
-          <Inline gap="sm" align="center">
-            <Button
-              variant="outline"
-              size="md"
-              leftIcon={<BezentIcon name="download" size={16} />}
-              onClick={handleExportCsv}
-              disabled={exporting}
-              aria-label="Export transfers to CSV"
-            >
-              {exporting ? 'Exporting…' : 'Export'}
-            </Button>
-            <Button
-              variant="primary"
-              size="md"
-              leftIcon={<BezentIcon name="plus" size={16} />}
-              onClick={() => setIsNewModalOpen(true)}
-              aria-label="Initiate new transfer"
-            >
-              Initiate Transfer
-            </Button>
-          </Inline>
-        }
-      />
+      <PageHeader title={title} eyebrow="HRMS · Workforce" subtitle={subtitle} />
 
       {/* Success banner if an action was applied or cancelled */}
       {successMessage && (
