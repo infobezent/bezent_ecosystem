@@ -636,7 +636,7 @@ export const AttendanceTrendsCard: React.FC<AttendanceTrendsCardProps> = ({
                         </text>
 
                         {/* Late Arrival Row */}
-                        <circle cx={20} cy={92} r={4} fill="#818cf8" />
+                        <circle cx={20} cy={92} r={4} fill="#10b981" />
                         <text x={30} y={95} className="bezent-att-tooltip-label">
                           Late Arrival:
                         </text>

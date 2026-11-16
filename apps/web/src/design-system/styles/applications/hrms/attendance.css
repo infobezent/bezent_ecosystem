@@ -2161,7 +2161,7 @@
   background: #7c3aed;
 }
 .bezent-att-legend-pill--late {
-  background: #6366f1;
+  background: #10b981;
 }
 
 .bezent-att-legend-label {
@@ -2219,8 +2219,8 @@
 }
 
 .bezent-att-summary-dot.is-late {
-  background: #6366f1;
-  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
+  background: #10b981;
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.15);
 }
 
 .bezent-att-summary-meta {
@@ -2259,7 +2259,7 @@
   color: #6d28d9 !important;
 }
 .bezent-att-summary-val--late {
-  color: #4f46e5 !important;
+  color: #047857 !important;
 }
 
 [data-theme='dark'] .bezent-att-summary-val--present {
@@ -2269,7 +2269,7 @@
   color: #c084fc !important;
 }
 [data-theme='dark'] .bezent-att-summary-val--late {
-  color: #a5b4fc !important;
+  color: #6ee7b7 !important;
 }
 
 .bezent-att-summary-divider {
@@ -2363,9 +2363,9 @@
 }
 
 .bezent-att-line--late {
-  stroke: #6366f1;
+  stroke: #10b981;
   stroke-width: 2.2;
-  filter: drop-shadow(0 2px 5px rgba(99, 102, 241, 0.2));
+  filter: drop-shadow(0 2px 5px rgba(16, 185, 129, 0.25));
 }
 
 .bezent-att-node {
@@ -2383,7 +2383,7 @@
 }
 
 .bezent-att-node--late {
-  stroke: #6366f1;
+  stroke: #10b981;
 }
 
 [data-theme='dark'] .bezent-att-node {
@@ -2405,7 +2405,7 @@
 }
 
 .bezent-att-halo--late {
-  color: #6366f1;
+  color: #10b981;
 }
 
 .bezent-att-dot {
@@ -2420,7 +2420,7 @@
   fill: #7c3aed;
 }
 .bezent-att-dot--late {
-  fill: #6366f1;
+  fill: #10b981;
 }
 
 [data-theme='dark'] .bezent-att-dot {
@@ -2475,7 +2475,7 @@
 }
 
 .bezent-att-tooltip-val--late {
-  fill: #a5b4fc;
+  fill: #34d399;
   font-size: 11px;
   font-weight: 750;
 }
