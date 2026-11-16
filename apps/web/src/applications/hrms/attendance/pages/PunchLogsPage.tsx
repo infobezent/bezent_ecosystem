@@ -28,12 +28,12 @@ import {
 } from '../../../../design-system/components';
 import { BezentIcon } from '../../../../design-system/icons';
 import { AttendanceSectionTabs } from '../components/AttendanceSectionTabs';
+import { AttendanceImportModal } from '../components/import';
 import {
   fetchPunchLogs,
   fetchPunchDetails,
   updatePunchInvestigation,
   retryPunchProcessing,
-  bulkPunchAction,
   exportPunchLogsCsv,
 } from '../api/attendanceApi';
 import { fetchDepartments, fetchWorkLocations } from '../../api/organizationMastersApi';
@@ -226,6 +226,9 @@ export function PunchLogsPage() {
     null,
   );
   const [investigationSubmitting, setInvestigationSubmitting] = useState(false);
+
+  // ── Standalone Punch Bulk Import Modal State ──────────────────────────────
+  const [isImportModalOpen, setIsImportModalOpen] = useState(false);
 
   // ── 9. Retry Processing Confirmation Modal State ──────────────────────────
   const [retryModalOpen, setRetryModalOpen] = useState(false);
@@ -824,6 +827,17 @@ export function PunchLogsPage() {
               title="Export Punch Logs"
             >
               <BezentIcon name="download" size={16} />
+            </Button>
+            {/* Import: Icon Only per user instruction */}
+            <Button
+              variant="outline"
+              size="md"
+              shape="rounded"
+              onClick={() => setIsImportModalOpen(true)}
+              aria-label="Import Punches CSV"
+              title="Import Punches CSV"
+            >
+              <BezentIcon name="upload" size={16} />
             </Button>
 
             <span className="bezent-records-badge">{totalCount} Records</span>
@@ -1545,6 +1559,16 @@ export function PunchLogsPage() {
           </Modal>
         )}
       </Stack>
+
+      {/* Standalone Attendance Punch Bulk Import Modal */}
+      <AttendanceImportModal
+        isOpen={isImportModalOpen}
+        onClose={() => setIsImportModalOpen(false)}
+        onImportSuccess={() => {
+          setIsImportModalOpen(false);
+          loadData();
+        }}
+      />
     </Page>
   );
 }

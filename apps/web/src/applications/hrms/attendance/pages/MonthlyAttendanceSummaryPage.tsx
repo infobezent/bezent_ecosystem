@@ -29,6 +29,7 @@ import {
 } from '../../../../design-system/components';
 import { BezentIcon } from '../../../../design-system/icons';
 import { AttendanceSectionTabs } from '../components/AttendanceSectionTabs';
+import { AttendanceImportModal } from '../components/import';
 import {
   fetchMonthlySummaryWorkspace,
   fetchMonthlySummaryById,
@@ -37,7 +38,6 @@ import {
   startMonthlySummaryReview,
   requestMonthlySummaryCorrection,
   markMonthlySummaryReviewed,
-  reopenMonthlySummaryReview,
   executeMonthlySummaryBulkAction,
   exportMonthlySummaryCsv,
   lockAttendancePeriod,
@@ -237,6 +237,9 @@ export function MonthlyAttendanceSummaryPage() {
 
   // Bulk Operations State
   const [showBulkApproveModal, setShowBulkApproveModal] = useState<boolean>(false);
+
+  // Standalone Punch Bulk Import Modal State
+  const [isImportModalOpen, setIsImportModalOpen] = useState<boolean>(false);
   const [bulkSubmitting, setBulkSubmitting] = useState<boolean>(false);
   const [showSkippedRecordsModal, setShowSkippedRecordsModal] = useState<boolean>(false);
 
@@ -944,6 +947,17 @@ export function MonthlyAttendanceSummaryPage() {
               <BezentIcon name="download" size={16} />
             </Button>
 
+            {/* Import: Icon Only per user instruction */}
+            <Button
+              variant="outline"
+              size="md"
+              shape="rounded"
+              onClick={() => setIsImportModalOpen(true)}
+              aria-label="Import Punches CSV"
+              title="Import Punches CSV"
+            >
+              <BezentIcon name="upload" size={16} />
+            </Button>
             {/* Primary Button: Freeze Period */}
             <Button
               variant="primary"
@@ -2367,6 +2381,16 @@ export function MonthlyAttendanceSummaryPage() {
           </Stack>
         </Modal>
       )}
+
+      {/* Standalone Attendance Punch Bulk Import Modal */}
+      <AttendanceImportModal
+        isOpen={isImportModalOpen}
+        onClose={() => setIsImportModalOpen(false)}
+        onImportSuccess={() => {
+          setIsImportModalOpen(false);
+          loadWorkspace();
+        }}
+      />
     </Page>
   );
 }
