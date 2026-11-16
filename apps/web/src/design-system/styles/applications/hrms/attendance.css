@@ -1900,12 +1900,10 @@
 
 /* ── Colored Pastel Variants for KPI Cards (Flat, borderless, one shade darker from graph color) ── */
 .bezent-att-kpi-card--blue {
-  background: linear-gradient(
-    180deg,
-    rgba(219, 234, 254, 0.95) 0%,
-    rgba(235, 244, 255, 0.88) 50%,
-    rgba(246, 250, 255, 0.96) 100%
-  );
+  background: linear-gradient(180deg,
+      rgba(219, 234, 254, 0.95) 0%,
+      rgba(235, 244, 255, 0.88) 50%,
+      rgba(246, 250, 255, 0.96) 100%);
   border: none;
 }
 
@@ -1915,12 +1913,10 @@
 }
 
 .bezent-att-kpi-card--green {
-  background: linear-gradient(
-    180deg,
-    rgba(220, 252, 231, 0.95) 0%,
-    rgba(238, 252, 243, 0.88) 50%,
-    rgba(247, 254, 250, 0.96) 100%
-  );
+  background: linear-gradient(180deg,
+      rgba(220, 252, 231, 0.95) 0%,
+      rgba(238, 252, 243, 0.88) 50%,
+      rgba(247, 254, 250, 0.96) 100%);
   border: none;
 }
 
@@ -1930,12 +1926,10 @@
 }
 
 .bezent-att-kpi-card--rose {
-  background: linear-gradient(
-    180deg,
-    rgba(254, 226, 226, 0.95) 0%,
-    rgba(255, 241, 242, 0.88) 50%,
-    rgba(255, 250, 251, 0.96) 100%
-  );
+  background: linear-gradient(180deg,
+      rgba(254, 226, 226, 0.95) 0%,
+      rgba(255, 241, 242, 0.88) 50%,
+      rgba(255, 250, 251, 0.96) 100%);
   border: none;
 }
 
@@ -1945,12 +1939,10 @@
 }
 
 .bezent-att-kpi-card--amber {
-  background: linear-gradient(
-    180deg,
-    rgba(254, 243, 199, 0.95) 0%,
-    rgba(255, 249, 235, 0.88) 50%,
-    rgba(255, 253, 245, 0.96) 100%
-  );
+  background: linear-gradient(180deg,
+      rgba(254, 243, 199, 0.95) 0%,
+      rgba(255, 249, 235, 0.88) 50%,
+      rgba(255, 253, 245, 0.96) 100%);
   border: none;
 }
 
@@ -1960,12 +1952,10 @@
 }
 
 .bezent-att-kpi-card--purple {
-  background: linear-gradient(
-    180deg,
-    rgba(237, 233, 254, 0.95) 0%,
-    rgba(246, 243, 255, 0.88) 50%,
-    rgba(252, 250, 255, 0.96) 100%
-  );
+  background: linear-gradient(180deg,
+      rgba(237, 233, 254, 0.95) 0%,
+      rgba(246, 243, 255, 0.88) 50%,
+      rgba(252, 250, 255, 0.96) 100%);
   border: none;
 }
 
@@ -1980,6 +1970,7 @@
   border: none;
   box-shadow: none;
 }
+
 [data-theme='dark'] .bezent-att-kpi-card--blue:hover {
   border: none;
   box-shadow: none;
@@ -1990,6 +1981,7 @@
   border: none;
   box-shadow: none;
 }
+
 [data-theme='dark'] .bezent-att-kpi-card--green:hover {
   border: none;
   box-shadow: none;
@@ -2000,6 +1992,7 @@
   border: none;
   box-shadow: none;
 }
+
 [data-theme='dark'] .bezent-att-kpi-card--rose:hover {
   border: none;
   box-shadow: none;
@@ -2010,6 +2003,7 @@
   border: none;
   box-shadow: none;
 }
+
 [data-theme='dark'] .bezent-att-kpi-card--amber:hover {
   border: none;
   box-shadow: none;
@@ -2020,6 +2014,7 @@
   border: none;
   box-shadow: none;
 }
+
 [data-theme='dark'] .bezent-att-kpi-card--purple:hover {
   border: none;
   box-shadow: none;
@@ -2052,13 +2047,13 @@
 }
 
 .bezent-att-kpi-value {
-  font-size: 28px;
+  font-size: 32px;
   font-weight: 800;
   color: #0f172a;
   line-height: 1.1;
   letter-spacing: -0.035em;
   font-feature-settings: 'tnum';
-  margin: 2px 0;
+  margin: 4px 0;
 }
 
 [data-theme='dark'] .bezent-att-kpi-value {
@@ -2267,7 +2262,7 @@
 /* ── SVG Sparkline Area Chart ── */
 .bezent-att-kpi-sparkline-svg {
   width: 100%;
-  height: 54px;
+  height: 72px;
   display: block;
   overflow: visible;
 }
@@ -2465,7 +2460,7 @@
 
 .bezent-att-kpi-graph-skeleton {
   width: 100%;
-  height: 48px;
+  height: 68px;
   background: rgba(0, 0, 0, 0.04);
   border-radius: 6px;
   animation: bezent-pulse 1.4s ease-in-out infinite;
