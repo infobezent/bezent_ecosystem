@@ -958,7 +958,6 @@ export function MonthlyAttendanceSummaryPage() {
             >
               <BezentIcon name="upload" size={16} />
             </Button>
-
             {/* Primary Button: Freeze Period */}
             <Button
               variant="primary"

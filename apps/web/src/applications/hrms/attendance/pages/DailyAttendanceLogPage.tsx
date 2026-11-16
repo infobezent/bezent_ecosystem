@@ -786,7 +786,6 @@ export function DailyAttendanceLogPage() {
             >
               <BezentIcon name="upload" size={16} />
             </Button>
-
             {/* 3. Manual Entry: Pencil Icon Only per user instruction */}
             {generalSettings?.manualEntryAllowed !== false && (
               <Button

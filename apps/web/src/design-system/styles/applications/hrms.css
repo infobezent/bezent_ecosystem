@@ -13612,10 +13612,6 @@
 }
 
 .bezent-att-title-row .bezent-page-header__title {
-  font-size: 22px;
-  font-weight: 750;
-  letter-spacing: -0.025em;
-  color: #1e293b;
   margin: 0;
 }
 
@@ -14008,8 +14004,8 @@
 /* ── 4. Attendance Trends Card & Chart ── */
 .bezent-att-trends-card {
   background: #ffffff !important;
-  border: 1px solid #e2e8f0 !important;
-  border-radius: 12px !important;
+  border: 0.8px solid #e9eaf4 !important;
+  border-radius: var(--radius-card) !important;
   display: flex !important;
   flex-direction: column !important;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02) !important;
@@ -14546,8 +14542,8 @@
 /* ── 6. Needs Attention Card (Action Queue) ── */
 .bezent-att-action-card {
   background: #ffffff !important;
-  border: 1px solid #e2e8f0 !important;
-  border-radius: 12px !important;
+  border: 0.8px solid #e9eaf4 !important;
+  border-radius: var(--radius-card) !important;
   display: flex !important;
   flex-direction: column !important;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02) !important;
@@ -15021,8 +15017,8 @@
 /* ── 7. Payroll Readiness Card ── */
 .bezent-att-readiness-card {
   background: #ffffff !important;
-  border: 1px solid #e2e8f0 !important;
-  border-radius: 12px !important;
+  border: 0.8px solid #e9eaf4 !important;
+  border-radius: var(--radius-card) !important;
   display: flex !important;
   flex-direction: column !important;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02) !important;
@@ -15368,8 +15364,8 @@
 /* ── 8. Attendance Insights Card ── */
 .bezent-att-insights-card {
   background: #ffffff !important;
-  border: 1px solid #e2e8f0 !important;
-  border-radius: 12px !important;
+  border: 0.8px solid #e9eaf4 !important;
+  border-radius: var(--radius-card) !important;
   display: flex !important;
   flex-direction: column !important;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02) !important;
@@ -15636,8 +15632,8 @@
 /* ── 9. Attendance Calendar Card ── */
 .bezent-att-cal-card {
   background: #ffffff !important;
-  border: 1px solid #e2e8f0 !important;
-  border-radius: 12px !important;
+  border: 0.8px solid #e9eaf4 !important;
+  border-radius: var(--radius-card) !important;
   display: flex !important;
   flex-direction: column !important;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02) !important;

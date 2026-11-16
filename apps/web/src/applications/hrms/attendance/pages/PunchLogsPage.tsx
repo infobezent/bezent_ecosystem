@@ -828,7 +828,6 @@ export function PunchLogsPage() {
             >
               <BezentIcon name="download" size={16} />
             </Button>
-
             {/* Import: Icon Only per user instruction */}
             <Button
               variant="outline"
