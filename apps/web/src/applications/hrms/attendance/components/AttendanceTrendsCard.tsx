@@ -360,15 +360,15 @@ export const AttendanceTrendsCard: React.FC<AttendanceTrendsCardProps> = ({
             >
               <defs>
                 <linearGradient id={gradPresentId} x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="#10b981" stopOpacity="0.26" />
-                  <stop offset="60%" stopColor="#10b981" stopOpacity="0.08" />
-                  <stop offset="100%" stopColor="#10b981" stopOpacity="0.0" />
+                  <stop offset="0%" stopColor="#3b82f6" stopOpacity="0.28" />
+                  <stop offset="60%" stopColor="#3b82f6" stopOpacity="0.08" />
+                  <stop offset="100%" stopColor="#3b82f6" stopOpacity="0.0" />
                 </linearGradient>
 
                 <linearGradient id={gradAbsentId} x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="#f43f5e" stopOpacity="0.12" />
-                  <stop offset="70%" stopColor="#f43f5e" stopOpacity="0.02" />
-                  <stop offset="100%" stopColor="#f43f5e" stopOpacity="0.0" />
+                  <stop offset="0%" stopColor="#8b5cf6" stopOpacity="0.16" />
+                  <stop offset="70%" stopColor="#8b5cf6" stopOpacity="0.03" />
+                  <stop offset="100%" stopColor="#8b5cf6" stopOpacity="0.0" />
                 </linearGradient>
 
                 <filter id="att-trend-shadow" x="-30%" y="-30%" width="160%" height="160%">
@@ -607,7 +607,7 @@ export const AttendanceTrendsCard: React.FC<AttendanceTrendsCardProps> = ({
                         />
 
                         {/* Present Row */}
-                        <circle cx={20} cy={46} r={4} fill="#10b981" />
+                        <circle cx={20} cy={46} r={4} fill="#3b82f6" />
                         <text x={30} y={49} className="bezent-att-tooltip-label">
                           Present:
                         </text>
@@ -622,7 +622,7 @@ export const AttendanceTrendsCard: React.FC<AttendanceTrendsCardProps> = ({
                         </text>
 
                         {/* Absent Row */}
-                        <circle cx={20} cy={69} r={4} fill="#f43f5e" />
+                        <circle cx={20} cy={69} r={4} fill="#8b5cf6" />
                         <text x={30} y={72} className="bezent-att-tooltip-label">
                           Absent:
                         </text>
@@ -636,7 +636,7 @@ export const AttendanceTrendsCard: React.FC<AttendanceTrendsCardProps> = ({
                         </text>
 
                         {/* Late Arrival Row */}
-                        <circle cx={20} cy={92} r={4} fill="#f59e0b" />
+                        <circle cx={20} cy={92} r={4} fill="#818cf8" />
                         <text x={30} y={95} className="bezent-att-tooltip-label">
                           Late Arrival:
                         </text>

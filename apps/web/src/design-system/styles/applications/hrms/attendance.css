@@ -2062,8 +2062,8 @@
   width: 32px;
   height: 32px;
   border-radius: 8px;
-  background: #ecfdf5;
-  color: #047857;
+  background: #eff6ff;
+  color: #2563eb;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -2072,8 +2072,8 @@
 }
 
 [data-theme='dark'] .bezent-att-trends-icon {
-  background: rgba(16, 185, 129, 0.15);
-  color: #6ee7b7;
+  background: rgba(37, 99, 235, 0.15);
+  color: #93c5fd;
 }
 
 .bezent-att-trends-title {
@@ -2155,13 +2155,13 @@
 }
 
 .bezent-att-legend-pill--present {
-  background: #10b981;
+  background: #2563eb;
 }
 .bezent-att-legend-pill--absent {
-  background: #f43f5e;
+  background: #7c3aed;
 }
 .bezent-att-legend-pill--late {
-  background: #f59e0b;
+  background: #6366f1;
 }
 
 .bezent-att-legend-label {
@@ -2209,18 +2209,18 @@
 }
 
 .bezent-att-summary-dot.is-present {
-  background: #10b981;
-  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.15);
+  background: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
 }
 
 .bezent-att-summary-dot.is-absent {
-  background: #f43f5e;
-  box-shadow: 0 0 0 3px rgba(244, 63, 94, 0.15);
+  background: #7c3aed;
+  box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.15);
 }
 
 .bezent-att-summary-dot.is-late {
-  background: #f59e0b;
-  box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.15);
+  background: #6366f1;
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
 }
 
 .bezent-att-summary-meta {
@@ -2253,23 +2253,23 @@
 }
 
 .bezent-att-summary-val--present {
-  color: #047857 !important;
+  color: #1d4ed8 !important;
 }
 .bezent-att-summary-val--absent {
-  color: #be123c !important;
+  color: #6d28d9 !important;
 }
 .bezent-att-summary-val--late {
-  color: #b45309 !important;
+  color: #4f46e5 !important;
 }
 
 [data-theme='dark'] .bezent-att-summary-val--present {
-  color: #6ee7b7 !important;
+  color: #60a5fa !important;
 }
 [data-theme='dark'] .bezent-att-summary-val--absent {
-  color: #fca5a5 !important;
+  color: #c084fc !important;
 }
 [data-theme='dark'] .bezent-att-summary-val--late {
-  color: #fcd34d !important;
+  color: #a5b4fc !important;
 }
 
 .bezent-att-summary-divider {
@@ -2351,21 +2351,21 @@
 }
 
 .bezent-att-line--present {
-  stroke: #10b981;
+  stroke: #2563eb;
   stroke-width: 2.8;
-  filter: drop-shadow(0 2px 6px rgba(16, 185, 129, 0.25));
+  filter: drop-shadow(0 2px 6px rgba(37, 99, 235, 0.28));
 }
 
 .bezent-att-line--absent {
-  stroke: #f43f5e;
+  stroke: #7c3aed;
   stroke-width: 2.4;
-  filter: drop-shadow(0 2px 5px rgba(244, 63, 94, 0.2));
+  filter: drop-shadow(0 2px 5px rgba(124, 58, 237, 0.25));
 }
 
 .bezent-att-line--late {
-  stroke: #f59e0b;
+  stroke: #6366f1;
   stroke-width: 2.2;
-  filter: drop-shadow(0 2px 5px rgba(245, 158, 11, 0.2));
+  filter: drop-shadow(0 2px 5px rgba(99, 102, 241, 0.2));
 }
 
 .bezent-att-node {
@@ -2375,15 +2375,15 @@
 }
 
 .bezent-att-node--present {
-  stroke: #10b981;
+  stroke: #2563eb;
 }
 
 .bezent-att-node--absent {
-  stroke: #f43f5e;
+  stroke: #7c3aed;
 }
 
 .bezent-att-node--late {
-  stroke: #f59e0b;
+  stroke: #6366f1;
 }
 
 [data-theme='dark'] .bezent-att-node {
@@ -2397,15 +2397,15 @@
 }
 
 .bezent-att-halo--present {
-  color: #10b981;
+  color: #2563eb;
 }
 
 .bezent-att-halo--absent {
-  color: #f43f5e;
+  color: #7c3aed;
 }
 
 .bezent-att-halo--late {
-  color: #f59e0b;
+  color: #6366f1;
 }
 
 .bezent-att-dot {
@@ -2414,13 +2414,13 @@
 }
 
 .bezent-att-dot--present {
-  fill: #10b981;
+  fill: #2563eb;
 }
 .bezent-att-dot--absent {
-  fill: #f43f5e;
+  fill: #7c3aed;
 }
 .bezent-att-dot--late {
-  fill: #f59e0b;
+  fill: #6366f1;
 }
 
 [data-theme='dark'] .bezent-att-dot {
@@ -2463,19 +2463,19 @@
 }
 
 .bezent-att-tooltip-val--present {
-  fill: #34d399;
+  fill: #60a5fa;
   font-size: 11px;
   font-weight: 750;
 }
 
 .bezent-att-tooltip-val--absent {
-  fill: #f87171;
+  fill: #c084fc;
   font-size: 11px;
   font-weight: 750;
 }
 
 .bezent-att-tooltip-val--late {
-  fill: #fbbf24;
+  fill: #a5b4fc;
   font-size: 11px;
   font-weight: 750;
 }
@@ -2506,8 +2506,8 @@
   width: 6px;
   height: 6px;
   border-radius: 50%;
-  background: #10b981;
-  box-shadow: 0 0 0 2.5px rgba(16, 185, 129, 0.2);
+  background: #2563eb;
+  box-shadow: 0 0 0 2.5px rgba(37, 99, 235, 0.2);
 }
 
 .bezent-att-trends-footer-text {
