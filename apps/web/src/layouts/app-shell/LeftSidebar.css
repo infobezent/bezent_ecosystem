@@ -80,8 +80,8 @@
   top: 0;
   left: 50%;
   transform: translateX(-50%);
-  width: 40px;
-  height: 40px;
+  width: var(--shell-nav-surface-size, 40px);
+  height: var(--shell-nav-surface-size, 40px);
   border-radius: var(--radius-md, 8px);
   background: transparent;
   transition:
@@ -155,7 +155,7 @@
   overflow: hidden;
   text-overflow: ellipsis;
   font-family: var(--font-family-base);
-  font-size: var(--font-size-sm, 12px);
+  font-size: var(--shell-nav-label-size, var(--font-size-sm, 12px));
   font-weight: var(--font-weight-medium, 500);
   line-height: 14px;
   letter-spacing: -0.15px;

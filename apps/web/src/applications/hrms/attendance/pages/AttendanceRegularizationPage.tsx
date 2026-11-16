@@ -183,7 +183,6 @@ export function AttendanceRegularizationPage() {
   const [totalPages, setTotalPages] = useState(1);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [usingDemo, setUsingDemo] = useState(false);
 
   // 5. Selection State
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
@@ -271,9 +270,12 @@ export function AttendanceRegularizationPage() {
 
       const live = await fetchRegularizationWorkspace(filter);
       // Nothing recorded yet: show sample requests so the workspace can be reviewed.
-      const noLiveData = live.total === 0 && Object.values(live.counters).every((n) => n === 0);
+      // Local development only: show sample rows when the API has nothing yet.
+      const noLiveData =
+        import.meta.env.DEV &&
+        live.total === 0 &&
+        Object.values(live.counters).every((n) => n === 0);
       const res = noLiveData ? getDemoRegularizationWorkspace(filter) : live;
-      setUsingDemo(noLiveData);
       setItems(res.items);
       setCounters(res.counters);
       setTotalCount(res.total);
@@ -740,8 +742,6 @@ export function AttendanceRegularizationPage() {
             >
               Reset
             </Button>
-
-            {usingDemo && <span className="bezent-records-badge">Sample data</span>}
             <span className="bezent-records-badge">{totalCount} Records</span>
 
             <IconButton
@@ -860,7 +860,7 @@ export function AttendanceRegularizationPage() {
 
         {/* 5. Ten-Column Data Table with Explicit Minimum Widths and Horizontal Scroll */}
         {loading ? (
-          <Table compact hoverable className="bezent-table--workspace">
+          <Table compact hoverable className="bezent-table--workspace bezent-table--requests">
             <TableHead>
               <TableRow>
                 <TableHeaderCell className="bezent-table-col--select">
@@ -909,7 +909,7 @@ export function AttendanceRegularizationPage() {
           />
         ) : (
           <Card padding="none">
-            <Table compact hoverable className="bezent-table--workspace">
+            <Table compact hoverable className="bezent-table--workspace bezent-table--requests">
               <TableHead>
                 <TableRow>
                   <TableHeaderCell className="bezent-table-col--select">
