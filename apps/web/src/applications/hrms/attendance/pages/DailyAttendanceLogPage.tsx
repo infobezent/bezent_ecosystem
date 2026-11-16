@@ -28,6 +28,7 @@ import {
 } from '../../../../design-system/components';
 import { BezentIcon } from '../../../../design-system/icons';
 import { AttendanceSectionTabs } from '../components/AttendanceSectionTabs';
+import { AttendanceImportModal } from '../components/import';
 import {
   fetchDailyAttendanceLogV1,
   fetchEmployeeDailyDetail,
@@ -155,6 +156,9 @@ export function DailyAttendanceLogPage() {
 
   // Contextual Row Action Menu State
   const [openActionMenuId, setOpenActionMenuId] = useState<string | null>(null);
+
+  // Standalone Punch Bulk Import Modal State
+  const [isImportModalOpen, setIsImportModalOpen] = useState(false);
 
   useEffect(() => {
     const handleOutsideClick = () => setOpenActionMenuId(null);
@@ -769,6 +773,18 @@ export function DailyAttendanceLogPage() {
               title="Export Daily Attendance CSV"
             >
               <BezentIcon name="download" size={16} />
+            </Button>
+
+            {/* 2b. Import: Icon Only per user instruction */}
+            <Button
+              variant="outline"
+              size="md"
+              shape="rounded"
+              onClick={() => setIsImportModalOpen(true)}
+              aria-label="Import Punches CSV"
+              title="Import Punches CSV"
+            >
+              <BezentIcon name="upload" size={16} />
             </Button>
 
             {/* 3. Manual Entry: Pencil Icon Only per user instruction */}
@@ -1940,6 +1956,16 @@ export function DailyAttendanceLogPage() {
           </Modal>
         )}
       </Stack>
+
+      {/* Standalone Attendance Punch Bulk Import Modal */}
+      <AttendanceImportModal
+        isOpen={isImportModalOpen}
+        onClose={() => setIsImportModalOpen(false)}
+        onImportSuccess={() => {
+          setIsImportModalOpen(false);
+          loadData();
+        }}
+      />
     </Page>
   );
 }
