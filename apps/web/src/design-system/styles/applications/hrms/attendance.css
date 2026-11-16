@@ -5072,3 +5072,53 @@ thead .bezent-attendance-col--sticky-right {
     right: 0;
   }
 }
+
+/* Request pages tables: fit the card instead of forcing a 1480px minimum width, so the
+   Status column is never hidden behind the sticky Actions column on 15-inch laptops. */
+.bezent-table--workspace.bezent-table--requests {
+  min-width: 0;
+}
+
+.bezent-table--requests th:nth-last-child(2),
+.bezent-table--requests td:nth-last-child(2) {
+  min-width: 128px;
+}
+
+/* Long status labels (for example "Stage 1 Approved (Pending HR)") wrap inside the pill
+   instead of stretching the column. */
+.bezent-table--requests .bezent-status-pill {
+  max-width: 150px;
+  height: auto;
+  padding-top: 3px;
+  padding-bottom: 3px;
+  border-radius: 12px;
+}
+
+.bezent-table--requests .bezent-status-pill__label {
+  white-space: normal;
+  line-height: 1.25;
+}
+
+.bezent-table--requests .bezent-table-meta-subtitle {
+  display: block;
+  max-width: 220px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.bezent-table--requests .bezent-table-col--employee {
+  min-width: 180px;
+}
+.bezent-table--requests .bezent-table-col--workday {
+  min-width: 110px;
+}
+.bezent-table--requests .bezent-table-col--change {
+  min-width: 190px;
+}
+.bezent-table--requests .bezent-table-col--submitted {
+  min-width: 125px;
+}
+.bezent-table--requests .bezent-table-col--assigned {
+  min-width: 140px;
+}
