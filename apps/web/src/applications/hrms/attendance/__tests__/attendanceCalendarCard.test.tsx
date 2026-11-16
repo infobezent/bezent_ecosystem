@@ -39,20 +39,28 @@ describe('AttendanceCalendarCard Component', () => {
     expect(html).toContain('role="grid"');
   });
 
-  it('renders the small graph with present percent and absent percent inside the calendar', () => {
+  it('renders the small graph with present percent and absent percent inside each calendar date box', () => {
     const html = renderToStaticMarkup(
       <MemoryRouter>
         <AttendanceCalendarCard overviewData={mockOverviewData} />
       </MemoryRouter>,
     );
 
-    // Confirms presence of both percent badges and the two-segment progress bar graph
+    // Confirms presence of the small graph in each date box
+    expect(html).toContain('bezent-att-cal-day-graph');
+    expect(html).toContain('bezent-att-cal-day-bar-svg');
+    expect(html).toContain('bezent-att-cal-day-bar-present');
+    expect(html).toContain('bezent-att-cal-day-bar-absent');
+
+    // Confirms presence of P: and A: metric labels inside each date card
+    expect(html).toContain('P:');
+    expect(html).toContain('A:');
+    expect(html).toContain('bezent-att-cal-day-metrics');
+
+    // Confirms presence of the selected day summary strip with its rates
     expect(html).toContain('bezent-att-cal-graph');
     expect(html).toContain('88% Present');
     expect(html).toContain('12% Absent');
-    expect(html).toContain('bezent-att-cal-graph-bar-svg');
-    expect(html).toContain('bezent-att-cal-bar-present');
-    expect(html).toContain('bezent-att-cal-bar-absent');
   });
 
   it('renders loading skeleton cleanly', () => {
