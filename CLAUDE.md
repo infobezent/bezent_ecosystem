@@ -37,4 +37,5 @@ All coding agents operating via Claude Code must strictly follow `AGENTS.md` for
 - **PR Target:** PRs must **ALWAYS** target `develop`. Never create feature PRs against `main`.
 - **Search Before Create:** Always inspect existing components, APIs, and Design System tokens before implementing new code (`AGENTS.md`, Article 24).
 - **No Speculative Scaffolding:** Never create empty folders, dummy packages, or unneeded abstractions (`AGENTS.md`, Article 33).
+- **HRMS CSS Location:** HRMS module styles live in `apps/web/src/design-system/styles/applications/hrms/` as one file per module (`ess.css`, `attendance.css`, `workforce.css`, `onboarding.css`, `settings.css`), imported by `hrms/index.css`. Edit the owning module's file, never add `.css` under `apps/web/src/applications/**`, do not reorder the imports, and use design tokens (`AGENTS.md`, Article 7, Section 3).
 - **No Silent Architecture Changes:** Any change to stacks, dependencies, layers, or conventions requires justification, an ADR, and explicit approval (`AGENTS.md`, Article 4).

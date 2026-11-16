@@ -1,0 +1,3829 @@
+/* ==========================================================================
+   HRMS module: Attendance — monthly calendar and attendance overview
+   ========================================================================== */
+
+/* ==========================================================================
+   2. HRMS Attendance Monthly Calendar & Snapshot
+   ========================================================================== */
+/* BEZENT Monthly Attendance Snapshot & Calendar Component Styles */
+
+.bezent-attendance-snapshot {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md, 16px);
+  width: 100%;
+}
+
+.bezent-attendance-snapshot__layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.45fr) minmax(0, 1fr);
+  gap: var(--spacing-md, 16px);
+  align-items: start;
+}
+
+.bezent-attendance-snapshot__layout--calendar-only {
+  grid-template-columns: 1fr;
+}
+
+@media (max-width: 960px) {
+  .bezent-attendance-snapshot__layout {
+    grid-template-columns: 1fr;
+    gap: var(--spacing-md, 16px);
+  }
+}
+
+/* ── Calendar Column (Left) ── */
+.bezent-attendance-calendar {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm, 12px);
+}
+
+.bezent-attendance-calendar__nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 2px 0;
+}
+
+.bezent-attendance-calendar__month-title {
+  font-size: var(--font-size-md, 16px);
+  font-weight: var(--font-weight-semibold, 600);
+  color: var(--text-primary);
+  letter-spacing: -0.01em;
+}
+
+/* ── Calendar Grid ── */
+.bezent-attendance-calendar__grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 8px 6px;
+  width: 100%;
+}
+
+.bezent-attendance-calendar__weekday {
+  text-align: center;
+  font-size: 11.5px;
+  font-weight: 700;
+  color: #8b96a8;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 8px 0;
+  background: #f4f6fb;
+  border-radius: 8px;
+  user-select: none;
+}
+
+.bezent-attendance-calendar__day-wrapper {
+  display: flex;
+  align-items: stretch;
+  justify-content: stretch;
+  min-height: 72px;
+  width: 100%;
+}
+
+/* ── Modern Rectangular Attendance Day Tile ── */
+.bezent-attendance-calendar__tile,
+.bezent-attendance-calendar__day {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: stretch;
+  width: 100%;
+  min-height: 72px;
+  border-radius: 12px;
+  border: 1px solid var(--border-default, #e4e9f2);
+  background: var(--bg-surface, #ffffff);
+  color: var(--text-primary, #20283a);
+  cursor: pointer;
+  transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+  padding: 8px 9px;
+  outline: none;
+  text-align: left;
+  user-select: none;
+  box-sizing: border-box;
+}
+
+.bezent-attendance-calendar__tile:hover:not(:disabled),
+.bezent-attendance-calendar__day:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 14px rgba(32, 40, 58, 0.08);
+  border-color: var(--action-blue);
+}
+
+.bezent-attendance-calendar__tile:disabled,
+.bezent-attendance-calendar__day:disabled {
+  cursor: default;
+}
+
+/* Accessible focus ring */
+.bezent-attendance-calendar__tile:focus-visible,
+.bezent-attendance-calendar__day:focus-visible {
+  outline: 2px solid var(--action-blue);
+  outline-offset: 1px;
+  z-index: 3;
+}
+
+/* ── Tile Internal Sections ── */
+.bezent-attendance-calendar__tile-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  gap: 4px;
+  margin-bottom: 3px;
+}
+
+.bezent-attendance-calendar__tile-date {
+  font-size: 13.5px;
+  font-weight: 700;
+  color: var(--text-primary, #202938);
+  line-height: 1.15;
+}
+
+.bezent-attendance-calendar__tile-today-pill {
+  font-size: 9px;
+  font-weight: 700;
+  background-color: var(--action-blue);
+  color: #ffffff;
+  padding: 1.5px 5px;
+  border-radius: 4px;
+  line-height: 1;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+
+.bezent-attendance-calendar__tile-reg-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background-color: var(--action-blue);
+  display: inline-block;
+  flex-shrink: 0;
+}
+
+.bezent-attendance-calendar__tile-status {
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1.2;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+
+.bezent-attendance-calendar__tile-sub {
+  font-size: 10px;
+  font-weight: 500;
+  color: var(--text-secondary, #5f6368);
+  line-height: 1.2;
+  margin-top: auto;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+
+/* ── Day Status Themes (Soft-Tinted Rectangular Tiles) ── */
+
+/* Present: soft mint */
+.bezent-attendance-calendar__tile--present,
+.bezent-attendance-calendar__day--present {
+  background-color: #ddf7e9;
+  border-color: #bce8cb;
+  color: var(--text-primary);
+}
+.bezent-attendance-calendar__tile--present .bezent-attendance-calendar__tile-status {
+  color: #159a68;
+}
+
+/* Late: soft peach (Accessible non-yellow replacement) */
+.bezent-attendance-calendar__tile--late,
+.bezent-attendance-calendar__day--late {
+  background-color: #ffe8dc;
+  border-color: #ffd2ae;
+  color: var(--text-primary);
+}
+.bezent-attendance-calendar__tile--late .bezent-attendance-calendar__tile-status {
+  color: #c2410c;
+}
+
+/* Half Day: soft peach */
+.bezent-attendance-calendar__tile--half-day,
+.bezent-attendance-calendar__day--half-day {
+  background-color: #ffe9de;
+  border-color: #ffd8be;
+  color: var(--text-primary, #202938);
+}
+.bezent-attendance-calendar__tile--half-day .bezent-attendance-calendar__tile-status {
+  color: #ea580c;
+}
+
+/* Absent: soft rose */
+.bezent-attendance-calendar__tile--absent,
+.bezent-attendance-calendar__day--absent {
+  background-color: #ffe6ec;
+  border-color: #f6c2c8;
+  color: var(--text-primary, #202938);
+}
+.bezent-attendance-calendar__tile--absent .bezent-attendance-calendar__tile-status {
+  color: #de5264;
+}
+
+/* Missing Punch: soft lavender */
+.bezent-attendance-calendar__tile--missing-punch,
+.bezent-attendance-calendar__day--missing-punch {
+  background-color: #eee8ff;
+  border-color: #e0d5fa;
+  color: var(--text-primary, #202938);
+}
+.bezent-attendance-calendar__tile--missing-punch .bezent-attendance-calendar__tile-status {
+  color: #896be5;
+}
+
+/* Leave: soft purple */
+.bezent-attendance-calendar__tile--leave,
+.bezent-attendance-calendar__day--leave {
+  background-color: #f3e8fd;
+  border-color: #e9d5ff;
+  color: var(--text-primary, #202938);
+}
+.bezent-attendance-calendar__tile--leave .bezent-attendance-calendar__tile-status {
+  color: #7e22ce;
+}
+
+/* Holiday: soft blue */
+.bezent-attendance-calendar__tile--holiday,
+.bezent-attendance-calendar__day--holiday {
+  background-color: #e8f1ff;
+  border-color: #d2e3fc;
+  color: var(--text-primary, #202938);
+}
+.bezent-attendance-calendar__tile--holiday .bezent-attendance-calendar__tile-status {
+  color: var(--action-blue);
+}
+
+/* Weekly Off: neutral soft background */
+.bezent-attendance-calendar__tile--weekly-off,
+.bezent-attendance-calendar__day--weekly-off {
+  background-color: #f8fafe;
+  border-color: var(--border-default, #e5eaf2);
+  color: #8b96a8;
+}
+.bezent-attendance-calendar__tile--weekly-off .bezent-attendance-calendar__tile-date,
+.bezent-attendance-calendar__tile--weekly-off .bezent-attendance-calendar__tile-status,
+.bezent-attendance-calendar__tile--weekly-off .bezent-attendance-calendar__tile-sub {
+  color: #8b96a8;
+}
+
+/* Pending / Incomplete: soft slate */
+.bezent-attendance-calendar__tile--pending,
+.bezent-attendance-calendar__day--pending {
+  background-color: #f1f5f9;
+  border-color: #e2e8f0;
+  color: var(--text-primary);
+}
+.bezent-attendance-calendar__tile--pending .bezent-attendance-calendar__tile-status {
+  color: #475569;
+}
+
+/* Unclassified / Future Dates */
+.bezent-attendance-calendar__tile--unclassified,
+.bezent-attendance-calendar__day--unclassified {
+  background-color: var(--bg-surface, #ffffff);
+  border-color: var(--border-subtle, #e7ebf0);
+  color: var(--text-primary);
+}
+.bezent-attendance-calendar__tile--unclassified .bezent-attendance-calendar__tile-status,
+.bezent-attendance-calendar__tile--unclassified .bezent-attendance-calendar__tile-sub {
+  color: var(--text-muted, #747775);
+}
+
+/* ── Dark Mode Overrides ── */
+[data-theme='dark'] .bezent-attendance-calendar__tile,
+[data-theme='dark'] .bezent-attendance-calendar__day {
+  background: rgba(255, 255, 255, 0.02);
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
+[data-theme='dark'] .bezent-attendance-calendar__tile--present,
+[data-theme='dark'] .bezent-attendance-calendar__day--present {
+  background-color: rgba(52, 168, 83, 0.16);
+  border-color: rgba(52, 168, 83, 0.35);
+}
+[data-theme='dark']
+  .bezent-attendance-calendar__tile--present
+  .bezent-attendance-calendar__tile-status {
+  color: #81c995;
+}
+
+[data-theme='dark'] .bezent-attendance-calendar__tile--late,
+[data-theme='dark'] .bezent-attendance-calendar__day--late {
+  background-color: rgba(240, 120, 101, 0.16);
+  border-color: rgba(240, 120, 101, 0.35);
+}
+[data-theme='dark']
+  .bezent-attendance-calendar__tile--late
+  .bezent-attendance-calendar__tile-status {
+  color: #f07865;
+}
+
+[data-theme='dark'] .bezent-attendance-calendar__tile--half-day,
+[data-theme='dark'] .bezent-attendance-calendar__day--half-day {
+  background-color: rgba(249, 115, 22, 0.16);
+  border-color: rgba(249, 115, 22, 0.35);
+}
+[data-theme='dark']
+  .bezent-attendance-calendar__tile--half-day
+  .bezent-attendance-calendar__tile-status {
+  color: #fdba74;
+}
+
+[data-theme='dark'] .bezent-attendance-calendar__tile--absent,
+[data-theme='dark'] .bezent-attendance-calendar__day--absent {
+  background-color: rgba(234, 67, 53, 0.16);
+  border-color: rgba(234, 67, 53, 0.35);
+}
+[data-theme='dark']
+  .bezent-attendance-calendar__tile--absent
+  .bezent-attendance-calendar__tile-status {
+  color: #f28b82;
+}
+
+[data-theme='dark'] .bezent-attendance-calendar__tile--missing-punch,
+[data-theme='dark'] .bezent-attendance-calendar__day--missing-punch {
+  background-color: rgba(234, 88, 12, 0.18);
+  border-color: rgba(234, 88, 12, 0.4);
+}
+[data-theme='dark']
+  .bezent-attendance-calendar__tile--missing-punch
+  .bezent-attendance-calendar__tile-status {
+  color: #fb923c;
+}
+
+[data-theme='dark'] .bezent-attendance-calendar__tile--leave,
+[data-theme='dark'] .bezent-attendance-calendar__day--leave {
+  background-color: rgba(168, 85, 247, 0.16);
+  border-color: rgba(168, 85, 247, 0.35);
+}
+[data-theme='dark']
+  .bezent-attendance-calendar__tile--leave
+  .bezent-attendance-calendar__tile-status {
+  color: #d8b4fe;
+}
+
+[data-theme='dark'] .bezent-attendance-calendar__tile--holiday,
+[data-theme='dark'] .bezent-attendance-calendar__day--holiday {
+  background-color: rgba(66, 133, 244, 0.16);
+  border-color: rgba(66, 133, 244, 0.35);
+}
+[data-theme='dark']
+  .bezent-attendance-calendar__tile--holiday
+  .bezent-attendance-calendar__tile-status {
+  color: #8ab4f8;
+}
+
+[data-theme='dark'] .bezent-attendance-calendar__tile--weekly-off,
+[data-theme='dark'] .bezent-attendance-calendar__day--weekly-off {
+  background-color: rgba(255, 255, 255, 0.04);
+  border-color: rgba(255, 255, 255, 0.08);
+}
+[data-theme='dark']
+  .bezent-attendance-calendar__tile--weekly-off
+  .bezent-attendance-calendar__tile-date,
+[data-theme='dark']
+  .bezent-attendance-calendar__tile--weekly-off
+  .bezent-attendance-calendar__tile-status,
+[data-theme='dark']
+  .bezent-attendance-calendar__tile--weekly-off
+  .bezent-attendance-calendar__tile-sub {
+  color: #9aa0a6;
+}
+
+[data-theme='dark'] .bezent-attendance-calendar__tile--pending,
+[data-theme='dark'] .bezent-attendance-calendar__day--pending {
+  background-color: rgba(148, 163, 184, 0.14);
+  border-color: rgba(148, 163, 184, 0.28);
+}
+[data-theme='dark']
+  .bezent-attendance-calendar__tile--pending
+  .bezent-attendance-calendar__tile-status {
+  color: #94a3b8;
+}
+
+[data-theme='dark'] .bezent-attendance-calendar__tile--unclassified,
+[data-theme='dark'] .bezent-attendance-calendar__day--unclassified {
+  background-color: rgba(255, 255, 255, 0.02);
+  border-color: rgba(255, 255, 255, 0.08);
+}
+[data-theme='dark']
+  .bezent-attendance-calendar__tile--unclassified
+  .bezent-attendance-calendar__tile-status,
+[data-theme='dark']
+  .bezent-attendance-calendar__tile--unclassified
+  .bezent-attendance-calendar__tile-sub {
+  color: #9aa0a6;
+}
+
+/* ── Today & Selection Highlights ── */
+.bezent-attendance-calendar__tile--today,
+.bezent-attendance-calendar__day--today {
+  border: 2px solid var(--action-blue);
+}
+
+.bezent-attendance-calendar__tile--selected,
+.bezent-attendance-calendar__day--selected {
+  outline: 2px solid var(--action-blue);
+  outline-offset: -1px;
+  box-shadow:
+    0 0 0 1px var(--action-blue),
+    0 4px 14px rgba(57, 120, 246, 0.15);
+  z-index: 2;
+}
+
+/* Empty filler day */
+.bezent-attendance-calendar__tile--empty,
+.bezent-attendance-calendar__day--empty {
+  visibility: hidden;
+  pointer-events: none;
+  min-height: 64px;
+}
+
+/* ── Responsive Tile Behavior ── */
+@media (max-width: 1024px) {
+  .bezent-attendance-calendar__day-wrapper {
+    min-height: 56px;
+  }
+  .bezent-attendance-calendar__tile,
+  .bezent-attendance-calendar__day {
+    min-height: 56px;
+    padding: 4px 5px;
+  }
+  .bezent-attendance-calendar__tile-status {
+    font-size: 10px;
+  }
+  .bezent-attendance-calendar__tile-sub {
+    font-size: 9px;
+  }
+}
+
+@media (max-width: 640px) {
+  .bezent-attendance-calendar__grid {
+    gap: 4px 2px;
+  }
+  .bezent-attendance-calendar__day-wrapper {
+    min-height: 44px;
+  }
+  .bezent-attendance-calendar__tile,
+  .bezent-attendance-calendar__day {
+    min-height: 44px;
+    padding: 3px 2px;
+    align-items: center;
+    text-align: center;
+  }
+  .bezent-attendance-calendar__tile-top {
+    justify-content: center;
+  }
+  .bezent-attendance-calendar__tile-today-pill {
+    position: absolute;
+    top: 2px;
+    right: 2px;
+    font-size: 7px;
+    padding: 0 2px;
+  }
+  .bezent-attendance-calendar__tile-reg-dot {
+    position: absolute;
+    top: 3px;
+    right: 3px;
+    width: 4px;
+    height: 4px;
+  }
+  .bezent-attendance-calendar__tile-status {
+    font-size: 9px;
+    letter-spacing: -0.02em;
+  }
+  .bezent-attendance-calendar__tile-sub {
+    display: none;
+  }
+}
+
+/* ── Legend ── */
+.bezent-attendance-calendar__legend {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  padding: 10px 16px;
+  background: #f8fafe;
+  border: 1px solid #e4e9f2;
+  border-radius: 12px;
+  margin-top: 8px;
+}
+
+.bezent-attendance-calendar__legend-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11.5px;
+  font-weight: 500;
+  color: #65728a;
+}
+
+.bezent-attendance-calendar__legend-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 3px;
+  display: inline-block;
+}
+
+.bezent-attendance-calendar__legend-dot--present {
+  background-color: #168b61;
+}
+
+.bezent-attendance-calendar__legend-dot--late {
+  background-color: #f07865;
+}
+
+.bezent-attendance-calendar__legend-dot--half-day {
+  background-color: #ea580c;
+}
+
+.bezent-attendance-calendar__legend-dot--absent {
+  background-color: #de5264;
+}
+
+.bezent-attendance-calendar__legend-dot--missing-punch {
+  background-color: #8265de;
+}
+
+.bezent-attendance-calendar__legend-dot--leave {
+  background-color: #7e22ce;
+}
+
+.bezent-attendance-calendar__legend-dot--holiday {
+  background-color: var(--action-blue);
+}
+
+.bezent-attendance-calendar__legend-dot--weekly-off {
+  background-color: #8b96a8;
+}
+
+.bezent-attendance-calendar__legend-dot--pending {
+  background-color: #64748b;
+}
+
+/* ── Selected Date Details Box ── */
+.bezent-attendance-calendar__details {
+  border-top: 1px solid var(--border-default, #dde3ea);
+  padding-top: var(--spacing-sm, 10px);
+  margin-top: var(--spacing-xs, 4px);
+}
+
+/* ── Summary Column (Right) ── */
+.bezent-attendance-summary {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+  height: 100%;
+}
+
+.bezent-attendance-summary__card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 18px 14px 16px 14px;
+  border-radius: var(--radius-card);
+  text-align: center;
+  gap: 6px;
+  min-height: 126px;
+  box-sizing: border-box;
+  transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 2px 8px rgba(32, 40, 58, 0.035);
+}
+
+.bezent-attendance-summary__card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 24px rgba(32, 40, 58, 0.08);
+}
+
+/* Individual Pastel Card Backgrounds & Borders */
+.bezent-attendance-summary__card--present {
+  background: #edfaf2;
+  border: 1px solid #c4eed7;
+}
+.bezent-attendance-summary__card--present:hover {
+  border-color: #9de4bd;
+}
+.bezent-attendance-summary__card--present .bezent-attendance-summary__value {
+  color: #11704b;
+}
+.bezent-attendance-summary__card--present .bezent-attendance-summary__label {
+  color: #168b61;
+}
+
+.bezent-attendance-summary__card--absent {
+  background: #fff0f3;
+  border: 1px solid #fcd4dd;
+}
+.bezent-attendance-summary__card--absent:hover {
+  border-color: #f8b4c2;
+}
+.bezent-attendance-summary__card--absent .bezent-attendance-summary__value {
+  color: #b72f40;
+}
+.bezent-attendance-summary__card--absent .bezent-attendance-summary__label {
+  color: #de5264;
+}
+
+.bezent-attendance-summary__card--half-day {
+  background: #fff4ed;
+  border: 1px solid #fdddca;
+}
+.bezent-attendance-summary__card--half-day:hover {
+  border-color: #fcc7a5;
+}
+.bezent-attendance-summary__card--half-day .bezent-attendance-summary__value {
+  color: #c2410c;
+}
+.bezent-attendance-summary__card--half-day .bezent-attendance-summary__label {
+  color: #ea580c;
+}
+
+.bezent-attendance-summary__card--late {
+  background: #fff3ef;
+  border: 1px solid #fdd4c9;
+}
+.bezent-attendance-summary__card--late:hover {
+  border-color: #fbbbaa;
+}
+.bezent-attendance-summary__card--late .bezent-attendance-summary__value {
+  color: #c4432f;
+}
+.bezent-attendance-summary__card--late .bezent-attendance-summary__label {
+  color: #f07865;
+}
+
+.bezent-attendance-summary__card--worked {
+  background: #eef5ff;
+  border: 1px solid #d6e6fe;
+}
+.bezent-attendance-summary__card--worked:hover {
+  border-color: #b4d3fd;
+}
+.bezent-attendance-summary__card--worked .bezent-attendance-summary__value {
+  color: #1d57c7;
+}
+.bezent-attendance-summary__card--worked .bezent-attendance-summary__label {
+  color: var(--action-blue);
+}
+
+.bezent-attendance-summary__card--missing-punch {
+  background: #f4efff;
+  border: 1px solid #ded4fb;
+}
+.bezent-attendance-summary__card--missing-punch:hover {
+  border-color: #c6b5f7;
+}
+.bezent-attendance-summary__card--missing-punch .bezent-attendance-summary__value {
+  color: #5f3ec4;
+}
+.bezent-attendance-summary__card--missing-punch .bezent-attendance-summary__label {
+  color: #8265de;
+}
+
+.bezent-attendance-summary__value {
+  font-size: 32px;
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: -0.025em;
+}
+
+[data-theme='dark'] .bezent-attendance-summary__value {
+  color: var(--text-primary, #f8fafc);
+}
+
+.bezent-attendance-summary__label {
+  font-size: 12.5px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+}
+
+[data-theme='dark'] .bezent-attendance-summary__label {
+  color: var(--text-secondary, #94a3b8);
+}
+
+.bezent-attendance-summary__sparkline {
+  width: 100%;
+  max-width: 90px;
+  height: 24px;
+  margin-top: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.bezent-attendance-summary__sparkline-svg {
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+/* ── Compact Contextual Daily Attendance State ── */
+.ess-attendance-compact-contextual {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 18px;
+  background: var(--bg-surface-secondary, #f8fafe);
+  border: 1px solid var(--border-default, #e5eaf2);
+  border-radius: 12px;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+
+[data-theme='dark'] .ess-attendance-compact-contextual {
+  background: rgba(255, 255, 255, 0.02);
+  border-color: var(--border-default, #2a313d);
+}
+
+.ess-attendance-compact-contextual__meta {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.ess-attendance-compact-contextual__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 8px;
+  background: #ffe6ec;
+  color: #de5264;
+  flex-shrink: 0;
+}
+
+[data-theme='dark'] .ess-attendance-compact-contextual__icon {
+  background: rgba(222, 82, 100, 0.16);
+  color: #f28b82;
+}
+
+.ess-attendance-compact-contextual__texts {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.ess-attendance-compact-contextual__title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-primary, #202938);
+}
+
+[data-theme='dark'] .ess-attendance-compact-contextual__title {
+  color: var(--text-primary, #f8fafc);
+}
+
+.ess-attendance-compact-contextual__desc {
+  font-size: 12.5px;
+  color: var(--text-secondary, #68758a);
+  line-height: 1.4;
+}
+
+[data-theme='dark'] .ess-attendance-compact-contextual__desc {
+  color: var(--text-secondary, #94a3b8);
+}
+
+/* ── Compact Empty State for Regularizations ── */
+.ess-attendance-compact-empty {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 18px;
+  background: var(--bg-surface-secondary, #f8fafe);
+  border: 1px dashed var(--border-default, #e5eaf2);
+  border-radius: 12px;
+}
+
+[data-theme='dark'] .ess-attendance-compact-empty {
+  background: rgba(255, 255, 255, 0.02);
+  border-color: var(--border-default, #2a313d);
+}
+
+.ess-attendance-compact-empty__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 8px;
+  background: #e8f1ff;
+  color: var(--action-blue);
+  flex-shrink: 0;
+}
+
+[data-theme='dark'] .ess-attendance-compact-empty__icon {
+  background: rgba(57, 120, 246, 0.15);
+  color: #60a5fa;
+}
+
+.ess-attendance-compact-empty__content {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.ess-attendance-compact-empty__title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-primary, #202938);
+}
+
+[data-theme='dark'] .ess-attendance-compact-empty__title {
+  color: var(--text-primary, #f8fafc);
+}
+
+.ess-attendance-compact-empty__desc {
+  font-size: 12.5px;
+  color: var(--text-secondary, #68758a);
+  line-height: 1.4;
+}
+
+[data-theme='dark'] .ess-attendance-compact-empty__desc {
+  color: var(--text-secondary, #94a3b8);
+}
+
+/* ==========================================================================
+   BEZENT HRMS ATTENDANCE OVERVIEW — PREMIUM 3D CLAYMORPHISM SYSTEM
+   Light pastel palette, soft ambient shadows, inner highlights, floating icons,
+   and inflated 3D surfaces (Inter typography with high contrast navy/charcoal).
+   ========================================================================== */
+
+/* ── Page Canvas Atmosphere ── */
+.attendance-clay-overview {
+  background-color: #ffffff;
+  font-family: var(--font-family-base, 'Inter', -apple-system, BlinkMacSystemFont, sans-serif);
+  color: #252b3b;
+}
+
+/* ── Clay Header Styling ── */
+.attendance-clay-header .bezent-page-header__eyebrow {
+  color: #6366f1 !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.08em !important;
+  font-size: 11.5px !important;
+  text-transform: uppercase !important;
+}
+
+.attendance-clay-header .bezent-page-header__title {
+  color: #222a3b !important;
+  font-weight: 800 !important;
+  font-size: 28px !important;
+  letter-spacing: -0.025em !important;
+}
+
+.attendance-clay-header .bezent-page-header__subtitle {
+  color: #68758f !important;
+  font-size: 14px !important;
+  font-weight: 500 !important;
+}
+
+/* ── Clay Header Action Buttons ── */
+.attendance-clay-header-btn {
+  background: linear-gradient(135deg, #ffffff 0%, #f1f4fb 100%) !important;
+  color: #252b3b !important;
+  border: none !important;
+  border-radius: 14px !important;
+  padding: 8px 16px !important;
+  font-weight: 700 !important;
+  font-size: 13px !important;
+  box-shadow:
+    0 4px 12px -2px rgba(37, 43, 59, 0.08),
+    0 2px 4px 0 rgba(37, 43, 59, 0.03),
+    inset 1px 2px 3px rgba(255, 255, 255, 0.95),
+    inset -1px -2px 3px rgba(37, 43, 59, 0.05) !important;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+
+.attendance-clay-header-btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  background: linear-gradient(135deg, #ffffff 0%, #e8f0fe 100%) !important;
+  box-shadow:
+    0 8px 18px -3px rgba(37, 43, 59, 0.12),
+    0 3px 6px 0 rgba(37, 43, 59, 0.04),
+    inset 1px 2px 3px rgba(255, 255, 255, 1),
+    inset -1px -2px 3px rgba(37, 43, 59, 0.06) !important;
+}
+
+.attendance-clay-header-btn:active:not(:disabled) {
+  transform: translateY(1px) scale(0.98);
+  box-shadow:
+    0 2px 6px -1px rgba(37, 43, 59, 0.08),
+    inset 0 2px 4px rgba(37, 43, 59, 0.08) !important;
+}
+
+/* ── Clay Date Filter & Controls Toolbar ── */
+.attendance-clay-toolbar {
+  background: linear-gradient(135deg, #ffffff 0%, #f6f8fd 100%);
+  border: none !important;
+  border-radius: 20px;
+  padding: 10px 18px;
+  box-shadow:
+    0 10px 24px -4px rgba(37, 43, 59, 0.06),
+    0 2px 6px -1px rgba(37, 43, 59, 0.03),
+    inset 2px 3px 5px rgba(255, 255, 255, 0.95),
+    inset -2px -3px 6px rgba(37, 43, 59, 0.03);
+}
+
+.attendance-clay-toolbar .bezent-toolbar {
+  background: transparent;
+  padding: 0;
+  border: none;
+  box-shadow: none;
+}
+
+.attendance-clay-toolbar input[type='date'],
+.attendance-clay-toolbar .bezent-input {
+  background: #f1f4fb !important;
+  border: 1px solid #dce4f2 !important;
+  border-radius: 12px !important;
+  color: #252b3b !important;
+  font-weight: 600 !important;
+  box-shadow: inset 0 2px 4px rgba(37, 43, 59, 0.06) !important;
+  padding: 6px 12px !important;
+}
+
+.attendance-clay-toolbar select,
+.attendance-clay-toolbar .bezent-select {
+  background: #f1f4fb !important;
+  border: 1px solid #dce4f2 !important;
+  border-radius: 12px !important;
+  color: #252b3b !important;
+  font-weight: 600 !important;
+  box-shadow:
+    0 2px 6px -1px rgba(37, 43, 59, 0.05),
+    inset 0 1px 2px rgba(255, 255, 255, 0.8) !important;
+  padding: 6px 12px !important;
+}
+
+/* Floating Clay Badges */
+.attendance-clay-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 700;
+  border: none !important;
+  box-shadow:
+    0 4px 10px -2px rgba(37, 43, 59, 0.06),
+    inset 1px 2px 3px rgba(255, 255, 255, 0.9),
+    inset -1px -1px 2px rgba(37, 43, 59, 0.04);
+}
+
+.attendance-clay-badge--scope {
+  background: linear-gradient(135deg, #f0f4fc 0%, #e2eaf7 100%);
+  color: #475569;
+}
+
+.attendance-clay-badge--rate-good {
+  background: linear-gradient(135deg, #ebf9f2 0%, #c8f0dc 100%);
+  color: #0d7048;
+}
+
+.attendance-clay-badge--rate-warn {
+  background: linear-gradient(135deg, #fff4ec 0%, #ffdcc2 100%);
+  color: #b45309;
+}
+
+.attendance-clay-badge--live {
+  background: linear-gradient(135deg, #edf5ff 0%, #cde7ff 100%);
+  color: #1e40af;
+}
+
+/* ── 1. Attendance Summary Bar (Inflated 3D Clay Capsule) ── */
+.attendance-clay-strip {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 24px;
+  background: linear-gradient(135deg, #ffffff 0%, #f7f9fd 100%) !important;
+  border: none !important;
+  border-radius: 22px !important;
+  box-shadow:
+    0 12px 28px -6px rgba(37, 43, 59, 0.07),
+    0 4px 10px -2px rgba(37, 43, 59, 0.03),
+    inset 2px 3px 5px 0 rgba(255, 255, 255, 0.95),
+    inset -3px -4px 8px 0 rgba(37, 43, 59, 0.04) !important;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.attendance-clay-strip__stats {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.attendance-clay-stat-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  padding: 6px 12px;
+  border-radius: 14px;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.attendance-clay-stat-item:hover {
+  background: rgba(255, 255, 255, 0.9);
+  box-shadow:
+    0 4px 12px -2px rgba(37, 43, 59, 0.06),
+    inset 0 1px 2px rgba(255, 255, 255, 0.95);
+  transform: translateY(-1px);
+}
+
+.attendance-clay-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  display: inline-block;
+  flex-shrink: 0;
+  box-shadow:
+    0 3px 6px -1px rgba(37, 43, 59, 0.2),
+    inset 0 1px 2px rgba(255, 255, 255, 0.9),
+    inset 0 -1px 2px rgba(0, 0, 0, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.7);
+}
+
+.attendance-clay-dot--blue {
+  background: linear-gradient(135deg, #60a5fa 0%, var(--blue-600) 100%);
+}
+.attendance-clay-dot--green {
+  background: linear-gradient(135deg, #34d399 0%, #059669 100%);
+}
+.attendance-clay-dot--amber {
+  background: linear-gradient(135deg, #fbbf24 0%, #d97706 100%);
+}
+.attendance-clay-dot--purple {
+  background: linear-gradient(135deg, #a78bfa 0%, #7c3aed 100%);
+}
+.attendance-clay-dot--red {
+  background: linear-gradient(135deg, #f87171 0%, #dc2626 100%);
+}
+
+.attendance-clay-stat-item__value {
+  font-size: 21px;
+  font-weight: 800;
+  color: #222a3b;
+  letter-spacing: -0.02em;
+}
+
+.attendance-clay-stat-item__label {
+  font-size: 13px;
+  font-weight: 600;
+  color: #68758f;
+}
+
+/* Clay Alert Pills */
+.attendance-clay-alert-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  border-radius: 14px;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  border: none !important;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow:
+    0 4px 12px -2px rgba(37, 43, 59, 0.08),
+    inset 1px 2px 3px rgba(255, 255, 255, 0.95),
+    inset -1px -2px 3px rgba(37, 43, 59, 0.05);
+}
+
+.attendance-clay-alert-pill:hover {
+  transform: translateY(-2px);
+  box-shadow:
+    0 8px 18px -3px rgba(37, 43, 59, 0.12),
+    inset 1px 2px 3px rgba(255, 255, 255, 1);
+}
+
+.attendance-clay-alert-pill--late {
+  background: linear-gradient(135deg, #fff7ed 0%, #ffdcc2 100%);
+  color: #b45309;
+}
+.attendance-clay-alert-pill--missing {
+  background: linear-gradient(135deg, #fff1f2 0%, #ffe0eb 100%);
+  color: #be123c;
+}
+.attendance-clay-alert-pill--blocker {
+  background: linear-gradient(135deg, #f5f3ff 0%, #e9e1ff 100%);
+  color: #5b21b6;
+}
+
+/* ── 2. Four Primary 3D Statistic Cards (Compact Borderless 3D Clay Objects) ── */
+.attendance-clay-card {
+  border-radius: var(--radius-card) !important;
+  padding: 14px 18px 12px 18px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: space-between !important;
+  gap: 8px !important;
+  position: relative !important;
+  overflow: hidden !important;
+  border: none !important;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+
+.attendance-clay-card:hover {
+  transform: translateY(-3px) !important;
+}
+
+/* Card 1: Lavender (Matching Total Candidates in reference) */
+.attendance-clay-card--lavender {
+  background: linear-gradient(145deg, #f3ebff 0%, #e6d7ff 100%) !important;
+  box-shadow:
+    0 10px 20px -4px rgba(160, 125, 230, 0.28),
+    0 3px 6px -2px rgba(160, 125, 230, 0.16),
+    inset 2.5px 2.5px 5px rgba(255, 255, 255, 0.95),
+    inset -2.5px -3px 6px rgba(150, 110, 220, 0.26) !important;
+}
+
+.attendance-clay-card--lavender:hover {
+  box-shadow:
+    0 14px 26px -4px rgba(160, 125, 230, 0.38),
+    0 5px 10px -2px rgba(160, 125, 230, 0.22),
+    inset 2.5px 2.5px 5px rgba(255, 255, 255, 1),
+    inset -2.5px -3px 6px rgba(150, 110, 220, 0.3) !important;
+}
+
+/* Card 2: Peach (Exceptions) */
+.attendance-clay-card--peach {
+  background: linear-gradient(145deg, #fff3ea 0%, #fedecb 100%) !important;
+  box-shadow:
+    0 10px 20px -4px rgba(240, 140, 95, 0.26),
+    0 3px 6px -2px rgba(240, 140, 95, 0.14),
+    inset 2.5px 2.5px 5px rgba(255, 255, 255, 0.95),
+    inset -2.5px -3px 6px rgba(220, 110, 60, 0.24) !important;
+}
+
+.attendance-clay-card--peach:hover {
+  box-shadow:
+    0 14px 26px -4px rgba(240, 140, 95, 0.36),
+    0 5px 10px -2px rgba(240, 140, 95, 0.2),
+    inset 2.5px 2.5px 5px rgba(255, 255, 255, 1),
+    inset -2.5px -3px 6px rgba(220, 110, 60, 0.28) !important;
+}
+
+/* Card 3: Pink (Missing Punches) */
+.attendance-clay-card--pink {
+  background: linear-gradient(145deg, #fff0f5 0%, #fcd9e5 100%) !important;
+  box-shadow:
+    0 10px 20px -4px rgba(235, 115, 155, 0.26),
+    0 3px 6px -2px rgba(235, 115, 155, 0.14),
+    inset 2.5px 2.5px 5px rgba(255, 255, 255, 0.95),
+    inset -2.5px -3px 6px rgba(215, 80, 120, 0.24) !important;
+}
+
+.attendance-clay-card--pink:hover {
+  box-shadow:
+    0 14px 26px -4px rgba(235, 115, 155, 0.36),
+    0 5px 10px -2px rgba(235, 115, 155, 0.2),
+    inset 2.5px 2.5px 5px rgba(255, 255, 255, 1),
+    inset -2.5px -3px 6px rgba(215, 80, 120, 0.28) !important;
+}
+
+/* Card 4: Blue (Matching In Pipeline in reference) */
+.attendance-clay-card--blue {
+  background: linear-gradient(145deg, #edf5ff 0%, #d8ebff 100%) !important;
+  box-shadow:
+    0 10px 20px -4px rgba(96, 165, 250, 0.28),
+    0 3px 6px -2px rgba(96, 165, 250, 0.16),
+    inset 2.5px 2.5px 5px rgba(255, 255, 255, 0.95),
+    inset -2.5px -3px 6px rgba(60, 130, 230, 0.26) !important;
+}
+
+.attendance-clay-card--blue:hover {
+  box-shadow:
+    0 14px 26px -4px rgba(96, 165, 250, 0.38),
+    0 5px 10px -2px rgba(96, 165, 250, 0.22),
+    inset 2.5px 2.5px 5px rgba(255, 255, 255, 1),
+    inset -2.5px -3px 6px rgba(60, 130, 230, 0.3) !important;
+}
+
+.attendance-clay-card__top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+}
+
+.attendance-clay-card__title-group {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.attendance-clay-card__dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  display: inline-block;
+  flex-shrink: 0;
+}
+
+.attendance-clay-card__dot--lavender {
+  background: #7c3aed;
+}
+.attendance-clay-card__dot--peach {
+  background: #ea580c;
+}
+.attendance-clay-card__dot--pink {
+  background: #e11d48;
+}
+.attendance-clay-card__dot--blue {
+  background: var(--blue-600);
+}
+
+/* 3D Embossed Squircle Icon Button (Matching Screenshot) */
+.attendance-clay-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 11px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  border: none !important;
+  box-shadow:
+    0 3px 6px -1px rgba(0, 0, 0, 0.08),
+    inset 1.5px 1.5px 2.5px rgba(255, 255, 255, 0.9),
+    inset -1.5px -1.5px 3px rgba(0, 0, 0, 0.08) !important;
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.attendance-clay-card:hover .attendance-clay-icon {
+  transform: scale(1.05);
+}
+
+.attendance-clay-icon--lavender {
+  background: linear-gradient(135deg, #f5efff 0%, #e0d0fe 100%) !important;
+  color: #5b21b6 !important;
+}
+.attendance-clay-icon--peach {
+  background: linear-gradient(135deg, #fff3ea 0%, #fed8c2 100%) !important;
+  color: #9a3412 !important;
+}
+.attendance-clay-icon--pink {
+  background: linear-gradient(135deg, #fff0f5 0%, #fcd2e1 100%) !important;
+  color: #9f1239 !important;
+}
+.attendance-clay-icon--blue {
+  background: linear-gradient(135deg, #edf5ff 0%, #cfe3fe 100%) !important;
+  color: #1e40af !important;
+}
+
+.attendance-clay-card__title {
+  font-size: 13.5px;
+  font-weight: 700;
+  color: #252b3b;
+  letter-spacing: -0.01em;
+}
+
+.attendance-clay-card__mid {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+  margin-top: 1px;
+}
+
+.attendance-clay-card__count {
+  font-size: 28px;
+  font-weight: 800;
+  color: #222a3b;
+  line-height: 1;
+  letter-spacing: -0.03em;
+}
+
+/* Clay Status Pill */
+.attendance-clay-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 8px;
+  border-radius: 8px;
+  font-size: 11px;
+  font-weight: 700;
+  border: none !important;
+  box-shadow:
+    0 2px 4px rgba(0, 0, 0, 0.05),
+    inset 1px 1px 2px rgba(255, 255, 255, 0.85);
+}
+
+.attendance-clay-pill--warning {
+  background: #fef3c7;
+  color: #92400e;
+}
+.attendance-clay-pill--danger {
+  background: #fee2e2;
+  color: #991b1b;
+}
+.attendance-clay-pill--info {
+  background: #dbeafe;
+  color: #1e40af;
+}
+.attendance-clay-pill--neutral {
+  background: #f1f5f9;
+  color: #475569;
+}
+
+.attendance-clay-card__bottom {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding-top: 6px;
+  border-top: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.attendance-clay-card__tag {
+  font-size: 11.5px;
+  font-weight: 600;
+  color: #475569;
+}
+
+/* Tactile 3D Clay Button */
+.attendance-clay-btn {
+  background: #ffffff !important;
+  color: #222a3b !important;
+  border: none !important;
+  border-radius: 10px !important;
+  padding: 4px 12px !important;
+  font-size: 11.5px !important;
+  font-weight: 700 !important;
+  box-shadow:
+    0 3px 8px -2px rgba(37, 43, 59, 0.12),
+    inset 1px 1px 2px rgba(255, 255, 255, 0.95),
+    inset -1px -1px 2px rgba(0, 0, 0, 0.06) !important;
+  transition: all 0.15s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+
+.attendance-clay-btn:hover {
+  transform: translateY(-2px);
+  box-shadow:
+    0 5px 12px -2px rgba(37, 43, 59, 0.16),
+    inset 1px 1px 2px rgba(255, 255, 255, 1) !important;
+}
+
+.attendance-clay-btn:active {
+  transform: translateY(1px) scale(0.97);
+  box-shadow:
+    0 1px 3px rgba(37, 43, 59, 0.08),
+    inset 0 2px 4px rgba(37, 43, 59, 0.08) !important;
+}
+
+/* ── 3. Panels (Department Attendance & Attendance Trends) ── */
+.attendance-clay-panel {
+  background: linear-gradient(145deg, #ffffff 0%, #f6f8fd 100%) !important;
+  border: none !important;
+  border-radius: 22px !important;
+  box-shadow:
+    0 12px 28px -6px rgba(37, 43, 59, 0.07),
+    0 4px 10px -2px rgba(37, 43, 59, 0.03),
+    inset 2px 3px 5px 0 rgba(255, 255, 255, 0.95),
+    inset -3px -4px 8px 0 rgba(37, 43, 59, 0.03) !important;
+  overflow: hidden;
+}
+
+.attendance-clay-panel .bezent-card-header {
+  padding-bottom: 14px;
+  border-bottom: 1px solid rgba(37, 43, 59, 0.05);
+}
+
+.attendance-clay-panel .bezent-card-title {
+  font-size: 17px !important;
+  font-weight: 800 !important;
+  color: #222a3b !important;
+  letter-spacing: -0.015em;
+}
+
+/* Department Donut Center Disc */
+.attendance-clay-donut-center {
+  fill: #ffffff;
+  filter: drop-shadow(0 4px 10px rgba(37, 43, 59, 0.08));
+}
+
+/* Department Rows as Elevated Pastel Clay Elements */
+.attendance-clay-dept-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 9px 14px !important;
+  border-radius: 14px !important;
+  border: none !important;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
+  cursor: pointer;
+}
+
+/* All department rows unified to a balanced soft pastel clay colour */
+.attendance-clay-dept-row,
+.attendance-clay-dept-row--0,
+.attendance-clay-dept-row--1,
+.attendance-clay-dept-row--2,
+.attendance-clay-dept-row--3,
+.attendance-clay-dept-row--4,
+.attendance-clay-dept-row--5,
+.attendance-clay-dept-row--6,
+.attendance-clay-dept-row--7,
+.attendance-clay-dept-row--8 {
+  background: linear-gradient(135deg, #edf4fc 0%, #d8e8f8 100%) !important;
+  border: none !important;
+  box-shadow:
+    0 4px 10px -2px rgba(37, 43, 59, 0.06),
+    inset 2px 2px 4px rgba(255, 255, 255, 0.95),
+    inset -2px -2px 4px rgba(37, 43, 59, 0.04) !important;
+}
+
+.attendance-clay-dept-row:hover {
+  transform: translateX(3px) translateY(-1px) !important;
+  background: linear-gradient(135deg, #e2eefb 0%, #cde2f7 100%) !important;
+  box-shadow:
+    0 8px 16px -3px rgba(37, 43, 59, 0.1),
+    inset 1px 2px 3px rgba(255, 255, 255, 1) !important;
+}
+
+.attendance-clay-dept-row .bezent-dept-pie-legend-name {
+  font-size: 13.5px !important;
+  font-weight: 700 !important;
+  color: #222a3b !important;
+}
+
+.attendance-clay-dept-row .bezent-dept-pie-legend-count {
+  font-size: 12.5px !important;
+  font-weight: 600 !important;
+  color: #475569 !important;
+}
+
+/* ── 4. Attendance Trends Clay Chart ── */
+.attendance-clay-trend-card {
+  padding: 8px 4px;
+}
+
+.attendance-clay-trend-columns {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 10px;
+  align-items: end;
+  height: 175px;
+  padding: 10px 6px;
+  border-bottom: 1px solid rgba(37, 43, 59, 0.06);
+}
+
+.attendance-clay-trend-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  height: 100%;
+  justify-content: flex-end;
+  padding: 6px 3px;
+  border-radius: 12px;
+  transition: all 0.2s ease;
+  position: relative;
+  cursor: pointer;
+}
+
+.attendance-clay-trend-col:hover {
+  background: rgba(255, 255, 255, 0.95);
+  box-shadow: 0 4px 12px -2px rgba(37, 43, 59, 0.06);
+  transform: translateY(-2px);
+}
+
+.attendance-clay-trend-col__bar-wrap {
+  width: 100%;
+  max-width: 32px;
+  height: 105px;
+  display: flex;
+  align-items: flex-end;
+  background: #edf1f8;
+  border-radius: 10px;
+  box-shadow:
+    inset 0 3px 6px rgba(37, 43, 59, 0.08),
+    inset 0 -1px 2px rgba(255, 255, 255, 0.8);
+  overflow: hidden;
+  position: relative;
+}
+
+.attendance-clay-trend-col__rate {
+  font-size: 12px;
+  font-weight: 800;
+  color: #222a3b;
+  margin-bottom: 4px;
+}
+
+/* ── 5. Monthly Payroll Readiness Clay Panels (Borderless Clay Objects) ── */
+.attendance-clay-readiness-card {
+  border-radius: var(--radius-card);
+  padding: 16px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  border: none !important;
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.attendance-clay-readiness-card:hover {
+  transform: translateY(-2px);
+}
+
+.attendance-clay-readiness-card--mint {
+  background: linear-gradient(145deg, #ebfaf1 0%, #d1f3e0 100%) !important;
+  box-shadow:
+    0 10px 22px -4px rgba(46, 196, 138, 0.24),
+    0 3px 6px -1px rgba(46, 196, 138, 0.12),
+    inset 3px 3px 6px rgba(255, 255, 255, 0.95),
+    inset -4px -4px 8px rgba(30, 160, 105, 0.22) !important;
+}
+
+.attendance-clay-readiness-card--peach {
+  background: linear-gradient(145deg, #fff3ea 0%, #fedecb 100%) !important;
+  box-shadow:
+    0 10px 22px -4px rgba(245, 150, 105, 0.24),
+    0 3px 6px -1px rgba(245, 150, 105, 0.12),
+    inset 3px 3px 6px rgba(255, 255, 255, 0.95),
+    inset -4px -4px 8px rgba(220, 110, 60, 0.22) !important;
+}
+
+.attendance-clay-readiness-card--lavender {
+  background: linear-gradient(145deg, #f3ebff 0%, #e6d7ff 100%) !important;
+  box-shadow:
+    0 10px 22px -4px rgba(175, 140, 235, 0.24),
+    0 3px 6px -1px rgba(175, 140, 235, 0.12),
+    inset 3px 3px 6px rgba(255, 255, 255, 0.95),
+    inset -4px -4px 8px rgba(130, 95, 205, 0.22) !important;
+}
+
+.attendance-clay-readiness-card__label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 700;
+  color: #475569;
+}
+
+.attendance-clay-readiness-card__value {
+  font-size: 28px;
+  font-weight: 800;
+  color: #222a3b;
+  letter-spacing: -0.02em;
+}
+
+.attendance-clay-readiness-card__caption {
+  font-size: 12px;
+  font-weight: 600;
+  color: #68758f;
+}
+
+/* Clay Inset Progress Track */
+.attendance-clay-progress-track {
+  width: 100%;
+  height: 12px;
+  background: #edf1f8;
+  border-radius: 999px;
+  overflow: hidden;
+  box-shadow:
+    inset 0 2px 4px rgba(37, 43, 59, 0.1),
+    inset 0 -1px 2px rgba(255, 255, 255, 0.8);
+  position: relative;
+}
+
+/* ── BEZENT HRMS Attendance Overview — Clean Enterprise 5-Tier Styling ── */
+
+.bezent-att-overview-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  width: 100%;
+}
+
+.bezent-att-title-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.bezent-att-title-row .bezent-page-header__title {
+  margin: 0;
+}
+
+[data-theme='dark'] .bezent-att-title-row .bezent-page-header__title {
+  color: #f8fafc;
+}
+
+.bezent-att-help-trigger {
+  position: relative;
+  display: inline-flex;
+}
+
+.bezent-att-help-btn {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #f1f5f9;
+  border: 1px solid #e2e8f0;
+  color: #64748b;
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  transition: all 0.15s ease;
+  user-select: none;
+}
+
+.bezent-att-help-btn:hover {
+  background: #e2e8f0;
+  color: #0f172a;
+  border-color: #cbd5e1;
+}
+
+[data-theme='dark'] .bezent-att-help-btn {
+  background: #1e293b;
+  border-color: #334155;
+  color: #94a3b8;
+}
+
+[data-theme='dark'] .bezent-att-help-btn:hover {
+  background: #334155;
+  color: #f8fafc;
+}
+
+.bezent-att-help-popover {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  width: 280px;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 10px 14px;
+  font-size: 12px;
+  line-height: 1.45;
+  color: #475569;
+  box-shadow: 0 4px 16px rgba(15, 23, 42, 0.08);
+  z-index: 40;
+  display: none;
+}
+
+.bezent-att-help-popover--visible {
+  display: block;
+}
+
+[data-theme='dark'] .bezent-att-help-popover {
+  background: #1e293b;
+  border-color: #334155;
+  color: #cbd5e1;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.35);
+}
+
+/* Header Controls & Global Filters */
+.bezent-att-header-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.bezent-att-custom-dates {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.bezent-att-filter-separator {
+  font-size: 12px;
+  color: #94a3b8;
+  font-weight: 500;
+}
+
+.bezent-att-reset-btn {
+  font-size: 12px !important;
+  color: #64748b !important;
+  border: 1px dashed #cbd5e1 !important;
+  border-radius: 8px !important;
+  padding: 0 10px !important;
+  height: 32px !important;
+  transition: all 0.15s ease !important;
+}
+
+.bezent-att-reset-btn:hover {
+  color: #0f172a !important;
+  border-color: #94a3b8 !important;
+  background: #f8fafc !important;
+}
+
+[data-theme='dark'] .bezent-att-reset-btn {
+  border-color: #334155 !important;
+  color: #94a3b8 !important;
+}
+
+.bezent-att-date-display-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 12px;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #475569;
+  line-height: 1.2;
+  white-space: nowrap;
+  user-select: none;
+  margin-left: auto;
+}
+
+[data-theme='dark'] .bezent-att-date-display-pill {
+  background: #1e293b;
+  border-color: #334155;
+  color: #94a3b8;
+}
+
+/* ── 2. KPI Deck Grid & Cards (Harmonized with Workforce KPI Concept) ── */
+.bezent-att-kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 14px;
+  width: 100%;
+}
+
+.bezent-att-kpi-card {
+  cursor: pointer;
+}
+
+/* ── Attendance Segment Modifiers (Pastel Ring Segments) ── */
+.bezent-kpi-ring-segment--scheduled {
+  stroke: #2563eb;
+}
+.bezent-kpi-ring-segment--ontime {
+  stroke: #059669;
+}
+.bezent-kpi-ring-segment--late {
+  stroke: #f59e0b;
+}
+.bezent-kpi-ring-segment--halfday {
+  stroke: #06b6d4;
+}
+.bezent-kpi-ring-segment--absent {
+  stroke: #e11d48;
+}
+.bezent-kpi-ring-segment--leave {
+  stroke: #d97706;
+}
+.bezent-kpi-ring-segment--missing-punch {
+  stroke: #8b5cf6;
+}
+.bezent-kpi-ring-segment--regularization {
+  stroke: #7c3aed;
+}
+
+[data-theme='dark'] .bezent-kpi-ring-segment--scheduled {
+  stroke: #60a5fa;
+}
+[data-theme='dark'] .bezent-kpi-ring-segment--ontime {
+  stroke: #10b981;
+}
+[data-theme='dark'] .bezent-kpi-ring-segment--late {
+  stroke: #fbbf24;
+}
+[data-theme='dark'] .bezent-kpi-ring-segment--halfday {
+  stroke: #22d3ee;
+}
+[data-theme='dark'] .bezent-kpi-ring-segment--absent {
+  stroke: #f43f5e;
+}
+[data-theme='dark'] .bezent-kpi-ring-segment--leave {
+  stroke: #f59e0b;
+}
+[data-theme='dark'] .bezent-kpi-ring-segment--missing-punch {
+  stroke: #a78bfa;
+}
+[data-theme='dark'] .bezent-kpi-ring-segment--regularization {
+  stroke: #c4b5fd;
+}
+
+/* ── Dynamic Center Icon Colors on Hover ── */
+.bezent-kpi-ring-icon-wrapper--scheduled {
+  color: #2563eb;
+}
+.bezent-kpi-ring-icon-wrapper--ontime {
+  color: #059669;
+}
+.bezent-kpi-ring-icon-wrapper--late {
+  color: #f59e0b;
+}
+.bezent-kpi-ring-icon-wrapper--halfday {
+  color: #06b6d4;
+}
+.bezent-kpi-ring-icon-wrapper--absent {
+  color: #e11d48;
+}
+.bezent-kpi-ring-icon-wrapper--leave {
+  color: #d97706;
+}
+.bezent-kpi-ring-icon-wrapper--missing-punch {
+  color: #8b5cf6;
+}
+.bezent-kpi-ring-icon-wrapper--regularization {
+  color: #7c3aed;
+}
+
+[data-theme='dark'] .bezent-kpi-ring-icon-wrapper--scheduled {
+  color: #60a5fa;
+}
+[data-theme='dark'] .bezent-kpi-ring-icon-wrapper--ontime {
+  color: #10b981;
+}
+[data-theme='dark'] .bezent-kpi-ring-icon-wrapper--late {
+  color: #fbbf24;
+}
+[data-theme='dark'] .bezent-kpi-ring-icon-wrapper--halfday {
+  color: #22d3ee;
+}
+[data-theme='dark'] .bezent-kpi-ring-icon-wrapper--absent {
+  color: #f43f5e;
+}
+[data-theme='dark'] .bezent-kpi-ring-icon-wrapper--leave {
+  color: #f59e0b;
+}
+[data-theme='dark'] .bezent-kpi-ring-icon-wrapper--missing-punch {
+  color: #a78bfa;
+}
+[data-theme='dark'] .bezent-kpi-ring-icon-wrapper--regularization {
+  color: #c4b5fd;
+}
+
+.bezent-att-kpi-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 7px;
+  border-radius: 999px;
+  width: fit-content;
+  margin-top: 4px;
+}
+
+.bezent-att-kpi-badge-dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.bezent-att-kpi-badge--neutral {
+  background: #f1f5f9;
+  color: #475569;
+}
+.bezent-att-kpi-badge--neutral .bezent-att-kpi-badge-dot {
+  background: #94a3b8;
+}
+
+.bezent-att-kpi-badge--success {
+  background: #ecfdf5;
+  color: #047857;
+}
+.bezent-att-kpi-badge--success .bezent-att-kpi-badge-dot {
+  background: #10b981;
+}
+
+.bezent-att-kpi-badge--warning {
+  background: #fffbeb;
+  color: #b45309;
+}
+.bezent-att-kpi-badge--warning .bezent-att-kpi-badge-dot {
+  background: #f59e0b;
+}
+
+.bezent-att-kpi-badge--danger {
+  background: #fef2f2;
+  color: #b91c1c;
+}
+.bezent-att-kpi-badge--danger .bezent-att-kpi-badge-dot {
+  background: #ef4444;
+}
+
+.bezent-att-kpi-badge--info {
+  background: #eff6ff;
+  color: #1d4ed8;
+}
+.bezent-att-kpi-badge--info .bezent-att-kpi-badge-dot {
+  background: #3b82f6;
+}
+
+[data-theme='dark'] .bezent-att-kpi-badge--neutral {
+  background: rgba(148, 163, 184, 0.15);
+  color: #cbd5e1;
+}
+[data-theme='dark'] .bezent-att-kpi-badge--success {
+  background: rgba(16, 185, 129, 0.15);
+  color: #6ee7b7;
+}
+[data-theme='dark'] .bezent-att-kpi-badge--warning {
+  background: rgba(245, 158, 11, 0.15);
+  color: #fcd34d;
+}
+[data-theme='dark'] .bezent-att-kpi-badge--danger {
+  background: rgba(239, 68, 68, 0.15);
+  color: #fca5a5;
+}
+[data-theme='dark'] .bezent-att-kpi-badge--info {
+  background: rgba(59, 130, 246, 0.15);
+  color: #93c5fd;
+}
+
+/* ── 3. Dual Intelligence Grid Container ── */
+.bezent-att-intelligence-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+  width: 100%;
+}
+
+/* ── 4. Attendance Trends Card & Chart ── */
+.bezent-att-trends-card {
+  background: #ffffff !important;
+  border: 0.8px solid #e9eaf4 !important;
+  border-radius: var(--radius-card) !important;
+  display: flex !important;
+  flex-direction: column !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02) !important;
+  overflow: hidden;
+}
+
+[data-theme='dark'] .bezent-att-trends-card {
+  background: #1e293b !important;
+  border-color: #334155 !important;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2) !important;
+}
+
+.bezent-att-trends-header {
+  padding: 16px 20px 14px 20px !important;
+  border-bottom: 1px solid #f1f5f9 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  background: transparent !important;
+}
+
+[data-theme='dark'] .bezent-att-trends-header {
+  border-bottom-color: #334155 !important;
+}
+
+.bezent-att-trends-header-left {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.bezent-att-trends-title-group {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.bezent-att-trends-icon {
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  background: #f1f5f9;
+  color: #334155;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+[data-theme='dark'] .bezent-att-trends-icon {
+  background: #334155;
+  color: #cbd5e1;
+}
+
+.bezent-att-trends-title {
+  font-size: 15px !important;
+  font-weight: 750 !important;
+  color: #0f172a !important;
+  letter-spacing: -0.015em;
+  margin: 0 !important;
+}
+
+[data-theme='dark'] .bezent-att-trends-title {
+  color: #f8fafc !important;
+}
+
+.bezent-att-trends-subtitle {
+  font-size: 11.5px;
+  color: #64748b;
+}
+
+[data-theme='dark'] .bezent-att-trends-subtitle {
+  color: #94a3b8;
+}
+
+.bezent-att-trends-legend {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.bezent-att-legend-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  padding: 4px 8px;
+  font-size: 11.5px;
+  font-weight: 600;
+  color: #475569;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  user-select: none;
+}
+
+.bezent-att-legend-btn:hover {
+  background: #f1f5f9;
+  color: #0f172a;
+}
+
+.bezent-att-legend-btn.is-muted {
+  opacity: 0.4;
+  background: transparent;
+  border-color: transparent;
+}
+
+[data-theme='dark'] .bezent-att-legend-btn {
+  background: #334155;
+  border-color: #475569;
+  color: #cbd5e1;
+}
+
+[data-theme='dark'] .bezent-att-legend-btn.is-muted {
+  background: transparent;
+  border-color: transparent;
+}
+
+.bezent-att-legend-pill {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  display: inline-block;
+  flex-shrink: 0;
+}
+
+.bezent-att-legend-pill--present {
+  background: #10b981;
+}
+.bezent-att-legend-pill--absent {
+  background: #ef4444;
+}
+.bezent-att-legend-pill--late {
+  background: #f59e0b;
+}
+
+.bezent-att-legend-label {
+  line-height: 1;
+}
+
+.bezent-att-trends-body {
+  padding: 16px 20px !important;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.bezent-att-trends-summary-strip {
+  background: #f8fafc;
+  border: 1px solid #f1f5f9;
+  border-radius: 8px;
+  padding: 8px 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  gap: 12px;
+}
+
+[data-theme='dark'] .bezent-att-trends-summary-strip {
+  background: #253347;
+  border-color: #334155;
+}
+
+.bezent-att-summary-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.bezent-att-summary-label {
+  font-size: 11.5px;
+  font-weight: 500;
+  color: #64748b;
+}
+
+[data-theme='dark'] .bezent-att-summary-label {
+  color: #94a3b8;
+}
+
+.bezent-att-summary-val {
+  font-size: 12.5px;
+  font-weight: 700;
+  color: #0f172a;
+  font-variant-numeric: tabular-nums;
+}
+
+[data-theme='dark'] .bezent-att-summary-val {
+  color: #f8fafc;
+}
+
+.bezent-att-summary-val--present {
+  color: #047857 !important;
+}
+.bezent-att-summary-val--absent {
+  color: #b91c1c !important;
+}
+.bezent-att-summary-val--late {
+  color: #b45309 !important;
+}
+
+[data-theme='dark'] .bezent-att-summary-val--present {
+  color: #6ee7b7 !important;
+}
+[data-theme='dark'] .bezent-att-summary-val--absent {
+  color: #fca5a5 !important;
+}
+[data-theme='dark'] .bezent-att-summary-val--late {
+  color: #fcd34d !important;
+}
+
+.bezent-att-summary-divider {
+  width: 1px;
+  height: 16px;
+  background: #e2e8f0;
+}
+
+[data-theme='dark'] .bezent-att-summary-divider {
+  background: #334155;
+}
+
+.bezent-att-chart-container {
+  width: 100%;
+  position: relative;
+}
+
+.bezent-att-trend-svg {
+  width: 100%;
+  height: 190px;
+  display: block;
+  overflow: visible;
+}
+
+.bezent-att-trend-gridline {
+  stroke: #f1f5f9;
+  stroke-width: 1;
+}
+
+[data-theme='dark'] .bezent-att-trend-gridline {
+  stroke: #334155;
+}
+
+.bezent-att-trend-guideline {
+  stroke: #94a3b8;
+  stroke-dasharray: 3 3;
+  stroke-width: 1;
+}
+
+.bezent-att-trend-baseline {
+  stroke: #e2e8f0;
+  stroke-width: 1;
+}
+
+[data-theme='dark'] .bezent-att-trend-baseline {
+  stroke: #475569;
+}
+
+.bezent-att-trend-axis-label {
+  font-size: 10.5px;
+  fill: #94a3b8;
+  font-family: inherit;
+  font-variant-numeric: tabular-nums;
+}
+
+.bezent-att-line {
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.bezent-att-line--present {
+  stroke: #10b981;
+  stroke-width: 2.2;
+}
+
+.bezent-att-line--absent {
+  stroke: #ef4444;
+  stroke-width: 2;
+  stroke-dasharray: 4 2;
+}
+
+.bezent-att-line--late {
+  stroke: #f59e0b;
+  stroke-width: 2;
+}
+
+.bezent-att-dot {
+  r: 3.5;
+  stroke-width: 1.5;
+  stroke: #ffffff;
+}
+
+.bezent-att-dot--present {
+  fill: #10b981;
+}
+.bezent-att-dot--absent {
+  fill: #ef4444;
+}
+.bezent-att-dot--late {
+  fill: #f59e0b;
+}
+
+[data-theme='dark'] .bezent-att-dot {
+  stroke: #1e293b;
+}
+
+.bezent-att-trend-tracker {
+  pointer-events: none;
+}
+
+.bezent-att-tooltip-bg {
+  fill: #0f172a;
+  stroke: #334155;
+  stroke-width: 1;
+  rx: 6;
+  ry: 6;
+}
+
+[data-theme='dark'] .bezent-att-tooltip-bg {
+  fill: #1e293b;
+  stroke: #475569;
+}
+
+.bezent-att-tooltip-title {
+  fill: #f8fafc;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.bezent-att-tooltip-line {
+  stroke: #334155;
+  stroke-width: 0.5;
+}
+
+.bezent-att-tooltip-label {
+  fill: #94a3b8;
+  font-size: 10px;
+}
+
+.bezent-att-tooltip-val--present {
+  fill: #34d399;
+  font-size: 10.5px;
+  font-weight: 700;
+}
+
+.bezent-att-tooltip-val--absent {
+  fill: #f87171;
+  font-size: 10.5px;
+  font-weight: 700;
+}
+
+.bezent-att-tooltip-val--late {
+  fill: #fbbf24;
+  font-size: 10.5px;
+  font-weight: 700;
+}
+
+.bezent-att-trends-skeleton {
+  width: 100%;
+  height: 190px;
+  background: #f1f5f9;
+  border-radius: 8px;
+  animation: bezent-pulse 1.4s ease-in-out infinite;
+}
+
+/* ── 5. Attendance Distribution Card ── */
+.bezent-att-dist-card {
+  min-height: 280px;
+}
+
+.bezent-att-dist-meta {
+  display: flex;
+  align-items: center;
+}
+
+.bezent-att-dist-badge {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 3px 8px;
+  background: #f1f5f9;
+  color: #475569;
+  border-radius: 6px;
+  border: 1px solid #e2e8f0;
+}
+
+[data-theme='dark'] .bezent-att-dist-badge {
+  background: #334155;
+  color: #cbd5e1;
+  border-color: #475569;
+}
+
+.bezent-att-dist-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.bezent-att-dist-item {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  padding: 6px 8px;
+  border-radius: 6px;
+  transition: background 0.15s ease;
+}
+
+.bezent-att-dist-item:hover {
+  background: #f8fafc;
+}
+
+[data-theme='dark'] .bezent-att-dist-item:hover {
+  background: #253347;
+}
+
+.bezent-att-dist-row-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.bezent-att-dist-dept-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: #0f172a;
+}
+
+[data-theme='dark'] .bezent-att-dist-dept-name {
+  color: #f8fafc;
+}
+
+.bezent-att-dist-row-stats {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.bezent-att-dist-counts {
+  font-size: 12px;
+  color: #64748b;
+  font-variant-numeric: tabular-nums;
+}
+
+[data-theme='dark'] .bezent-att-dist-counts {
+  color: #94a3b8;
+}
+
+.bezent-att-dist-rate-chip {
+  font-size: 11.5px;
+  font-weight: 700;
+  padding: 1px 7px;
+  border-radius: 6px;
+  font-variant-numeric: tabular-nums;
+}
+
+.bezent-att-dist-rate-chip.is-high {
+  background: #ecfdf5;
+  color: #047857;
+}
+
+.bezent-att-dist-rate-chip.is-mid {
+  background: #fffbeb;
+  color: #b45309;
+}
+
+.bezent-att-dist-rate-chip.is-low {
+  background: #fef2f2;
+  color: #b91c1c;
+}
+
+[data-theme='dark'] .bezent-att-dist-rate-chip.is-high {
+  background: rgba(16, 185, 129, 0.15);
+  color: #6ee7b7;
+}
+[data-theme='dark'] .bezent-att-dist-rate-chip.is-mid {
+  background: rgba(245, 158, 11, 0.15);
+  color: #fcd34d;
+}
+[data-theme='dark'] .bezent-att-dist-rate-chip.is-low {
+  background: rgba(239, 68, 68, 0.15);
+  color: #fca5a5;
+}
+
+.bezent-att-dist-bar-track {
+  width: 100%;
+  height: 6px;
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.bezent-att-dist-bar-svg {
+  width: 100%;
+  height: 6px;
+  display: block;
+}
+
+.bezent-att-dist-bar-bg {
+  fill: #f1f5f9;
+}
+[data-theme='dark'] .bezent-att-dist-bar-bg {
+  fill: #334155;
+}
+
+.bezent-att-dist-bar-seg--present {
+  fill: #10b981;
+}
+.bezent-att-dist-bar-seg--absent {
+  fill: #ef4444;
+}
+.bezent-att-dist-bar-seg--leave {
+  fill: #3b82f6;
+}
+
+.bezent-att-dist-empty {
+  font-size: 13px;
+  color: #94a3b8;
+  text-align: center;
+  padding: 32px 0;
+}
+
+.bezent-att-dist-skeleton-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.bezent-att-dist-skeleton-row {
+  height: 38px;
+  background: #f1f5f9;
+  border-radius: 6px;
+  animation: bezent-pulse 1.4s ease-in-out infinite;
+}
+
+/* ── 6. Needs Attention Card (Action Queue) ── */
+.bezent-att-action-card {
+  background: #ffffff !important;
+  border: 0.8px solid #e9eaf4 !important;
+  border-radius: var(--radius-card) !important;
+  display: flex !important;
+  flex-direction: column !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02) !important;
+  overflow: hidden;
+}
+
+[data-theme='dark'] .bezent-att-action-card {
+  background: #1e293b !important;
+  border-color: #334155 !important;
+}
+
+.bezent-att-action-header {
+  padding: 16px 20px 14px 20px !important;
+  border-bottom: 1px solid #f1f5f9 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  background: transparent !important;
+}
+
+[data-theme='dark'] .bezent-att-action-header {
+  border-bottom-color: #334155 !important;
+}
+
+.bezent-att-action-title-group {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.bezent-att-action-icon {
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  background: #fffbeb;
+  color: #b45309;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+[data-theme='dark'] .bezent-att-action-icon {
+  background: rgba(245, 158, 11, 0.15);
+  color: #fcd34d;
+}
+
+.bezent-att-action-title {
+  font-size: 15px !important;
+  font-weight: 750 !important;
+  color: #0f172a !important;
+  letter-spacing: -0.015em;
+  margin: 0 !important;
+}
+
+[data-theme='dark'] .bezent-att-action-title {
+  color: #f8fafc !important;
+}
+
+.bezent-att-action-subtitle {
+  font-size: 11.5px;
+  color: #64748b;
+  margin: 0;
+}
+
+[data-theme='dark'] .bezent-att-action-subtitle {
+  color: #94a3b8;
+}
+
+.bezent-att-action-header-badge {
+  display: flex;
+  align-items: center;
+}
+
+.bezent-att-action-count-pill {
+  font-size: 11px;
+  font-weight: 700;
+  padding: 3px 8px;
+  background: #fee2e2;
+  color: #b91c1c;
+  border-radius: 999px;
+  font-variant-numeric: tabular-nums;
+}
+
+[data-theme='dark'] .bezent-att-action-count-pill {
+  background: rgba(239, 68, 68, 0.2);
+  color: #fca5a5;
+}
+
+.bezent-att-action-body {
+  padding: 16px 20px !important;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.bezent-att-action-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.bezent-att-action-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: 1px solid #f1f5f9;
+  background: #ffffff;
+  transition: all 0.15s ease;
+}
+
+.bezent-att-action-item:hover {
+  background: #f8fafc;
+  border-color: #cbd5e1;
+}
+
+[data-theme='dark'] .bezent-att-action-item {
+  background: #1e293b;
+  border-color: #334155;
+}
+
+[data-theme='dark'] .bezent-att-action-item:hover {
+  background: #253347;
+  border-color: #475569;
+}
+
+.bezent-att-action-item-left {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.bezent-att-action-item-icon {
+  width: 24px;
+  height: 24px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.bezent-att-action-item-details {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.bezent-att-action-item-headline {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.bezent-att-action-item-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: #0f172a;
+}
+
+[data-theme='dark'] .bezent-att-action-item-title {
+  color: #f8fafc;
+}
+
+.bezent-att-action-item-age {
+  font-size: 11px;
+  color: #94a3b8;
+  font-variant-numeric: tabular-nums;
+}
+
+.bezent-att-action-item-desc {
+  font-size: 11.5px;
+  color: #64748b;
+  margin: 0;
+}
+
+[data-theme='dark'] .bezent-att-action-item-desc {
+  color: #94a3b8;
+}
+
+.bezent-att-action-item-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.bezent-att-action-item-badge {
+  font-size: 11.5px;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: 6px;
+  font-variant-numeric: tabular-nums;
+}
+
+.bezent-att-action-item-badge.is-danger {
+  background: #fee2e2;
+  color: #b91c1c;
+}
+
+.bezent-att-action-item-badge.is-warning {
+  background: #fffbeb;
+  color: #b45309;
+}
+
+.bezent-att-action-item-badge.is-neutral {
+  background: #f1f5f9;
+  color: #475569;
+}
+
+[data-theme='dark'] .bezent-att-action-item-badge.is-danger {
+  background: rgba(239, 68, 68, 0.2);
+  color: #fca5a5;
+}
+[data-theme='dark'] .bezent-att-action-item-badge.is-warning {
+  background: rgba(245, 158, 11, 0.2);
+  color: #fcd34d;
+}
+[data-theme='dark'] .bezent-att-action-item-badge.is-neutral {
+  background: #334155;
+  color: #cbd5e1;
+}
+
+.bezent-att-action-footer {
+  padding: 10px 20px;
+  border-top: 1px solid #f1f5f9;
+  background: #fafbfc;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+[data-theme='dark'] .bezent-att-action-footer {
+  background: #182234;
+  border-top-color: #334155;
+}
+
+.bezent-att-action-footer-note {
+  font-size: 11.5px;
+  color: #64748b;
+}
+
+[data-theme='dark'] .bezent-att-action-footer-note {
+  color: #94a3b8;
+}
+
+.bezent-att-action-footer-link {
+  font-size: 12px;
+  font-weight: 700;
+  color: #2563eb;
+  cursor: pointer;
+}
+
+.bezent-att-action-empty {
+  padding: 32px 0;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+
+.bezent-att-action-empty-icon {
+  color: #10b981;
+}
+
+.bezent-att-action-empty-title {
+  font-size: 13.5px;
+  font-weight: 600;
+  color: #0f172a;
+}
+
+[data-theme='dark'] .bezent-att-action-empty-title {
+  color: #f8fafc;
+}
+
+.bezent-att-action-empty-desc {
+  font-size: 11.5px;
+  color: #64748b;
+}
+
+.bezent-att-action-skeleton-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.bezent-att-action-skeleton-row {
+  height: 48px;
+  background: #f1f5f9;
+  border-radius: 8px;
+  animation: bezent-pulse 1.4s ease-in-out infinite;
+}
+
+/* ── 7. Payroll Readiness Card ── */
+.bezent-att-readiness-card {
+  background: #ffffff !important;
+  border: 0.8px solid #e9eaf4 !important;
+  border-radius: var(--radius-card) !important;
+  display: flex !important;
+  flex-direction: column !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02) !important;
+  overflow: hidden;
+}
+
+[data-theme='dark'] .bezent-att-readiness-card {
+  background: #1e293b !important;
+  border-color: #334155 !important;
+}
+
+.bezent-att-readiness-header {
+  padding: 16px 20px 14px 20px !important;
+  border-bottom: 1px solid #f1f5f9 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  background: transparent !important;
+}
+
+[data-theme='dark'] .bezent-att-readiness-header {
+  border-bottom-color: #334155 !important;
+}
+
+.bezent-att-readiness-title-group {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.bezent-att-readiness-icon {
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  background: #eff6ff;
+  color: #1d4ed8;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+[data-theme='dark'] .bezent-att-readiness-icon {
+  background: rgba(59, 130, 246, 0.15);
+  color: #93c5fd;
+}
+
+.bezent-att-readiness-title {
+  font-size: 15px !important;
+  font-weight: 750 !important;
+  color: #0f172a !important;
+  letter-spacing: -0.015em;
+  margin: 0 !important;
+}
+
+[data-theme='dark'] .bezent-att-readiness-title {
+  color: #f8fafc !important;
+}
+
+.bezent-att-readiness-subtitle {
+  font-size: 11.5px;
+  color: #64748b;
+  margin: 0;
+}
+
+[data-theme='dark'] .bezent-att-readiness-subtitle {
+  color: #94a3b8;
+}
+
+.bezent-att-readiness-header-badge {
+  display: flex;
+  align-items: center;
+}
+
+.bezent-att-readiness-pill {
+  font-size: 11px;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 999px;
+  border: 1px solid #e2e8f0;
+}
+
+.bezent-att-readiness-pill.is-clear {
+  background: #ecfdf5;
+  color: #047857;
+  border-color: #a7f3d0;
+}
+
+.bezent-att-readiness-pill.is-blocked {
+  background: #fef2f2;
+  color: #b91c1c;
+  border-color: #fecaca;
+}
+
+.bezent-att-readiness-body {
+  padding: 16px 20px !important;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.bezent-att-readiness-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.bezent-att-readiness-stat-tile {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 10px 12px;
+  display: flex;
+  flex-direction: column;
+}
+
+[data-theme='dark'] .bezent-att-readiness-stat-tile {
+  background: #253347;
+  border-color: #334155;
+}
+
+.bezent-att-readiness-stat-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.bezent-att-readiness-stat-label {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  color: #64748b;
+  letter-spacing: 0.03em;
+}
+
+[data-theme='dark'] .bezent-att-readiness-stat-label {
+  color: #94a3b8;
+}
+
+.bezent-att-readiness-stat-value {
+  font-size: 20px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  margin: 4px 0 2px;
+  font-variant-numeric: tabular-nums;
+}
+
+.bezent-att-readiness-stat-sub {
+  font-size: 11px;
+  color: #94a3b8;
+}
+
+.bezent-att-readiness-progress-container {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.bezent-att-readiness-bar-track {
+  width: 100%;
+  height: 8px;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.bezent-att-readiness-bar-svg {
+  width: 100%;
+  height: 8px;
+  display: block;
+}
+
+.bezent-att-readiness-bar-bg {
+  fill: #f1f5f9;
+}
+[data-theme='dark'] .bezent-att-readiness-bar-bg {
+  fill: #334155;
+}
+
+.bezent-att-readiness-seg--ready {
+  fill: #10b981;
+}
+.bezent-att-readiness-seg--review {
+  fill: #f59e0b;
+}
+.bezent-att-readiness-seg--blocked {
+  fill: #ef4444;
+}
+
+.bezent-att-readiness-legend {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 11px;
+  color: #64748b;
+}
+
+[data-theme='dark'] .bezent-att-readiness-legend {
+  color: #94a3b8;
+}
+
+.bezent-att-readiness-legend-item {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.bezent-att-readiness-legend-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.bezent-att-readiness-checklist {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.bezent-att-readiness-check-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 10px;
+  border-radius: 6px;
+  border: 1px solid #f1f5f9;
+  background: #ffffff;
+}
+
+[data-theme='dark'] .bezent-att-readiness-check-item {
+  background: #1e293b;
+  border-color: #334155;
+}
+
+.bezent-att-readiness-check-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.bezent-att-readiness-check-icon {
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+}
+
+.bezent-att-readiness-check-title {
+  font-size: 12.5px;
+  font-weight: 500;
+  color: #0f172a;
+}
+
+[data-theme='dark'] .bezent-att-readiness-check-title {
+  color: #f8fafc;
+}
+
+.bezent-att-readiness-check-sub {
+  font-size: 11px;
+  color: #94a3b8;
+  margin-left: 6px;
+}
+
+.bezent-att-readiness-check-badge {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 1px 6px;
+  border-radius: 4px;
+}
+
+.bezent-att-readiness-check-badge.is-ready {
+  background: #ecfdf5;
+  color: #047857;
+}
+
+.bezent-att-readiness-check-badge.is-review {
+  background: #fffbeb;
+  color: #b45309;
+}
+
+.bezent-att-readiness-check-badge.is-blocked {
+  background: #fef2f2;
+  color: #b91c1c;
+}
+
+.bezent-att-readiness-footer {
+  padding: 10px 20px;
+  border-top: 1px solid #f1f5f9;
+  background: #fafbfc;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+[data-theme='dark'] .bezent-att-readiness-footer {
+  background: #182234;
+  border-top-color: #334155;
+}
+
+.bezent-att-readiness-footer-note {
+  font-size: 11.5px;
+  color: #64748b;
+}
+
+[data-theme='dark'] .bezent-att-readiness-footer-note {
+  color: #94a3b8;
+}
+
+.bezent-att-readiness-footer-link {
+  font-size: 12px;
+  font-weight: 700;
+  color: #2563eb;
+  cursor: pointer;
+}
+
+.bezent-att-readiness-skeleton {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.bezent-att-readiness-skeleton-stats {
+  height: 60px;
+  background: #f1f5f9;
+  border-radius: 8px;
+  animation: bezent-pulse 1.4s ease-in-out infinite;
+}
+
+.bezent-att-readiness-skeleton-bar {
+  height: 8px;
+  background: #f1f5f9;
+  border-radius: 4px;
+  animation: bezent-pulse 1.4s ease-in-out infinite;
+}
+
+.bezent-att-readiness-skeleton-list {
+  height: 80px;
+  background: #f1f5f9;
+  border-radius: 6px;
+  animation: bezent-pulse 1.4s ease-in-out infinite;
+}
+
+/* ── 8. Attendance Insights Card ── */
+.bezent-att-insights-card {
+  background: #ffffff !important;
+  border: 0.8px solid #e9eaf4 !important;
+  border-radius: var(--radius-card) !important;
+  display: flex !important;
+  flex-direction: column !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02) !important;
+  overflow: hidden;
+}
+
+[data-theme='dark'] .bezent-att-insights-card {
+  background: #1e293b !important;
+  border-color: #334155 !important;
+}
+
+.bezent-att-insights-header {
+  padding: 16px 20px 14px 20px !important;
+  border-bottom: 1px solid #f1f5f9 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  background: transparent !important;
+}
+
+[data-theme='dark'] .bezent-att-insights-header {
+  border-bottom-color: #334155 !important;
+}
+
+.bezent-att-insights-title-group {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.bezent-att-insights-icon {
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  background: #ecfdf5;
+  color: #047857;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+[data-theme='dark'] .bezent-att-insights-icon {
+  background: rgba(16, 185, 129, 0.15);
+  color: #6ee7b7;
+}
+
+.bezent-att-insights-title {
+  font-size: 15px !important;
+  font-weight: 750 !important;
+  color: #0f172a !important;
+  letter-spacing: -0.015em;
+  margin: 0 !important;
+}
+
+[data-theme='dark'] .bezent-att-insights-title {
+  color: #f8fafc !important;
+}
+
+.bezent-att-insights-subtitle {
+  font-size: 11.5px;
+  color: #64748b;
+  margin: 0;
+}
+
+[data-theme='dark'] .bezent-att-insights-subtitle {
+  color: #94a3b8;
+}
+
+.bezent-att-insights-header-badge {
+  display: flex;
+  align-items: center;
+}
+
+.bezent-att-insights-pill {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 3px 8px;
+  border-radius: 6px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  color: #475569;
+}
+
+[data-theme='dark'] .bezent-att-insights-pill {
+  background: #334155;
+  border-color: #475569;
+  color: #cbd5e1;
+}
+
+.bezent-att-insights-body {
+  padding: 16px 20px !important;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.bezent-att-insights-kpis-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.bezent-att-insights-kpi {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 10px 12px;
+  display: flex;
+  flex-direction: column;
+}
+
+[data-theme='dark'] .bezent-att-insights-kpi {
+  background: #253347;
+  border-color: #334155;
+}
+
+.bezent-att-insights-kpi-label {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  color: #64748b;
+  letter-spacing: 0.03em;
+}
+
+[data-theme='dark'] .bezent-att-insights-kpi-label {
+  color: #94a3b8;
+}
+
+.bezent-att-insights-kpi-val {
+  font-size: 20px;
+  font-weight: 800;
+  margin: 4px 0 2px;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+}
+
+.bezent-att-insights-kpi-sub {
+  font-size: 11px;
+  color: #94a3b8;
+}
+
+.bezent-att-insights-callouts-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.bezent-att-insights-callout {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: 1px solid #f1f5f9;
+  background: #ffffff;
+  transition: all 0.15s ease;
+}
+
+.bezent-att-insights-callout:hover {
+  background: #f8fafc;
+  border-color: #cbd5e1;
+}
+
+[data-theme='dark'] .bezent-att-insights-callout {
+  background: #1e293b;
+  border-color: #334155;
+}
+
+[data-theme='dark'] .bezent-att-insights-callout:hover {
+  background: #253347;
+  border-color: #475569;
+}
+
+.bezent-att-insights-callout-icon {
+  width: 24px;
+  height: 24px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.bezent-att-insights-callout-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.bezent-att-insights-callout-title {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: #0f172a;
+}
+
+[data-theme='dark'] .bezent-att-insights-callout-title {
+  color: #f8fafc;
+}
+
+.bezent-att-insights-callout-desc {
+  font-size: 11.5px;
+  color: #64748b;
+  line-height: 1.35;
+  margin: 0;
+}
+
+[data-theme='dark'] .bezent-att-insights-callout-desc {
+  color: #94a3b8;
+}
+
+.bezent-att-insights-footer {
+  padding: 10px 20px;
+  border-top: 1px solid #f1f5f9;
+  background: #fafbfc;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+[data-theme='dark'] .bezent-att-insights-footer {
+  background: #182234;
+  border-top-color: #334155;
+}
+
+.bezent-att-insights-footer-note {
+  font-size: 11.5px;
+  color: #64748b;
+}
+
+[data-theme='dark'] .bezent-att-insights-footer-note {
+  color: #94a3b8;
+}
+
+.bezent-att-insights-footer-link {
+  font-size: 12px;
+  font-weight: 700;
+  color: #2563eb;
+  cursor: pointer;
+}
+
+.bezent-att-insights-skeleton {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.bezent-att-insights-skeleton-stats {
+  height: 60px;
+  background: #f1f5f9;
+  border-radius: 8px;
+  animation: bezent-pulse 1.4s ease-in-out infinite;
+}
+
+.bezent-att-insights-skeleton-item {
+  height: 48px;
+  background: #f1f5f9;
+  border-radius: 8px;
+  animation: bezent-pulse 1.4s ease-in-out infinite;
+}
+
+/* ── 9. Attendance Calendar Card ── */
+.bezent-att-cal-card {
+  background: #ffffff !important;
+  border: 0.8px solid #e9eaf4 !important;
+  border-radius: var(--radius-card) !important;
+  display: flex !important;
+  flex-direction: column !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02) !important;
+  overflow: hidden;
+}
+
+[data-theme='dark'] .bezent-att-cal-card {
+  background: #1e293b !important;
+  border-color: #334155 !important;
+}
+
+.bezent-att-cal-header {
+  padding: 16px 20px 14px 20px !important;
+  border-bottom: 1px solid #f1f5f9 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  background: transparent !important;
+}
+
+[data-theme='dark'] .bezent-att-cal-header {
+  border-bottom-color: #334155 !important;
+}
+
+.bezent-att-cal-title-group {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.bezent-att-cal-icon {
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  background: #eff6ff;
+  color: #1d4ed8;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+[data-theme='dark'] .bezent-att-cal-icon {
+  background: rgba(59, 130, 246, 0.15);
+  color: #93c5fd;
+}
+
+.bezent-att-cal-title {
+  font-size: 15px !important;
+  font-weight: 750 !important;
+  color: #0f172a !important;
+  letter-spacing: -0.015em;
+  margin: 0 !important;
+}
+
+[data-theme='dark'] .bezent-att-cal-title {
+  color: #f8fafc !important;
+}
+
+.bezent-att-cal-subtitle {
+  font-size: 11.5px;
+  color: #64748b;
+  margin: 0;
+}
+
+[data-theme='dark'] .bezent-att-cal-subtitle {
+  color: #94a3b8;
+}
+
+.bezent-att-cal-nav {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.bezent-att-cal-nav-btn {
+  width: 26px;
+  height: 26px;
+  border-radius: 6px;
+  border: 1px solid #e2e8f0;
+  background: #ffffff;
+  color: #475569;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  padding: 0;
+}
+
+.bezent-att-cal-nav-btn:hover {
+  background: #f1f5f9;
+  color: #0f172a;
+}
+
+[data-theme='dark'] .bezent-att-cal-nav-btn {
+  background: #1e293b;
+  border-color: #334155;
+  color: #cbd5e1;
+}
+
+.bezent-att-cal-month-label {
+  font-size: 12.5px;
+  font-weight: 700;
+  color: #0f172a;
+  min-width: 110px;
+  text-align: center;
+}
+
+[data-theme='dark'] .bezent-att-cal-month-label {
+  color: #f8fafc;
+}
+
+.bezent-att-cal-today-btn {
+  font-size: 11px !important;
+  font-weight: 600 !important;
+  padding: 2px 7px !important;
+  height: 24px !important;
+  border-radius: 4px !important;
+}
+
+.bezent-att-cal-body {
+  padding: 16px 20px !important;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.bezent-att-cal-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 5px;
+}
+
+.bezent-att-cal-weekday {
+  text-align: center;
+  font-size: 11px;
+  font-weight: 700;
+  color: #94a3b8;
+  padding-bottom: 4px;
+}
+
+.bezent-att-cal-day {
+  aspect-ratio: 1;
+  border-radius: 7px;
+  border: 1px solid #f1f5f9;
+  background: #ffffff;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  position: relative;
+  transition: all 0.12s ease;
+  user-select: none;
+}
+
+.bezent-att-cal-day:hover {
+  border-color: #cbd5e1;
+  background: #f8fafc;
+}
+
+.bezent-att-cal-day.is-empty {
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.bezent-att-cal-day.is-weekend {
+  background: #f8fafc;
+  color: #94a3b8;
+}
+
+.bezent-att-cal-day.is-selected {
+  border-color: #2563eb !important;
+  background: #eff6ff !important;
+  color: #1d4ed8 !important;
+  font-weight: 800 !important;
+  box-shadow: 0 0 0 1px #2563eb;
+}
+
+[data-theme='dark'] .bezent-att-cal-day {
+  background: #1e293b;
+  border-color: #334155;
+  color: #cbd5e1;
+}
+
+[data-theme='dark'] .bezent-att-cal-day:hover {
+  background: #253347;
+  border-color: #475569;
+}
+
+[data-theme='dark'] .bezent-att-cal-day.is-weekend {
+  background: #162032;
+  color: #64748b;
+}
+
+[data-theme='dark'] .bezent-att-cal-day.is-selected {
+  background: #1e3a8a !important;
+  color: #93c5fd !important;
+  border-color: #3b82f6 !important;
+}
+
+.bezent-att-cal-day-num {
+  font-size: 11.5px;
+  line-height: 1;
+}
+
+.bezent-att-cal-day-dot {
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  margin-top: 3px;
+}
+
+.bezent-att-cal-day-dot.is-high {
+  background: #10b981;
+}
+.bezent-att-cal-day-dot.is-mid {
+  background: #f59e0b;
+}
+.bezent-att-cal-day-dot.is-weekend {
+  background: #cbd5e1;
+}
+
+.bezent-att-cal-selected-strip {
+  background: #f8fafc;
+  border: 1px solid #f1f5f9;
+  border-radius: 8px;
+  padding: 8px 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+[data-theme='dark'] .bezent-att-cal-selected-strip {
+  background: #253347;
+  border-color: #334155;
+}
+
+.bezent-att-cal-selected-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.bezent-att-cal-selected-date {
+  font-size: 12px;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+[data-theme='dark'] .bezent-att-cal-selected-date {
+  color: #f8fafc;
+}
+
+.bezent-att-cal-selected-tag {
+  font-size: 10.5px;
+  font-weight: 600;
+  padding: 1px 6px;
+  border-radius: 4px;
+  background: #e2e8f0;
+  color: #475569;
+}
+
+.bezent-att-cal-rate-pill {
+  font-size: 11.5px;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-variant-numeric: tabular-nums;
+}
+
+.bezent-att-cal-rate-pill.is-high {
+  background: #ecfdf5;
+  color: #047857;
+}
+
+.bezent-att-cal-rate-pill.is-mid {
+  background: #fffbeb;
+  color: #b45309;
+}
+
+.bezent-att-cal-rate-pill.is-weekend {
+  background: #f1f5f9;
+  color: #64748b;
+}
+
+.bezent-att-cal-legend {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  font-size: 11px;
+  color: #64748b;
+}
+
+[data-theme='dark'] .bezent-att-cal-legend {
+  color: #94a3b8;
+}
+
+.bezent-att-cal-legend-item {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.bezent-att-cal-legend-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.bezent-att-cal-footer {
+  padding: 10px 20px;
+  border-top: 1px solid #f1f5f9;
+  background: #fafbfc;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+[data-theme='dark'] .bezent-att-cal-footer {
+  background: #182234;
+  border-top-color: #334155;
+}
+
+.bezent-att-cal-footer-note {
+  font-size: 11.5px;
+  color: #64748b;
+}
+
+[data-theme='dark'] .bezent-att-cal-footer-note {
+  color: #94a3b8;
+}
+
+.bezent-att-cal-footer-link {
+  font-size: 12px;
+  font-weight: 700;
+  color: #2563eb;
+  cursor: pointer;
+}
+
+.bezent-att-cal-skeleton {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.bezent-att-cal-skeleton-grid {
+  height: 180px;
+  background: #f1f5f9;
+  border-radius: 8px;
+  animation: bezent-pulse 1.4s ease-in-out infinite;
+}
+
+/* ── 10. General Utility Tone Classes ── */
+.tone-emerald {
+  color: #047857 !important;
+}
+.tone-blue {
+  color: #2563eb !important;
+}
+.tone-amber {
+  color: #b45309 !important;
+}
+.tone-rose {
+  color: #b91c1c !important;
+}
+.tone-purple {
+  color: #7c3aed !important;
+}
+.tone-cyan {
+  color: #0891b2 !important;
+}
+.tone-slate {
+  color: #475569 !important;
+}
+
+/* ── 11. Responsive Breakpoints ── */
+@media (max-width: 1200px) {
+  .bezent-att-kpi-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+  .bezent-att-intelligence-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .bezent-att-kpi-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+  .bezent-att-header-controls {
+    width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .bezent-att-kpi-grid {
+    grid-template-columns: 1fr;
+  }
+}
