@@ -71,6 +71,31 @@ export const AttendanceCalendarCard: React.FC<AttendanceCalendarCardProps> = ({
   const selectedDayOfWeek = (firstDayIndex + selectedDay - 1) % 7;
   const isSelectedWeekend = selectedDayOfWeek === 0 || selectedDayOfWeek === 6;
 
+  // Selected date presence and absence rates
+  const { presentPercent, absentPercent } = useMemo(() => {
+    if (isSelectedWeekend) {
+      return { presentPercent: 0, absentPercent: 0 };
+    }
+
+    const selectedIso = `${year}-${String(month + 1).padStart(2, '0')}-${String(selectedDay).padStart(2, '0')}`;
+    const trendItem = overviewData?.recentTrends?.find((t) => t.date === selectedIso);
+
+    if (trendItem && trendItem.present + trendItem.absent > 0) {
+      const total = trendItem.present + trendItem.absent;
+      const pres = Math.min(100, Math.max(0, Math.round((trendItem.present / total) * 100)));
+      return { presentPercent: pres, absentPercent: Math.max(0, 100 - pres) };
+    }
+
+    // Default to overall overview attendanceRate for active schedule days
+    const fallbackPres = Math.min(100, Math.max(0, Math.round(overviewData?.attendanceRate ?? 88)));
+    return {
+      presentPercent: fallbackPres,
+      absentPercent: Math.max(0, 100 - fallbackPres),
+    };
+  }, [isSelectedWeekend, year, month, selectedDay, overviewData]);
+
+  const presentBarWidth = Math.round((presentPercent / 100) * 140);
+
   return (
     <Card className="bezent-att-cal-card">
       <CardHeader className="bezent-att-cal-header">
@@ -187,11 +212,90 @@ export const AttendanceCalendarCard: React.FC<AttendanceCalendarCardProps> = ({
                 </span>
               </div>
               <div className="bezent-att-cal-selected-right">
-                <span className="bezent-att-cal-rate-pill">
-                  {isSelectedWeekend
-                    ? 'Off-Duty'
-                    : `${overviewData?.attendanceRate ?? 88}% Presence`}
-                </span>
+                {isSelectedWeekend ? (
+                  <span className="bezent-att-cal-rate-pill is-weekend">Off-Duty / Weekend</span>
+                ) : (
+                  <div
+                    className="bezent-att-cal-graph"
+                    role="group"
+                    aria-label={`Attendance rates: ${presentPercent}% Present, ${absentPercent}% Absent`}
+                  >
+                    {/* Numbers: Present % & Absent % */}
+                    <div className="bezent-att-cal-graph-meta">
+                      <span
+                        className="bezent-att-cal-graph-badge is-present"
+                        title={`${presentPercent}% Present workforce`}
+                      >
+                        <span className="bezent-att-cal-graph-dot is-present" />
+                        {presentPercent}% Present
+                      </span>
+                      <span
+                        className="bezent-att-cal-graph-badge is-absent"
+                        title={`${absentPercent}% Absent workforce`}
+                      >
+                        <span className="bezent-att-cal-graph-dot is-absent" />
+                        {absentPercent}% Absent
+                      </span>
+                    </div>
+
+                    {/* Small Graph: Two-Segment Linear Progress Bar */}
+                    <div
+                      className="bezent-att-cal-graph-track"
+                      title={`Day ${selectedDay}: ${presentPercent}% Present · ${absentPercent}% Absent`}
+                    >
+                      <svg
+                        viewBox="0 0 140 7"
+                        className="bezent-att-cal-graph-bar-svg"
+                        aria-hidden="true"
+                      >
+                        <defs>
+                          <linearGradient
+                            id="bezent-att-cal-grad-present"
+                            x1="0"
+                            y1="0"
+                            x2="1"
+                            y2="0"
+                          >
+                            <stop offset="0%" stopColor="#10b981" />
+                            <stop offset="100%" stopColor="#059669" />
+                          </linearGradient>
+                          <linearGradient
+                            id="bezent-att-cal-grad-absent"
+                            x1="0"
+                            y1="0"
+                            x2="1"
+                            y2="0"
+                          >
+                            <stop offset="0%" stopColor="#fb7185" />
+                            <stop offset="100%" stopColor="#e11d48" />
+                          </linearGradient>
+                        </defs>
+                        {/* Background track (Absent fill) */}
+                        <rect
+                          x="0"
+                          y="0"
+                          width="140"
+                          height="7"
+                          rx="3.5"
+                          fill="url(#bezent-att-cal-grad-absent)"
+                          className="bezent-att-cal-bar-absent"
+                        />
+                        {/* Present segment overlay */}
+                        {presentPercent > 0 && (
+                          <rect
+                            x="0"
+                            y="0"
+                            width={Math.max(6, presentBarWidth)}
+                            height="7"
+                            rx="3.5"
+                            fill="url(#bezent-att-cal-grad-present)"
+                            className="bezent-att-cal-bar-present"
+                          />
+                        )}
+                      </svg>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
 

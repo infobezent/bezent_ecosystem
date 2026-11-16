@@ -3934,6 +3934,95 @@
   color: #64748b;
 }
 
+.bezent-att-cal-selected-right {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+.bezent-att-cal-graph {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+}
+
+.bezent-att-cal-graph-meta {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.bezent-att-cal-graph-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 10.5px;
+  font-weight: 600;
+  padding: 1.5px 7px;
+  border-radius: 999px;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.2;
+}
+
+.bezent-att-cal-graph-badge.is-present {
+  background: #ecfdf5;
+  color: #047857;
+  border: 1px solid rgba(16, 185, 129, 0.2);
+}
+
+.bezent-att-cal-graph-badge.is-absent {
+  background: #fff1f2;
+  color: #be123c;
+  border: 1px solid rgba(244, 63, 94, 0.2);
+}
+
+[data-theme='dark'] .bezent-att-cal-graph-badge.is-present {
+  background: rgba(16, 185, 129, 0.15);
+  color: #34d399;
+  border-color: rgba(52, 211, 153, 0.25);
+}
+
+[data-theme='dark'] .bezent-att-cal-graph-badge.is-absent {
+  background: rgba(244, 63, 94, 0.15);
+  color: #fb7185;
+  border-color: rgba(251, 113, 133, 0.25);
+}
+
+.bezent-att-cal-graph-dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.bezent-att-cal-graph-dot.is-present {
+  background: #10b981;
+}
+
+.bezent-att-cal-graph-dot.is-absent {
+  background: #f43f5e;
+}
+
+.bezent-att-cal-graph-track {
+  width: 140px;
+  height: 7px;
+  border-radius: 999px;
+  overflow: hidden;
+  display: flex;
+  background: #ffe4e6;
+}
+
+[data-theme='dark'] .bezent-att-cal-graph-track {
+  background: #3f1d24;
+}
+
+.bezent-att-cal-graph-bar-svg {
+  width: 140px;
+  height: 7px;
+  display: block;
+}
+
 .bezent-att-cal-legend {
   display: flex;
   align-items: center;
