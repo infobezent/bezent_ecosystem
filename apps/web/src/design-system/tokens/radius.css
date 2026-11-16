@@ -23,6 +23,9 @@
   --radius-xl: 12px;
   --radius-full: 9999px;
 
+  /* Card surface radius: the Workforce reference. One source for every card family. */
+  --radius-card: 16px;
+
   /* Semantic Container Radius Alias */
-  --card-radius: var(--radius-lg);
+  --card-radius: var(--radius-card);
 }

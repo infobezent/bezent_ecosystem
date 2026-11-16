@@ -127,7 +127,6 @@ export const AttendanceInsightsCard: React.FC<AttendanceInsightsCardProps> = ({
                   </p>
                 </div>
               </div>
-
               <div className="bezent-att-insights-callout">
                 <div className="bezent-att-insights-callout-icon tone-emerald">
                   <BezentIcon name="check" size={14} />

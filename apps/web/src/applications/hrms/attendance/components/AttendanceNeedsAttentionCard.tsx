@@ -51,7 +51,6 @@ export const AttendanceNeedsAttentionCard: React.FC<AttendanceNeedsAttentionCard
       setTimeout(() => setNudgeState('idle'), 3000);
     }, 450);
   };
-
   return (
     <Card className="bezent-att-action-card">
       <CardHeader className="bezent-att-action-header">
@@ -92,7 +91,6 @@ export const AttendanceNeedsAttentionCard: React.FC<AttendanceNeedsAttentionCard
               )}
             </Button>
           )}
-
           {totalPending > 0 ? (
             <span className="bezent-att-action-count-pill is-active">
               {totalPending} {totalPending === 1 ? 'Action Required' : 'Actions Required'}

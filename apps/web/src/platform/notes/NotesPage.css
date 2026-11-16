@@ -225,7 +225,7 @@
 }
 
 .notes-take-box__pin-btn.is-pinned {
-  color: #1a73e8;
+  color: var(--blue-interactive);
 }
 
 .notes-take-box__body-input {
@@ -267,7 +267,7 @@
 }
 
 .notes-take-box__color-dot.is-active {
-  box-shadow: 0 0 0 2px var(--border-focus, #1a73e8);
+  box-shadow: 0 0 0 2px var(--border-focus, var(--blue-interactive));
 }
 
 .notes-take-box__color-dot--default {
@@ -418,7 +418,7 @@
 }
 
 .note-card__pin-btn.is-pinned {
-  color: #1a73e8;
+  color: var(--blue-interactive);
   opacity: 1;
 }
 

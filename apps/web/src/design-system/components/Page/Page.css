@@ -125,8 +125,8 @@
 
 .bezent-step-tab.is-active,
 .bezent-step-tab--active {
-  color: #0d9488;
-  border-bottom-color: #14b8a6;
+  color: var(--teal-600);
+  border-bottom-color: var(--teal-500);
   font-weight: 600;
 }
 
@@ -155,9 +155,9 @@
   align-items: center;
   gap: 6px;
   padding: 4px 10px;
-  background-color: #f0fdfa;
-  color: #0f766e;
-  border: 1px solid #99f6e4;
+  background-color: var(--teal-50);
+  color: var(--teal-700);
+  border: 1px solid var(--teal-200);
   border-radius: 9999px;
   font-size: 12px;
   font-weight: 600;
@@ -262,9 +262,9 @@
 }
 
 .bezent-btn-draft:hover {
-  background-color: #f0fdfa;
-  border-color: #14b8a6;
-  color: #0f766e;
+  background-color: var(--teal-50);
+  border-color: var(--teal-500);
+  color: var(--teal-700);
 }
 
 .bezent-btn-cancel {

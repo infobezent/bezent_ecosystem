@@ -449,7 +449,6 @@ export function AttendanceOverviewPage({
                 <span className="bezent-att-sync-dot" />
                 <span>Biometrics Online</span>
               </div>
-
               {/* Active Date Display Pill */}
               <div className="bezent-att-date-display-pill" title="Selected Date">
                 <BezentIcon name="calendar" size={13} />
