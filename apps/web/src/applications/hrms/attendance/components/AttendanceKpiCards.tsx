@@ -1,4 +1,4 @@
-import React, { useId, useMemo } from 'react';
+import React, { useState, useId, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import type { AttendanceOverviewKpis } from '../types/attendance.types';
 
@@ -8,6 +8,24 @@ export interface AttendanceKpiSegment {
   count: number;
   cssModifier: string;
   hoverIcon?: string;
+}
+
+export interface SparklinePoint {
+  date: string;
+  formattedDate: string;
+  value: number;
+  rate?: number;
+  detail?: string;
+}
+
+interface NormalizedTrendPoint {
+  date: string;
+  scheduled: number;
+  present: number;
+  absent: number;
+  late: number;
+  attendanceRate: number;
+  absenceRate: number;
 }
 
 export interface AttendanceGenericKpiCardProps {
@@ -44,42 +62,89 @@ export interface AttendanceGenericKpiCardProps {
     | 'rose'
     | 'orange';
   graphTag?: string;
+  points?: SparklinePoint[];
   sparklineData?: number[];
 }
 
+function formatDateShort(dateStr: string): string {
+  try {
+    const d = new Date(dateStr.includes('T') ? dateStr : `${dateStr}T00:00:00`);
+    if (isNaN(d.getTime())) return dateStr;
+    return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+  } catch {
+    return dateStr;
+  }
+}
+
 /**
- * Generates a smooth Catmull-Rom to Cubic Bézier SVG sparkline line & area path.
+ * Generates an interactive smooth Catmull-Rom to Cubic Bézier SVG sparkline line & area path.
+ * Handles all-zero, constant non-zero, and fluctuating series gracefully.
  */
 function generateSparkline(
-  values: number[],
+  pointList: SparklinePoint[],
   width = 100,
   height = 44,
-  padX = 4,
+  padX = 5,
   padY = 6,
-): { linePath: string; areaPath: string; endX: number; endY: number } {
-  const n = values.length;
+): {
+  linePath: string;
+  areaPath: string;
+  pts: Array<{ x: number; y: number; point: SparklinePoint }>;
+  endX: number;
+  endY: number;
+} {
+  const n = pointList.length;
   if (n === 0) {
-    return { linePath: '', areaPath: '', endX: width - padX, endY: height / 2 };
+    return { linePath: '', areaPath: '', pts: [], endX: width - padX, endY: height / 2 };
   }
 
+  const values = pointList.map((p) => p.value);
   const minVal = Math.min(...values);
   const maxVal = Math.max(...values);
-  const effectiveMin = Math.min(0, minVal);
-  const effectiveMax = Math.max(maxVal, 5);
-  const range = effectiveMax - effectiveMin || 1;
+  const allZero = maxVal === 0 && minVal === 0;
+  const allEqual = maxVal === minVal && !allZero;
 
-  const pts = values.map((v, i) => {
-    const x = padX + (i / Math.max(1, n - 1)) * (width - 2 * padX);
-    const normalized = (v - effectiveMin) / range;
-    const y = height - padY - normalized * (height - 2 * padY);
-    return { x, y: Math.max(padY, Math.min(height - padY, y)) };
-  });
+  const baselineY = height - padY;
 
-  const first = pts[0] ?? { x: padX, y: height / 2 };
+  let pts: Array<{ x: number; y: number; point: SparklinePoint }>;
+
+  if (allZero) {
+    // Clean straight baseline at bottom
+    pts = pointList.map((p, i) => ({
+      x: padX + (i / Math.max(1, n - 1)) * (width - 2 * padX),
+      y: baselineY,
+      point: p,
+    }));
+  } else if (allEqual) {
+    // Constant non-zero value: placed stably in upper-middle leaving room for gradient area
+    const midY = Math.round(height * 0.45);
+    pts = pointList.map((p, i) => ({
+      x: padX + (i / Math.max(1, n - 1)) * (width - 2 * padX),
+      y: midY,
+      point: p,
+    }));
+  } else {
+    // Normalization with dynamic variance
+    const effectiveMin = Math.min(0, minVal);
+    const effectiveMax = Math.max(maxVal, 1);
+    const range = effectiveMax - effectiveMin || 1;
+
+    pts = pointList.map((p, i) => {
+      const x = padX + (i / Math.max(1, n - 1)) * (width - 2 * padX);
+      const normalized = (p.value - effectiveMin) / range;
+      const y = baselineY - normalized * (baselineY - padY);
+      return { x, y: Math.max(padY, Math.min(baselineY, y)), point: p };
+    });
+  }
+
+  const first = pts[0] ?? { x: padX, y: baselineY, point: pointList[0]! };
+  const last = pts[n - 1] ?? first;
+
   if (n === 1) {
     return {
       linePath: `M ${padX} ${first.y.toFixed(1)} L ${width - padX} ${first.y.toFixed(1)}`,
-      areaPath: `M ${padX} ${first.y.toFixed(1)} L ${width - padX} ${first.y.toFixed(1)} L ${width - padX} ${height} L ${padX} ${height} Z`,
+      areaPath: `M ${padX} ${first.y.toFixed(1)} L ${width - padX} ${first.y.toFixed(1)} L ${width - padX} ${baselineY} L ${padX} ${baselineY} Z`,
+      pts,
       endX: width - padX,
       endY: first.y,
     };
@@ -100,12 +165,12 @@ function generateSparkline(
     line += ` C ${cp1x.toFixed(1)} ${cp1y.toFixed(1)}, ${cp2x.toFixed(1)} ${cp2y.toFixed(1)}, ${p2.x.toFixed(1)} ${p2.y.toFixed(1)}`;
   }
 
-  const last = pts[n - 1] ?? first;
-  const area = `${line} L ${last.x.toFixed(1)} ${height} L ${first.x.toFixed(1)} ${height} Z`;
+  const area = `${line} L ${last.x.toFixed(1)} ${baselineY} L ${first.x.toFixed(1)} ${baselineY} Z`;
 
   return {
     linePath: line,
     areaPath: area,
+    pts,
     endX: last.x,
     endY: last.y,
   };
@@ -121,9 +186,13 @@ export const AttendanceGenericKpiCard: React.FC<AttendanceGenericKpiCardProps> =
   ariaLabel,
   colorScheme = 'blue',
   graphTag,
+  points,
   sparklineData,
 }) => {
   const gradId = useId();
+  const navigate = useNavigate();
+  const [hoveredIdx, setHoveredIdx] = useState<number | null>(null);
+
   const effectivePillText = subPillText ?? badgeText;
 
   const variantKey: 'blue' | 'green' | 'rose' | 'amber' | 'purple' =
@@ -145,18 +214,41 @@ export const AttendanceGenericKpiCard: React.FC<AttendanceGenericKpiCardProps> =
     purple: '#8b5cf6',
   }[variantKey];
 
-  const effectiveData = useMemo(() => {
-    if (sparklineData && sparklineData.length > 0) return sparklineData;
+  // Resolve 7-point array
+  const effectivePoints: SparklinePoint[] = useMemo(() => {
+    if (points && points.length > 0) return points;
+    if (sparklineData && sparklineData.length > 0) {
+      return sparklineData.map((val, idx) => ({
+        date: '',
+        formattedDate: `Day ${idx + 1}`,
+        value: val,
+      }));
+    }
     const num = typeof value === 'number' ? value : 0;
-    return num > 0
-      ? [Math.max(0, num - 2), num - 1, num, num - 1, num, num, num]
-      : [0, 0, 0, 0, 0, 0, 0];
-  }, [sparklineData, value]);
+    const baseDate = new Date();
+    return Array.from({ length: 7 }, (_, i) => {
+      const d = new Date(baseDate);
+      d.setDate(d.getDate() - (6 - i));
+      const dateStr = d.toISOString().slice(0, 10);
+      return {
+        date: dateStr,
+        formattedDate: formatDateShort(dateStr),
+        value: num,
+      };
+    });
+  }, [points, sparklineData, value]);
 
-  const { linePath, areaPath, endX, endY } = useMemo(
-    () => generateSparkline(effectiveData, 100, 44),
-    [effectiveData],
+  const { linePath, areaPath, pts, endX, endY } = useMemo(
+    () => generateSparkline(effectivePoints, 100, 44),
+    [effectivePoints],
   );
+
+  const activePt = hoveredIdx !== null && pts[hoveredIdx] ? pts[hoveredIdx] : null;
+
+  const displayValue = activePt ? activePt.point.value : value;
+  const displayPillText = activePt
+    ? `${activePt.point.formattedDate} · ${activePt.point.detail || activePt.point.value}`
+    : effectivePillText;
 
   return (
     <div
@@ -172,34 +264,70 @@ export const AttendanceGenericKpiCard: React.FC<AttendanceGenericKpiCardProps> =
         }
       }}
     >
-      {/* Left Column: Heading, Big Number, Subtitle / Status Pill */}
+      {/* Left Column: Heading, Value (with live scrub on hover), Subtitle Pill */}
       <div className="bezent-att-kpi-left">
         <div className="bezent-att-kpi-heading">{heading}</div>
         <div className="bezent-att-kpi-value">
           {loading ? (
             <span className="bezent-att-kpi-val-skeleton" aria-hidden="true" />
-          ) : typeof value === 'number' ? (
-            value.toLocaleString()
+          ) : typeof displayValue === 'number' ? (
+            displayValue.toLocaleString()
           ) : (
-            value
+            displayValue
           )}
         </div>
-        {effectivePillText && (
-          <div className={`bezent-att-kpi-sub bezent-att-kpi-sub--${variantKey}`}>
+        {displayPillText && (
+          <div
+            className={`bezent-att-kpi-sub bezent-att-kpi-sub--${variantKey} ${
+              activePt ? 'is-scrubbing' : ''
+            }`}
+          >
             <span className="bezent-att-kpi-sub-dot" />
             {loading ? (
               <span className="bezent-att-kpi-pill-skeleton" aria-hidden="true" />
             ) : (
-              <span>{effectivePillText}</span>
+              <span>{displayPillText}</span>
             )}
           </div>
         )}
       </div>
 
-      {/* Right Column: Inset Graph Panel with Sparkline Area Chart */}
-      <div className={`bezent-att-kpi-right bezent-att-kpi-right--${variantKey}`}>
+      {/* Right Column: Inset Graph Panel with Interactive Scrubbing */}
+      <div
+        className={`bezent-att-kpi-right bezent-att-kpi-right--${variantKey}`}
+        onMouseMove={(e) => {
+          const rect = e.currentTarget.getBoundingClientRect();
+          if (rect.width <= 0 || pts.length === 0) return;
+          const relX = (e.clientX - rect.left) / rect.width;
+          const svgX = relX * 100;
+          let bestIdx = 0;
+          let bestDist = Infinity;
+          pts.forEach((pt, idx) => {
+            const dist = Math.abs(pt.x - svgX);
+            if (dist < bestDist) {
+              bestDist = dist;
+              bestIdx = idx;
+            }
+          });
+          setHoveredIdx(bestIdx);
+        }}
+        onMouseLeave={() => setHoveredIdx(null)}
+        onClick={(e) => {
+          if (activePt && activePt.point.date) {
+            e.stopPropagation();
+            navigate(`/hrms/attendance/daily-log?date=${activePt.point.date}`);
+          }
+        }}
+        title="Hover along curve to inspect daily numbers · Click point to open daily log"
+      >
         <div className="bezent-att-kpi-right-top">
-          <span className="bezent-att-kpi-graph-tag">{graphTag || '7D Trend'}</span>
+          <span
+            className={`bezent-att-kpi-graph-tag ${activePt ? 'is-scrubbing' : ''}`}
+          >
+            {activePt
+              ? `${activePt.point.formattedDate}: ${activePt.point.value}`
+              : graphTag || '7D Trend'}
+          </span>
           <span
             className={`bezent-att-kpi-graph-indicator bezent-att-kpi-graph-indicator--${variantKey}`}
           />
@@ -245,8 +373,8 @@ export const AttendanceGenericKpiCard: React.FC<AttendanceGenericKpiCardProps> =
               />
             )}
 
-            {/* End Live Beacon Node */}
-            {linePath && (
+            {/* Default Beacon Node at Line End (when not scrubbing) */}
+            {!activePt && linePath && (
               <>
                 <circle
                   cx={endX}
@@ -261,6 +389,61 @@ export const AttendanceGenericKpiCard: React.FC<AttendanceGenericKpiCardProps> =
                   className={`bezent-att-sparkline-dot bezent-att-sparkline-dot--${variantKey}`}
                 />
               </>
+            )}
+
+            {/* Interactive Tracker when Hovered / Scrubbing */}
+            {activePt && (
+              <g className="bezent-att-sparkline-tracker" pointerEvents="none">
+                <line
+                  x1={activePt.x}
+                  y1={2}
+                  x2={activePt.x}
+                  y2={38}
+                  className="bezent-att-sparkline-guideline"
+                />
+                <circle
+                  cx={activePt.x}
+                  cy={activePt.y}
+                  r={6}
+                  className={`bezent-att-sparkline-halo bezent-att-sparkline-halo--${variantKey}`}
+                />
+                <circle
+                  cx={activePt.x}
+                  cy={activePt.y}
+                  r={2.8}
+                  className={`bezent-att-sparkline-dot bezent-att-sparkline-dot--${variantKey}`}
+                />
+
+                {/* Vector Tooltip Pill Floating Over Hovered Point */}
+                {(() => {
+                  const tipW = 48;
+                  const tipH = 12;
+                  let tipX = activePt.x - tipW / 2;
+                  if (tipX < 2) tipX = 2;
+                  if (tipX + tipW > 98) tipX = 98 - tipW;
+                  let tipY = activePt.y - tipH - 4;
+                  if (tipY < 1) tipY = activePt.y + 6;
+
+                  return (
+                    <g transform={`translate(${tipX}, ${tipY})`}>
+                      <rect
+                        width={tipW}
+                        height={tipH}
+                        rx={3}
+                        className="bezent-att-sparkline-tip-bg"
+                      />
+                      <text
+                        x={tipW / 2}
+                        y={8.5}
+                        textAnchor="middle"
+                        className="bezent-att-sparkline-tip-text"
+                      >
+                        {activePt.point.formattedDate}: {activePt.point.value}
+                      </text>
+                    </g>
+                  );
+                })()}
+              </g>
             )}
           </svg>
         )}
@@ -370,59 +553,129 @@ export const AttendanceKpiDeck: React.FC<AttendanceKpiDeckProps> = ({
     },
   ];
 
-  const recentTrends = overviewData?.recentTrends ?? [];
-
-  // Trend series for each card's right-side graph
-  const scheduledTrend = useMemo(() => {
-    if (recentTrends.length > 0) {
-      return recentTrends.map((t) => Math.max(safeExpected, t.present + t.absent));
+  // Extract source trend items
+  const trendItems = useMemo<NormalizedTrendPoint[]>(() => {
+    if (overviewData?.trends?.items && overviewData.trends.items.length > 0) {
+      return overviewData.trends.items.map((item) => {
+        const scheduled = item.scheduledHeadcount ?? item.scheduledDayEquivalents ?? safeExpected;
+        const present = item.presentHeadcount ?? item.presentEquivalentDays ?? 0;
+        const absent = item.absentEquivalentDays ?? 0;
+        const late = item.lateOccurrences ?? 0;
+        const attRate = item.attendanceRate ?? (scheduled > 0 ? Math.round((present / scheduled) * 100) : 0);
+        const absRate = item.absenceRate ?? (scheduled > 0 ? Number(((absent / scheduled) * 100).toFixed(1)) : 0);
+        return {
+          date: item.date,
+          scheduled,
+          present,
+          absent,
+          late,
+          attendanceRate: attRate,
+          absenceRate: absRate,
+        };
+      });
     }
-    return safeExpected > 0
-      ? [Math.max(0, safeExpected - 1), safeExpected, safeExpected, safeExpected, safeExpected, safeExpected, safeExpected]
-      : [0, 0, 0, 0, 0, 0, 0];
-  }, [recentTrends, safeExpected]);
-
-  const presentTrend = useMemo(() => {
-    if (recentTrends.length > 0) {
-      return recentTrends.map((t) => t.present);
+    if (overviewData?.recentTrends && overviewData.recentTrends.length > 0) {
+      return overviewData.recentTrends.map((rt) => ({
+        date: rt.date,
+        scheduled: safeExpected,
+        present: rt.present,
+        absent: rt.absent,
+        late: rt.late,
+        attendanceRate: safeExpected > 0 ? Math.round((rt.present / safeExpected) * 100) : 0,
+        absenceRate: safeExpected > 0 ? Number(((rt.absent / safeExpected) * 100).toFixed(1)) : 0,
+      }));
     }
-    return safePresent > 0
-      ? [Math.max(0, safePresent - 2), safePresent - 1, safePresent, safePresent - 1, safePresent, safePresent, safePresent]
-      : [0, 0, 0, 0, 0, 0, 0];
-  }, [recentTrends, safePresent]);
+    // Fallback: 7 days leading to today
+    const baseDate = new Date(overviewData?.date || new Date().toISOString().slice(0, 10));
+    return Array.from({ length: 7 }, (_, i) => {
+      const d = new Date(baseDate);
+      d.setDate(d.getDate() - (6 - i));
+      const dateStr = d.toISOString().slice(0, 10);
+      return {
+        date: dateStr,
+        scheduled: safeExpected,
+        present: safePresent,
+        absent: safeAbsent,
+        late: totalExceptions,
+        attendanceRate,
+        absenceRate: Number(absentRate),
+      };
+    });
+  }, [
+    overviewData?.trends?.items,
+    overviewData?.recentTrends,
+    overviewData?.date,
+    safeExpected,
+    safePresent,
+    safeAbsent,
+    totalExceptions,
+    attendanceRate,
+    absentRate,
+  ]);
 
-  const absentTrend = useMemo(() => {
-    if (recentTrends.length > 0) {
-      return recentTrends.map((t) => t.absent);
-    }
-    return safeAbsent > 0
-      ? [safeAbsent + 1, safeAbsent, safeAbsent + 1, safeAbsent, safeAbsent, safeAbsent, safeAbsent]
-      : [0, 0, 0, 0, 0, 0, 0];
-  }, [recentTrends, safeAbsent]);
+  // 1. Scheduled Workforce (Roster)
+  const scheduledPoints: SparklinePoint[] = useMemo(() => {
+    return trendItems.map((t) => ({
+      date: t.date,
+      formattedDate: formatDateShort(t.date),
+      value: t.scheduled,
+      detail: `${t.scheduled} Rostered Shifts`,
+    }));
+  }, [trendItems]);
 
-  const leaveTrend = useMemo(() => {
-    return safeOnLeave > 0
-      ? [Math.max(0, safeOnLeave - 1), safeOnLeave, safeOnLeave, safeOnLeave + 1, safeOnLeave, safeOnLeave, safeOnLeave]
-      : [0, 0, 0, 0, 0, 0, 0];
-  }, [safeOnLeave]);
+  // 2. Present Today (Presence & Rate)
+  const presentPoints: SparklinePoint[] = useMemo(() => {
+    return trendItems.map((t) => ({
+      date: t.date,
+      formattedDate: formatDateShort(t.date),
+      value: Math.round(t.present),
+      rate: t.attendanceRate,
+      detail: `${Math.round(t.present)} Present (${t.attendanceRate}%)`,
+    }));
+  }, [trendItems]);
 
-  const exceptionsTrend = useMemo(() => {
-    return totalExceptions > 0
-      ? [
-          totalExceptions + 2,
-          totalExceptions + 1,
-          totalExceptions + 3,
-          totalExceptions + 1,
-          totalExceptions + 2,
-          totalExceptions,
-          totalExceptions,
-        ]
-      : [0, 0, 0, 0, 0, 0, 0];
-  }, [totalExceptions]);
+  // 3. Absent (Absence & Absenteeism)
+  const absentPoints: SparklinePoint[] = useMemo(() => {
+    return trendItems.map((t) => ({
+      date: t.date,
+      formattedDate: formatDateShort(t.date),
+      value: Math.round(t.absent),
+      rate: t.absenceRate,
+      detail: `${Math.round(t.absent)} Absent (${t.absenceRate}%)`,
+    }));
+  }, [trendItems]);
+
+  // 4. On Approved Leave
+  const leavePoints: SparklinePoint[] = useMemo(() => {
+    return trendItems.map((t, idx) => {
+      const isToday = idx === trendItems.length - 1;
+      const val = isToday ? safeOnLeave : 0;
+      return {
+        date: t.date,
+        formattedDate: formatDateShort(t.date),
+        value: val,
+        detail: `${val} on Approved Leave`,
+      };
+    });
+  }, [trendItems, safeOnLeave]);
+
+  // 5. Exceptions & Queue
+  const exceptionPoints: SparklinePoint[] = useMemo(() => {
+    return trendItems.map((t, idx) => {
+      const isToday = idx === trendItems.length - 1;
+      const val = isToday ? totalExceptions : t.late;
+      return {
+        date: t.date,
+        formattedDate: formatDateShort(t.date),
+        value: val,
+        detail: `${val} Pending Action`,
+      };
+    });
+  }, [trendItems, totalExceptions]);
 
   return (
     <div className="bezent-att-kpi-grid">
-      {/* Card 1: Scheduled Workforce (Pastel Sky / Royal Blue) */}
+      {/* Card 1: Scheduled Workforce */}
       <AttendanceGenericKpiCard
         heading="Scheduled Workforce"
         value={safeExpected}
@@ -433,12 +686,12 @@ export const AttendanceKpiDeck: React.FC<AttendanceKpiDeckProps> = ({
         loading={loading}
         colorScheme="blue"
         graphTag="Roster"
-        sparklineData={scheduledTrend}
+        points={scheduledPoints}
         ariaLabel="Scheduled Workforce KPI Card"
         onClick={() => navigate('/hrms/attendance/shifts')}
       />
 
-      {/* Card 2: Present Today (Pastel Mint / Emerald Green) */}
+      {/* Card 2: Present Today */}
       <AttendanceGenericKpiCard
         heading="Present Today"
         value={safePresent}
@@ -449,12 +702,12 @@ export const AttendanceKpiDeck: React.FC<AttendanceKpiDeckProps> = ({
         loading={loading}
         colorScheme="green"
         graphTag={`${attendanceRate}% Rate`}
-        sparklineData={presentTrend}
+        points={presentPoints}
         ariaLabel="Present Today KPI Card"
         onClick={() => navigate('/hrms/attendance/daily-log')}
       />
 
-      {/* Card 3: Absent (Pastel Rose / Blush Red) */}
+      {/* Card 3: Absent */}
       <AttendanceGenericKpiCard
         heading="Absent"
         value={safeAbsent}
@@ -465,12 +718,12 @@ export const AttendanceKpiDeck: React.FC<AttendanceKpiDeckProps> = ({
         loading={loading}
         colorScheme="rose"
         graphTag={`${absentRate}% Rate`}
-        sparklineData={absentTrend}
+        points={absentPoints}
         ariaLabel="Absent KPI Card"
-        onClick={() => navigate('/hrms/attendance/daily-log')}
+        onClick={() => navigate('/hrms/attendance/daily-log?status=absent')}
       />
 
-      {/* Card 4: On Approved Leave (Pastel Amber / Peach Warmth) */}
+      {/* Card 4: On Approved Leave */}
       <AttendanceGenericKpiCard
         heading="On Approved Leave"
         value={safeOnLeave}
@@ -481,12 +734,12 @@ export const AttendanceKpiDeck: React.FC<AttendanceKpiDeckProps> = ({
         loading={loading}
         colorScheme="amber"
         graphTag="Approved"
-        sparklineData={leaveTrend}
+        points={leavePoints}
         ariaLabel="On Approved Leave KPI Card"
         onClick={() => navigate('/hrms/leave/records')}
       />
 
-      {/* Card 5: Exceptions & Queue (Pastel Lavender / Purple) */}
+      {/* Card 5: Exceptions & Queue */}
       <AttendanceGenericKpiCard
         heading="Exceptions & Queue"
         value={totalExceptions}
@@ -497,7 +750,7 @@ export const AttendanceKpiDeck: React.FC<AttendanceKpiDeckProps> = ({
         loading={loading}
         colorScheme="purple"
         graphTag="Queue"
-        sparklineData={exceptionsTrend}
+        points={exceptionPoints}
         ariaLabel="Attendance Exceptions & Regularization Queue KPI Card"
         onClick={() => navigate('/hrms/attendance/regularization')}
       />

@@ -194,6 +194,7 @@
   border-color: #bce8cb;
   color: var(--text-primary);
 }
+
 .bezent-attendance-calendar__tile--present .bezent-attendance-calendar__tile-status {
   color: #159a68;
 }
@@ -205,6 +206,7 @@
   border-color: #ffd2ae;
   color: var(--text-primary);
 }
+
 .bezent-attendance-calendar__tile--late .bezent-attendance-calendar__tile-status {
   color: #c2410c;
 }
@@ -216,6 +218,7 @@
   border-color: #ffd8be;
   color: var(--text-primary, #202938);
 }
+
 .bezent-attendance-calendar__tile--half-day .bezent-attendance-calendar__tile-status {
   color: #ea580c;
 }
@@ -227,6 +230,7 @@
   border-color: #f6c2c8;
   color: var(--text-primary, #202938);
 }
+
 .bezent-attendance-calendar__tile--absent .bezent-attendance-calendar__tile-status {
   color: #de5264;
 }
@@ -238,6 +242,7 @@
   border-color: #e0d5fa;
   color: var(--text-primary, #202938);
 }
+
 .bezent-attendance-calendar__tile--missing-punch .bezent-attendance-calendar__tile-status {
   color: #896be5;
 }
@@ -249,6 +254,7 @@
   border-color: #e9d5ff;
   color: var(--text-primary, #202938);
 }
+
 .bezent-attendance-calendar__tile--leave .bezent-attendance-calendar__tile-status {
   color: #7e22ce;
 }
@@ -260,6 +266,7 @@
   border-color: #d2e3fc;
   color: var(--text-primary, #202938);
 }
+
 .bezent-attendance-calendar__tile--holiday .bezent-attendance-calendar__tile-status {
   color: var(--action-blue);
 }
@@ -271,6 +278,7 @@
   border-color: var(--border-default, #e5eaf2);
   color: #8b96a8;
 }
+
 .bezent-attendance-calendar__tile--weekly-off .bezent-attendance-calendar__tile-date,
 .bezent-attendance-calendar__tile--weekly-off .bezent-attendance-calendar__tile-status,
 .bezent-attendance-calendar__tile--weekly-off .bezent-attendance-calendar__tile-sub {
@@ -284,6 +292,7 @@
   border-color: #e2e8f0;
   color: var(--text-primary);
 }
+
 .bezent-attendance-calendar__tile--pending .bezent-attendance-calendar__tile-status {
   color: #475569;
 }
@@ -295,6 +304,7 @@
   border-color: var(--border-subtle, #e7ebf0);
   color: var(--text-primary);
 }
+
 .bezent-attendance-calendar__tile--unclassified .bezent-attendance-calendar__tile-status,
 .bezent-attendance-calendar__tile--unclassified .bezent-attendance-calendar__tile-sub {
   color: var(--text-muted, #747775);
@@ -312,9 +322,8 @@
   background-color: rgba(52, 168, 83, 0.16);
   border-color: rgba(52, 168, 83, 0.35);
 }
-[data-theme='dark']
-  .bezent-attendance-calendar__tile--present
-  .bezent-attendance-calendar__tile-status {
+
+[data-theme='dark'] .bezent-attendance-calendar__tile--present .bezent-attendance-calendar__tile-status {
   color: #81c995;
 }
 
@@ -323,9 +332,8 @@
   background-color: rgba(240, 120, 101, 0.16);
   border-color: rgba(240, 120, 101, 0.35);
 }
-[data-theme='dark']
-  .bezent-attendance-calendar__tile--late
-  .bezent-attendance-calendar__tile-status {
+
+[data-theme='dark'] .bezent-attendance-calendar__tile--late .bezent-attendance-calendar__tile-status {
   color: #f07865;
 }
 
@@ -334,9 +342,8 @@
   background-color: rgba(249, 115, 22, 0.16);
   border-color: rgba(249, 115, 22, 0.35);
 }
-[data-theme='dark']
-  .bezent-attendance-calendar__tile--half-day
-  .bezent-attendance-calendar__tile-status {
+
+[data-theme='dark'] .bezent-attendance-calendar__tile--half-day .bezent-attendance-calendar__tile-status {
   color: #fdba74;
 }
 
@@ -345,9 +352,8 @@
   background-color: rgba(234, 67, 53, 0.16);
   border-color: rgba(234, 67, 53, 0.35);
 }
-[data-theme='dark']
-  .bezent-attendance-calendar__tile--absent
-  .bezent-attendance-calendar__tile-status {
+
+[data-theme='dark'] .bezent-attendance-calendar__tile--absent .bezent-attendance-calendar__tile-status {
   color: #f28b82;
 }
 
@@ -356,9 +362,8 @@
   background-color: rgba(234, 88, 12, 0.18);
   border-color: rgba(234, 88, 12, 0.4);
 }
-[data-theme='dark']
-  .bezent-attendance-calendar__tile--missing-punch
-  .bezent-attendance-calendar__tile-status {
+
+[data-theme='dark'] .bezent-attendance-calendar__tile--missing-punch .bezent-attendance-calendar__tile-status {
   color: #fb923c;
 }
 
@@ -367,9 +372,8 @@
   background-color: rgba(168, 85, 247, 0.16);
   border-color: rgba(168, 85, 247, 0.35);
 }
-[data-theme='dark']
-  .bezent-attendance-calendar__tile--leave
-  .bezent-attendance-calendar__tile-status {
+
+[data-theme='dark'] .bezent-attendance-calendar__tile--leave .bezent-attendance-calendar__tile-status {
   color: #d8b4fe;
 }
 
@@ -378,9 +382,8 @@
   background-color: rgba(66, 133, 244, 0.16);
   border-color: rgba(66, 133, 244, 0.35);
 }
-[data-theme='dark']
-  .bezent-attendance-calendar__tile--holiday
-  .bezent-attendance-calendar__tile-status {
+
+[data-theme='dark'] .bezent-attendance-calendar__tile--holiday .bezent-attendance-calendar__tile-status {
   color: #8ab4f8;
 }
 
@@ -389,15 +392,10 @@
   background-color: rgba(255, 255, 255, 0.04);
   border-color: rgba(255, 255, 255, 0.08);
 }
-[data-theme='dark']
-  .bezent-attendance-calendar__tile--weekly-off
-  .bezent-attendance-calendar__tile-date,
-[data-theme='dark']
-  .bezent-attendance-calendar__tile--weekly-off
-  .bezent-attendance-calendar__tile-status,
-[data-theme='dark']
-  .bezent-attendance-calendar__tile--weekly-off
-  .bezent-attendance-calendar__tile-sub {
+
+[data-theme='dark'] .bezent-attendance-calendar__tile--weekly-off .bezent-attendance-calendar__tile-date,
+[data-theme='dark'] .bezent-attendance-calendar__tile--weekly-off .bezent-attendance-calendar__tile-status,
+[data-theme='dark'] .bezent-attendance-calendar__tile--weekly-off .bezent-attendance-calendar__tile-sub {
   color: #9aa0a6;
 }
 
@@ -406,9 +404,8 @@
   background-color: rgba(148, 163, 184, 0.14);
   border-color: rgba(148, 163, 184, 0.28);
 }
-[data-theme='dark']
-  .bezent-attendance-calendar__tile--pending
-  .bezent-attendance-calendar__tile-status {
+
+[data-theme='dark'] .bezent-attendance-calendar__tile--pending .bezent-attendance-calendar__tile-status {
   color: #94a3b8;
 }
 
@@ -417,12 +414,9 @@
   background-color: rgba(255, 255, 255, 0.02);
   border-color: rgba(255, 255, 255, 0.08);
 }
-[data-theme='dark']
-  .bezent-attendance-calendar__tile--unclassified
-  .bezent-attendance-calendar__tile-status,
-[data-theme='dark']
-  .bezent-attendance-calendar__tile--unclassified
-  .bezent-attendance-calendar__tile-sub {
+
+[data-theme='dark'] .bezent-attendance-calendar__tile--unclassified .bezent-attendance-calendar__tile-status,
+[data-theme='dark'] .bezent-attendance-calendar__tile--unclassified .bezent-attendance-calendar__tile-sub {
   color: #9aa0a6;
 }
 
@@ -455,14 +449,17 @@
   .bezent-attendance-calendar__day-wrapper {
     min-height: 56px;
   }
+
   .bezent-attendance-calendar__tile,
   .bezent-attendance-calendar__day {
     min-height: 56px;
     padding: 4px 5px;
   }
+
   .bezent-attendance-calendar__tile-status {
     font-size: 10px;
   }
+
   .bezent-attendance-calendar__tile-sub {
     font-size: 9px;
   }
@@ -472,9 +469,11 @@
   .bezent-attendance-calendar__grid {
     gap: 4px 2px;
   }
+
   .bezent-attendance-calendar__day-wrapper {
     min-height: 44px;
   }
+
   .bezent-attendance-calendar__tile,
   .bezent-attendance-calendar__day {
     min-height: 44px;
@@ -482,9 +481,11 @@
     align-items: center;
     text-align: center;
   }
+
   .bezent-attendance-calendar__tile-top {
     justify-content: center;
   }
+
   .bezent-attendance-calendar__tile-today-pill {
     position: absolute;
     top: 2px;
@@ -492,6 +493,7 @@
     font-size: 7px;
     padding: 0 2px;
   }
+
   .bezent-attendance-calendar__tile-reg-dot {
     position: absolute;
     top: 3px;
@@ -499,10 +501,12 @@
     width: 4px;
     height: 4px;
   }
+
   .bezent-attendance-calendar__tile-status {
     font-size: 9px;
     letter-spacing: -0.02em;
   }
+
   .bezent-attendance-calendar__tile-sub {
     display: none;
   }
@@ -615,12 +619,15 @@
   background: #edfaf2;
   border: 1px solid #c4eed7;
 }
+
 .bezent-attendance-summary__card--present:hover {
   border-color: #9de4bd;
 }
+
 .bezent-attendance-summary__card--present .bezent-attendance-summary__value {
   color: #11704b;
 }
+
 .bezent-attendance-summary__card--present .bezent-attendance-summary__label {
   color: #168b61;
 }
@@ -629,12 +636,15 @@
   background: #fff0f3;
   border: 1px solid #fcd4dd;
 }
+
 .bezent-attendance-summary__card--absent:hover {
   border-color: #f8b4c2;
 }
+
 .bezent-attendance-summary__card--absent .bezent-attendance-summary__value {
   color: #b72f40;
 }
+
 .bezent-attendance-summary__card--absent .bezent-attendance-summary__label {
   color: #de5264;
 }
@@ -643,12 +653,15 @@
   background: #fff4ed;
   border: 1px solid #fdddca;
 }
+
 .bezent-attendance-summary__card--half-day:hover {
   border-color: #fcc7a5;
 }
+
 .bezent-attendance-summary__card--half-day .bezent-attendance-summary__value {
   color: #c2410c;
 }
+
 .bezent-attendance-summary__card--half-day .bezent-attendance-summary__label {
   color: #ea580c;
 }
@@ -657,12 +670,15 @@
   background: #fff3ef;
   border: 1px solid #fdd4c9;
 }
+
 .bezent-attendance-summary__card--late:hover {
   border-color: #fbbbaa;
 }
+
 .bezent-attendance-summary__card--late .bezent-attendance-summary__value {
   color: #c4432f;
 }
+
 .bezent-attendance-summary__card--late .bezent-attendance-summary__label {
   color: #f07865;
 }
@@ -671,12 +687,15 @@
   background: #eef5ff;
   border: 1px solid #d6e6fe;
 }
+
 .bezent-attendance-summary__card--worked:hover {
   border-color: #b4d3fd;
 }
+
 .bezent-attendance-summary__card--worked .bezent-attendance-summary__value {
   color: #1d57c7;
 }
+
 .bezent-attendance-summary__card--worked .bezent-attendance-summary__label {
   color: var(--action-blue);
 }
@@ -685,12 +704,15 @@
   background: #f4efff;
   border: 1px solid #ded4fb;
 }
+
 .bezent-attendance-summary__card--missing-punch:hover {
   border-color: #c6b5f7;
 }
+
 .bezent-attendance-summary__card--missing-punch .bezent-attendance-summary__value {
   color: #5f3ec4;
 }
+
 .bezent-attendance-summary__card--missing-punch .bezent-attendance-summary__label {
   color: #8265de;
 }
@@ -1066,15 +1088,19 @@
 .attendance-clay-dot--blue {
   background: linear-gradient(135deg, #60a5fa 0%, var(--blue-600) 100%);
 }
+
 .attendance-clay-dot--green {
   background: linear-gradient(135deg, #34d399 0%, #059669 100%);
 }
+
 .attendance-clay-dot--amber {
   background: linear-gradient(135deg, #fbbf24 0%, #d97706 100%);
 }
+
 .attendance-clay-dot--purple {
   background: linear-gradient(135deg, #a78bfa 0%, #7c3aed 100%);
 }
+
 .attendance-clay-dot--red {
   background: linear-gradient(135deg, #f87171 0%, #dc2626 100%);
 }
@@ -1121,10 +1147,12 @@
   background: linear-gradient(135deg, #fff7ed 0%, #ffdcc2 100%);
   color: #b45309;
 }
+
 .attendance-clay-alert-pill--missing {
   background: linear-gradient(135deg, #fff1f2 0%, #ffe0eb 100%);
   color: #be123c;
 }
+
 .attendance-clay-alert-pill--blocker {
   background: linear-gradient(135deg, #f5f3ff 0%, #e9e1ff 100%);
   color: #5b21b6;
@@ -1244,12 +1272,15 @@
 .attendance-clay-card__dot--lavender {
   background: #7c3aed;
 }
+
 .attendance-clay-card__dot--peach {
   background: #ea580c;
 }
+
 .attendance-clay-card__dot--pink {
   background: #e11d48;
 }
+
 .attendance-clay-card__dot--blue {
   background: var(--blue-600);
 }
@@ -1279,14 +1310,17 @@
   background: linear-gradient(135deg, #f5efff 0%, #e0d0fe 100%) !important;
   color: #5b21b6 !important;
 }
+
 .attendance-clay-icon--peach {
   background: linear-gradient(135deg, #fff3ea 0%, #fed8c2 100%) !important;
   color: #9a3412 !important;
 }
+
 .attendance-clay-icon--pink {
   background: linear-gradient(135deg, #fff0f5 0%, #fcd2e1 100%) !important;
   color: #9f1239 !important;
 }
+
 .attendance-clay-icon--blue {
   background: linear-gradient(135deg, #edf5ff 0%, #cfe3fe 100%) !important;
   color: #1e40af !important;
@@ -1333,14 +1367,17 @@
   background: #fef3c7;
   color: #92400e;
 }
+
 .attendance-clay-pill--danger {
   background: #fee2e2;
   color: #991b1b;
 }
+
 .attendance-clay-pill--info {
   background: #dbeafe;
   color: #1e40af;
 }
+
 .attendance-clay-pill--neutral {
   background: #f1f5f9;
   color: #475569;
@@ -1767,11 +1804,13 @@
 }
 
 @keyframes bezent-sync-pulse {
+
   0%,
   100% {
     opacity: 1;
     transform: scale(1);
   }
+
   50% {
     opacity: 0.5;
     transform: scale(0.85);
@@ -1932,6 +1971,7 @@
   background: #eff6ff;
   color: #1d4ed8;
 }
+
 .bezent-att-kpi-sub--blue .bezent-att-kpi-sub-dot {
   background: #2563eb;
 }
@@ -1940,6 +1980,7 @@
   background: #ecfdf5;
   color: #047857;
 }
+
 .bezent-att-kpi-sub--green .bezent-att-kpi-sub-dot {
   background: #10b981;
 }
@@ -1948,6 +1989,7 @@
   background: #fff1f2;
   color: #be123c;
 }
+
 .bezent-att-kpi-sub--rose .bezent-att-kpi-sub-dot {
   background: #f43f5e;
 }
@@ -1956,6 +1998,7 @@
   background: #fffbeb;
   color: #b45309;
 }
+
 .bezent-att-kpi-sub--amber .bezent-att-kpi-sub-dot {
   background: #f59e0b;
 }
@@ -1964,6 +2007,7 @@
   background: #f5f3ff;
   color: #6d28d9;
 }
+
 .bezent-att-kpi-sub--purple .bezent-att-kpi-sub-dot {
   background: #7c3aed;
 }
@@ -1972,18 +2016,22 @@
   background: rgba(37, 99, 235, 0.18);
   color: #93c5fd;
 }
+
 [data-theme='dark'] .bezent-att-kpi-sub--green {
   background: rgba(16, 185, 129, 0.18);
   color: #6ee7b7;
 }
+
 [data-theme='dark'] .bezent-att-kpi-sub--rose {
   background: rgba(244, 63, 94, 0.18);
   color: #fca5a5;
 }
+
 [data-theme='dark'] .bezent-att-kpi-sub--amber {
   background: rgba(245, 158, 11, 0.18);
   color: #fcd34d;
 }
+
 [data-theme='dark'] .bezent-att-kpi-sub--purple {
   background: rgba(124, 58, 237, 0.18);
   color: #c084fc;
@@ -2009,18 +2057,22 @@
   background: #f0f7ff;
   border: 1px solid rgba(37, 99, 235, 0.08);
 }
+
 .bezent-att-kpi-right--green {
   background: #ecfdf5;
   border: 1px solid rgba(16, 185, 129, 0.08);
 }
+
 .bezent-att-kpi-right--rose {
   background: #fff1f2;
   border: 1px solid rgba(244, 63, 94, 0.08);
 }
+
 .bezent-att-kpi-right--amber {
   background: #fffbeb;
   border: 1px solid rgba(245, 158, 11, 0.08);
 }
+
 .bezent-att-kpi-right--purple {
   background: #f5f3ff;
   border: 1px solid rgba(124, 58, 237, 0.08);
@@ -2030,18 +2082,22 @@
   background: rgba(37, 99, 235, 0.1);
   border-color: rgba(37, 99, 235, 0.2);
 }
+
 [data-theme='dark'] .bezent-att-kpi-right--green {
   background: rgba(16, 185, 129, 0.1);
   border-color: rgba(16, 185, 129, 0.2);
 }
+
 [data-theme='dark'] .bezent-att-kpi-right--rose {
   background: rgba(244, 63, 94, 0.1);
   border-color: rgba(244, 63, 94, 0.2);
 }
+
 [data-theme='dark'] .bezent-att-kpi-right--amber {
   background: rgba(245, 158, 11, 0.1);
   border-color: rgba(245, 158, 11, 0.2);
 }
+
 [data-theme='dark'] .bezent-att-kpi-right--purple {
   background: rgba(124, 58, 237, 0.1);
   border-color: rgba(124, 58, 237, 0.2);
@@ -2074,11 +2130,25 @@
   flex-shrink: 0;
 }
 
-.bezent-att-kpi-graph-indicator--blue { background: #2563eb; }
-.bezent-att-kpi-graph-indicator--green { background: #10b981; }
-.bezent-att-kpi-graph-indicator--rose { background: #f43f5e; }
-.bezent-att-kpi-graph-indicator--amber { background: #f59e0b; }
-.bezent-att-kpi-graph-indicator--purple { background: #7c3aed; }
+.bezent-att-kpi-graph-indicator--blue {
+  background: #2563eb;
+}
+
+.bezent-att-kpi-graph-indicator--green {
+  background: #10b981;
+}
+
+.bezent-att-kpi-graph-indicator--rose {
+  background: #f43f5e;
+}
+
+.bezent-att-kpi-graph-indicator--amber {
+  background: #f59e0b;
+}
+
+.bezent-att-kpi-graph-indicator--purple {
+  background: #7c3aed;
+}
 
 /* ── SVG Sparkline Area Chart ── */
 .bezent-att-kpi-sparkline-svg {
@@ -2108,57 +2178,156 @@
   stroke-width: 2.2;
   filter: drop-shadow(0 2px 4px rgba(37, 99, 235, 0.3));
 }
+
 .bezent-att-sparkline-line--green {
   stroke: #10b981;
   stroke-width: 2.2;
   filter: drop-shadow(0 2px 4px rgba(16, 185, 129, 0.3));
 }
+
 .bezent-att-sparkline-line--rose {
   stroke: #f43f5e;
   stroke-width: 2.2;
   filter: drop-shadow(0 2px 4px rgba(244, 63, 94, 0.3));
 }
+
 .bezent-att-sparkline-line--amber {
   stroke: #f59e0b;
   stroke-width: 2.2;
   filter: drop-shadow(0 2px 4px rgba(245, 158, 11, 0.3));
 }
+
 .bezent-att-sparkline-line--purple {
   stroke: #7c3aed;
   stroke-width: 2.2;
   filter: drop-shadow(0 2px 4px rgba(124, 58, 237, 0.3));
 }
 
-[data-theme='dark'] .bezent-att-sparkline-line--blue { stroke: #60a5fa; }
-[data-theme='dark'] .bezent-att-sparkline-line--green { stroke: #34d399; }
-[data-theme='dark'] .bezent-att-sparkline-line--rose { stroke: #fb7185; }
-[data-theme='dark'] .bezent-att-sparkline-line--amber { stroke: #fbbf24; }
-[data-theme='dark'] .bezent-att-sparkline-line--purple { stroke: #c084fc; }
+[data-theme='dark'] .bezent-att-sparkline-line--blue {
+  stroke: #60a5fa;
+}
+
+[data-theme='dark'] .bezent-att-sparkline-line--green {
+  stroke: #34d399;
+}
+
+[data-theme='dark'] .bezent-att-sparkline-line--rose {
+  stroke: #fb7185;
+}
+
+[data-theme='dark'] .bezent-att-sparkline-line--amber {
+  stroke: #fbbf24;
+}
+
+[data-theme='dark'] .bezent-att-sparkline-line--purple {
+  stroke: #c084fc;
+}
 
 .bezent-att-sparkline-halo {
   fill: currentColor;
   opacity: 0.25;
 }
 
-.bezent-att-sparkline-halo--blue { color: #2563eb; }
-.bezent-att-sparkline-halo--green { color: #10b981; }
-.bezent-att-sparkline-halo--rose { color: #f43f5e; }
-.bezent-att-sparkline-halo--amber { color: #f59e0b; }
-.bezent-att-sparkline-halo--purple { color: #7c3aed; }
+.bezent-att-sparkline-halo--blue {
+  color: #2563eb;
+}
+
+.bezent-att-sparkline-halo--green {
+  color: #10b981;
+}
+
+.bezent-att-sparkline-halo--rose {
+  color: #f43f5e;
+}
+
+.bezent-att-sparkline-halo--amber {
+  color: #f59e0b;
+}
+
+.bezent-att-sparkline-halo--purple {
+  color: #7c3aed;
+}
 
 .bezent-att-sparkline-dot {
   stroke-width: 1.8;
   stroke: #ffffff;
 }
 
-.bezent-att-sparkline-dot--blue { fill: #2563eb; }
-.bezent-att-sparkline-dot--green { fill: #10b981; }
-.bezent-att-sparkline-dot--rose { fill: #f43f5e; }
-.bezent-att-sparkline-dot--amber { fill: #f59e0b; }
-.bezent-att-sparkline-dot--purple { fill: #7c3aed; }
+.bezent-att-sparkline-dot--blue {
+  fill: #2563eb;
+}
+
+.bezent-att-sparkline-dot--green {
+  fill: #10b981;
+}
+
+.bezent-att-sparkline-dot--rose {
+  fill: #f43f5e;
+}
+
+.bezent-att-sparkline-dot--amber {
+  fill: #f59e0b;
+}
+
+.bezent-att-sparkline-dot--purple {
+  fill: #7c3aed;
+}
 
 [data-theme='dark'] .bezent-att-sparkline-dot {
   stroke: #1e293b;
+}
+
+/* ── Interactive Tracker, Guideline & Tooltip ── */
+.bezent-att-sparkline-tracker {
+  pointer-events: none;
+}
+
+.bezent-att-sparkline-guideline {
+  stroke: #94a3b8;
+  stroke-width: 1;
+  stroke-dasharray: 2 2;
+}
+
+[data-theme='dark'] .bezent-att-sparkline-guideline {
+  stroke: #64748b;
+}
+
+.bezent-att-sparkline-tip-bg {
+  fill: #0f172a;
+  stroke: rgba(255, 255, 255, 0.15);
+  stroke-width: 0.6;
+}
+
+[data-theme='dark'] .bezent-att-sparkline-tip-bg {
+  fill: #020617;
+  stroke: #475569;
+}
+
+.bezent-att-sparkline-tip-text {
+  fill: #f8fafc;
+  font-size: 6px;
+  font-weight: 700;
+  font-family: inherit;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.01em;
+}
+
+.bezent-att-kpi-right {
+  cursor: crosshair;
+}
+
+.bezent-att-kpi-graph-tag.is-scrubbing {
+  color: #0f172a !important;
+  font-weight: 800 !important;
+}
+
+[data-theme='dark'] .bezent-att-kpi-graph-tag.is-scrubbing {
+  color: #f8fafc !important;
+}
+
+.bezent-att-kpi-sub.is-scrubbing {
+  box-shadow: 0 0 0 1px currentColor;
+  font-weight: 700;
 }
 
 /* ── Skeletons ── */
@@ -2201,24 +2370,31 @@
 .bezent-kpi-ring-segment--scheduled {
   stroke: #2563eb;
 }
+
 .bezent-kpi-ring-segment--ontime {
   stroke: #059669;
 }
+
 .bezent-kpi-ring-segment--late {
   stroke: #f59e0b;
 }
+
 .bezent-kpi-ring-segment--halfday {
   stroke: #06b6d4;
 }
+
 .bezent-kpi-ring-segment--absent {
   stroke: #e11d48;
 }
+
 .bezent-kpi-ring-segment--leave {
   stroke: #d97706;
 }
+
 .bezent-kpi-ring-segment--missing-punch {
   stroke: #8b5cf6;
 }
+
 .bezent-kpi-ring-segment--regularization {
   stroke: #7c3aed;
 }
@@ -2226,24 +2402,31 @@
 [data-theme='dark'] .bezent-kpi-ring-segment--scheduled {
   stroke: #60a5fa;
 }
+
 [data-theme='dark'] .bezent-kpi-ring-segment--ontime {
   stroke: #10b981;
 }
+
 [data-theme='dark'] .bezent-kpi-ring-segment--late {
   stroke: #fbbf24;
 }
+
 [data-theme='dark'] .bezent-kpi-ring-segment--halfday {
   stroke: #22d3ee;
 }
+
 [data-theme='dark'] .bezent-kpi-ring-segment--absent {
   stroke: #f43f5e;
 }
+
 [data-theme='dark'] .bezent-kpi-ring-segment--leave {
   stroke: #f59e0b;
 }
+
 [data-theme='dark'] .bezent-kpi-ring-segment--missing-punch {
   stroke: #a78bfa;
 }
+
 [data-theme='dark'] .bezent-kpi-ring-segment--regularization {
   stroke: #c4b5fd;
 }
@@ -2252,24 +2435,31 @@
 .bezent-kpi-ring-icon-wrapper--scheduled {
   color: #2563eb;
 }
+
 .bezent-kpi-ring-icon-wrapper--ontime {
   color: #059669;
 }
+
 .bezent-kpi-ring-icon-wrapper--late {
   color: #f59e0b;
 }
+
 .bezent-kpi-ring-icon-wrapper--halfday {
   color: #06b6d4;
 }
+
 .bezent-kpi-ring-icon-wrapper--absent {
   color: #e11d48;
 }
+
 .bezent-kpi-ring-icon-wrapper--leave {
   color: #d97706;
 }
+
 .bezent-kpi-ring-icon-wrapper--missing-punch {
   color: #8b5cf6;
 }
+
 .bezent-kpi-ring-icon-wrapper--regularization {
   color: #7c3aed;
 }
@@ -2277,24 +2467,31 @@
 [data-theme='dark'] .bezent-kpi-ring-icon-wrapper--scheduled {
   color: #60a5fa;
 }
+
 [data-theme='dark'] .bezent-kpi-ring-icon-wrapper--ontime {
   color: #10b981;
 }
+
 [data-theme='dark'] .bezent-kpi-ring-icon-wrapper--late {
   color: #fbbf24;
 }
+
 [data-theme='dark'] .bezent-kpi-ring-icon-wrapper--halfday {
   color: #22d3ee;
 }
+
 [data-theme='dark'] .bezent-kpi-ring-icon-wrapper--absent {
   color: #f43f5e;
 }
+
 [data-theme='dark'] .bezent-kpi-ring-icon-wrapper--leave {
   color: #f59e0b;
 }
+
 [data-theme='dark'] .bezent-kpi-ring-icon-wrapper--missing-punch {
   color: #a78bfa;
 }
+
 [data-theme='dark'] .bezent-kpi-ring-icon-wrapper--regularization {
   color: #c4b5fd;
 }
@@ -2322,6 +2519,7 @@
   background: #f1f5f9;
   color: #475569;
 }
+
 .bezent-att-kpi-badge--neutral .bezent-att-kpi-badge-dot {
   background: #94a3b8;
 }
@@ -2330,6 +2528,7 @@
   background: #ecfdf5;
   color: #047857;
 }
+
 .bezent-att-kpi-badge--success .bezent-att-kpi-badge-dot {
   background: #10b981;
 }
@@ -2338,6 +2537,7 @@
   background: #fffbeb;
   color: #b45309;
 }
+
 .bezent-att-kpi-badge--warning .bezent-att-kpi-badge-dot {
   background: #f59e0b;
 }
@@ -2346,6 +2546,7 @@
   background: #fef2f2;
   color: #b91c1c;
 }
+
 .bezent-att-kpi-badge--danger .bezent-att-kpi-badge-dot {
   background: #ef4444;
 }
@@ -2354,6 +2555,7 @@
   background: #eff6ff;
   color: #1d4ed8;
 }
+
 .bezent-att-kpi-badge--info .bezent-att-kpi-badge-dot {
   background: #3b82f6;
 }
@@ -2362,18 +2564,22 @@
   background: rgba(148, 163, 184, 0.15);
   color: #cbd5e1;
 }
+
 [data-theme='dark'] .bezent-att-kpi-badge--success {
   background: rgba(16, 185, 129, 0.15);
   color: #6ee7b7;
 }
+
 [data-theme='dark'] .bezent-att-kpi-badge--warning {
   background: rgba(245, 158, 11, 0.15);
   color: #fcd34d;
 }
+
 [data-theme='dark'] .bezent-att-kpi-badge--danger {
   background: rgba(239, 68, 68, 0.15);
   color: #fca5a5;
 }
+
 [data-theme='dark'] .bezent-att-kpi-badge--info {
   background: rgba(59, 130, 246, 0.15);
   color: #93c5fd;
@@ -2531,9 +2737,11 @@
 .bezent-att-legend-pill--present {
   background: #2563eb;
 }
+
 .bezent-att-legend-pill--absent {
   background: #7c3aed;
 }
+
 .bezent-att-legend-pill--late {
   background: #10b981;
 }
@@ -2629,9 +2837,11 @@
 .bezent-att-summary-val--present {
   color: #1d4ed8 !important;
 }
+
 .bezent-att-summary-val--absent {
   color: #6d28d9 !important;
 }
+
 .bezent-att-summary-val--late {
   color: #047857 !important;
 }
@@ -2639,9 +2849,11 @@
 [data-theme='dark'] .bezent-att-summary-val--present {
   color: #60a5fa !important;
 }
+
 [data-theme='dark'] .bezent-att-summary-val--absent {
   color: #c084fc !important;
 }
+
 [data-theme='dark'] .bezent-att-summary-val--late {
   color: #6ee7b7 !important;
 }
@@ -2790,9 +3002,11 @@
 .bezent-att-dot--present {
   fill: #2563eb;
 }
+
 .bezent-att-dot--absent {
   fill: #7c3aed;
 }
+
 .bezent-att-dot--late {
   fill: #10b981;
 }
@@ -3019,10 +3233,12 @@
   background: rgba(16, 185, 129, 0.15);
   color: #6ee7b7;
 }
+
 [data-theme='dark'] .bezent-att-dist-rate-chip.is-mid {
   background: rgba(245, 158, 11, 0.15);
   color: #fcd34d;
 }
+
 [data-theme='dark'] .bezent-att-dist-rate-chip.is-low {
   background: rgba(239, 68, 68, 0.15);
   color: #fca5a5;
@@ -3044,6 +3260,7 @@
 .bezent-att-dist-bar-bg {
   fill: #f1f5f9;
 }
+
 [data-theme='dark'] .bezent-att-dist-bar-bg {
   fill: #334155;
 }
@@ -3051,9 +3268,11 @@
 .bezent-att-dist-bar-seg--present {
   fill: #10b981;
 }
+
 .bezent-att-dist-bar-seg--absent {
   fill: #ef4444;
 }
+
 .bezent-att-dist-bar-seg--leave {
   fill: #3b82f6;
 }
@@ -3473,10 +3692,12 @@
   background: rgba(239, 68, 68, 0.2);
   color: #fca5a5;
 }
+
 [data-theme='dark'] .bezent-att-action-item-badge.is-warning {
   background: rgba(245, 158, 11, 0.2);
   color: #fcd34d;
 }
+
 [data-theme='dark'] .bezent-att-action-item-badge.is-neutral {
   background: #334155;
   color: #cbd5e1;
@@ -3733,6 +3954,7 @@
 .bezent-att-readiness-bar-bg {
   fill: #f1f5f9;
 }
+
 [data-theme='dark'] .bezent-att-readiness-bar-bg {
   fill: #334155;
 }
@@ -3740,9 +3962,11 @@
 .bezent-att-readiness-seg--ready {
   fill: #10b981;
 }
+
 .bezent-att-readiness-seg--review {
   fill: #f59e0b;
 }
+
 .bezent-att-readiness-seg--blocked {
   fill: #ef4444;
 }
@@ -4948,21 +5172,27 @@
 .tone-emerald {
   color: #047857 !important;
 }
+
 .tone-blue {
   color: #2563eb !important;
 }
+
 .tone-amber {
   color: #b45309 !important;
 }
+
 .tone-rose {
   color: #b91c1c !important;
 }
+
 .tone-purple {
   color: #7c3aed !important;
 }
+
 .tone-cyan {
   color: #0891b2 !important;
 }
+
 .tone-slate {
   color: #475569 !important;
 }
@@ -4972,6 +5202,7 @@
   .bezent-att-kpi-grid {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
+
   .bezent-att-intelligence-grid {
     grid-template-columns: 1fr;
   }
@@ -4981,6 +5212,7 @@
   .bezent-att-kpi-grid {
     grid-template-columns: 1fr 1fr;
   }
+
   .bezent-att-header-controls {
     width: 100%;
   }
@@ -5863,18 +6095,9 @@ thead .bezent-attendance-col--sticky-right {
   box-shadow: -4px 0 8px -2px rgba(0, 0, 0, 0.4);
 }
 
-[data-theme='dark']
-  .bezent-table.is-hoverable
-  .bezent-table__row:hover
-  .bezent-attendance-col--sticky-checkbox,
-[data-theme='dark']
-  .bezent-table.is-hoverable
-  .bezent-table__row:hover
-  .bezent-attendance-col--sticky-employee,
-[data-theme='dark']
-  .bezent-table.is-hoverable
-  .bezent-table__row:hover
-  .bezent-attendance-col--sticky-right {
+[data-theme='dark'] .bezent-table.is-hoverable .bezent-table__row:hover .bezent-attendance-col--sticky-checkbox,
+[data-theme='dark'] .bezent-table.is-hoverable .bezent-table__row:hover .bezent-attendance-col--sticky-employee,
+[data-theme='dark'] .bezent-table.is-hoverable .bezent-table__row:hover .bezent-attendance-col--sticky-right {
   background-color: var(--bg-card-hover, #243044);
 }
 
@@ -5987,15 +6210,19 @@ thead .bezent-attendance-col--sticky-right {
 .bezent-req-stats__dot--warning {
   background: var(--status-warning);
 }
+
 .bezent-req-stats__dot--info {
   background: var(--status-info);
 }
+
 .bezent-req-stats__dot--success {
   background: var(--status-success);
 }
+
 .bezent-req-stats__dot--danger {
   background: var(--status-danger);
 }
+
 .bezent-req-stats__dot--neutral {
   background: var(--status-neutral-fg);
 }
