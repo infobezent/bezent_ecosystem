@@ -1,0 +1,60 @@
+/* ==========================================================================
+   3. HRMS Onboarding & Candidate Registration Workspace
+   ========================================================================== */
+
+.employee-registration-workspace-content {
+  background: var(--app-canvas, #f6f8fc);
+}
+
+.employee-registration-workspace-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacing-md, 16px);
+  padding: 16px 24px;
+}
+
+.bezent-modal__header--brand .onboarding-page__drafts-btn,
+.onboarding-page__drafts-btn,
+.bezent-btn-draft {
+  background: #ffffff;
+  color: #041e49;
+  border: 1px solid #dde3ea;
+  box-shadow: 0 1px 2px rgba(4, 30, 73, 0.08);
+  font-weight: 600;
+  cursor: pointer;
+  border-radius: var(--radius-md, 8px);
+  transition: all 0.2s ease;
+}
+
+.bezent-modal__header--brand .onboarding-page__drafts-btn:hover,
+.onboarding-page__drafts-btn:hover,
+.bezent-btn-draft:hover {
+  background: var(--bg-surface-secondary, #f0f4f9);
+  border-color: var(--border-focus, var(--blue-interactive));
+  color: var(--brand-primary, #041e49);
+}
+
+[data-theme='dark'] .bezent-modal__header--brand .onboarding-page__drafts-btn,
+[data-theme='dark'] .onboarding-page__drafts-btn,
+[data-theme='dark'] .bezent-btn-draft {
+  background: rgba(56, 189, 248, 0.08);
+  color: #f8fafc;
+  border: 1px solid rgba(56, 189, 248, 0.32);
+  box-shadow: 0 1px 3px rgba(2, 11, 28, 0.5);
+}
+
+[data-theme='dark'] .bezent-modal__header--brand .onboarding-page__drafts-btn:hover,
+[data-theme='dark'] .onboarding-page__drafts-btn:hover,
+[data-theme='dark'] .bezent-btn-draft:hover {
+  background: rgba(22, 131, 255, 0.22);
+  color: #ffffff;
+  border-color: #1683ff;
+}
+
+.review-section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-lg, 24px);
+  width: 100%;
+}

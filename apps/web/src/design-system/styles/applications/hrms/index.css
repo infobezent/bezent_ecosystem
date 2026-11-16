@@ -1,0 +1,35 @@
+/* ==========================================================================
+   BEZENT Design System — HRMS Application Stylesheet (entry)
+   Centralized styles for the HRMS business application, including
+   Employee Self-Service (ESS), Attendance, Onboarding, and HR Administration.
+   All styles conform to BEZENT design tokens and support Light / Dark themes.
+   ========================================================================== */
+
+/* Per-module partials. Import order is the original cascade order; do not reorder. */
+@import './ess/attendance-hero.css';
+@import './attendance/calendar.css';
+@import './ess/attendance-workspace.css';
+@import './onboarding/registration.css';
+@import './settings/builder.css';
+@import './ess/profile.css';
+@import './ess/change-requests.css';
+@import './ess/privacy.css';
+@import './ess/timesheets.css';
+@import './ess/dashboard.css';
+@import './attendance/overview-clay.css';
+@import './workforce/overview.css';
+@import './workforce/kpi-onboarding.css';
+@import './workforce/kpi-onboarding-ring.css';
+@import './workforce/kpi-transfers.css';
+@import './workforce/kpi-promotions.css';
+@import './workforce/kpi-offboarding.css';
+@import './workforce/kpi-records.css';
+@import './workforce/kpi-cards.css';
+@import './workforce/analytics.css';
+@import './workforce/composition.css';
+@import './workforce/planning-alerts.css';
+@import './workforce/drawer-details.css';
+@import './workforce/talent-pipeline.css';
+@import './workforce/lifecycle.css';
+@import './workforce/action-center.css';
+@import './attendance/overview.css';

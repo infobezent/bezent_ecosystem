@@ -1,0 +1,600 @@
+/* ── Drawer Custom Detail List Styles ── */
+.bezent-wf-drawer-footer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+  width: 100%;
+}
+
+.bezent-wf-drawer-content {
+  padding: 8px 0;
+}
+
+.bezent-wf-drawer-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.bezent-wf-drawer-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 14px 16px;
+  background: #f8fafc;
+  border: 1px solid #e9eaf4;
+  border-radius: 12px;
+  transition: background-color 0.16s ease;
+}
+
+.bezent-wf-drawer-item:hover {
+  background: #f1f5f9;
+}
+
+[data-theme='dark'] .bezent-wf-drawer-item {
+  background: #1e293b;
+  border-color: #334155;
+}
+
+[data-theme='dark'] .bezent-wf-drawer-item:hover {
+  background: #24344d;
+}
+
+.bezent-wf-drawer-item-title {
+  font-size: 13.5px;
+  font-weight: 650;
+  color: #20263a;
+  margin: 0;
+}
+
+[data-theme='dark'] .bezent-wf-drawer-item-title {
+  color: #f8fafc;
+}
+
+.bezent-wf-drawer-item-desc {
+  font-size: 12px;
+  color: #64748b;
+  display: block;
+  margin-top: 2px;
+}
+
+[data-theme='dark'] .bezent-wf-drawer-item-desc {
+  color: #94a3b8;
+}
+
+.bezent-wf-drawer-meta-pill {
+  font-size: 11px;
+  font-weight: 650;
+  padding: 3px 9px;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+
+.bezent-wf-drawer-meta-pill--amber {
+  background: #fef3c7;
+  color: #b45309;
+}
+
+.bezent-wf-drawer-meta-pill--purple {
+  background: #ede9fe;
+  color: #6d28d9;
+}
+
+.bezent-wf-drawer-meta-pill--rose {
+  background: #ffe4e6;
+  color: #be123c;
+}
+
+.bezent-wf-drawer-meta-pill--blue {
+  background: #eff6ff;
+  color: var(--blue-600);
+}
+
+[data-theme='dark'] .bezent-wf-drawer-meta-pill--amber {
+  background: rgba(217, 119, 6, 0.25);
+  color: #fde68a;
+}
+
+[data-theme='dark'] .bezent-wf-drawer-meta-pill--purple {
+  background: rgba(124, 58, 237, 0.25);
+  color: #c4b5fd;
+}
+
+[data-theme='dark'] .bezent-wf-drawer-meta-pill--rose {
+  background: rgba(225, 29, 72, 0.25);
+  color: #fda4af;
+}
+
+[data-theme='dark'] .bezent-wf-drawer-meta-pill--blue {
+  background: rgba(37, 99, 235, 0.25);
+  color: #93c5fd;
+}
+
+@media (max-width: 860px) {
+  .bezent-wf-planning-stat-cards {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 16px;
+    padding: 14px;
+  }
+}
+
+.bezent-wf-planning-stat-card {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 0 20px;
+  background: transparent;
+  border: none;
+  cursor: default;
+}
+
+.bezent-wf-planning-stat-card:first-child {
+  padding-left: 0;
+}
+
+.bezent-wf-planning-stat-card:not(:last-child) {
+  border-right: 1px solid #e9eaf4;
+}
+
+.bezent-wf-planning-stat-card:last-child {
+  padding-right: 0;
+}
+
+[data-theme='dark'] .bezent-wf-planning-stat-cards {
+  background: #1e293b;
+  border-color: #334155;
+}
+
+[data-theme='dark'] .bezent-wf-planning-stat-card:not(:last-child) {
+  border-right-color: #334155;
+}
+
+@media (max-width: 860px) {
+  .bezent-wf-planning-stat-card {
+    padding: 0;
+  }
+  .bezent-wf-planning-stat-card:not(:last-child) {
+    border-right: none;
+    border-bottom: 1px solid #e9eaf4;
+    padding-bottom: 12px;
+  }
+  [data-theme='dark'] .bezent-wf-planning-stat-card:not(:last-child) {
+    border-bottom-color: #334155;
+  }
+}
+
+.bezent-wf-planning-stat-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.bezent-wf-planning-stat-title {
+  font-size: 11px;
+  font-weight: 700;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+[data-theme='dark'] .bezent-wf-planning-stat-title {
+  color: #94a3b8;
+}
+
+.bezent-wf-planning-stat-icon {
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.bezent-wf-planning-stat-icon--blue {
+  background: #eff6ff;
+  color: var(--blue-600);
+  border: 1px solid #dbeafe;
+}
+
+.bezent-wf-planning-stat-icon--amber {
+  background: #fffbeb;
+  color: #d97706;
+  border: 1px solid #fef3c7;
+}
+
+.bezent-wf-planning-stat-icon--emerald {
+  background: #ecfdf5;
+  color: #059669;
+  border: 1px solid #d1fae5;
+}
+
+[data-theme='dark'] .bezent-wf-planning-stat-icon--blue {
+  background: rgba(37, 99, 235, 0.2);
+  border-color: rgba(37, 99, 235, 0.35);
+  color: #93c5fd;
+}
+
+[data-theme='dark'] .bezent-wf-planning-stat-icon--amber {
+  background: rgba(217, 119, 6, 0.2);
+  border-color: rgba(217, 119, 6, 0.35);
+  color: #fde68a;
+}
+
+[data-theme='dark'] .bezent-wf-planning-stat-icon--emerald {
+  background: rgba(5, 150, 105, 0.2);
+  border-color: rgba(5, 150, 105, 0.35);
+  color: #6ee7b7;
+}
+
+.bezent-wf-planning-stat-main {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+}
+
+.bezent-wf-planning-mini-track {
+  width: 100%;
+  height: 5px;
+  background: #e2e8f0;
+  border-radius: 999px;
+  overflow: hidden;
+  margin-top: 4px;
+}
+
+.bezent-wf-planning-mini-fill {
+  height: 100%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #3b82f6, var(--blue-600));
+  transition: width 0.4s ease;
+}
+
+[data-theme='dark'] .bezent-wf-planning-mini-track {
+  background: #334155;
+}
+
+.bezent-wf-planning-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+.bezent-wf-planning-tag--blue {
+  background: #eff6ff;
+  color: #1d4ed8;
+  border: 1px solid #bfdbfe;
+}
+
+.bezent-wf-planning-tag--amber {
+  background: #fffbeb;
+  color: #b45309;
+  border: 1px solid #fde68a;
+}
+
+.bezent-wf-planning-tag--emerald {
+  background: #ecfdf5;
+  color: #047857;
+  border: 1px solid #a7f3d0;
+}
+
+[data-theme='dark'] .bezent-wf-planning-tag--blue {
+  background: rgba(37, 99, 235, 0.2);
+  color: #93c5fd;
+  border-color: rgba(37, 99, 235, 0.35);
+}
+
+[data-theme='dark'] .bezent-wf-planning-tag--amber {
+  background: rgba(217, 119, 6, 0.2);
+  color: #fde68a;
+  border-color: rgba(217, 119, 6, 0.35);
+}
+
+[data-theme='dark'] .bezent-wf-planning-tag--emerald {
+  background: rgba(5, 150, 105, 0.2);
+  color: #6ee7b7;
+  border-color: rgba(5, 150, 105, 0.35);
+}
+
+.bezent-wf-planning-stat-val {
+  font-size: 24px;
+  font-weight: 800;
+  color: #0f172a;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+}
+
+[data-theme='dark'] .bezent-wf-planning-stat-val {
+  color: #f8fafc;
+}
+
+.bezent-wf-planning-stat-denominator {
+  font-size: 13px;
+  font-weight: 600;
+  color: #64748b;
+}
+
+[data-theme='dark'] .bezent-wf-planning-stat-denominator {
+  color: #94a3b8;
+}
+
+.bezent-wf-planning-stat-hint {
+  font-size: 11.5px;
+  color: #64748b;
+  line-height: 1.2;
+}
+
+[data-theme='dark'] .bezent-wf-planning-stat-hint {
+  color: #94a3b8;
+}
+
+/* Legacy chips support if referenced */
+.bezent-wf-planning-chips {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 12px;
+}
+
+@media (max-width: 1080px) {
+  .bezent-wf-planning-chips {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (max-width: 600px) {
+  .bezent-wf-planning-chips {
+    grid-template-columns: 1fr;
+  }
+}
+
+.bezent-wf-planning-chip {
+  background: #f8fafc;
+  border: 1px solid #e9eaf4;
+  border-radius: 12px;
+  padding: 12px 14px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  transition: all 0.18s ease;
+}
+
+.bezent-wf-planning-chip:hover {
+  background: #ffffff;
+  border-color: #cbd5e1;
+  box-shadow: 0 4px 14px rgba(32, 45, 75, 0.05);
+  transform: translateY(-1px);
+}
+
+[data-theme='dark'] .bezent-wf-planning-chip {
+  background: #1e293b;
+  border-color: #334155;
+}
+
+[data-theme='dark'] .bezent-wf-planning-chip:hover {
+  background: #24344d;
+}
+
+.bezent-wf-chip-icon {
+  width: 34px;
+  height: 34px;
+  border-radius: 9px;
+  background: #eee9ff;
+  color: #7c3aed;
+  border: 1px solid #e5dcff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.bezent-wf-chip-icon--green {
+  background: #ecfdf5;
+  color: #059669;
+  border: 1px solid #d1fae5;
+}
+.bezent-wf-chip-icon--orange,
+.bezent-wf-chip-icon--red {
+  background: #fdf2f8;
+  color: #db2777;
+  border: 1px solid #fce7f3;
+}
+.bezent-wf-chip-icon--teal {
+  background: #eff6ff;
+  color: var(--blue-600);
+  border: 1px solid #dbeafe;
+}
+
+[data-theme='dark'] .bezent-wf-chip-icon {
+  background: rgba(124, 58, 237, 0.2);
+  border-color: rgba(124, 58, 237, 0.35);
+  color: #c4b5fd;
+}
+[data-theme='dark'] .bezent-wf-chip-icon--green {
+  background: rgba(5, 150, 105, 0.2);
+  border-color: rgba(5, 150, 105, 0.35);
+  color: #6ee7b7;
+}
+[data-theme='dark'] .bezent-wf-chip-icon--orange,
+[data-theme='dark'] .bezent-wf-chip-icon--red {
+  background: rgba(249, 168, 212, 0.2);
+  border-color: rgba(249, 168, 212, 0.35);
+  color: #f9a8d4;
+}
+[data-theme='dark'] .bezent-wf-chip-icon--teal {
+  background: rgba(37, 99, 235, 0.2);
+  border-color: rgba(37, 99, 235, 0.35);
+  color: #93c5fd;
+}
+
+.bezent-wf-chip-content {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.bezent-wf-chip-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: #788197;
+  line-height: 1.2;
+}
+
+[data-theme='dark'] .bezent-wf-chip-label {
+  color: #94a3b8;
+}
+
+.bezent-wf-chip-val {
+  font-size: 20px;
+  font-weight: 800;
+  color: #20263a;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+}
+
+[data-theme='dark'] .bezent-wf-chip-val {
+  color: #f8fafc;
+}
+
+.bezent-wf-planning-split {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 28px;
+}
+
+@media (max-width: 960px) {
+  .bezent-wf-planning-split {
+    grid-template-columns: 1fr;
+  }
+}
+
+.bezent-wf-dept-headcount-row {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  padding: 7px 0;
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid #f1f5f9;
+  transition: all 0.15s ease;
+  cursor: default;
+}
+
+.bezent-wf-dept-headcount-row:last-child {
+  border-bottom: none;
+}
+
+.bezent-wf-dept-headcount-row:hover {
+  background: transparent;
+}
+
+[data-theme='dark'] .bezent-wf-dept-headcount-row {
+  background: transparent;
+  border-color: transparent;
+  border-bottom: 1px solid #24344d;
+}
+
+[data-theme='dark'] .bezent-wf-dept-headcount-row:hover {
+  background: transparent;
+}
+
+.bezent-wf-dept-headcount-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 13px;
+  font-weight: 650;
+  color: #20263a;
+}
+
+[data-theme='dark'] .bezent-wf-dept-headcount-top {
+  color: #f8fafc;
+}
+
+.bezent-wf-dept-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.bezent-wf-dept-ratio {
+  font-size: 11.5px;
+  font-weight: 600;
+  color: #64748b;
+}
+
+[data-theme='dark'] .bezent-wf-dept-ratio {
+  color: #94a3b8;
+}
+
+.bezent-wf-dept-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 750;
+  line-height: 1.2;
+}
+
+.bezent-wf-dept-pill--gap-high {
+  background: #fef2f2;
+  color: #dc2626;
+  border: 1px solid #fecaca;
+}
+
+.bezent-wf-dept-pill--gap-mod {
+  background: #fffbeb;
+  color: #d97706;
+  border: 1px solid #fde68a;
+}
+
+.bezent-wf-dept-pill--on-track {
+  background: #ecfdf5;
+  color: #059669;
+  border: 1px solid #a7f3d0;
+}
+
+[data-theme='dark'] .bezent-wf-dept-pill--gap-high {
+  background: rgba(220, 38, 38, 0.2);
+  color: #fca5a5;
+  border-color: rgba(220, 38, 38, 0.35);
+}
+
+[data-theme='dark'] .bezent-wf-dept-pill--gap-mod {
+  background: rgba(217, 119, 6, 0.2);
+  color: #fde68a;
+  border-color: rgba(217, 119, 6, 0.35);
+}
+
+[data-theme='dark'] .bezent-wf-dept-pill--on-track {
+  background: rgba(5, 150, 105, 0.2);
+  color: #6ee7b7;
+  border-color: rgba(5, 150, 105, 0.35);
+}
+
+.bezent-wf-dept-bar-track {
+  width: 100%;
+}
+
+.bezent-wf-dept-bar-track .bezent-progress-bar__track {
+  background: #e2e8f0;
+  height: 5px;
+  border-radius: 999px;
+}
+
+.bezent-wf-dept-bar-track .bezent-progress-bar__fill--primary {
+  background: linear-gradient(90deg, #3b82f6, var(--blue-600));
+  border-radius: 999px;
+}
+
+[data-theme='dark'] .bezent-wf-dept-bar-track .bezent-progress-bar__track {
+  background: #334155;
+}

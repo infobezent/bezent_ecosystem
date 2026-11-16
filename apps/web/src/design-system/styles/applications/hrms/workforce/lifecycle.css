@@ -1,0 +1,399 @@
+/* ── Tier 5: Employee Lifecycle (Continuous Wave & Animated Frosted Pillars) ── */
+.bezent-wf-lifecycle-box {
+  background: #ffffff;
+  border: 1px solid #ebeef5;
+  border-radius: 22px;
+  padding: 24px 28px;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 4px 20px -2px rgba(32, 45, 75, 0.03);
+}
+
+[data-theme='dark'] .bezent-wf-lifecycle-box {
+  background: #0f172a;
+  border-color: #1e293b;
+  box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.3);
+}
+
+.bezent-wf-section-subtitle {
+  margin: 0 0 8px 0;
+  font-size: 13px;
+  color: #788197;
+  line-height: 1.4;
+}
+
+[data-theme='dark'] .bezent-wf-section-subtitle {
+  color: #94a3b8;
+}
+
+.bezent-wf-lifecycle-stage-area {
+  position: relative;
+  width: 100%;
+  min-height: 280px;
+  margin-top: 14px;
+}
+
+/* ── Continuous SVG Wave Overlay ── */
+.bezent-wf-lifecycle-wave-svg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 1;
+  overflow: visible;
+}
+
+/* Wave Path Drawing Animation */
+@keyframes wfWaveDraw {
+  0% {
+    stroke-dashoffset: 1400;
+  }
+  100% {
+    stroke-dashoffset: 0;
+  }
+}
+
+.bezent-wf-wave-stroke-line {
+  stroke-dasharray: 1400;
+  stroke-dashoffset: 0;
+  animation: wfWaveDraw 1.6s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+@keyframes wfWaveAreaFade {
+  0% {
+    opacity: 0;
+    transform: scaleY(0.92);
+  }
+  100% {
+    opacity: 1;
+    transform: scaleY(1);
+  }
+}
+
+.bezent-wf-wave-area-path {
+  transform-origin: bottom;
+  animation: wfWaveAreaFade 1.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes wfWaveBackFlow {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-4px);
+  }
+}
+
+.bezent-wf-wave-back-path {
+  animation: wfWaveBackFlow 6s ease-in-out infinite;
+  transform-origin: center;
+}
+
+/* ── HTML Overlay Pillars Grid ── */
+.bezent-wf-lifecycle-pillars {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 1.8%;
+  padding: 0 3%;
+  box-sizing: border-box;
+  z-index: 2;
+  pointer-events: none;
+}
+
+@keyframes wfPillarRise {
+  0% {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.bezent-wf-pillar {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  cursor: pointer;
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  padding-bottom: 28px;
+  box-sizing: border-box;
+  height: 100%;
+  pointer-events: auto;
+  transition: none;
+  animation: wfPillarRise 0.7s cubic-bezier(0.16, 1, 0.3, 1) backwards;
+}
+
+.bezent-wf-pillar--hovered,
+.bezent-wf-pillar:hover {
+  transform: none;
+}
+
+.bezent-wf-pillar--0,
+.bezent-wf-pillar--1 {
+  padding-top: 96px;
+  animation-delay: 0.15s;
+}
+
+.bezent-wf-pillar--2 {
+  padding-top: 102px;
+  animation-delay: 0.3s;
+}
+
+.bezent-wf-pillar--3 {
+  padding-top: 48px;
+  animation-delay: 0.45s;
+}
+
+.bezent-wf-pillar--4 {
+  padding-top: 106px;
+  animation-delay: 0.6s;
+}
+
+/* ── SVG Card Shapes (Integrated with Wave Curve) ── */
+.bezent-wf-svg-card {
+  stroke: rgba(226, 232, 240, 0.85);
+  stroke-width: 1.25px;
+  filter: drop-shadow(0 4px 14px rgba(0, 0, 0, 0.04));
+  transition: none;
+  transform-origin: center bottom;
+  cursor: pointer;
+  pointer-events: auto;
+}
+
+.bezent-wf-svg-card--hovered,
+.bezent-wf-svg-card:hover {
+  transform: none;
+}
+
+.bezent-wf-svg-card--0.bezent-wf-svg-card--hovered,
+.bezent-wf-svg-card--0:hover,
+.bezent-wf-svg-card--1.bezent-wf-svg-card--hovered,
+.bezent-wf-svg-card--1:hover,
+.bezent-wf-svg-card--2.bezent-wf-svg-card--hovered,
+.bezent-wf-svg-card--2:hover,
+.bezent-wf-svg-card--3.bezent-wf-svg-card--hovered,
+.bezent-wf-svg-card--3:hover,
+.bezent-wf-svg-card--4.bezent-wf-svg-card--hovered,
+.bezent-wf-svg-card--4:hover {
+  stroke: rgba(226, 232, 240, 0.85);
+  filter: drop-shadow(0 4px 14px rgba(0, 0, 0, 0.04));
+  transform: none;
+}
+
+[data-theme='dark'] .bezent-wf-svg-card {
+  stroke: rgba(255, 255, 255, 0.1);
+  filter: drop-shadow(0 4px 14px rgba(0, 0, 0, 0.25));
+}
+
+[data-theme='dark'] .bezent-wf-svg-card--hovered,
+[data-theme='dark'] .bezent-wf-svg-card:hover {
+  stroke: rgba(255, 255, 255, 0.1);
+  filter: drop-shadow(0 4px 14px rgba(0, 0, 0, 0.25));
+  transform: none;
+}
+
+/* Pillar Content Elements */
+.bezent-wf-pillar-icon {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: none;
+}
+
+.bezent-wf-pillar:hover .bezent-wf-pillar-icon {
+  transform: none;
+}
+
+.bezent-wf-pillar--blue .bezent-wf-pillar-icon {
+  background: #eff6ff;
+  color: #3b82f6;
+}
+
+.bezent-wf-pillar--green .bezent-wf-pillar-icon {
+  background: #ecfdf5;
+  color: #10b981;
+}
+
+.bezent-wf-pillar--amber .bezent-wf-pillar-icon {
+  background: #f5f3ff;
+  color: #7c3aed;
+}
+
+.bezent-wf-pillar--purple .bezent-wf-pillar-icon {
+  background: #f5f3ff;
+  color: #7c3aed;
+}
+
+.bezent-wf-pillar--pink .bezent-wf-pillar-icon,
+.bezent-wf-pillar--red .bezent-wf-pillar-icon {
+  background: #fdf2f8;
+  color: #db2777;
+}
+
+[data-theme='dark'] .bezent-wf-pillar--blue .bezent-wf-pillar-icon {
+  background: rgba(59, 130, 246, 0.2);
+  color: #60a5fa;
+}
+
+[data-theme='dark'] .bezent-wf-pillar--green .bezent-wf-pillar-icon {
+  background: rgba(16, 185, 129, 0.2);
+  color: #34d399;
+}
+
+[data-theme='dark'] .bezent-wf-pillar--amber .bezent-wf-pillar-icon {
+  background: rgba(124, 58, 237, 0.2);
+  color: #c4b5fd;
+}
+
+[data-theme='dark'] .bezent-wf-pillar--purple .bezent-wf-pillar-icon {
+  background: rgba(124, 58, 237, 0.2);
+  color: #c4b5fd;
+}
+
+[data-theme='dark'] .bezent-wf-pillar--pink .bezent-wf-pillar-icon,
+[data-theme='dark'] .bezent-wf-pillar--red .bezent-wf-pillar-icon {
+  background: rgba(249, 168, 212, 0.2);
+  color: #f9a8d4;
+}
+
+.bezent-wf-pillar-count {
+  font-size: 22px;
+  font-weight: 750;
+  color: #0f172a;
+  line-height: 1.1;
+  margin-top: 10px;
+  margin-bottom: 2px;
+}
+
+[data-theme='dark'] .bezent-wf-pillar-count {
+  color: #f8fafc;
+}
+
+.bezent-wf-pillar-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: #1e293b;
+  margin-bottom: 12px;
+  line-height: 1.2;
+}
+
+[data-theme='dark'] .bezent-wf-pillar-label {
+  color: #cbd5e1;
+}
+
+.bezent-wf-pillar-volume {
+  margin-top: auto;
+  font-size: 11.5px;
+  font-weight: 600;
+  padding: 4px 12px;
+  border-radius: 999px;
+  display: inline-block;
+  transition: none;
+}
+
+.bezent-wf-pillar:hover .bezent-wf-pillar-volume {
+  transform: none;
+}
+
+.bezent-wf-pillar--blue .bezent-wf-pillar-volume {
+  background: #eef6ff;
+  color: var(--blue-600);
+}
+
+.bezent-wf-pillar--green .bezent-wf-pillar-volume {
+  background: #ecfdf5;
+  color: #059669;
+}
+
+.bezent-wf-pillar--amber .bezent-wf-pillar-volume {
+  background: #f5f3ff;
+  color: #7c3aed;
+}
+
+.bezent-wf-pillar--purple .bezent-wf-pillar-volume {
+  background: #f5f3ff;
+  color: #7c3aed;
+}
+
+.bezent-wf-pillar--pink .bezent-wf-pillar-volume,
+.bezent-wf-pillar--red .bezent-wf-pillar-volume {
+  background: #fdf2f8;
+  color: #db2777;
+}
+
+[data-theme='dark'] .bezent-wf-pillar--blue .bezent-wf-pillar-volume {
+  background: rgba(37, 99, 235, 0.2);
+  color: #93c5fd;
+}
+
+[data-theme='dark'] .bezent-wf-pillar--green .bezent-wf-pillar-volume {
+  background: rgba(5, 150, 105, 0.2);
+  color: #6ee7b7;
+}
+
+[data-theme='dark'] .bezent-wf-pillar--amber .bezent-wf-pillar-volume {
+  background: rgba(124, 58, 237, 0.2);
+  color: #c4b5fd;
+}
+
+[data-theme='dark'] .bezent-wf-pillar--purple .bezent-wf-pillar-volume {
+  background: rgba(124, 58, 237, 0.2);
+  color: #c4b5fd;
+}
+
+[data-theme='dark'] .bezent-wf-pillar--pink .bezent-wf-pillar-volume,
+[data-theme='dark'] .bezent-wf-pillar--red .bezent-wf-pillar-volume {
+  background: rgba(249, 168, 212, 0.2);
+  color: #f9a8d4;
+}
+
+/* Responsive Support */
+@media (max-width: 900px) {
+  .bezent-wf-lifecycle-stage-area {
+    min-height: auto;
+  }
+  .bezent-wf-lifecycle-wave-svg {
+    display: none;
+  }
+  .bezent-wf-lifecycle-pillars {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .bezent-wf-pillar {
+    margin-top: 0 !important;
+    height: auto !important;
+    padding: 18px 12px;
+  }
+}
+
+@media (max-width: 480px) {
+  .bezent-wf-lifecycle-pillars {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bezent-wf-wave-stroke-line,
+  .bezent-wf-wave-area-path,
+  .bezent-wf-wave-back-path,
+  .bezent-wf-pillar {
+    animation: none !important;
+    transform: none !important;
+  }
+}

@@ -1,0 +1,353 @@
+/* ==========================================================================
+   Executive Card 5: Offboarding KPI Card (Option A: Circular Departure Ring)
+   ========================================================================== */
+.bezent-exec-kpi-card--offboarding {
+  cursor: pointer;
+  padding: 18px 18px 16px 18px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-height: 170px;
+  height: 170px;
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+  overflow: visible; /* Prevents floating hover badge from clipping */
+}
+
+.bezent-kpi-offboarding-layout {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  gap: 10px;
+}
+
+.bezent-kpi-offboarding-left {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  flex: 1;
+  min-width: 0;
+}
+
+.bezent-kpi-offboarding-heading {
+  font-size: 13px;
+  font-weight: 600;
+  color: #64748b;
+  line-height: 1.2;
+  letter-spacing: -0.01em;
+  margin: 0 0 6px 0;
+}
+
+[data-theme='dark'] .bezent-kpi-offboarding-heading {
+  color: #94a3b8;
+}
+
+.bezent-kpi-offboarding-value {
+  font-size: 32px;
+  font-weight: 800;
+  color: #1e293b;
+  line-height: 1;
+  letter-spacing: -0.035em;
+  margin: 0;
+  font-feature-settings: 'tnum';
+}
+
+[data-theme='dark'] .bezent-kpi-offboarding-value {
+  color: #f8fafc;
+}
+
+.bezent-kpi-offboarding-right {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  position: relative;
+  width: 68px;
+  height: 68px;
+  align-self: center;
+}
+
+.bezent-kpi-departure-svg,
+.bezent-kpi-offboarding-svg {
+  width: 68px;
+  height: 68px;
+  display: block;
+  overflow: visible;
+  position: relative;
+  z-index: 1;
+}
+
+/* 4 Stage Proportional Arcs */
+.bezent-kpi-departure-group {
+  cursor: pointer;
+  outline: none;
+  transition: opacity 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.bezent-kpi-departure-group.is-dimmed {
+  opacity: 0.3;
+}
+
+.bezent-kpi-departure-arc {
+  fill: none;
+  transition:
+    stroke 0.2s cubic-bezier(0.16, 1, 0.3, 1),
+    filter 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.bezent-kpi-departure-arc--notice_period,
+.bezent-kpi-departure-arc--active {
+  stroke: #be123c;
+}
+
+.bezent-kpi-departure-arc--handover,
+.bezent-kpi-departure-arc--completed {
+  stroke: #e11d48;
+}
+
+.bezent-kpi-departure-arc--clearance,
+.bezent-kpi-departure-arc--in_progress {
+  stroke: #f43f5e;
+}
+
+.bezent-kpi-departure-arc--final_settlement,
+.bezent-kpi-departure-arc--pending {
+  stroke: #fb7185;
+}
+
+[data-theme='dark'] .bezent-kpi-departure-arc--notice_period,
+[data-theme='dark'] .bezent-kpi-departure-arc--active {
+  stroke: #f43f5e;
+}
+
+[data-theme='dark'] .bezent-kpi-departure-arc--handover,
+[data-theme='dark'] .bezent-kpi-departure-arc--completed {
+  stroke: #fb7185;
+}
+
+[data-theme='dark'] .bezent-kpi-departure-arc--clearance,
+[data-theme='dark'] .bezent-kpi-departure-arc--in_progress {
+  stroke: #fda4af;
+}
+
+[data-theme='dark'] .bezent-kpi-departure-arc--final_settlement,
+[data-theme='dark'] .bezent-kpi-departure-arc--pending {
+  stroke: #fecdd3;
+}
+
+/* Arc Hover Glow */
+.bezent-kpi-departure-group--notice.is-hovered .bezent-kpi-departure-arc,
+.bezent-kpi-offboarding-node--notice_period.is-hovered .bezent-kpi-departure-arc {
+  stroke: #be123c;
+  filter: drop-shadow(0 1px 3px rgba(0, 0, 0, 0.15));
+}
+
+.bezent-kpi-departure-group--handover.is-hovered .bezent-kpi-departure-arc,
+.bezent-kpi-offboarding-node--handover.is-hovered .bezent-kpi-departure-arc {
+  stroke: #e11d48;
+  filter: drop-shadow(0 1px 3px rgba(0, 0, 0, 0.15));
+}
+
+.bezent-kpi-departure-group--clearance.is-hovered .bezent-kpi-departure-arc,
+.bezent-kpi-offboarding-node--clearance.is-hovered .bezent-kpi-departure-arc {
+  stroke: #f43f5e;
+  filter: drop-shadow(0 1px 3px rgba(0, 0, 0, 0.15));
+}
+
+.bezent-kpi-departure-group--settlement.is-hovered .bezent-kpi-departure-arc,
+.bezent-kpi-offboarding-node--final_settlement.is-hovered .bezent-kpi-departure-arc {
+  stroke: #fb7185;
+  filter: drop-shadow(0 1px 3px rgba(0, 0, 0, 0.15));
+}
+
+/* Outward Departure Arrow */
+.bezent-kpi-departure-arrow-group {
+  cursor: pointer;
+  outline: none;
+  transition:
+    transform 0.2s cubic-bezier(0.16, 1, 0.3, 1),
+    opacity 0.2s cubic-bezier(0.16, 1, 0.3, 1),
+    filter 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.bezent-kpi-departure-arrow-group.is-dimmed {
+  opacity: 0.3;
+}
+
+.bezent-kpi-departure-arrow-stem {
+  stroke: #e11d48;
+  stroke-linecap: round;
+  transition:
+    stroke 0.2s ease,
+    filter 0.2s ease;
+}
+
+.bezent-kpi-departure-arrowhead {
+  fill: #e11d48;
+  stroke: none;
+  transition:
+    fill 0.2s ease,
+    transform 0.2s cubic-bezier(0.16, 1, 0.3, 1),
+    filter 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+[data-theme='dark'] .bezent-kpi-departure-arrow-stem {
+  stroke: #f43f5e;
+}
+
+[data-theme='dark'] .bezent-kpi-departure-arrowhead {
+  fill: #f43f5e;
+  stroke: none;
+}
+
+.bezent-kpi-departure-arrow-group:hover,
+.bezent-kpi-departure-arrow-group.is-hovered {
+  transform: none;
+  filter: drop-shadow(0 1px 3px rgba(0, 0, 0, 0.15));
+}
+
+.bezent-kpi-departure-arrow-group:hover .bezent-kpi-departure-arrow-stem,
+.bezent-kpi-departure-arrow-group.is-hovered .bezent-kpi-departure-arrow-stem {
+  stroke: #dc2626;
+}
+
+.bezent-kpi-departure-arrow-group:hover .bezent-kpi-departure-arrowhead,
+.bezent-kpi-departure-arrow-group.is-hovered .bezent-kpi-departure-arrowhead {
+  fill: #dc2626;
+}
+
+[data-theme='dark'] .bezent-kpi-departure-arrow-group:hover,
+[data-theme='dark'] .bezent-kpi-departure-arrow-group.is-hovered {
+  transform: none;
+  filter: drop-shadow(0 1px 3px rgba(0, 0, 0, 0.35));
+}
+
+[data-theme='dark'] .bezent-kpi-departure-arrow-group:hover .bezent-kpi-departure-arrow-stem,
+[data-theme='dark'] .bezent-kpi-departure-arrow-group.is-hovered .bezent-kpi-departure-arrow-stem {
+  stroke: #ef4444;
+}
+
+[data-theme='dark'] .bezent-kpi-departure-arrow-group:hover .bezent-kpi-departure-arrowhead,
+[data-theme='dark'] .bezent-kpi-departure-arrow-group.is-hovered .bezent-kpi-departure-arrowhead {
+  fill: #ef4444;
+}
+
+/* Dynamic Center Icon Hub */
+.bezent-kpi-departure-center {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 5;
+  pointer-events: auto;
+  cursor: pointer;
+  user-select: none;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+[data-theme='dark'] .bezent-kpi-departure-center {
+  background: transparent;
+  border: none;
+  box-shadow: none;
+}
+
+.bezent-kpi-departure-center:hover,
+.bezent-kpi-departure-center.is-hovered {
+  border: none;
+  box-shadow: none;
+  transform: translate(-50%, -50%) scale(1.12);
+}
+
+.bezent-kpi-departure-icon-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition:
+    color 0.2s cubic-bezier(0.16, 1, 0.3, 1),
+    transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  animation: bezentDepartureIconFadeIn 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes bezentDepartureIconFadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.85);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.bezent-kpi-departure-icon--default {
+  color: #64748b;
+}
+
+[data-theme='dark'] .bezent-kpi-departure-icon--default {
+  color: #94a3b8;
+}
+
+.bezent-kpi-departure-icon--notice {
+  color: #be123c;
+  transform: scale(1.15);
+}
+
+[data-theme='dark'] .bezent-kpi-departure-icon--notice {
+  color: #f43f5e;
+}
+
+.bezent-kpi-departure-icon--handover {
+  color: #e11d48;
+  transform: scale(1.15);
+}
+
+[data-theme='dark'] .bezent-kpi-departure-icon--handover {
+  color: #fb7185;
+}
+
+.bezent-kpi-departure-icon--clearance {
+  color: #f43f5e;
+  transform: scale(1.15);
+}
+
+[data-theme='dark'] .bezent-kpi-departure-icon--clearance {
+  color: #fda4af;
+}
+
+.bezent-kpi-departure-icon--settlement {
+  color: #9f1239;
+  transform: scale(1.15);
+}
+
+[data-theme='dark'] .bezent-kpi-departure-icon--settlement {
+  color: #fecdd3;
+}
+
+.bezent-kpi-departure-icon--arrow {
+  color: #e11d48;
+  transform: scale(1.15);
+}
+
+[data-theme='dark'] .bezent-kpi-departure-icon--arrow {
+  color: #f87171;
+}
+
+.bezent-kpi-departure-icon--center {
+  color: #e11d48;
+  transform: scale(1.15);
+}
+
+[data-theme='dark'] .bezent-kpi-departure-icon--center {
+  color: #f43f5e;
+}

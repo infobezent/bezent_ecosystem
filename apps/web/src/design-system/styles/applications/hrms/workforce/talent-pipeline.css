@@ -1,0 +1,449 @@
+/* ── Talent Pipeline & Fulfillment Deck ── */
+.bezent-wf-pipeline-deck {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.bezent-wf-funnel-strip {
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  padding: 9px 14px;
+  background: #fafbfe;
+  border: 1px solid #f1f4fb;
+  border-radius: 10px;
+}
+
+[data-theme='dark'] .bezent-wf-funnel-strip {
+  background: #1e293b;
+  border-color: #334155;
+}
+
+.bezent-wf-funnel-step {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  cursor: default;
+}
+
+.bezent-wf-funnel-step-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: #64748b;
+}
+
+[data-theme='dark'] .bezent-wf-funnel-step-label {
+  color: #94a3b8;
+}
+
+.bezent-wf-funnel-step-count {
+  font-size: 16px;
+  font-weight: 800;
+  color: #0f172a;
+  line-height: 1;
+}
+
+[data-theme='dark'] .bezent-wf-funnel-step-count {
+  color: #f8fafc;
+}
+
+.bezent-wf-funnel-step-sub {
+  display: none;
+}
+
+.bezent-wf-funnel-arrow {
+  color: #94a3b8;
+  font-size: 13px;
+  font-weight: 700;
+  user-select: none;
+}
+
+[data-theme='dark'] .bezent-wf-funnel-arrow {
+  color: #475569;
+}
+
+.bezent-wf-upcoming-hires-card {
+  background: transparent;
+  border: none;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+[data-theme='dark'] .bezent-wf-upcoming-hires-card {
+  background: transparent;
+  border-color: transparent;
+}
+
+.bezent-wf-upcoming-hires-title {
+  font-size: 10px;
+  font-weight: 750;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #64748b;
+  margin-top: 2px;
+}
+
+[data-theme='dark'] .bezent-wf-upcoming-hires-title {
+  color: #94a3b8;
+}
+
+.bezent-wf-upcoming-hires-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.bezent-wf-upcoming-hire-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 6px 0;
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid #f1f5f9;
+  transition: all 0.15s ease;
+  cursor: default;
+}
+
+.bezent-wf-upcoming-hire-row:last-child {
+  border-bottom: none;
+}
+
+.bezent-wf-upcoming-hire-row:hover {
+  background: transparent;
+}
+
+[data-theme='dark'] .bezent-wf-upcoming-hire-row {
+  background: transparent;
+  border-color: transparent;
+  border-bottom: 1px solid #24344d;
+}
+
+.bezent-wf-upcoming-hire-main {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.bezent-wf-upcoming-hire-avatar {
+  width: 24px;
+  height: 24px;
+  border-radius: 999px;
+  background: #eff6ff;
+  color: var(--blue-600);
+  font-size: 10.5px;
+  font-weight: 750;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+[data-theme='dark'] .bezent-wf-upcoming-hire-avatar {
+  background: rgba(37, 99, 235, 0.2);
+  color: #93c5fd;
+}
+
+.bezent-wf-upcoming-hire-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+}
+
+.bezent-wf-upcoming-hire-name {
+  font-size: 12px;
+  font-weight: 700;
+  color: #1e293b;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+[data-theme='dark'] .bezent-wf-upcoming-hire-name {
+  color: #f8fafc;
+}
+
+.bezent-wf-upcoming-hire-role {
+  font-size: 10.5px;
+  color: #64748b;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+[data-theme='dark'] .bezent-wf-upcoming-hire-role {
+  color: #94a3b8;
+}
+
+.bezent-wf-upcoming-hire-date {
+  font-size: 10.5px;
+  font-weight: 700;
+  color: #059669;
+  background: #ecfdf5;
+  border: 1px solid #d1fae5;
+  border-radius: 999px;
+  padding: 2px 7px;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+[data-theme='dark'] .bezent-wf-upcoming-hire-date {
+  background: rgba(5, 150, 105, 0.2);
+  color: #6ee7b7;
+  border-color: rgba(5, 150, 105, 0.35);
+}
+
+.bezent-wf-efficiency-highlights {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding-top: 10px;
+  border-top: 1px solid #f1f5f9;
+  margin-top: 4px;
+}
+
+[data-theme='dark'] .bezent-wf-efficiency-highlights {
+  border-top-color: #24344d;
+}
+
+.bezent-wf-efficiency-item {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11px;
+  color: #475569;
+  font-weight: 550;
+  cursor: default;
+}
+
+[data-theme='dark'] .bezent-wf-efficiency-item {
+  color: #94a3b8;
+}
+
+.bezent-wf-efficiency-item strong {
+  color: #0f172a;
+  font-weight: 750;
+}
+
+[data-theme='dark'] .bezent-wf-efficiency-item strong {
+  color: #f8fafc;
+}
+
+/* Requisitions List (Simplified Executive Card) */
+.bezent-wf-requisitions-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.bezent-wf-requisition-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 14px;
+  background: #fafbfe;
+  border-radius: 10px;
+  border: 1px solid #f1f4fb;
+  transition: all 0.15s ease;
+}
+
+.bezent-wf-requisition-row:hover {
+  background: #f1f5fd;
+  border-color: #dbe0eb;
+}
+
+[data-theme='dark'] .bezent-wf-requisition-row {
+  background: #24344d;
+  border-color: #334155;
+}
+
+[data-theme='dark'] .bezent-wf-requisition-row:hover {
+  background: #2d4160;
+}
+
+.bezent-wf-requisition-main {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.bezent-wf-requisition-role {
+  font-size: 13px;
+  font-weight: 700;
+  color: #1e293b;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+[data-theme='dark'] .bezent-wf-requisition-role {
+  color: #f8fafc;
+}
+
+.bezent-wf-requisition-dept {
+  font-size: 11.5px;
+  color: #64748b;
+  font-weight: 500;
+}
+
+[data-theme='dark'] .bezent-wf-requisition-dept {
+  color: #94a3b8;
+}
+
+.bezent-wf-requisition-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.bezent-wf-requisition-openings {
+  font-size: 11.5px;
+  font-weight: 700;
+  color: #334155;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  padding: 2px 8px;
+}
+
+[data-theme='dark'] .bezent-wf-requisition-openings {
+  background: #1e293b;
+  border-color: #334155;
+  color: #cbd5e1;
+}
+
+/* Hiring Requirements Table */
+.bezent-wf-hiring-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.bezent-wf-hiring-table th {
+  text-align: left;
+  padding: 8px 10px;
+  font-size: 11px;
+  font-weight: 700;
+  color: #788197;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  border-bottom: 1px solid #e9eaf4;
+}
+
+[data-theme='dark'] .bezent-wf-hiring-table th {
+  color: #94a3b8;
+  border-bottom-color: #334155;
+}
+
+.bezent-wf-hiring-table td {
+  padding: 10px 10px;
+  border-bottom: 1px solid #f1f5f9;
+  color: #20263a;
+  vertical-align: middle;
+}
+
+[data-theme='dark'] .bezent-wf-hiring-table td {
+  border-bottom-color: #24344d;
+  color: #e2e8f0;
+}
+
+.bezent-wf-priority-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 8px;
+  border-radius: 999px;
+  font-size: 10.5px;
+  font-weight: 750;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.bezent-wf-priority-pill--critical,
+.bezent-wf-priority-pill--high {
+  background: #fdf2f8;
+  color: #db2777;
+  border: 1px solid #fbcfe8;
+}
+
+.bezent-wf-priority-pill--medium {
+  background: #f5f3ff;
+  color: #7c3aed;
+  border: 1px solid #ddd6fe;
+}
+
+.bezent-wf-priority-pill--low {
+  background: #eff6ff;
+  color: var(--blue-600);
+  border: 1px solid #bfdbfe;
+}
+
+[data-theme='dark'] .bezent-wf-priority-pill--critical,
+[data-theme='dark'] .bezent-wf-priority-pill--high {
+  background: rgba(225, 29, 72, 0.2);
+  border-color: rgba(225, 29, 72, 0.35);
+  color: #fda4af;
+}
+
+[data-theme='dark'] .bezent-wf-priority-pill--medium {
+  background: rgba(124, 58, 237, 0.2);
+  border-color: rgba(124, 58, 237, 0.35);
+  color: #c4b5fd;
+}
+
+[data-theme='dark'] .bezent-wf-priority-pill--low {
+  background: rgba(37, 99, 235, 0.2);
+  border-color: rgba(37, 99, 235, 0.35);
+  color: #93c5fd;
+}
+
+.bezent-wf-status-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 8px;
+  border-radius: 999px;
+  font-size: 11.5px;
+  font-weight: 600;
+  background: #f1f5f9;
+  color: #475569;
+  border: 1px solid #e2e8f0;
+}
+
+.bezent-wf-status-pill--open {
+  background: #e7f7f0;
+  color: #059669;
+  border-color: #d1f4e2;
+}
+
+.bezent-wf-status-pill--planned {
+  background: #eee9ff;
+  color: #7c3aed;
+  border-color: #e5dcff;
+}
+
+[data-theme='dark'] .bezent-wf-status-pill {
+  background: #334155;
+  border-color: #475569;
+  color: #cbd5e1;
+}
+
+[data-theme='dark'] .bezent-wf-status-pill--open {
+  background: rgba(5, 150, 105, 0.2);
+  border-color: rgba(5, 150, 105, 0.35);
+  color: #6ee7b7;
+}
+
+[data-theme='dark'] .bezent-wf-status-pill--planned {
+  background: rgba(124, 58, 237, 0.2);
+  border-color: rgba(124, 58, 237, 0.35);
+  color: #c4b5fd;
+}

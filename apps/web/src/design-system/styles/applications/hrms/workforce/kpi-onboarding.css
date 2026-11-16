@@ -1,0 +1,166 @@
+/* ==========================================================================
+   Executive Card 2: Onboarding KPI Card (Compact Mini Activity Bars)
+   ========================================================================== */
+.bezent-exec-kpi-card--onboarding {
+  cursor: pointer;
+  padding: 18px 18px 16px 18px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-height: 170px;
+  height: 170px;
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+}
+
+.bezent-kpi-onboarding-layout {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  gap: 10px;
+}
+
+.bezent-kpi-onboarding-left {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  flex: 1;
+  min-width: 0;
+}
+
+.bezent-kpi-onboarding-heading {
+  font-size: 13px;
+  font-weight: 600;
+  color: #64748b;
+  line-height: 1.2;
+  letter-spacing: -0.01em;
+  margin: 0 0 6px 0;
+}
+
+[data-theme='dark'] .bezent-kpi-onboarding-heading {
+  color: #94a3b8;
+}
+
+.bezent-kpi-onboarding-value {
+  font-size: 32px;
+  font-weight: 800;
+  color: #1e293b;
+  line-height: 1;
+  letter-spacing: -0.035em;
+  margin: 0;
+  font-feature-settings: 'tnum';
+}
+
+[data-theme='dark'] .bezent-kpi-onboarding-value {
+  color: #f8fafc;
+}
+
+.bezent-kpi-onboarding-right {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  position: relative;
+  width: 68px;
+  height: 68px;
+  align-self: center;
+}
+
+.bezent-kpi-bar-tooltip,
+.bezent-kpi-onboarding-tooltip {
+  position: absolute;
+  top: 4px;
+  left: 50%;
+  transform: translate(-50%, -100%);
+  font-size: 10.5px;
+  font-weight: 700;
+  color: #1e293b;
+  background: #ffffff;
+  border: 1px solid #d8deeb;
+  border-radius: 6px;
+  padding: 2px 7px;
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  box-shadow: 0 4px 10px rgba(32, 45, 75, 0.08);
+  transition:
+    opacity 0.18s cubic-bezier(0.16, 1, 0.3, 1),
+    transform 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+  z-index: 10;
+}
+
+.bezent-kpi-bar-tooltip.is-visible,
+.bezent-kpi-onboarding-tooltip.is-visible {
+  opacity: 1;
+  transform: translate(-50%, -120%);
+}
+
+[data-theme='dark'] .bezent-kpi-bar-tooltip,
+[data-theme='dark'] .bezent-kpi-onboarding-tooltip {
+  background: #1e293b;
+  border-color: #334155;
+  color: #f1f5f9;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+}
+
+/* Backward compatibility for activity bars */
+.bezent-kpi-activity-bars-svg {
+  width: 60px;
+  height: 42px;
+  display: block;
+  overflow: visible;
+}
+
+.bezent-kpi-bars-baseline {
+  stroke: #e2e8f0;
+  stroke-width: 1.5;
+  stroke-linecap: round;
+}
+
+[data-theme='dark'] .bezent-kpi-bars-baseline {
+  stroke: #334155;
+}
+
+.bezent-kpi-activity-bar {
+  fill: #93c5fd;
+  cursor: pointer;
+  outline: none;
+  transition:
+    fill 0.2s cubic-bezier(0.16, 1, 0.3, 1),
+    opacity 0.2s cubic-bezier(0.16, 1, 0.3, 1),
+    transform 0.2s cubic-bezier(0.16, 1, 0.3, 1),
+    filter 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+[data-theme='dark'] .bezent-kpi-activity-bar {
+  fill: #3b82f6;
+}
+
+.bezent-kpi-activity-bar:focus-visible {
+  filter: drop-shadow(0 0 4px rgba(0, 0, 0, 0.25));
+}
+
+.bezent-kpi-activity-bar--hovered {
+  fill: var(--blue-600) !important;
+  opacity: 1 !important;
+  filter: drop-shadow(0 1px 3px rgba(0, 0, 0, 0.15));
+}
+
+[data-theme='dark'] .bezent-kpi-activity-bar--hovered {
+  fill: #60a5fa !important;
+  filter: drop-shadow(0 1px 3px rgba(0, 0, 0, 0.35));
+}
+
+.bezent-kpi-activity-bar--dimmed {
+  opacity: 0.35;
+}
+
+.bezent-kpi-activity-bar--empty {
+  fill: #e2e8f0;
+}
+
+[data-theme='dark'] .bezent-kpi-activity-bar--empty {
+  fill: #334155;
+}

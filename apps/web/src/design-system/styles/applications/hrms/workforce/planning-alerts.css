@@ -1,0 +1,474 @@
+/* ── Tier 3: Executive Two-Column Command Deck (Workforce Planning + Workforce Alerts) ── */
+.bezent-wf-planning-row {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+  align-items: stretch;
+  margin-bottom: 0;
+}
+
+@media (max-width: 1100px) {
+  .bezent-wf-planning-row {
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
+}
+
+/* Card Shell — Matches .bezent-wf-analytics-card & .bezent-wf-comp-card exactly */
+.bezent-wf-planning-card,
+.bezent-wf-alerts-card {
+  background: #ffffff;
+  border: 1px solid rgba(226, 232, 240, 0.8);
+  border-radius: 16px;
+  padding: 18px 22px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  box-shadow:
+    0 1px 3px rgba(15, 23, 42, 0.04),
+    0 1px 2px rgba(15, 23, 42, 0.02);
+  min-height: 290px;
+  height: 100%;
+  box-sizing: border-box;
+  transition: all 0.2s ease;
+}
+
+[data-theme='dark'] .bezent-wf-planning-card,
+[data-theme='dark'] .bezent-wf-alerts-card {
+  background: #1e293b;
+  border-color: #334155;
+  box-shadow: none;
+}
+
+/* Top Header */
+.bezent-wf-planning-card__top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.bezent-wf-planning-card__header-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+
+.bezent-wf-planning-card__icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: #eff6ff;
+  color: var(--blue-600);
+  border: 1px solid #dbeafe;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.bezent-wf-planning-card__icon--rose {
+  background: #fff1f2;
+  color: #e11d48;
+  border-color: #ffe4e6;
+}
+
+[data-theme='dark'] .bezent-wf-planning-card__icon {
+  background: rgba(37, 99, 235, 0.2);
+  color: #93c5fd;
+  border-color: rgba(37, 99, 235, 0.35);
+}
+
+[data-theme='dark'] .bezent-wf-planning-card__icon--rose {
+  background: rgba(225, 29, 72, 0.2);
+  color: #fda4af;
+  border-color: rgba(225, 29, 72, 0.35);
+}
+
+.bezent-wf-planning-card__title {
+  font-size: 15px;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0;
+  line-height: 1.25;
+  letter-spacing: -0.015em;
+}
+
+[data-theme='dark'] .bezent-wf-planning-card__title {
+  color: #f8fafc;
+}
+
+.bezent-wf-planning-card__desc {
+  font-size: 12px;
+  font-weight: 500;
+  color: #64748b;
+  margin: 2px 0 0;
+  line-height: 1.35;
+}
+
+[data-theme='dark'] .bezent-wf-planning-card__desc {
+  color: #94a3b8;
+}
+
+.bezent-wf-card-header-link {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--blue-600);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 8px;
+  border-radius: 6px;
+  transition: background 0.15s ease;
+}
+
+.bezent-wf-card-header-link:hover {
+  background: #eff6ff;
+}
+
+[data-theme='dark'] .bezent-wf-card-header-link {
+  color: #93c5fd;
+}
+
+[data-theme='dark'] .bezent-wf-card-header-link:hover {
+  background: rgba(37, 99, 235, 0.2);
+}
+
+/* ── Card 1: Workforce Planning Body ── */
+.bezent-wf-planning-body {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  flex: 1;
+}
+
+.bezent-wf-plan-primary {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.bezent-wf-plan-stats-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+
+.bezent-wf-plan-stat {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.bezent-wf-plan-stat-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+[data-theme='dark'] .bezent-wf-plan-stat-label {
+  color: #94a3b8;
+}
+
+.bezent-wf-plan-stat-val {
+  font-size: 22px;
+  font-weight: 800;
+  color: #0f172a;
+  line-height: 1.2;
+  font-variant-numeric: tabular-nums;
+  margin-top: 3px;
+  letter-spacing: -0.02em;
+}
+
+[data-theme='dark'] .bezent-wf-plan-stat-val {
+  color: #f8fafc;
+}
+
+.bezent-wf-plan-stat-val--blue {
+  color: var(--blue-600);
+}
+
+[data-theme='dark'] .bezent-wf-plan-stat-val--blue {
+  color: #93c5fd;
+}
+
+.bezent-wf-plan-progress-wrap {
+  width: 100%;
+  cursor: pointer;
+  padding: 4px 0;
+}
+
+.bezent-wf-plan-capacity-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 11.5px;
+  color: #64748b;
+}
+
+[data-theme='dark'] .bezent-wf-plan-capacity-meta {
+  color: #94a3b8;
+}
+
+.bezent-wf-plan-ratio-text {
+  font-weight: 600;
+  color: var(--blue-600);
+  font-variant-numeric: tabular-nums;
+}
+
+[data-theme='dark'] .bezent-wf-plan-ratio-text {
+  color: #93c5fd;
+}
+
+.bezent-wf-plan-divider {
+  border: none;
+  border-top: 1px solid #f1f5f9;
+  margin: 14px 0;
+}
+
+[data-theme='dark'] .bezent-wf-plan-divider {
+  border-top-color: #334155;
+}
+
+.bezent-wf-plan-secondary {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.bezent-wf-plan-sec-stat {
+  font: inherit;
+  background: transparent;
+  border: none;
+  text-align: left;
+  display: flex;
+  flex-direction: column;
+  padding: 6px 8px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.bezent-wf-plan-sec-stat:hover {
+  background: #f8fafc;
+}
+
+[data-theme='dark'] .bezent-wf-plan-sec-stat:hover {
+  background: #24344d;
+}
+
+.bezent-wf-plan-sec-stat-main {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  margin-top: 3px;
+}
+
+.bezent-wf-plan-sec-pill {
+  font-size: 10.5px;
+  font-weight: 650;
+  padding: 2px 7px;
+  border-radius: 999px;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+
+.bezent-wf-plan-sec-pill--amber {
+  background: #fef3c7;
+  color: #b45309;
+}
+
+.bezent-wf-plan-sec-pill--blue {
+  background: #eff6ff;
+  color: var(--blue-600);
+}
+
+[data-theme='dark'] .bezent-wf-plan-sec-pill--amber {
+  background: rgba(217, 119, 6, 0.25);
+  color: #fde68a;
+}
+
+[data-theme='dark'] .bezent-wf-plan-sec-pill--blue {
+  background: rgba(37, 99, 235, 0.25);
+  color: #93c5fd;
+}
+
+.bezent-wf-plan-sec-hint {
+  font-size: 11.5px;
+  color: #94a3b8;
+  margin-top: 2px;
+}
+
+/* ── Card 2: Workforce Alerts Clean Rows ── */
+.bezent-wf-alerts-clean-list {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  flex: 1;
+}
+
+.bezent-wf-clean-alert-row {
+  font: inherit;
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid #f1f5f9;
+  text-align: left;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 6px;
+  cursor: pointer;
+  border-radius: 8px;
+  transition: background 0.15s ease;
+  width: 100%;
+}
+
+.bezent-wf-clean-alert-row:last-child {
+  border-bottom: none;
+}
+
+.bezent-wf-clean-alert-row:hover {
+  background: #f8fafc;
+}
+
+[data-theme='dark'] .bezent-wf-clean-alert-row {
+  border-bottom-color: #334155;
+}
+
+[data-theme='dark'] .bezent-wf-clean-alert-row:hover {
+  background: #24344d;
+}
+
+.bezent-wf-clean-alert-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+  flex: 1;
+}
+
+.bezent-wf-clean-alert-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.bezent-wf-clean-alert-icon--amber {
+  background: #fef3c7;
+  color: #d97706;
+}
+
+.bezent-wf-clean-alert-icon--purple {
+  background: #ede9fe;
+  color: #7c3aed;
+}
+
+.bezent-wf-clean-alert-icon--rose {
+  background: #ffe4e6;
+  color: #e11d48;
+}
+
+[data-theme='dark'] .bezent-wf-clean-alert-icon--amber {
+  background: rgba(217, 119, 6, 0.22);
+  color: #fde68a;
+}
+
+[data-theme='dark'] .bezent-wf-clean-alert-icon--purple {
+  background: rgba(124, 58, 237, 0.22);
+  color: #c4b5fd;
+}
+
+[data-theme='dark'] .bezent-wf-clean-alert-icon--rose {
+  background: rgba(225, 29, 72, 0.22);
+  color: #fda4af;
+}
+
+.bezent-wf-clean-alert-text {
+  min-width: 0;
+}
+
+.bezent-wf-clean-alert-title {
+  font-size: 13.5px;
+  font-weight: 650;
+  color: #1e293b;
+  margin: 0;
+  line-height: 1.25;
+}
+
+[data-theme='dark'] .bezent-wf-clean-alert-title {
+  color: #f8fafc;
+}
+
+.bezent-wf-clean-alert-desc {
+  font-size: 11.5px;
+  font-weight: 500;
+  color: #64748b;
+  margin: 2px 0 0;
+  display: block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+[data-theme='dark'] .bezent-wf-clean-alert-desc {
+  color: #94a3b8;
+}
+
+.bezent-wf-clean-alert-right {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+  color: #94a3b8;
+}
+
+.bezent-wf-clean-alert-badge {
+  font-size: 11px;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 999px;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.bezent-wf-clean-alert-badge--amber {
+  background: #fef3c7;
+  color: #b45309;
+}
+
+.bezent-wf-clean-alert-badge--purple {
+  background: #ede9fe;
+  color: #6d28d9;
+}
+
+.bezent-wf-clean-alert-badge--rose {
+  background: #ffe4e6;
+  color: #be123c;
+}
+
+[data-theme='dark'] .bezent-wf-clean-alert-badge--amber {
+  background: rgba(217, 119, 6, 0.25);
+  color: #fde68a;
+}
+
+[data-theme='dark'] .bezent-wf-clean-alert-badge--purple {
+  background: rgba(124, 58, 237, 0.25);
+  color: #c4b5fd;
+}
+
+[data-theme='dark'] .bezent-wf-clean-alert-badge--rose {
+  background: rgba(225, 29, 72, 0.25);
+  color: #fda4af;
+}
