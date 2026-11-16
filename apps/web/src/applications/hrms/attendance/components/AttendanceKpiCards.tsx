@@ -12,7 +12,7 @@ export interface AttendanceKpiSegment {
 
 export interface AttendanceGenericKpiCardProps {
   heading: string;
-  value: number;
+  value: number | string;
   subPillText?: string;
   subPillVariant?: 'onboarding' | 'active' | 'transfers' | 'promotions' | 'offboarding';
   badgeText?: string;
@@ -69,8 +69,10 @@ export const AttendanceGenericKpiCard: React.FC<AttendanceGenericKpiCardProps> =
           <div className="bezent-kpi-employees-value">
             {loading ? (
               <span className="bezent-kpi-value-skeleton" aria-hidden="true" />
-            ) : (
+            ) : typeof value === 'number' ? (
               value.toLocaleString()
+            ) : (
+              value
             )}
           </div>
         </div>

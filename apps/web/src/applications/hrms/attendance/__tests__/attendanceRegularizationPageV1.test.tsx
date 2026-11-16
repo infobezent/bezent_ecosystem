@@ -69,8 +69,8 @@ describe('BEZENT HRMS — Attendance Regularization V1.0 Frontend Workspace', ()
       </MemoryRouter>,
     );
 
-    expect(html).toContain('Regularization');
-    expect(html).toContain('Attendance › Requests › Regularization');
+    expect(html).toContain('Requests');
+    expect(html).toContain('Attendance › Requests');
     expect(html).toContain('Submit, review and manage attendance correction requests');
     expect(html).toContain('Export');
     expect(html).toContain('New Request');

@@ -28,7 +28,13 @@ import {
 } from '../../../../design-system/components';
 import { BezentIcon } from '../../../../design-system/icons';
 import { AttendanceSectionTabs } from '../components/AttendanceSectionTabs';
-import { AttendanceGenericKpiCard } from '../components/AttendanceKpiCards';
+import { RequestStatStrip } from '../components/RequestStatStrip';
+import { AttendanceDateRangeControl } from '../components/AttendanceDateRangeControl';
+import {
+  RegularizationFilterPanel,
+  countActiveRegularizationFilters,
+  type RegularizationFilterState,
+} from '../components/RegularizationFilterPanel';
 import {
   getDemoRegularizationDetail,
   getDemoRegularizationWorkspace,
@@ -57,6 +63,12 @@ import type {
 } from '../types/attendance.types';
 
 // Preset date helpers
+function getEndOfMonthString(): string {
+  const d = new Date();
+  const last = new Date(d.getFullYear(), d.getMonth() + 1, 0).getDate();
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(last).padStart(2, '0')}`;
+}
+
 function getTodayString(): string {
   return new Date().toISOString().slice(0, 10);
 }
@@ -112,19 +124,6 @@ function formatDateTime(val?: string | Date | null): string {
   });
 }
 
-function formatExceptionDisplay(id?: string | null) {
-  if (!id) return <span className="bezent-table-meta-subtitle">—</span>;
-  if (id.startsWith('EXC-')) {
-    return <Badge variant="neutral">{id}</Badge>;
-  }
-  const shortId = `EXC-${id.slice(-5).toUpperCase()}`;
-  return (
-    <span title={id}>
-      <Badge variant="neutral">{shortId}</Badge>
-    </span>
-  );
-}
-
 const REQUEST_TYPE_LABELS: Record<RegularizationRequestType, string> = {
   missing_in: 'Missing IN',
   missing_out: 'Missing OUT',
@@ -145,7 +144,7 @@ const QUEUE_TABS = [
 export function AttendanceRegularizationPage() {
   // 1. Date Range State (defaults to current month)
   const [workdayFrom, setWorkdayFrom] = useState(getStartOfMonthString());
-  const [workdayTo, setWorkdayTo] = useState(getTodayString());
+  const [workdayTo, setWorkdayTo] = useState(getEndOfMonthString());
 
   // 2. Filter State
   const [assignedQueue, setAssignedQueue] = useState<string>('all');
@@ -403,23 +402,29 @@ export function AttendanceRegularizationPage() {
     setPage(1);
   };
 
-  // Active advanced filters count
-  const activeAdvancedFilterCount = useMemo(() => {
-    let count = 0;
-    if (submittedFrom || submittedTo) count++;
-    if (assignedTo !== 'all') count++;
-    if (departmentId !== 'all') count++;
-    if (locationId !== 'all') count++;
-    if (relatedException !== 'all') count++;
-    if (source !== 'all') count++;
-    return count;
-  }, [submittedFrom, submittedTo, assignedTo, departmentId, locationId, relatedException, source]);
+  const appliedPanelFilters: RegularizationFilterState = {
+    approvalStatus,
+    requestType,
+    applicationStatus,
+    source,
+    assignedTo,
+    relatedException,
+    submittedFrom,
+    submittedTo,
+  };
+  const totalFilterCount = countActiveRegularizationFilters(appliedPanelFilters);
 
-  const totalFilterCount =
-    activeAdvancedFilterCount +
-    (approvalStatus !== 'all' ? 1 : 0) +
-    (requestType !== 'all' ? 1 : 0) +
-    (applicationStatus !== 'all' ? 1 : 0);
+  const handleApplyPanelFilters = (next: RegularizationFilterState) => {
+    setApprovalStatus(next.approvalStatus);
+    setRequestType(next.requestType);
+    setApplicationStatus(next.applicationStatus);
+    setSource(next.source);
+    setAssignedTo(next.assignedTo);
+    setRelatedException(next.relatedException);
+    setSubmittedFrom(next.submittedFrom);
+    setSubmittedTo(next.submittedTo);
+    setPage(1);
+  };
 
   // Drawer Actions Execution
   const handleDrawerDecision = async () => {
@@ -615,76 +620,19 @@ export function AttendanceRegularizationPage() {
     <Page>
       {/* 1. Header & Actions Strip */}
       <PageHeader
-        breadcrumbs={<span>Attendance › Requests › Regularization</span>}
-        title={
-          <span>
-            Regularization
-            <span className="bezent-sr-only">
-              Submit, review and manage attendance correction requests
-            </span>
-          </span>
-        }
+        eyebrow="Attendance › Requests"
+        title="Requests"
+        subtitle="Submit, review and manage attendance correction requests."
         actions={
-          <Inline gap="xs" align="center">
-            {/* Workday Date Range Selector */}
-            <Card padding="none">
-              <Inline gap="xs" align="center">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => {
-                    const from = new Date(workdayFrom);
-                    from.setMonth(from.getMonth() - 1);
-                    setWorkdayFrom(from.toISOString().slice(0, 10));
-                  }}
-                  aria-label="Previous month"
-                >
-                  <BezentIcon name="chevron_left" size={14} />
-                </Button>
-                <span className="bezent-table-meta-title">
-                  {formatDate(workdayFrom)} – {formatDate(workdayTo)}
-                </span>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => {
-                    const to = new Date(workdayTo);
-                    to.setMonth(to.getMonth() + 1);
-                    setWorkdayTo(to.toISOString().slice(0, 10));
-                  }}
-                  aria-label="Next month"
-                >
-                  <BezentIcon name="chevron_right" size={14} />
-                </Button>
-                <Button
-                  variant="secondary"
-                  size="sm"
-                  onClick={() => {
-                    setWorkdayFrom(getStartOfMonthString());
-                    setWorkdayTo(getTodayString());
-                  }}
-                >
-                  Today
-                </Button>
-              </Inline>
-            </Card>
-
-            <Button variant="secondary" size="sm" onClick={() => setShowExportModal(true)}>
-              <BezentIcon name="download" size={14} /> Export
-            </Button>
-
-            <Button
-              variant="primary"
-              size="sm"
-              onClick={() => {
-                setFormEmployeeId('emp_demo_01');
-                setFormWorkday(getTodayString());
-                setShowNewModal(true);
-              }}
-            >
-              <BezentIcon name="add" size={14} /> New Request
-            </Button>
-          </Inline>
+          <AttendanceDateRangeControl
+            startDate={workdayFrom}
+            endDate={workdayTo}
+            onChange={(r) => {
+              setWorkdayFrom(r.startDate);
+              setWorkdayTo(r.endDate);
+              setPage(1);
+            }}
+          />
         }
       />
 
@@ -692,62 +640,47 @@ export function AttendanceRegularizationPage() {
 
       <Stack gap="md">
         {/* 2. Summary counters (same KPI cards as Workforce overview) */}
-        <div className="bezent-att-kpi-grid bezent-att-kpi-grid--six">
-          <AttendanceGenericKpiCard
-            heading="Pending Review"
-            value={counters.pendingReview}
-            subPillText="Awaiting first action"
-            subPillVariant="transfers"
-            colorScheme="transfers"
-            ariaLabel="Filter by pending review"
-            onClick={() => handleCounterClick('submitted')}
-          />
-          <AttendanceGenericKpiCard
-            heading="Under Review"
-            value={counters.underReview}
-            subPillText="Being assessed"
-            subPillVariant="active"
-            colorScheme="blue"
-            ariaLabel="Filter by under review"
-            onClick={() => handleCounterClick('under_review')}
-          />
-          <AttendanceGenericKpiCard
-            heading="Awaiting Info"
-            value={counters.awaitingInfo}
-            subPillText="Waiting on employee"
-            subPillVariant="promotions"
-            colorScheme="promotions"
-            ariaLabel="Filter by awaiting info"
-            onClick={() => handleCounterClick('awaiting_info')}
-          />
-          <AttendanceGenericKpiCard
-            heading="Approved Today"
-            value={counters.approvedToday}
-            subPillText="Corrections applied"
-            subPillVariant="active"
-            colorScheme="employees"
-            ariaLabel="Filter by approved today"
-            onClick={() => handleCounterClick('approved_today')}
-          />
-          <AttendanceGenericKpiCard
-            heading="Application Issues"
-            value={counters.applicationIssues}
-            subPillText="Failed or blocked"
-            subPillVariant="offboarding"
-            colorScheme="offboarding"
-            ariaLabel="Filter by application issues"
-            onClick={() => handleCounterClick('application_issues')}
-          />
-          <AttendanceGenericKpiCard
-            heading="Rejected Today"
-            value={counters.rejectedToday}
-            subPillText="Declined"
-            subPillVariant="offboarding"
-            colorScheme="rose"
-            ariaLabel="Filter by rejected today"
-            onClick={() => handleCounterClick('rejected_today')}
-          />
-        </div>
+        <RequestStatStrip
+          ariaLabel="Regularization summary"
+          stats={[
+            {
+              label: 'Pending Review',
+              value: counters.pendingReview,
+              tone: 'warning',
+              onClick: () => handleCounterClick('submitted'),
+            },
+            {
+              label: 'Under Review',
+              value: counters.underReview,
+              tone: 'info',
+              onClick: () => handleCounterClick('under_review'),
+            },
+            {
+              label: 'Awaiting Info',
+              value: counters.awaitingInfo,
+              tone: 'neutral',
+              onClick: () => handleCounterClick('awaiting_info'),
+            },
+            {
+              label: 'Approved Today',
+              value: counters.approvedToday,
+              tone: 'success',
+              onClick: () => handleCounterClick('approved_today'),
+            },
+            {
+              label: 'Application Issues',
+              value: counters.applicationIssues,
+              tone: 'danger',
+              onClick: () => handleCounterClick('application_issues'),
+            },
+            {
+              label: 'Rejected Today',
+              value: counters.rejectedToday,
+              tone: 'danger',
+              onClick: () => handleCounterClick('rejected_today'),
+            },
+          ]}
+        />
 
         {/* 2.5 Multi-Stage Workspace Queue Switcher Tabs */}
         <Tabs
@@ -774,18 +707,28 @@ export function AttendanceRegularizationPage() {
           </div>
 
           <div className="bezent-directory-toolbar__actions">
-            <Button
-              variant={showAdvancedFilters || totalFilterCount > 0 ? 'secondary' : 'outline'}
-              size="md"
-              shape="rounded"
-              leftIcon={<BezentIcon name="filter" size={16} />}
-              onClick={() => setShowAdvancedFilters(!showAdvancedFilters)}
-            >
-              Filters
-              {totalFilterCount > 0 && (
-                <span className="bezent-btn__filter-count">{totalFilterCount}</span>
-              )}
-            </Button>
+            <div className="bezent-filter-anchor">
+              <Button
+                variant={showAdvancedFilters || totalFilterCount > 0 ? 'secondary' : 'outline'}
+                size="md"
+                shape="rounded"
+                className={totalFilterCount > 0 ? 'bezent-btn--filters-active' : ''}
+                leftIcon={<BezentIcon name="filter" size={16} />}
+                onClick={() => setShowAdvancedFilters((prev) => !prev)}
+              >
+                Filters
+                {totalFilterCount > 0 && (
+                  <span className="bezent-btn__filter-count">{totalFilterCount}</span>
+                )}
+              </Button>
+
+              <RegularizationFilterPanel
+                isOpen={showAdvancedFilters}
+                onClose={() => setShowAdvancedFilters(false)}
+                appliedFilters={appliedPanelFilters}
+                onApply={handleApplyPanelFilters}
+              />
+            </div>
 
             <Button
               variant="outline"
@@ -799,161 +742,29 @@ export function AttendanceRegularizationPage() {
 
             {usingDemo && <span className="bezent-records-badge">Sample data</span>}
             <span className="bezent-records-badge">{totalCount} Records</span>
+
+            <IconButton
+              label="Export"
+              variant="ghost"
+              tooltipDirection="down"
+              onClick={() => setShowExportModal(true)}
+            >
+              <BezentIcon name="download" size={18} />
+            </IconButton>
+            <IconButton
+              label="New Request"
+              variant="solid"
+              tooltipDirection="down"
+              onClick={() => {
+                setFormEmployeeId('emp_demo_01');
+                setFormWorkday(getTodayString());
+                setShowNewModal(true);
+              }}
+            >
+              <BezentIcon name="add" size={18} />
+            </IconButton>
           </div>
         </div>
-
-        {/* Collapsible advanced filters */}
-        {showAdvancedFilters && (
-          <Card padding="sm">
-            <Stack gap="sm">
-              {
-                <div className="bezent-filter-toolbar__more">
-                  <Stack gap="xs">
-                    <span className="bezent-card__desc">Approval Status</span>
-                    <Select
-                      value={approvalStatus}
-                      onChange={(e) => {
-                        setApprovalStatus(e.target.value);
-                        setPage(1);
-                      }}
-                    >
-                      <option value="all">All Approval Statuses</option>
-                      <option value="submitted">Pending Review</option>
-                      <option value="under_review">Under Review</option>
-                      <option value="awaiting_info">Awaiting Info</option>
-                      <option value="approved">Approved</option>
-                      <option value="rejected">Rejected</option>
-                      <option value="cancelled">Cancelled</option>
-                    </Select>
-                  </Stack>
-
-                  <Stack gap="xs">
-                    <span className="bezent-card__desc">Request Type</span>
-                    <Select
-                      value={requestType}
-                      onChange={(e) => {
-                        setRequestType(e.target.value);
-                        setPage(1);
-                      }}
-                    >
-                      <option value="all">All Request Types</option>
-                      <option value="missing_in">Missing IN Punch</option>
-                      <option value="missing_out">Missing OUT Punch</option>
-                      <option value="incorrect_time">Incorrect Punch Time</option>
-                      <option value="status_correction">Status Correction</option>
-                      <option value="worked_hours">Worked Hours</option>
-                      <option value="both_missing">Both Punches Missing</option>
-                      <option value="wrong_direction">Wrong Punch Direction</option>
-                    </Select>
-                  </Stack>
-
-                  <Stack gap="xs">
-                    <span className="bezent-card__desc">Application State</span>
-                    <Select
-                      value={applicationStatus}
-                      onChange={(e) => {
-                        setApplicationStatus(e.target.value);
-                        setPage(1);
-                      }}
-                    >
-                      <option value="all">All Application States</option>
-                      <option value="not_applicable">Not Applied</option>
-                      <option value="pending_application">Pending</option>
-                      <option value="applied">Applied</option>
-                      <option value="failed">Failed</option>
-                      <option value="blocked">Blocked</option>
-                    </Select>
-                  </Stack>
-
-                  <Stack gap="xs">
-                    <span className="bezent-card__desc">Workday Range</span>
-                    <Inline gap="xs">
-                      <Input
-                        type="date"
-                        value={workdayFrom}
-                        onChange={(e) => setWorkdayFrom(e.target.value)}
-                      />
-                      <Input
-                        type="date"
-                        value={workdayTo}
-                        onChange={(e) => setWorkdayTo(e.target.value)}
-                      />
-                    </Inline>
-                  </Stack>
-
-                  <Stack gap="xs">
-                    <span className="bezent-card__desc">Submitted Date Range</span>
-                    <Inline gap="xs">
-                      <Input
-                        type="date"
-                        value={submittedFrom}
-                        onChange={(e) => setSubmittedFrom(e.target.value)}
-                      />
-                      <Input
-                        type="date"
-                        value={submittedTo}
-                        onChange={(e) => setSubmittedTo(e.target.value)}
-                      />
-                    </Inline>
-                  </Stack>
-
-                  <Stack gap="xs">
-                    <span className="bezent-card__desc">Assigned To</span>
-                    <Select value={assignedTo} onChange={(e) => setAssignedTo(e.target.value)}>
-                      <option value="all">All Reviewers</option>
-                      <option value="unassigned">Unassigned</option>
-                    </Select>
-                  </Stack>
-
-                  <Stack gap="xs">
-                    <span className="bezent-card__desc">Department</span>
-                    <Select value={departmentId} onChange={(e) => setDepartmentId(e.target.value)}>
-                      <option value="all">All Departments</option>
-                    </Select>
-                  </Stack>
-
-                  <Stack gap="xs">
-                    <span className="bezent-card__desc">Branch / Location</span>
-                    <Select value={locationId} onChange={(e) => setLocationId(e.target.value)}>
-                      <option value="all">All Locations</option>
-                    </Select>
-                  </Stack>
-
-                  <Stack gap="xs">
-                    <span className="bezent-card__desc">Related Exception</span>
-                    <Select
-                      value={relatedException}
-                      onChange={(e) => setRelatedException(e.target.value)}
-                    >
-                      <option value="all">All Cases</option>
-                      <option value="has_exception">Has Linked Exception</option>
-                    </Select>
-                  </Stack>
-
-                  <Stack gap="xs">
-                    <span className="bezent-card__desc">Request Source</span>
-                    <Select value={source} onChange={(e) => setSource(e.target.value)}>
-                      <option value="all">All Sources</option>
-                      <option value="web">Web HR Admin</option>
-                      <option value="ess">Employee Self-Service</option>
-                      <option value="mobile">Mobile App</option>
-                      <option value="biometric">Biometric Auto</option>
-                    </Select>
-                  </Stack>
-
-                  <Inline justify="end" align="center" gap="xs">
-                    <Button variant="secondary" size="sm" onClick={handleResetFilters}>
-                      Reset Filters
-                    </Button>
-                    <Button variant="primary" size="sm" onClick={loadData}>
-                      Apply Filters
-                    </Button>
-                  </Inline>
-                </div>
-              }
-            </Stack>
-          </Card>
-        )}
 
         {/* 4. Contextual Bulk Action Bar */}
         {selectedIds.size > 0 && (
@@ -1072,25 +883,14 @@ export function AttendanceRegularizationPage() {
                   </TableHeaderCell>
                   <TableHeaderCell className="bezent-table-col--employee">Employee</TableHeaderCell>
                   <TableHeaderCell className="bezent-table-col--workday">Workday</TableHeaderCell>
-                  <TableHeaderCell className="bezent-table-col--type">Request Type</TableHeaderCell>
-                  <TableHeaderCell className="bezent-table-col--change">
-                    Requested Change
-                  </TableHeaderCell>
+                  <TableHeaderCell className="bezent-table-col--change">Request</TableHeaderCell>
                   <TableHeaderCell className="bezent-table-col--submitted">
-                    Submitted At
+                    Submitted
                   </TableHeaderCell>
                   <TableHeaderCell className="bezent-table-col--assigned">
                     Assigned To
                   </TableHeaderCell>
-                  <TableHeaderCell className="bezent-table-col--approval">
-                    Approval Status
-                  </TableHeaderCell>
-                  <TableHeaderCell className="bezent-table-col--application">
-                    Application Status
-                  </TableHeaderCell>
-                  <TableHeaderCell className="bezent-table-col--exception">
-                    Related Exception
-                  </TableHeaderCell>
+                  <TableHeaderCell className="bezent-table-col--approval">Status</TableHeaderCell>
                   <TableHeaderCell className="bezent-table-col--actions bezent-table-col--sticky-right">
                     Actions
                   </TableHeaderCell>
@@ -1106,7 +906,7 @@ export function AttendanceRegularizationPage() {
                       />
                     </TableCell>
 
-                    {/* 1. Employee */}
+                    {/* Employee */}
                     <TableCell className="bezent-table-col--employee">
                       <div className="bezent-table-cell--avatar-meta">
                         <Avatar
@@ -1120,12 +920,15 @@ export function AttendanceRegularizationPage() {
                           <span className="bezent-table-meta-title" title={req.employeeName}>
                             {req.employeeName}
                           </span>
-                          <span className="bezent-table-meta-subtitle">{req.employeeCode}</span>
+                          <span className="bezent-table-meta-subtitle">
+                            {req.employeeCode}
+                            {req.departmentName ? ` · ${req.departmentName}` : ''}
+                          </span>
                         </div>
                       </div>
                     </TableCell>
 
-                    {/* 2. Workday */}
+                    {/* Workday */}
                     <TableCell className="bezent-table-col--workday">
                       <div className="bezent-table-meta-group">
                         <span className="bezent-table-meta-title">{formatDate(req.workday)}</span>
@@ -1135,24 +938,23 @@ export function AttendanceRegularizationPage() {
                       </div>
                     </TableCell>
 
-                    {/* 3. Request Type */}
-                    <TableCell className="bezent-table-col--type">
-                      <span
-                        className="bezent-table-cell--nowrap"
-                        title={REQUEST_TYPE_LABELS[req.requestType] ?? req.requestType}
-                      >
-                        {REQUEST_TYPE_LABELS[req.requestType] ?? req.requestType}
-                      </span>
-                    </TableCell>
-
-                    {/* 4. Requested Change */}
+                    {/* Request: type + what changes (+ linked exception) */}
                     <TableCell className="bezent-table-col--change">
-                      <span className="bezent-table-cell--nowrap" title={req.requestedChange}>
-                        {req.requestedChange}
-                      </span>
+                      <div className="bezent-table-meta-group">
+                        <span
+                          className="bezent-table-meta-title"
+                          title={REQUEST_TYPE_LABELS[req.requestType] ?? req.requestType}
+                        >
+                          {REQUEST_TYPE_LABELS[req.requestType] ?? req.requestType}
+                        </span>
+                        <span className="bezent-table-meta-subtitle" title={req.requestedChange}>
+                          {req.requestedChange}
+                          {req.relatedExceptionId ? ` · ${req.relatedExceptionId}` : ''}
+                        </span>
+                      </div>
                     </TableCell>
 
-                    {/* 5. Submitted At */}
+                    {/* Submitted */}
                     <TableCell className="bezent-table-col--submitted">
                       <div className="bezent-table-meta-group">
                         <span className="bezent-table-meta-title">
@@ -1164,7 +966,7 @@ export function AttendanceRegularizationPage() {
                       </div>
                     </TableCell>
 
-                    {/* 6. Assigned To */}
+                    {/* Assigned To */}
                     <TableCell className="bezent-table-col--assigned">
                       {req.assignedToName ? (
                         <div className="bezent-table-cell--avatar-meta">
@@ -1180,22 +982,19 @@ export function AttendanceRegularizationPage() {
                       )}
                     </TableCell>
 
-                    {/* 7. Approval Status */}
+                    {/* Status: approval, plus whether the correction was applied once approved */}
                     <TableCell className="bezent-table-col--approval">
-                      {renderApprovalBadge(req.approvalStatus, req.assignedQueue)}
+                      <div className="bezent-table-meta-group">
+                        <span>{renderApprovalBadge(req.approvalStatus, req.assignedQueue)}</span>
+                        {req.approvalStatus === 'approved' && (
+                          <span className="bezent-table-meta-subtitle">
+                            {renderApplicationBadge(req.applicationStatus)}
+                          </span>
+                        )}
+                      </div>
                     </TableCell>
 
-                    {/* 8. Application Status */}
-                    <TableCell className="bezent-table-col--application">
-                      {renderApplicationBadge(req.applicationStatus)}
-                    </TableCell>
-
-                    {/* 9. Related Exception */}
-                    <TableCell className="bezent-table-col--exception">
-                      {formatExceptionDisplay(req.relatedExceptionId)}
-                    </TableCell>
-
-                    {/* 10. Actions (Sticky Right) */}
+                    {/* Actions (sticky right) */}
                     <TableCell className="bezent-table-col--actions bezent-table-col--sticky-right">
                       <IconButton
                         label="View details and review"
