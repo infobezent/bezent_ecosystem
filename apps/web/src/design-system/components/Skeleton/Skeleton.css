@@ -134,6 +134,12 @@
   gap: 10px;
 }
 
+.bezent-table-skeleton-text-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
 .bezent-sr-only {
   position: absolute;
   width: 1px;

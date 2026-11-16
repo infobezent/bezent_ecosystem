@@ -7,7 +7,6 @@ import {
   Card,
   Stack,
   Inline,
-  Grid,
   Button,
   Badge,
   Table,
@@ -1511,7 +1510,7 @@ export function DailyAttendanceLogPage() {
                   <div className="bezent-attendance-drawer-hero">
                     <div className="bezent-attendance-drawer-hero__left">
                       <span className="bezent-attendance-drawer-hero__eyebrow">
-                        Today's Attendance
+                        Today&apos;s Attendance
                       </span>
                       <div className="bezent-attendance-drawer-hero__hours">
                         {formatWorkedHours(drawerDetail.attendanceSummary.workedMinutes)}

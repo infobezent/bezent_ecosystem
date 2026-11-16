@@ -1,5 +1,5 @@
 import { getDb } from '../src/db/connection.js';
-import { attendancePunches, employees } from '../src/db/schema.js';
+import { attendancePunches } from '../src/db/schema.js';
 import { generateSurrogateId } from '../src/platform/auth/security.js';
 import { and, eq } from 'drizzle-orm';
 

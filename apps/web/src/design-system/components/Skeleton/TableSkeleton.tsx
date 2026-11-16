@@ -40,7 +40,7 @@ export function TableSkeleton({
             <td className="bezent-table-cell">
               <div className="bezent-table-skeleton-cell">
                 <Skeleton variant="circular" width="2xs" height="lg" />
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                <div className="bezent-table-skeleton-text-group">
                   <Skeleton variant="text" width={rowIndex % 2 === 0 ? 'md' : 'sm'} height="sm" />
                   <Skeleton variant="text" width="xs" height="xs" />
                 </div>
