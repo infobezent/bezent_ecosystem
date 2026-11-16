@@ -1861,7 +1861,7 @@
 .bezent-att-kpi-card {
   position: relative;
   background: #ffffff;
-  border: 1px solid #e2e8f0;
+  border: none;
   border-radius: 16px;
   padding: 13px 13px 13px 16px;
   display: flex;
@@ -1872,38 +1872,33 @@
   height: 132px;
   min-height: 132px;
   box-sizing: border-box;
-  box-shadow:
-    0 1px 3px rgba(0, 0, 0, 0.03),
-    0 1px 2px rgba(0, 0, 0, 0.02);
-  transition:
-    transform 0.18s cubic-bezier(0.16, 1, 0.3, 1),
-    box-shadow 0.18s cubic-bezier(0.16, 1, 0.3, 1),
-    border-color 0.18s ease;
+  box-shadow: none;
+  transition: filter 0.18s ease, opacity 0.18s ease;
   cursor: pointer;
   overflow: hidden;
   user-select: none;
 }
 
 .bezent-att-kpi-card:hover {
-  transform: translateY(-2px);
-  box-shadow:
-    0 8px 20px rgba(0, 0, 0, 0.06),
-    0 2px 6px rgba(0, 0, 0, 0.03);
-  border-color: #cbd5e1;
+  transform: none;
+  box-shadow: none;
+  border: none;
+  filter: brightness(0.97);
 }
 
 [data-theme='dark'] .bezent-att-kpi-card {
   background: #1e293b;
-  border-color: #334155;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  border: none;
+  box-shadow: none;
 }
 
 [data-theme='dark'] .bezent-att-kpi-card:hover {
-  border-color: #475569;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45);
+  border: none;
+  box-shadow: none;
+  filter: brightness(1.06);
 }
 
-/* ── Colored Pastel Variants for KPI Cards (One shade darker from graph color) ── */
+/* ── Colored Pastel Variants for KPI Cards (Flat, borderless, one shade darker from graph color) ── */
 .bezent-att-kpi-card--blue {
   background: linear-gradient(
     180deg,
@@ -1911,14 +1906,12 @@
     rgba(235, 244, 255, 0.88) 50%,
     rgba(246, 250, 255, 0.96) 100%
   );
-  border-color: #bfdbfe;
+  border: none;
 }
 
 .bezent-att-kpi-card--blue:hover {
-  border-color: #93c5fd;
-  box-shadow:
-    0 8px 24px rgba(37, 99, 235, 0.12),
-    0 2px 6px rgba(37, 99, 235, 0.06);
+  border: none;
+  box-shadow: none;
 }
 
 .bezent-att-kpi-card--green {
@@ -1928,14 +1921,12 @@
     rgba(238, 252, 243, 0.88) 50%,
     rgba(247, 254, 250, 0.96) 100%
   );
-  border-color: #bbf7d0;
+  border: none;
 }
 
 .bezent-att-kpi-card--green:hover {
-  border-color: #86efac;
-  box-shadow:
-    0 8px 24px rgba(16, 185, 129, 0.12),
-    0 2px 6px rgba(16, 185, 129, 0.06);
+  border: none;
+  box-shadow: none;
 }
 
 .bezent-att-kpi-card--rose {
@@ -1945,14 +1936,12 @@
     rgba(255, 241, 242, 0.88) 50%,
     rgba(255, 250, 251, 0.96) 100%
   );
-  border-color: #fecdd3;
+  border: none;
 }
 
 .bezent-att-kpi-card--rose:hover {
-  border-color: #fda4af;
-  box-shadow:
-    0 8px 24px rgba(244, 63, 94, 0.12),
-    0 2px 6px rgba(244, 63, 94, 0.06);
+  border: none;
+  box-shadow: none;
 }
 
 .bezent-att-kpi-card--amber {
@@ -1962,14 +1951,12 @@
     rgba(255, 249, 235, 0.88) 50%,
     rgba(255, 253, 245, 0.96) 100%
   );
-  border-color: #fde68a;
+  border: none;
 }
 
 .bezent-att-kpi-card--amber:hover {
-  border-color: #fcd34d;
-  box-shadow:
-    0 8px 24px rgba(245, 158, 11, 0.12),
-    0 2px 6px rgba(245, 158, 11, 0.06);
+  border: none;
+  box-shadow: none;
 }
 
 .bezent-att-kpi-card--purple {
@@ -1979,60 +1966,63 @@
     rgba(246, 243, 255, 0.88) 50%,
     rgba(252, 250, 255, 0.96) 100%
   );
-  border-color: #ddd6fe;
+  border: none;
 }
 
 .bezent-att-kpi-card--purple:hover {
-  border-color: #c4b5fd;
-  box-shadow:
-    0 8px 24px rgba(124, 58, 237, 0.12),
-    0 2px 6px rgba(124, 58, 237, 0.06);
+  border: none;
+  box-shadow: none;
 }
 
 /* Dark Theme Overrides for KPI Card Variants */
 [data-theme='dark'] .bezent-att-kpi-card--blue {
   background: linear-gradient(180deg, rgba(37, 99, 235, 0.22) 0%, rgba(15, 23, 42, 0.96) 100%);
-  border-color: rgba(37, 99, 235, 0.35);
+  border: none;
+  box-shadow: none;
 }
 [data-theme='dark'] .bezent-att-kpi-card--blue:hover {
-  border-color: rgba(37, 99, 235, 0.55);
-  box-shadow: 0 8px 24px rgba(37, 99, 235, 0.25);
+  border: none;
+  box-shadow: none;
 }
 
 [data-theme='dark'] .bezent-att-kpi-card--green {
   background: linear-gradient(180deg, rgba(16, 185, 129, 0.22) 0%, rgba(15, 23, 42, 0.96) 100%);
-  border-color: rgba(16, 185, 129, 0.35);
+  border: none;
+  box-shadow: none;
 }
 [data-theme='dark'] .bezent-att-kpi-card--green:hover {
-  border-color: rgba(16, 185, 129, 0.55);
-  box-shadow: 0 8px 24px rgba(16, 185, 129, 0.25);
+  border: none;
+  box-shadow: none;
 }
 
 [data-theme='dark'] .bezent-att-kpi-card--rose {
   background: linear-gradient(180deg, rgba(244, 63, 94, 0.22) 0%, rgba(15, 23, 42, 0.96) 100%);
-  border-color: rgba(244, 63, 94, 0.35);
+  border: none;
+  box-shadow: none;
 }
 [data-theme='dark'] .bezent-att-kpi-card--rose:hover {
-  border-color: rgba(244, 63, 94, 0.55);
-  box-shadow: 0 8px 24px rgba(244, 63, 94, 0.25);
+  border: none;
+  box-shadow: none;
 }
 
 [data-theme='dark'] .bezent-att-kpi-card--amber {
   background: linear-gradient(180deg, rgba(245, 158, 11, 0.22) 0%, rgba(15, 23, 42, 0.96) 100%);
-  border-color: rgba(245, 158, 11, 0.35);
+  border: none;
+  box-shadow: none;
 }
 [data-theme='dark'] .bezent-att-kpi-card--amber:hover {
-  border-color: rgba(245, 158, 11, 0.55);
-  box-shadow: 0 8px 24px rgba(245, 158, 11, 0.25);
+  border: none;
+  box-shadow: none;
 }
 
 [data-theme='dark'] .bezent-att-kpi-card--purple {
   background: linear-gradient(180deg, rgba(124, 58, 237, 0.22) 0%, rgba(15, 23, 42, 0.96) 100%);
-  border-color: rgba(124, 58, 237, 0.35);
+  border: none;
+  box-shadow: none;
 }
 [data-theme='dark'] .bezent-att-kpi-card--purple:hover {
-  border-color: rgba(124, 58, 237, 0.55);
-  box-shadow: 0 8px 24px rgba(124, 58, 237, 0.25);
+  border: none;
+  box-shadow: none;
 }
 
 /* ── Left Content Column (Heading, Big Number, Subtitle Pill) ── */
@@ -2090,8 +2080,9 @@
   text-overflow: ellipsis;
   letter-spacing: -0.01em;
   transition: all 0.15s ease;
-  background: rgba(255, 255, 255, 0.85);
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
+  background: rgba(255, 255, 255, 0.65);
+  border: none;
+  box-shadow: none;
 }
 
 .bezent-att-kpi-sub-dot {
@@ -2102,9 +2093,9 @@
 }
 
 .bezent-att-kpi-sub--blue {
-  background: rgba(255, 255, 255, 0.88);
+  background: rgba(255, 255, 255, 0.65);
   color: #1d4ed8;
-  border: 1px solid rgba(37, 99, 235, 0.18);
+  border: none;
 }
 
 .bezent-att-kpi-sub--blue .bezent-att-kpi-sub-dot {
@@ -2112,9 +2103,9 @@
 }
 
 .bezent-att-kpi-sub--green {
-  background: rgba(255, 255, 255, 0.88);
+  background: rgba(255, 255, 255, 0.65);
   color: #047857;
-  border: 1px solid rgba(16, 185, 129, 0.18);
+  border: none;
 }
 
 .bezent-att-kpi-sub--green .bezent-att-kpi-sub-dot {
@@ -2122,9 +2113,9 @@
 }
 
 .bezent-att-kpi-sub--rose {
-  background: rgba(255, 255, 255, 0.88);
+  background: rgba(255, 255, 255, 0.65);
   color: #be123c;
-  border: 1px solid rgba(244, 63, 94, 0.18);
+  border: none;
 }
 
 .bezent-att-kpi-sub--rose .bezent-att-kpi-sub-dot {
@@ -2132,9 +2123,9 @@
 }
 
 .bezent-att-kpi-sub--amber {
-  background: rgba(255, 255, 255, 0.88);
+  background: rgba(255, 255, 255, 0.65);
   color: #b45309;
-  border: 1px solid rgba(245, 158, 11, 0.18);
+  border: none;
 }
 
 .bezent-att-kpi-sub--amber .bezent-att-kpi-sub-dot {
@@ -2142,9 +2133,9 @@
 }
 
 .bezent-att-kpi-sub--purple {
-  background: rgba(255, 255, 255, 0.88);
+  background: rgba(255, 255, 255, 0.65);
   color: #6d28d9;
-  border: 1px solid rgba(124, 58, 237, 0.18);
+  border: none;
 }
 
 .bezent-att-kpi-sub--purple .bezent-att-kpi-sub-dot {
@@ -2154,34 +2145,34 @@
 [data-theme='dark'] .bezent-att-kpi-sub--blue {
   background: rgba(37, 99, 235, 0.22);
   color: #93c5fd;
-  border: 1px solid rgba(37, 99, 235, 0.35);
+  border: none;
 }
 
 [data-theme='dark'] .bezent-att-kpi-sub--green {
   background: rgba(16, 185, 129, 0.22);
   color: #6ee7b7;
-  border: 1px solid rgba(16, 185, 129, 0.35);
+  border: none;
 }
 
 [data-theme='dark'] .bezent-att-kpi-sub--rose {
   background: rgba(244, 63, 94, 0.22);
   color: #fca5a5;
-  border: 1px solid rgba(244, 63, 94, 0.35);
+  border: none;
 }
 
 [data-theme='dark'] .bezent-att-kpi-sub--amber {
   background: rgba(245, 158, 11, 0.22);
   color: #fcd34d;
-  border: 1px solid rgba(245, 158, 11, 0.35);
+  border: none;
 }
 
 [data-theme='dark'] .bezent-att-kpi-sub--purple {
   background: rgba(124, 58, 237, 0.22);
   color: #c084fc;
-  border: 1px solid rgba(124, 58, 237, 0.35);
+  border: none;
 }
 
-/* ── Right Column: Inset Graph Panel (Inspired by Card 1) ── */
+/* ── Right Column: Inset Graph Panel (Transparent, no white background, no borders) ── */
 .bezent-att-kpi-right {
   width: 45%;
   min-width: 82px;
@@ -2195,59 +2186,35 @@
   overflow: hidden;
   box-sizing: border-box;
   transition: all 0.2s ease;
-  background: #ffffff;
-  border: 1px solid rgba(255, 255, 255, 0.85);
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+  background: transparent;
+  border: none;
+  box-shadow: none;
 }
 
-.bezent-att-kpi-right--blue {
-  background: #ffffff;
-  border: 1px solid rgba(37, 99, 235, 0.12);
-}
-
-.bezent-att-kpi-right--green {
-  background: #ffffff;
-  border: 1px solid rgba(16, 185, 129, 0.12);
-}
-
-.bezent-att-kpi-right--rose {
-  background: #ffffff;
-  border: 1px solid rgba(244, 63, 94, 0.12);
-}
-
-.bezent-att-kpi-right--amber {
-  background: #ffffff;
-  border: 1px solid rgba(245, 158, 11, 0.12);
-}
-
+.bezent-att-kpi-right--blue,
+.bezent-att-kpi-right--green,
+.bezent-att-kpi-right--rose,
+.bezent-att-kpi-right--amber,
 .bezent-att-kpi-right--purple {
-  background: #ffffff;
-  border: 1px solid rgba(124, 58, 237, 0.12);
+  background: transparent;
+  border: none;
+  box-shadow: none;
 }
 
 [data-theme='dark'] .bezent-att-kpi-right {
-  background: rgba(15, 23, 42, 0.7);
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
+  background: transparent;
+  border: none;
+  box-shadow: none;
 }
 
-[data-theme='dark'] .bezent-att-kpi-right--blue {
-  border-color: rgba(37, 99, 235, 0.25);
-}
-
-[data-theme='dark'] .bezent-att-kpi-right--green {
-  border-color: rgba(16, 185, 129, 0.25);
-}
-
-[data-theme='dark'] .bezent-att-kpi-right--rose {
-  border-color: rgba(244, 63, 94, 0.25);
-}
-
-[data-theme='dark'] .bezent-att-kpi-right--amber {
-  border-color: rgba(245, 158, 11, 0.25);
-}
-
+[data-theme='dark'] .bezent-att-kpi-right--blue,
+[data-theme='dark'] .bezent-att-kpi-right--green,
+[data-theme='dark'] .bezent-att-kpi-right--rose,
+[data-theme='dark'] .bezent-att-kpi-right--amber,
 [data-theme='dark'] .bezent-att-kpi-right--purple {
-  border-color: rgba(124, 58, 237, 0.25);
+  border: none;
+  background: transparent;
+  box-shadow: none;
 }
 
 .bezent-att-kpi-right-top {
