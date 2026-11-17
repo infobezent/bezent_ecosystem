@@ -87,7 +87,9 @@ export interface AttendanceGenericKpiCardProps {
     | 'lollipop'
     | 'dot'
     | 'donut'
-    | 'pulse';
+    | 'pulse'
+    | 'sharp'
+    | 'dotted';
 }
 
 function formatDateShort(dateStr: string): string {

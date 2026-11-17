@@ -70,6 +70,7 @@ function generateSharpArea(points: Point[], baselineY: number): string {
   const linePath = generateSharpPolyline(points);
   const first = points[0];
   const last = points[points.length - 1];
+  if (!first || !last) return '';
   return `${linePath} L ${last.x.toFixed(1)} ${baselineY.toFixed(1)} L ${first.x.toFixed(1)} ${baselineY.toFixed(1)} Z`;
 }
 
