@@ -3128,6 +3128,98 @@
   pointer-events: none;
 }
 
+/* ── Segmented Daily Columns ── */
+.bezent-att-col-group {
+  cursor: pointer;
+}
+
+.bezent-att-col-bg {
+  fill: #f1f5f9;
+  transition: fill 0.15s ease;
+}
+
+[data-theme='dark'] .bezent-att-col-bg {
+  fill: #1e293b;
+}
+
+.bezent-att-col-group:hover .bezent-att-col-bg {
+  fill: #e2e8f0;
+}
+
+[data-theme='dark'] .bezent-att-col-group:hover .bezent-att-col-bg {
+  fill: #2c3a4f;
+}
+
+.bezent-att-col-hover-halo {
+  fill: rgba(37, 99, 235, 0.08);
+  pointer-events: none;
+}
+
+[data-theme='dark'] .bezent-att-col-hover-halo {
+  fill: rgba(96, 165, 250, 0.12);
+}
+
+.bezent-att-col-seg--present {
+  fill: #2563eb;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+[data-theme='dark'] .bezent-att-col-seg--present {
+  fill: #3b82f6;
+}
+
+.bezent-att-col-seg--absent {
+  fill: #8b5cf6;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+[data-theme='dark'] .bezent-att-col-seg--absent {
+  fill: #a78bfa;
+}
+
+.bezent-att-col-seg--late {
+  fill: #10b981;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+[data-theme='dark'] .bezent-att-col-seg--late {
+  fill: #34d399;
+}
+
+.bezent-att-col-rate {
+  font-size: 10px;
+  font-weight: 700;
+  fill: #64748b;
+  font-variant-numeric: tabular-nums;
+  pointer-events: none;
+  font-family: inherit;
+}
+
+[data-theme='dark'] .bezent-att-col-rate {
+  fill: #94a3b8;
+}
+
+.bezent-att-col-rate.is-high {
+  fill: #059669;
+}
+
+[data-theme='dark'] .bezent-att-col-rate.is-high {
+  fill: #34d399;
+}
+
+.bezent-att-col-rate.is-mid {
+  fill: #d97706;
+}
+
+[data-theme='dark'] .bezent-att-col-rate.is-mid {
+  fill: #fbbf24;
+}
+
+.bezent-att-col-rate.is-empty {
+  fill: #94a3b8;
+  opacity: 0.7;
+}
+
 .bezent-att-tooltip-bg {
   fill: #0f172a;
   stroke: rgba(255, 255, 255, 0.12);
