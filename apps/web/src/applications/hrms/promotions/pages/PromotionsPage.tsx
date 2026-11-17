@@ -25,6 +25,7 @@ import {
 } from '../../employee-administration/api/employeeAdministrationApi';
 import {
   ACTION_STATUS_LABELS,
+  PROMOTION_ACTION_TYPES,
   actionTypeLabel,
 } from '../../employee-administration/model/actionCatalog';
 import { NewEmployeeActionModal } from '../../employee-administration/components/NewEmployeeActionModal';
@@ -42,8 +43,6 @@ import { DEMO_PROMOTIONS } from '../model/demoPromotions';
 const PAGE_SIZE_OPTIONS = [10, 25, 50, 100] as const;
 type PageSizeOption = (typeof PAGE_SIZE_OPTIONS)[number];
 const DEFAULT_PAGE_SIZE: PageSizeOption = 25;
-
-const PROMOTION_ACTION_TYPES: EmployeeActionType[] = ['designation_change', 'department_change'];
 
 function getTodayIsoDate(): string {
   const now = new Date();

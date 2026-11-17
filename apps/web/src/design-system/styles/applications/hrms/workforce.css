@@ -7480,3 +7480,175 @@
   white-space: nowrap !important;
   border: 0 !important;
 }
+
+/* ── Records: employee folders (drive view) ───────────────────────────── */
+.bezent-rec-folder-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: var(--space-3, 12px);
+}
+
+.bezent-rec-folder {
+  position: relative;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: var(--space-2, 8px) var(--space-3, 12px);
+  align-items: center;
+  padding: var(--space-3, 12px) var(--space-4, 16px);
+  text-align: left;
+  background: var(--bg-surface, #fff);
+  border: 0.8px solid #e9eaf4;
+  border-radius: var(--radius-card, 12px);
+  cursor: pointer;
+  font: inherit;
+  color: inherit;
+  transition:
+    background-color 0.15s ease,
+    border-color 0.15s ease;
+}
+
+.bezent-rec-folder:hover,
+.bezent-rec-folder:focus-visible {
+  background: var(--bg-hover, #c2e7ff);
+  border-color: var(--blue-interactive, #1a73e8);
+  outline: none;
+}
+
+.bezent-rec-folder__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius-md, 10px);
+  background: var(--bg-hover, #c2e7ff);
+  color: var(--blue-interactive, #1a73e8);
+}
+
+.bezent-rec-folder__text {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.bezent-rec-folder__id {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--blue-interactive, #1a73e8);
+}
+
+.bezent-rec-folder__name {
+  font-weight: 600;
+  color: var(--brand-primary, #041e49);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.bezent-rec-folder__meta {
+  font-size: 12px;
+  color: var(--text-secondary, #64748b);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.bezent-rec-folder__chips {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.bezent-rec-folder__avatar {
+  display: none;
+}
+
+.bezent-rec-folder--skeleton {
+  min-height: 112px;
+  background: linear-gradient(90deg, #f1f3f9 25%, #e9eaf4 50%, #f1f3f9 75%);
+  background-size: 200% 100%;
+  animation: bezent-rec-shimmer 1.2s linear infinite;
+  cursor: default;
+}
+
+@keyframes bezent-rec-shimmer {
+  from {
+    background-position: 200% 0;
+  }
+  to {
+    background-position: -200% 0;
+  }
+}
+
+.bezent-rec-open {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3, 12px);
+}
+
+.bezent-rec-open__bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--space-2, 8px);
+}
+
+.bezent-rec-crumbs {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 14px;
+  color: var(--text-secondary, #64748b);
+}
+
+.bezent-rec-crumbs__link {
+  padding: 4px 8px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--blue-interactive, #1a73e8);
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.bezent-rec-crumbs__link:hover {
+  background: var(--bg-hover, #c2e7ff);
+}
+
+.bezent-rec-crumbs__current {
+  font-weight: 600;
+  color: var(--brand-primary, #041e49);
+}
+
+/* ── Offboarding: clearance checklist ─────────────────────────────────── */
+.bezent-clearance-group {
+  border: 0.8px solid #e9eaf4;
+  border-radius: var(--radius-card, 12px);
+  overflow: hidden;
+}
+
+.bezent-clearance-group__title {
+  padding: 8px 14px;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--brand-primary, #041e49);
+  background: var(--bg-hover, #c2e7ff);
+}
+
+.bezent-clearance-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 14px;
+  border-top: 0.8px solid #e9eaf4;
+}
+
+.bezent-clearance-item__text {
+  flex: 1;
+  min-width: 0;
+}

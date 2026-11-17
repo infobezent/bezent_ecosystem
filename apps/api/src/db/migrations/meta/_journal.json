@@ -428,6 +428,13 @@
       "when": 1793879354004,
       "tag": "0060_workforce_employee_bulk_import",
       "breakpoints": true
+    },
+    {
+      "idx": 61,
+      "version": "5",
+      "when": 1795400000000,
+      "tag": "0061_employee_clearance_items",
+      "breakpoints": true
     }
   ]
 }

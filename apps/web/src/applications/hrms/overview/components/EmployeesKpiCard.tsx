@@ -350,7 +350,7 @@ export const EmployeesKpiCard: React.FC<EmployeesKpiCardProps> = ({
         ) : (
           <>
             <span className="bezent-kpi-sub-pill-dot" />
-            100% Active
+            {effectiveTotal > 0 ? Math.round((safeActive / effectiveTotal) * 100) : 0}% Active
           </>
         )}
       </div>

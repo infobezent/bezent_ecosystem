@@ -156,15 +156,15 @@
 }
 
 .bezent-toolbar .bezent-icon-btn--solid {
-  background: var(--teal-50);
-  border-color: var(--teal-200);
-  color: var(--teal-700);
+  background: var(--bg-hover, #c2e7ff);
+  border-color: var(--accent-hover, #a8dbfc);
+  color: var(--brand-primary, #041e49);
 }
 
 .bezent-toolbar .bezent-icon-btn--solid:hover:not(:disabled) {
-  background: var(--teal-100);
-  border-color: var(--teal-300);
-  color: var(--teal-700);
+  background: var(--accent-hover, #a8dbfc);
+  border-color: var(--accent-pressed, #90cefa);
+  color: var(--brand-primary, #041e49);
 }
 
 .bezent-view-toggle__btn .bezent-material-icon {
@@ -331,9 +331,9 @@
 }
 
 [data-theme='dark'] .bezent-toolbar .bezent-icon-btn--solid {
-  background: rgba(20, 184, 166, 0.16);
-  border-color: rgba(45, 212, 191, 0.35);
-  color: var(--teal-300);
+  background: rgba(22, 131, 255, 0.16);
+  border-color: rgba(22, 131, 255, 0.4);
+  color: #c2e7ff;
 }
 
 /* ── Compact Filter Toolbar Grid ── */

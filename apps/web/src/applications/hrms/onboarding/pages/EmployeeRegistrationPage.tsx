@@ -5,6 +5,7 @@ import type { EmployeeRegistrationDraft } from '../components/DraftsModal';
 import type { ReviewSectionData } from '../components/ReviewSection';
 import { RegistrationConfigLoader } from '../registration/registrationConfig';
 import { createEmployee } from '../../employees/api/employeesApi';
+import { syncRegistrationDocuments } from '../api/syncEmployeeDocuments';
 import {
   fetchOrganizationMasters,
   type OrganizationMasters,
@@ -102,6 +103,8 @@ export function EmployeeRegistrationPage({ onCancel }: { onCancel?: () => void }
       try {
         const payload = buildCreateEmployeePayload(formData, masters ?? undefined);
         const record = await createEmployee(payload);
+        // File the uploaded documents into the new employee's Records folder.
+        await syncRegistrationDocuments(record.id, formData).catch(() => 0);
         const fullName = `${record.firstName} ${record.lastName ?? ''}`.trim();
         setCreatedEmployee({
           id: record.id,
@@ -151,6 +154,7 @@ export function EmployeeRegistrationPage({ onCancel }: { onCancel?: () => void }
   return (
     <RegistrationConfigLoader>
       <EmployeeRegistration
+        masters={masters}
         onCancel={handleCancel}
         initialDraft={initialDraft}
         onSubmit={handleSubmit}

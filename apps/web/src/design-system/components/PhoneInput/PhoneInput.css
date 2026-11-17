@@ -36,14 +36,14 @@
 }
 
 .bezent-phone-input-box:hover:not(.is-disabled) {
-  border-color: var(--teal-300);
+  border-color: #8ab4f8;
 }
 
 .bezent-phone-input-box:focus-within,
 .bezent-phone-input-box.is-focused,
 .bezent-phone-input-box.has-open-dropdown {
-  border-color: var(--teal-500);
-  box-shadow: 0 0 0 3px rgba(20, 184, 166, 0.14);
+  border-color: #1a73e8;
+  box-shadow: 0 0 0 3px rgba(26, 115, 232, 0.14);
 }
 
 /* ── Sizes ── */
@@ -210,7 +210,7 @@
 }
 
 .bezent-phone-input-search-input:focus {
-  border-color: var(--teal-500);
+  border-color: #1a73e8;
 }
 
 .bezent-phone-input-dropdown {
@@ -247,8 +247,8 @@
 }
 
 .bezent-phone-input-option.is-selected {
-  background: var(--teal-50);
-  color: var(--teal-700);
+  background: #e8f0fe;
+  color: #0b57d0;
   font-weight: 600;
 }
 

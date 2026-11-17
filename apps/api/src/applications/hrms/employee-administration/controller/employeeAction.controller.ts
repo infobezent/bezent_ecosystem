@@ -28,6 +28,37 @@ const UNAUTHENTICATED_ACTOR = null;
 export class EmployeeActionController {
   constructor(private readonly service = new EmployeeActionService()) {}
 
+  listClearance = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const { tenantId, companyId } = requireContext(req);
+      res.json({
+        data: await this.service.listClearance(tenantId, companyId, requireActionId(req)),
+      });
+    } catch (err) {
+      next(err);
+    }
+  };
+
+  updateClearanceItem = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const { tenantId, companyId } = requireContext(req);
+      const rawItem = req.params.itemId;
+      const itemId = (Array.isArray(rawItem) ? rawItem[0] : rawItem) ?? '';
+      res.json({
+        data: await this.service.updateClearanceItem(
+          tenantId,
+          companyId,
+          requireActionId(req),
+          itemId,
+          req.body,
+          UNAUTHENTICATED_ACTOR,
+        ),
+      });
+    } catch (err) {
+      next(err);
+    }
+  };
+
   listActions = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const { tenantId, companyId } = requireContext(req);

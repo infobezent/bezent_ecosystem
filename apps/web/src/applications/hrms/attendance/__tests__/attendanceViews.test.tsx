@@ -240,7 +240,7 @@ describe('HRMS Attendance Module V1 Frontend', () => {
         </MemoryRouter>,
       );
       expect(html).toContain('Exceptions');
-      expect(html).toContain('ACTIVE CASES');
+      expect(html).toContain('Resolved today');
     });
 
     it('renders AttendanceReportsPage without crashing', () => {

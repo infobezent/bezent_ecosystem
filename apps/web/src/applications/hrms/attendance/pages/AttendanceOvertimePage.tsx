@@ -263,7 +263,6 @@ export function AttendanceOvertimePage() {
 
   const [items, setItems] = useState<OvertimeRequestItem[]>([]);
   const [totalCount, setTotalCount] = useState(0);
-  const [usingDemo, setUsingDemo] = useState(false);
   const [metrics, setMetrics] = useState<OvertimeOverviewMetrics | null>(null);
   const [policy, setPolicy] = useState<OvertimePolicyItem | null>(null);
 
@@ -327,7 +326,9 @@ export function AttendanceOvertimePage() {
       ]);
 
       // Nothing recorded yet: show sample requests so the page can be reviewed.
-      const noLiveData = !(requestsRes.items?.length ?? 0) && !(requestsRes.meta?.total ?? 0);
+      // Local development only: show sample rows when the API has nothing yet.
+      const noLiveData =
+        import.meta.env.DEV && !(requestsRes.items?.length ?? 0) && !(requestsRes.meta?.total ?? 0);
       if (noLiveData) {
         const q = search.trim().toLowerCase();
         const demo = getDemoOvertimeRequests().filter((d) => {
@@ -341,13 +342,11 @@ export function AttendanceOvertimePage() {
           if (q && !`${d.employeeName} ${d.employeeCode}`.toLowerCase().includes(q)) return false;
           return true;
         });
-        setUsingDemo(true);
         setMetrics(null);
         setItems(demo);
         setTotalCount(demo.length);
         return;
       }
-      setUsingDemo(false);
       setMetrics(overviewRes);
       if (policiesRes && policiesRes.length > 0 && policiesRes[0]) {
         setPolicy(policiesRes[0]);
@@ -884,8 +883,6 @@ export function AttendanceOvertimePage() {
                 Reset Filters
               </Button>
             )}
-
-            {usingDemo && <span className="bezent-records-badge">Sample data</span>}
             <span className="bezent-records-badge">{totalCount} Records</span>
 
             <IconButton
@@ -1082,7 +1079,7 @@ export function AttendanceOvertimePage() {
         ) : (
           <Card padding="none">
             <div className="bezent-table-scroll-container">
-              <Table compact hoverable className="bezent-table--workspace">
+              <Table compact hoverable className="bezent-table--workspace bezent-table--requests">
                 <TableHead>
                   <TableRow>
                     {/* 1. Checkbox */}

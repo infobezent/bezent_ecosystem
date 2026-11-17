@@ -460,7 +460,7 @@ export class EmployeeRepository {
    * when no tenant/company-scoped employee row matched.
    */
   async updateEmploymentFields(
-    executor: DbExecutor,
+    executor: DbExecutor = getDb(),
     tenantId: string,
     companyId: string,
     id: string,
@@ -483,6 +483,29 @@ export class EmployeeRepository {
 
     const header = result[0] as unknown as { affectedRows?: number };
     return (header?.affectedRows ?? 0) > 0;
+  }
+
+  /** Employees still "pending activation" whose joining date has arrived. */
+  async listDueForActivation(
+    tenantId: string,
+    companyId: string,
+    today: string,
+  ): Promise<{ id: string; joiningDate: string; probationEndDate: string | null }[]> {
+    return getDb()
+      .select({
+        id: employees.id,
+        joiningDate: employees.joiningDate,
+        probationEndDate: employees.probationEndDate,
+      })
+      .from(employees)
+      .where(
+        and(
+          eq(employees.tenantId, tenantId),
+          eq(employees.companyId, companyId),
+          eq(employees.employmentStatus, 'pending_activation'),
+          lte(employees.joiningDate, today),
+        ),
+      );
   }
 
   async delete(tenantId: string, companyId: string, id: string): Promise<boolean> {

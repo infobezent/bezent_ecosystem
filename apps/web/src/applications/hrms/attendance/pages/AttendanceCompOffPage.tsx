@@ -260,7 +260,6 @@ export function AttendanceCompOffPage() {
   const [requests, setRequests] = useState<CompOffRequestItem[]>([]);
   const [entitlements, setEntitlements] = useState<CompOffEntitlementItem[]>([]);
   const [handoffs, setHandoffs] = useState<CompOffHandoffItem[]>([]);
-  const [usingDemo, setUsingDemo] = useState(false);
 
   // ── 4. Filter Bar State (Spec Section 4) ───────────────────────────────────
   const [search, setSearch] = useState('');
@@ -352,11 +351,12 @@ export function AttendanceCompOffPage() {
 
       setMetrics(overviewRes);
       // Nothing recorded yet: show sample requests so the page can be reviewed.
+      // Local development only: show sample rows when the API has nothing yet.
       const noLiveData =
+        import.meta.env.DEV &&
         !(requestsRes.items?.length ?? 0) &&
         !(entitlementsRes.items?.length ?? 0) &&
         !(handoffsRes.items?.length ?? 0);
-      setUsingDemo(noLiveData);
       setRequests(noLiveData ? getDemoCompOffRequests() : requestsRes.items || []);
       setEntitlements(entitlementsRes.items || []);
       setHandoffs(handoffsRes.items || []);
@@ -937,8 +937,6 @@ export function AttendanceCompOffPage() {
                 Reset Filters
               </Button>
             )}
-
-            {usingDemo && <span className="bezent-records-badge">Sample data</span>}
             <span className="bezent-records-badge">
               {activeTab === 'earnings'
                 ? `${filteredRequests.length} Records`
@@ -1096,7 +1094,7 @@ export function AttendanceCompOffPage() {
           ) : (
             <Card padding="none">
               <div className="bezent-table-scroll-container">
-                <Table compact hoverable className="bezent-table--workspace">
+                <Table compact hoverable className="bezent-table--workspace bezent-table--requests">
                   <TableHead>
                     <TableRow>
                       <TableHeaderCell>Employee</TableHeaderCell>
@@ -1293,7 +1291,7 @@ export function AttendanceCompOffPage() {
           ) : (
             <Card padding="none">
               <div className="bezent-table-scroll-container">
-                <Table compact hoverable className="bezent-table--workspace">
+                <Table compact hoverable className="bezent-table--workspace bezent-table--requests">
                   <TableHead>
                     <TableRow>
                       <TableHeaderCell>Employee</TableHeaderCell>
@@ -1400,7 +1398,7 @@ export function AttendanceCompOffPage() {
         ) : (
           <Card padding="none">
             <div className="bezent-table-scroll-container">
-              <Table compact hoverable className="bezent-table--workspace">
+              <Table compact hoverable className="bezent-table--workspace bezent-table--requests">
                 <TableHead>
                   <TableRow>
                     <TableHeaderCell>Employee</TableHeaderCell>

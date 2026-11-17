@@ -25,6 +25,8 @@
   --shell-nav-item-gap: 2px;
   --shell-nav-label-max-width: 86px;
   --shell-nav-label-area-height: 24px;
+  --shell-nav-label-size: var(--font-size-sm, 12px);
+  --shell-nav-surface-size: 40px;
   --shell-subnav-flyout-width: 250px;
   --shell-launcher-width: 710px;
 
@@ -56,4 +58,33 @@
   --form-label-width-sm: 140px;
   --form-label-width-md: 180px;
   --form-label-width-lg: 220px;
+}
+
+/*
+ * Compact shell for 15-inch and smaller laptops (about 1536px wide or 860px tall and below).
+ * The 16-inch and larger layout above is unchanged. Flyouts, the launcher and the main
+ * grid all read --shell-sidebar-width, so they follow automatically.
+ */
+@media (max-width: 1536px), (max-height: 860px) {
+  :root {
+    --shell-sidebar-width: 80px;
+    --shell-nav-item-width: 74px;
+    --shell-nav-item-height: 62px;
+    --shell-nav-label-max-width: 74px;
+    --shell-nav-label-area-height: 22px;
+    --shell-nav-label-size: 11px;
+    --shell-nav-surface-size: 36px;
+  }
+}
+
+@media (max-width: 1280px), (max-height: 720px) {
+  :root {
+    --shell-sidebar-width: 72px;
+    --shell-nav-item-width: 66px;
+    --shell-nav-item-height: 54px;
+    --shell-nav-label-max-width: 66px;
+    --shell-nav-label-area-height: 20px;
+    --shell-nav-label-size: 10.5px;
+    --shell-nav-surface-size: 32px;
+  }
 }

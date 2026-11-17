@@ -1,9 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-  Alert,
   Button,
-  Grid,
   IconButton,
   Inline,
   Page,
@@ -26,7 +24,7 @@ import {
 import { employeeProfilePath } from '../../employees/model/employeeModel';
 import { CATEGORY_LABELS, STATUS_LABELS } from '../../documents/model/documentModel';
 import { DocumentDetailModal } from '../../documents/components/DocumentDetail';
-import { RecordsTable } from '../components/RecordsTable';
+import { RecordsFolderView } from '../components/RecordsFolderView';
 import {
   RecordsFilterPanel,
   type RecordsFilterState,
@@ -36,40 +34,59 @@ import {
 import { NewRecordModal } from '../components/NewRecordModal';
 import { DEMO_RECORDS } from '../model/demoRecords';
 
-const PAGE_SIZE_OPTIONS = [10, 25, 50, 100] as const;
-type PageSizeOption = (typeof PAGE_SIZE_OPTIONS)[number];
-const DEFAULT_PAGE_SIZE: PageSizeOption = 25;
+const FOLDER_FETCH_PAGE_SIZE = 100;
+const FOLDER_FETCH_MAX_PAGES = 20;
+
+type RecordsListState = {
+  status: 'loading' | 'error' | 'ready';
+  documents: EmployeeDocument[];
+  pagination: DocumentsPagination | null;
+  counts: Record<DocumentView, number> | null;
+  error: string | null;
+};
+
+/** Sample records shown when the API has nothing, filtered the same way the API would. */
+function buildDemoState(search: string, filters: RecordsFilterState): RecordsListState {
+  let docs = [...DEMO_RECORDS];
+  if (filters.category) docs = docs.filter((d) => d.category === filters.category);
+  const q = search.trim().toLowerCase();
+  if (q) {
+    docs = docs.filter(
+      (d) =>
+        d.documentName.toLowerCase().includes(q) ||
+        d.employeeName.toLowerCase().includes(q) ||
+        d.employeeNumber.toLowerCase().includes(q) ||
+        (d.documentNumber ? d.documentNumber.toLowerCase().includes(q) : false),
+    );
+  }
+  if (filters.status) docs = docs.filter((d) => d.status === filters.status);
+  if (filters.departmentId) docs = docs.filter((d) => d.departmentId === filters.departmentId);
+  return {
+    status: 'ready',
+    documents: docs,
+    pagination: {
+      page: 1,
+      pageSize: FOLDER_FETCH_PAGE_SIZE,
+      totalItems: docs.length,
+      totalPages: 1,
+    },
+    counts: {
+      all: DEMO_RECORDS.length,
+      pending_review: DEMO_RECORDS.filter(
+        (d) => d.status === 'under_review' || d.status === 'pending',
+      ).length,
+      expiring: DEMO_RECORDS.filter((d) => d.expiryState === 'expiring').length,
+      expired: DEMO_RECORDS.filter((d) => d.expiryState === 'expired').length,
+    },
+    error: null,
+  };
+}
 
 function getTodayIsoDate(): string {
   const now = new Date();
   const month = String(now.getMonth() + 1).padStart(2, '0');
   const day = String(now.getDate()).padStart(2, '0');
   return `${now.getFullYear()}-${month}-${day}`;
-}
-
-function getPaginationItems(currentPage: number, totalPages: number): (number | 'ellipsis')[] {
-  if (totalPages <= 7) {
-    return Array.from({ length: totalPages }, (_, i) => i + 1);
-  }
-  const items: (number | 'ellipsis')[] = [];
-  if (currentPage <= 4) {
-    for (let i = 1; i <= 5; i++) items.push(i);
-    items.push('ellipsis');
-    items.push(totalPages);
-  } else if (currentPage >= totalPages - 3) {
-    items.push(1);
-    items.push('ellipsis');
-    for (let i = totalPages - 4; i <= totalPages; i++) items.push(i);
-  } else {
-    items.push(1);
-    items.push('ellipsis');
-    items.push(currentPage - 1);
-    items.push(currentPage);
-    items.push(currentPage + 1);
-    items.push('ellipsis');
-    items.push(totalPages);
-  }
-  return items;
 }
 
 export interface RecordsPageProps {
@@ -93,13 +110,7 @@ export function RecordsPage({
   const [masters, setMasters] = useState<OrganizationMasters | null>(null);
 
   // List State
-  const [listState, setListState] = useState<{
-    status: 'loading' | 'error' | 'ready';
-    documents: EmployeeDocument[];
-    pagination: DocumentsPagination | null;
-    counts: Record<DocumentView, number> | null;
-    error: string | null;
-  }>({
+  const [listState, setListState] = useState<RecordsListState>({
     status: 'loading',
     documents: [],
     pagination: null,
@@ -109,14 +120,9 @@ export function RecordsPage({
 
   // Filters, View Mode, and Category Tab State
   const [search, setSearch] = useState('');
-  const [viewMode, setViewMode] = useState<'list' | 'grid'>('list');
-  const [activeCategoryTab, setActiveCategoryTab] = useState<string>('all');
+  const [openFolderId, setOpenFolderId] = useState<string | null>(null);
   const [filters, setFilters] = useState<RecordsFilterState>(EMPTY_RECORDS_FILTER_STATE);
   const [isFilterPanelOpen, setIsFilterPanelOpen] = useState(false);
-
-  // Pagination State
-  const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState<number>(DEFAULT_PAGE_SIZE);
   const [reloadKey, setReloadKey] = useState(0);
 
   // Modals
@@ -124,21 +130,6 @@ export function RecordsPage({
   const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
 
   const reload = useCallback(() => setReloadKey((k) => k + 1), []);
-
-  const currentSizeIndex = PAGE_SIZE_OPTIONS.indexOf(pageSize as PageSizeOption);
-  const handlePrevPageSize = () => {
-    const nextIdx = currentSizeIndex > 0 ? currentSizeIndex - 1 : 0;
-    setPageSize(PAGE_SIZE_OPTIONS[nextIdx] ?? DEFAULT_PAGE_SIZE);
-    setPage(1);
-  };
-  const handleNextPageSize = () => {
-    const nextIdx =
-      currentSizeIndex < PAGE_SIZE_OPTIONS.length - 1
-        ? currentSizeIndex + 1
-        : PAGE_SIZE_OPTIONS.length - 1;
-    setPageSize(PAGE_SIZE_OPTIONS[nextIdx] ?? DEFAULT_PAGE_SIZE);
-    setPage(1);
-  };
 
   // Load Organization Masters (Departments)
   useEffect(() => {
@@ -151,26 +142,38 @@ export function RecordsPage({
     };
   }, [reloadKey]);
 
-  // Load Documents from API
+  // Load Documents from API. Folder mode needs every matching document so each
+  // employee's folder is complete, so it walks all pages (100 per request).
   useEffect(() => {
     let active = true;
     setListState((prev) => ({ ...prev, status: 'loading', error: null }));
 
     const timer = setTimeout(() => {
-      const categoryParam =
-        activeCategoryTab !== 'all'
-          ? (activeCategoryTab as DocumentCategory)
-          : (filters.category as DocumentCategory) || undefined;
-
-      fetchDocuments({
+      const categoryParam = (filters.category as DocumentCategory) || undefined;
+      const query = {
         view: filters.view,
         search: search.trim() || undefined,
         category: categoryParam,
         status: (filters.status as DocumentStatus) || undefined,
         departmentId: filters.departmentId || undefined,
-        page,
-        pageSize,
-      })
+      };
+
+      const load = async () => {
+        const first = await fetchDocuments({ ...query, page: 1, pageSize: FOLDER_FETCH_PAGE_SIZE });
+        let documents = first.data;
+        const lastPage = Math.min(first.pagination.totalPages, FOLDER_FETCH_MAX_PAGES);
+        for (let p = 2; p <= lastPage; p++) {
+          const next = await fetchDocuments({
+            ...query,
+            page: p,
+            pageSize: FOLDER_FETCH_PAGE_SIZE,
+          });
+          documents = documents.concat(next.data);
+        }
+        return { ...first, data: documents };
+      };
+
+      load()
         .then((res) => {
           if (!active) return;
           if (res.data.length > 0) {
@@ -182,83 +185,12 @@ export function RecordsPage({
               error: null,
             });
           } else {
-            // Fallback to rich demo records
-            let filteredDemo = [...DEMO_RECORDS];
-            if (activeCategoryTab !== 'all') {
-              filteredDemo = filteredDemo.filter((d) => d.category === activeCategoryTab);
-            }
-            if (search.trim()) {
-              const q = search.toLowerCase();
-              filteredDemo = filteredDemo.filter(
-                (d) =>
-                  d.documentName.toLowerCase().includes(q) ||
-                  d.employeeName.toLowerCase().includes(q) ||
-                  d.employeeNumber.toLowerCase().includes(q) ||
-                  (d.documentNumber && d.documentNumber.toLowerCase().includes(q)),
-              );
-            }
-            if (filters.status) {
-              filteredDemo = filteredDemo.filter((d) => d.status === filters.status);
-            }
-            if (filters.departmentId) {
-              filteredDemo = filteredDemo.filter((d) => d.departmentId === filters.departmentId);
-            }
-
-            setListState({
-              status: 'ready',
-              documents: filteredDemo,
-              pagination: {
-                page: 1,
-                pageSize,
-                totalItems: filteredDemo.length,
-                totalPages: Math.ceil(filteredDemo.length / pageSize) || 1,
-              },
-              counts: {
-                all: DEMO_RECORDS.length,
-                pending_review: DEMO_RECORDS.filter(
-                  (d) => d.status === 'under_review' || d.status === 'pending',
-                ).length,
-                expiring: DEMO_RECORDS.filter((d) => d.expiryState === 'expiring').length,
-                expired: DEMO_RECORDS.filter((d) => d.expiryState === 'expired').length,
-              },
-              error: null,
-            });
+            setListState(buildDemoState(search, filters));
           }
         })
         .catch(() => {
           if (!active) return;
-          let filteredDemo = [...DEMO_RECORDS];
-          if (activeCategoryTab !== 'all') {
-            filteredDemo = filteredDemo.filter((d) => d.category === activeCategoryTab);
-          }
-          if (search.trim()) {
-            const q = search.toLowerCase();
-            filteredDemo = filteredDemo.filter(
-              (d) =>
-                d.documentName.toLowerCase().includes(q) ||
-                d.employeeName.toLowerCase().includes(q) ||
-                d.employeeNumber.toLowerCase().includes(q),
-            );
-          }
-          setListState({
-            status: 'ready',
-            documents: filteredDemo,
-            pagination: {
-              page: 1,
-              pageSize,
-              totalItems: filteredDemo.length,
-              totalPages: Math.ceil(filteredDemo.length / pageSize) || 1,
-            },
-            counts: {
-              all: DEMO_RECORDS.length,
-              pending_review: DEMO_RECORDS.filter(
-                (d) => d.status === 'under_review' || d.status === 'pending',
-              ).length,
-              expiring: DEMO_RECORDS.filter((d) => d.expiryState === 'expiring').length,
-              expired: DEMO_RECORDS.filter((d) => d.expiryState === 'expired').length,
-            },
-            error: null,
-          });
+          setListState(buildDemoState(search, filters));
         });
     }, 200);
 
@@ -266,7 +198,7 @@ export function RecordsPage({
       active = false;
       clearTimeout(timer);
     };
-  }, [filters, search, activeCategoryTab, page, pageSize, reloadKey]);
+  }, [filters, search, reloadKey]);
 
   // Export to CSV
   const handleExport = useCallback(() => {
@@ -309,36 +241,13 @@ export function RecordsPage({
     filters.category ||
     filters.status ||
     (filters.view && filters.view !== 'all') ||
-    filters.departmentId ||
-    activeCategoryTab !== 'all',
+    filters.departmentId,
   );
 
   const handleClearAllFilters = () => {
     setSearch('');
-    setActiveCategoryTab('all');
     setFilters(EMPTY_RECORDS_FILTER_STATE);
-    setPage(1);
   };
-
-  const handleCategoryTabChange = (tabId: string) => {
-    setActiveCategoryTab(tabId);
-    setPage(1);
-  };
-
-  const pagination = listState.pagination;
-  const loading = listState.status === 'loading';
-  const counts = listState.counts;
-  const totalItems = pagination?.totalItems ?? listState.documents.length;
-  const totalPages = pagination?.totalPages ?? 1;
-
-  const categoryTabs = [
-    { id: 'all', label: 'All Records', count: counts?.all ?? listState.documents.length },
-    { id: 'personal_identity', label: 'Identity' },
-    { id: 'education', label: 'Education' },
-    { id: 'bank_payroll', label: 'Bank & Payroll' },
-    { id: 'previous_employment', label: 'Employment' },
-    { id: 'tax_other', label: 'Tax & Compliance' },
-  ];
 
   return (
     <Page maxWidth="full" gap="md" className="bezent-page">
@@ -383,7 +292,6 @@ export function RecordsPage({
                 value={search}
                 onChange={(e) => {
                   setSearch(e.target.value);
-                  setPage(1);
                 }}
                 className="bezent-search-bar__input"
                 aria-label="Search employee name, ID, or document..."
@@ -414,7 +322,6 @@ export function RecordsPage({
                 appliedFilters={filters}
                 onApply={(nextFilters) => {
                   setFilters(nextFilters);
-                  setPage(1);
                 }}
                 masters={masters}
               />
@@ -431,57 +338,6 @@ export function RecordsPage({
             >
               Reset
             </Button>
-
-            {/* View Mode Toggle: List vs Grid */}
-            <div
-              className="bezent-view-toggle"
-              role="group"
-              aria-label="Records view layout switcher"
-            >
-              <button
-                type="button"
-                className={`bezent-view-toggle__btn ${viewMode === 'list' ? 'is-active' : ''}`}
-                onClick={() => setViewMode('list')}
-                title="List View"
-                aria-label="List View"
-                aria-pressed={viewMode === 'list'}
-              >
-                <BezentIcon name="viewList" size={18} />
-              </button>
-              <button
-                type="button"
-                className={`bezent-view-toggle__btn ${viewMode === 'grid' ? 'is-active' : ''}`}
-                onClick={() => setViewMode('grid')}
-                title="Grid View"
-                aria-label="Grid View"
-                aria-pressed={viewMode === 'grid'}
-              >
-                <BezentIcon name="viewGrid" size={18} />
-              </button>
-            </div>
-
-            {/* Horizontal Category Filter Tabs */}
-            <div
-              className="bezent-filter-tabs"
-              role="tablist"
-              aria-label="Filter records by category"
-            >
-              {categoryTabs.map((tab) => (
-                <button
-                  key={tab.id}
-                  type="button"
-                  role="tab"
-                  aria-selected={activeCategoryTab === tab.id}
-                  className={`bezent-filter-tab ${activeCategoryTab === tab.id ? 'is-active' : ''}`}
-                  onClick={() => handleCategoryTabChange(tab.id)}
-                >
-                  <span>{tab.label}</span>
-                  {tab.count !== undefined && (
-                    <span className="bezent-filter-tab__count">{tab.count}</span>
-                  )}
-                </button>
-              ))}
-            </div>
           </Inline>
         }
         right={
@@ -517,7 +373,6 @@ export function RecordsPage({
                 className="bezent-active-filter-chip__remove"
                 onClick={() => {
                   setSearch('');
-                  setPage(1);
                 }}
                 aria-label="Remove search filter"
               >
@@ -534,7 +389,6 @@ export function RecordsPage({
                 className="bezent-active-filter-chip__remove"
                 onClick={() => {
                   setFilters((prev) => ({ ...prev, category: '' }));
-                  setPage(1);
                 }}
                 aria-label="Remove category filter"
               >
@@ -551,7 +405,6 @@ export function RecordsPage({
                 className="bezent-active-filter-chip__remove"
                 onClick={() => {
                   setFilters((prev) => ({ ...prev, status: '' }));
-                  setPage(1);
                 }}
                 aria-label="Remove status filter"
               >
@@ -568,7 +421,6 @@ export function RecordsPage({
                 className="bezent-active-filter-chip__remove"
                 onClick={() => {
                   setFilters((prev) => ({ ...prev, departmentId: '' }));
-                  setPage(1);
                 }}
                 aria-label="Remove department filter"
               >
@@ -587,106 +439,18 @@ export function RecordsPage({
         </div>
       )}
 
-      {/* 5. Records Table / Grid Area */}
-      <div className={viewMode === 'list' ? 'bezent-table-card' : undefined}>
-        <RecordsTable
-          status={listState.status}
-          documents={listState.documents}
-          error={listState.error}
-          filtered={isFiltered}
-          onRetry={reload}
-          onView={(docId) => setOpenDocumentId(docId)}
-          onOpenEmployee={(empId) => navigate(employeeProfilePath(empId))}
-          viewMode={viewMode}
-        />
-      </div>
-
-      {/* 6. Pagination Toolbar */}
-      {listState.status === 'ready' && totalItems > 0 && (
-        <Toolbar
-          align="center"
-          left={
-            <span className="bezent-pagination__info" aria-live="polite">
-              {`Showing ${(page - 1) * pageSize + 1}–${Math.min(
-                page * pageSize,
-                totalItems,
-              )} of ${totalItems} records`}
-            </span>
-          }
-          right={
-            <Inline gap="lg" align="center">
-              <div
-                className="bezent-page-size-stepper"
-                role="group"
-                aria-label="Rows per page selector"
-              >
-                <span className="bezent-page-size-stepper__label">Rows per page:</span>
-                <div className="bezent-page-size-stepper__box">
-                  <button
-                    type="button"
-                    className="bezent-page-size-stepper__btn"
-                    disabled={currentSizeIndex <= 0}
-                    onClick={handlePrevPageSize}
-                    title="Fewer rows per page (10, 25, 50, 100)"
-                    aria-label="Fewer rows per page"
-                  >
-                    −
-                  </button>
-                  <span className="bezent-page-size-stepper__val" aria-live="polite">
-                    {pageSize}
-                  </span>
-                  <button
-                    type="button"
-                    className="bezent-page-size-stepper__btn"
-                    disabled={currentSizeIndex >= PAGE_SIZE_OPTIONS.length - 1}
-                    onClick={handleNextPageSize}
-                    title="More rows per page (10, 25, 50, 100)"
-                    aria-label="More rows per page"
-                  >
-                    +
-                  </button>
-                </div>
-              </div>
-              <div className="bezent-pagination">
-                <button
-                  type="button"
-                  className="bezent-pagination__btn"
-                  disabled={page <= 1}
-                  onClick={() => setPage((p) => Math.max(1, p - 1))}
-                  aria-label="Previous page"
-                >
-                  ‹
-                </button>
-                {getPaginationItems(page, totalPages).map((item, idx) =>
-                  item === 'ellipsis' ? (
-                    <span key={`ellipsis-${idx}`} className="bezent-pagination__ellipsis">
-                      …
-                    </span>
-                  ) : (
-                    <button
-                      key={`page-${item}`}
-                      type="button"
-                      className={`bezent-pagination__btn ${item === page ? 'is-active' : ''}`}
-                      onClick={() => setPage(item)}
-                    >
-                      {item}
-                    </button>
-                  ),
-                )}
-                <button
-                  type="button"
-                  className="bezent-pagination__btn"
-                  disabled={page >= totalPages}
-                  onClick={() => setPage((p) => p + 1)}
-                  aria-label="Next page"
-                >
-                  ›
-                </button>
-              </div>
-            </Inline>
-          }
-        />
-      )}
+      {/* 5. Employee folders: one per employee, ordered by employee ID */}
+      <RecordsFolderView
+        status={listState.status}
+        documents={listState.documents}
+        error={listState.error}
+        filtered={isFiltered}
+        openFolderId={openFolderId}
+        onOpenFolder={setOpenFolderId}
+        onRetry={reload}
+        onView={(docId) => setOpenDocumentId(docId)}
+        onOpenEmployee={(empId) => navigate(employeeProfilePath(empId))}
+      />
 
       {/* Document Detail Modal */}
       {openDocumentId && (
