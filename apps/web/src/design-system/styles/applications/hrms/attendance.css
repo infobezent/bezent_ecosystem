@@ -3165,7 +3165,8 @@
 .bezent-att-line {
   fill: none;
   stroke-linecap: round;
-  stroke-linejoin: round;
+  stroke-linejoin: miter;
+  stroke-miterlimit: 4;
   transition: stroke-width 0.15s ease;
 }
 
@@ -3185,6 +3186,29 @@
   stroke: #10b981;
   stroke-width: 2.2;
   filter: drop-shadow(0 2px 5px rgba(16, 185, 129, 0.25));
+}
+
+.bezent-att-hover-dot {
+  stroke-width: 2.5;
+  stroke: #ffffff;
+  filter: drop-shadow(0 2px 4px rgba(15, 23, 42, 0.25));
+  transition: r 0.15s ease;
+}
+
+.bezent-att-hover-dot--present {
+  fill: #2563eb;
+}
+
+.bezent-att-hover-dot--absent {
+  fill: #7c3aed;
+}
+
+.bezent-att-hover-dot--late {
+  fill: #10b981;
+}
+
+[data-theme='dark'] .bezent-att-hover-dot {
+  stroke: #0f172a;
 }
 
 .bezent-att-node {
@@ -3261,14 +3285,17 @@
   cursor: pointer;
 }
 
+.bezent-att-tooltip-dot--present,
 .bezent-att-tooltip-diamond--present {
   fill: #2563eb;
 }
 
+.bezent-att-tooltip-dot--absent,
 .bezent-att-tooltip-diamond--absent {
   fill: #8b5cf6;
 }
 
+.bezent-att-tooltip-dot--late,
 .bezent-att-tooltip-diamond--late {
   fill: #10b981;
 }

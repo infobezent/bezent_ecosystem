@@ -55,69 +55,19 @@ function formatDateFull(dateStr: string): string {
 }
 
 /**
- * Generates an architectural filleted polyline:
- * Straight line segments between data points, with smooth rounded corner fillets
- * at each vertex. Neither wavy/sinusoidal curves nor needle-sharp spikes.
+ * Generates a crisp, sharp polyline:
+ * Direct linear segments between data points with sharp vertex angles.
  */
-function generateFilletedPolyline(points: Point[], radius = 10): string {
+function generateSharpPolyline(points: Point[]): string {
   if (points.length === 0) return '';
-  if (points.length === 1) return `M ${points[0].x.toFixed(1)} ${points[0].y.toFixed(1)}`;
-  if (points.length === 2) {
-    return `M ${points[0].x.toFixed(1)} ${points[0].y.toFixed(1)} L ${points[1].x.toFixed(1)} ${points[1].y.toFixed(1)}`;
-  }
-
-  const d: string[] = [`M ${points[0].x.toFixed(1)} ${points[0].y.toFixed(1)}`];
-  const n = points.length;
-
-  for (let i = 1; i < n - 1; i++) {
-    const pPrev = points[i - 1];
-    const pCurr = points[i];
-    const pNext = points[i + 1];
-
-    const v1x = pPrev.x - pCurr.x;
-    const v1y = pPrev.y - pCurr.y;
-    const v2x = pNext.x - pCurr.x;
-    const v2y = pNext.y - pCurr.y;
-
-    const len1 = Math.hypot(v1x, v1y);
-    const len2 = Math.hypot(v2x, v2y);
-
-    if (len1 < 1e-4 || len2 < 1e-4) {
-      d.push(`L ${pCurr.x.toFixed(1)} ${pCurr.y.toFixed(1)}`);
-      continue;
-    }
-
-    const u1x = v1x / len1;
-    const u1y = v1y / len1;
-    const u2x = v2x / len2;
-    const u2y = v2y / len2;
-
-    const dot = Math.max(-1, Math.min(1, u1x * u2x + u1y * u2y));
-
-    // If points are collinear (180 deg or 0 deg turn), no corner fillet is needed
-    if (Math.abs(dot + 1) < 1e-3 || Math.abs(dot - 1) < 1e-3) {
-      d.push(`L ${pCurr.x.toFixed(1)} ${pCurr.y.toFixed(1)}`);
-      continue;
-    }
-
-    const r = Math.min(radius, len1 * 0.44, len2 * 0.44);
-    const startX = pCurr.x + u1x * r;
-    const startY = pCurr.y + u1y * r;
-    const endX = pCurr.x + u2x * r;
-    const endY = pCurr.y + u2y * r;
-
-    d.push(`L ${startX.toFixed(1)} ${startY.toFixed(1)}`);
-    d.push(`Q ${pCurr.x.toFixed(1)} ${pCurr.y.toFixed(1)} ${endX.toFixed(1)} ${endY.toFixed(1)}`);
-  }
-
-  const last = points[n - 1];
-  d.push(`L ${last.x.toFixed(1)} ${last.y.toFixed(1)}`);
-  return d.join(' ');
+  return points
+    .map((p, i) => `${i === 0 ? 'M' : 'L'} ${p.x.toFixed(1)} ${p.y.toFixed(1)}`)
+    .join(' ');
 }
 
-function generateFilletedArea(points: Point[], baselineY: number, radius = 10): string {
+function generateSharpArea(points: Point[], baselineY: number): string {
   if (points.length < 2) return '';
-  const linePath = generateFilletedPolyline(points, radius);
+  const linePath = generateSharpPolyline(points);
   const first = points[0];
   const last = points[points.length - 1];
   return `${linePath} L ${last.x.toFixed(1)} ${baselineY.toFixed(1)} L ${first.x.toFixed(1)} ${baselineY.toFixed(1)} Z`;
@@ -246,15 +196,13 @@ export const AttendanceTrendsCard: React.FC<AttendanceTrendsCardProps> = ({
     const aPts = computedCols.map((c) => ({ x: c.cx, y: c.aY }));
     const lPts = computedCols.map((c) => ({ x: c.cx, y: c.lY }));
 
-    const cornerRadius = Math.min(10, colStep * 0.25);
-
     const computedPaths = {
-      presentLine: generateFilletedPolyline(pPts, cornerRadius),
-      presentArea: generateFilletedArea(pPts, baselineY, cornerRadius),
-      absentLine: generateFilletedPolyline(aPts, cornerRadius),
-      absentArea: generateFilletedArea(aPts, baselineY, cornerRadius),
-      lateLine: generateFilletedPolyline(lPts, cornerRadius),
-      lateArea: generateFilletedArea(lPts, baselineY, cornerRadius),
+      presentLine: generateSharpPolyline(pPts),
+      presentArea: generateSharpArea(pPts, baselineY),
+      absentLine: generateSharpPolyline(aPts),
+      absentArea: generateSharpArea(aPts, baselineY),
+      lateLine: generateSharpPolyline(lPts),
+      lateArea: generateSharpArea(lPts, baselineY),
     };
 
     return {
@@ -479,7 +427,7 @@ export const AttendanceTrendsCard: React.FC<AttendanceTrendsCardProps> = ({
                 />
               )}
 
-              {/* Filleted Polyline Tracks (Smooth corners, straight lines) */}
+              {/* Sharp Polyline Tracks */}
               {showAbsent && paths.absentLine && (
                 <path
                   d={paths.absentLine}
@@ -499,99 +447,35 @@ export const AttendanceTrendsCard: React.FC<AttendanceTrendsCardProps> = ({
                 />
               )}
 
-              {/* Hover Halos */}
+              {/* Active Hover Data Point Indicators (Scrub only, no resting markers) */}
               {activeCol && (
                 <g className="bezent-att-trend-tracker">
                   {showAbsent && (
-                    <rect
-                      x={activeCol.cx - 6}
-                      y={activeCol.aY - 6}
-                      width={12}
-                      height={12}
-                      transform={`rotate(45 ${activeCol.cx} ${activeCol.aY})`}
-                      rx={2}
-                      className="bezent-att-halo bezent-att-halo--absent"
+                    <circle
+                      cx={activeCol.cx}
+                      cy={activeCol.aY}
+                      r={4.5}
+                      className="bezent-att-hover-dot bezent-att-hover-dot--absent"
                     />
                   )}
                   {showPresent && (
-                    <rect
-                      x={activeCol.cx - 6}
-                      y={activeCol.pY - 6}
-                      width={12}
-                      height={12}
-                      transform={`rotate(45 ${activeCol.cx} ${activeCol.pY})`}
-                      rx={2}
-                      className="bezent-att-halo bezent-att-halo--present"
+                    <circle
+                      cx={activeCol.cx}
+                      cy={activeCol.pY}
+                      r={4.5}
+                      className="bezent-att-hover-dot bezent-att-hover-dot--present"
                     />
                   )}
                   {showLate && (
-                    <rect
-                      x={activeCol.cx - 6}
-                      y={activeCol.lY - 6}
-                      width={12}
-                      height={12}
-                      transform={`rotate(45 ${activeCol.cx} ${activeCol.lY})`}
-                      rx={2}
-                      className="bezent-att-halo bezent-att-halo--late"
+                    <circle
+                      cx={activeCol.cx}
+                      cy={activeCol.lY}
+                      r={4.5}
+                      className="bezent-att-hover-dot bezent-att-hover-dot--late"
                     />
                   )}
                 </g>
               )}
-
-              {/* Diamond Data Node Markers */}
-              {showAbsent &&
-                columns.map((col) => {
-                  const isHovered = hoveredIdx === col.idx;
-                  const r = isHovered ? 4.5 : 3.5;
-                  return (
-                    <rect
-                      key={`absent-node-${col.date}`}
-                      x={col.cx - r}
-                      y={col.aY - r}
-                      width={r * 2}
-                      height={r * 2}
-                      transform={`rotate(45 ${col.cx} ${col.aY})`}
-                      rx={1}
-                      className={`bezent-att-node bezent-att-node--absent ${isHovered ? 'is-hovered' : ''}`}
-                    />
-                  );
-                })}
-
-              {showPresent &&
-                columns.map((col) => {
-                  const isHovered = hoveredIdx === col.idx;
-                  const r = isHovered ? 4.5 : 3.5;
-                  return (
-                    <rect
-                      key={`present-node-${col.date}`}
-                      x={col.cx - r}
-                      y={col.pY - r}
-                      width={r * 2}
-                      height={r * 2}
-                      transform={`rotate(45 ${col.cx} ${col.pY})`}
-                      rx={1}
-                      className={`bezent-att-node bezent-att-node--present ${isHovered ? 'is-hovered' : ''}`}
-                    />
-                  );
-                })}
-
-              {showLate &&
-                columns.map((col) => {
-                  const isHovered = hoveredIdx === col.idx;
-                  const r = isHovered ? 4.5 : 3.5;
-                  return (
-                    <rect
-                      key={`late-node-${col.date}`}
-                      x={col.cx - r}
-                      y={col.lY - r}
-                      width={r * 2}
-                      height={r * 2}
-                      transform={`rotate(45 ${col.cx} ${col.lY})`}
-                      rx={1}
-                      className={`bezent-att-node bezent-att-node--late ${isHovered ? 'is-hovered' : ''}`}
-                    />
-                  );
-                })}
 
               {/* X-Axis Date / Day Labels */}
               {columns.map((col) => {
@@ -665,14 +549,11 @@ export const AttendanceTrendsCard: React.FC<AttendanceTrendsCardProps> = ({
                     />
 
                     {/* Present Row */}
-                    <rect
-                      x={17}
-                      y={40}
-                      width={6}
-                      height={6}
-                      transform="rotate(45 20 43)"
-                      rx={1}
-                      className="bezent-att-tooltip-diamond--present"
+                    <circle
+                      cx={20}
+                      cy={45}
+                      r={3.5}
+                      className="bezent-att-tooltip-dot--present"
                     />
                     <text x={30} y={48} className="bezent-att-tooltip-label">
                       Present:
@@ -690,14 +571,11 @@ export const AttendanceTrendsCard: React.FC<AttendanceTrendsCardProps> = ({
                     </text>
 
                     {/* Absent Row */}
-                    <rect
-                      x={17}
-                      y={62}
-                      width={6}
-                      height={6}
-                      transform="rotate(45 20 65)"
-                      rx={1}
-                      className="bezent-att-tooltip-diamond--absent"
+                    <circle
+                      cx={20}
+                      cy={67}
+                      r={3.5}
+                      className="bezent-att-tooltip-dot--absent"
                     />
                     <text x={30} y={70} className="bezent-att-tooltip-label">
                       Absent:
@@ -712,14 +590,11 @@ export const AttendanceTrendsCard: React.FC<AttendanceTrendsCardProps> = ({
                     </text>
 
                     {/* Late Arrival Row */}
-                    <rect
-                      x={17}
-                      y={84}
-                      width={6}
-                      height={6}
-                      transform="rotate(45 20 87)"
-                      rx={1}
-                      className="bezent-att-tooltip-diamond--late"
+                    <circle
+                      cx={20}
+                      cy={89}
+                      r={3.5}
+                      className="bezent-att-tooltip-dot--late"
                     />
                     <text x={30} y={92} className="bezent-att-tooltip-label">
                       Late Arrival:
