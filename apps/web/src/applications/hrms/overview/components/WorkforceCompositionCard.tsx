@@ -265,19 +265,7 @@ export const WorkforceCompositionCard: React.FC<WorkforceCompositionCardProps> =
     const base: SelectOption[] = [{ value: 'all', label: 'All Employees' }];
 
     if (!employees || employees.length === 0) {
-      // Standard demo filters
-      base.push(
-        { value: 'dept:Engineering', label: 'Department: Engineering' },
-        { value: 'dept:Design', label: 'Department: Design' },
-        { value: 'dept:Marketing', label: 'Department: Marketing' },
-        { value: 'branch:Bangalore HQ', label: 'Branch: Bangalore HQ' },
-        { value: 'branch:Chennai (HQ)', label: 'Branch: Chennai (HQ)' },
-        { value: 'type:full_time', label: 'Employment Type: Full-Time' },
-        { value: 'type:contract', label: 'Employment Type: Contract' },
-        { value: 'department', label: 'Department' },
-        { value: 'branch', label: 'Branch' },
-        { value: 'employment_type', label: 'Employment Type' },
-      );
+      // No employees yet: only the unfiltered view exists (no invented departments).
       return base;
     }
 
@@ -355,7 +343,7 @@ export const WorkforceCompositionCard: React.FC<WorkforceCompositionCardProps> =
     return active;
   }, [employees, activeFilter]);
 
-  const totalActiveCount = employees ? filteredActiveEmployees.length : 1248;
+  const totalActiveCount = employees ? filteredActiveEmployees.length : 0;
 
   // ─────────────────────────────────────────────────────────────
   // Process Active Composition Dimension

@@ -106,6 +106,15 @@ export class EmployeeService {
     }
   }
 
+  /** Shows the number the next employee will get, without consuming it. */
+  async previewNextEmployeeNumber(
+    tenantId: string,
+    companyId: string,
+  ): Promise<{ employeeNumber: string }> {
+    const preview = await workforceSettingsService.previewNextEmployeeId(tenantId, companyId);
+    return { employeeNumber: preview.nextId };
+  }
+
   async getNextEmployeeNumber(
     tenantId: string,
     companyId: string,
@@ -157,6 +166,21 @@ export class EmployeeService {
         ? { ...(input as Record<string, unknown>) }
         : ({} as Record<string, unknown>);
 
+    // The registration form shows a previewed number. Submitting exactly that number is not a
+    // manual override: the sequence is reserved now, at creation, so previews never burn numbers.
+    // Fetch workforce general numbering settings for this company
+    const wfGeneralSettings = await workforceSettingsService.getGeneralSettings(
+      tenantId,
+      companyId,
+    );
+    if (
+      typeof inputObj.employeeNumber === 'string' &&
+      inputObj.employeeNumber.trim().length > 0 &&
+      inputObj.employeeNumber.trim() === wfGeneralSettings.nextSuggestedId
+    ) {
+      delete inputObj.employeeNumber;
+    }
+
     const hasManualNumber =
       typeof inputObj.employeeNumber === 'string' && inputObj.employeeNumber.trim().length > 0;
     const isAutoNumber = !hasManualNumber;
@@ -194,12 +218,6 @@ export class EmployeeService {
         );
       }
     }
-
-    // Fetch workforce general numbering settings for this company
-    const wfGeneralSettings = await workforceSettingsService.getGeneralSettings(
-      tenantId,
-      companyId,
-    );
 
     // 1. Enforce generationMode: 'manual' (P0)
     if (wfGeneralSettings.generationMode === 'manual' && !hasManualNumber) {
@@ -241,6 +259,23 @@ export class EmployeeService {
       }
     }
     validatedDto.employeeNumber = employeeNumber;
+
+    // 3a. Activation timing (Workforce Settings): a new hire left at "pending activation"
+    // is activated on creation ("instant") or when the joining date has arrived ("joining_date").
+    // "manual" leaves HR to activate them.
+    if (validatedDto.employmentStatus === 'pending_activation') {
+      const timing = wfGeneralSettings.activationTiming ?? 'instant';
+      const joined =
+        !!validatedDto.joiningDate &&
+        validatedDto.joiningDate <= new Date().toISOString().slice(0, 10);
+      if (timing === 'instant' || (timing === 'joining_date' && joined)) {
+        const policy = await workforceSettingsService.getProbationPolicy(tenantId, companyId);
+        const probationDays =
+          typeof policy?.defaultProbationDays === 'number' ? policy.defaultProbationDays : 90;
+        validatedDto.employmentStatus =
+          validatedDto.probationEndDate || probationDays > 0 ? 'probation' : 'active';
+      }
+    }
 
     // 3b. Probation defaulting (P1): Calculate probationEndDate from joiningDate + defaultProbationDays
     if (validatedDto.employmentStatus === 'probation' && !validatedDto.probationEndDate) {
@@ -384,11 +419,49 @@ export class EmployeeService {
     return details;
   }
 
+  private lastActivationSweep = new Map<string, number>();
+
+  /**
+   * Activation timing "joining_date" (Workforce Settings): hires created ahead of their start
+   * date stay pending until the day arrives, then move to probation/active. Run lazily (at most
+   * once a minute per company) so it needs no scheduler and stays inside the HRMS layer.
+   */
+  async activateDueEmployees(tenantId: string, companyId: string): Promise<number> {
+    const key = `${tenantId}:${companyId}`;
+    const now = Date.now();
+    const throttleMs = process.env.NODE_ENV === 'test' ? 0 : 60_000;
+    if (now - (this.lastActivationSweep.get(key) ?? 0) < throttleMs) return 0;
+    this.lastActivationSweep.set(key, now);
+
+    const general = await workforceSettingsService.getGeneralSettings(tenantId, companyId);
+    const timing = general.activationTiming ?? 'instant';
+    if (timing === 'manual') return 0;
+
+    const today = new Date().toISOString().slice(0, 10);
+    const due = await this.repo.listDueForActivation(tenantId, companyId, today);
+    if (due.length === 0) return 0;
+
+    const policy = await workforceSettingsService.getProbationPolicy(tenantId, companyId);
+    const probationDays =
+      typeof policy?.defaultProbationDays === 'number' ? policy.defaultProbationDays : 90;
+    for (const row of due) {
+      const probationEndDate =
+        row.probationEndDate ??
+        (probationDays > 0 ? addDays(row.joiningDate, probationDays) : null);
+      await this.repo.updateEmploymentFields(undefined, tenantId, companyId, row.id, {
+        employmentStatus: probationEndDate ? 'probation' : 'active',
+        probationEndDate,
+      });
+    }
+    return due.length;
+  }
+
   async listEmployees(
     tenantId: string,
     companyId: string,
     params: Record<string, unknown> = {},
   ): Promise<PaginatedEmployeesResult> {
+    await this.activateDueEmployees(tenantId, companyId).catch(() => 0);
     const validatedParams = validateListEmployeesParams(params);
     return this.repo.listPaginated(tenantId, companyId, validatedParams);
   }

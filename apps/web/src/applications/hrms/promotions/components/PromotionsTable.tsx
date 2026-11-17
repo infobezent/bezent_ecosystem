@@ -416,6 +416,8 @@ export const PromotionsTable: React.FC<PromotionsTableProps> = ({
                         </span>
                       </span>
                     </div>
+                  ) : action.departmentName ? (
+                    <span>{action.departmentName}</span>
                   ) : (
                     <span className="bezent-table-meta-dim">—</span>
                   )}

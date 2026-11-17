@@ -340,22 +340,14 @@ export function ReviewSection({
         if (!data.documents.isExperiencedHire && doc.category?.includes('Professional History')) {
           return;
         }
-        if (doc.isRequired) {
-          if (!doc.fileName && !doc.file && !doc.filePreviewUrl && !doc.docNumber) {
-            pending.push({
-              sectionId: 'documents',
-              sectionLabel: 'Documents',
-              fieldName: `${doc.name}`,
-              reason: 'Missing Upload',
-            });
-          } else if (doc.status === 'Rejected') {
-            pending.push({
-              sectionId: 'documents',
-              sectionLabel: 'Documents',
-              fieldName: `${doc.name}`,
-              reason: 'Verification Rejected',
-            });
-          }
+        // Missing uploads do not block creation: documents are collected during onboarding.
+        if (doc.isRequired && doc.status === 'Rejected') {
+          pending.push({
+            sectionId: 'documents',
+            sectionLabel: 'Documents',
+            fieldName: `${doc.name}`,
+            reason: 'Verification Rejected',
+          });
         }
       });
     }
