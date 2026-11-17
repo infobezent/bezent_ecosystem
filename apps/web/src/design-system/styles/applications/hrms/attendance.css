@@ -5180,7 +5180,7 @@
 }
 
 .bezent-att-cal-day {
-  min-height: 32px;
+  aspect-ratio: 1 / 1;
   border-radius: 6px;
   border: 1px solid #edf2f7;
   background: #ffffff;

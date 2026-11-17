@@ -69,6 +69,8 @@ export interface AttendanceGenericKpiCardProps {
     | 'bar'
     | 'spline'
     | 'step'
+    | 'square'
+    | 'microbar'
     | 'pin'
     | 'telemetry'
     | 'sparkline'
@@ -360,9 +362,15 @@ export const AttendanceGenericKpiCard: React.FC<AttendanceGenericKpiCardProps> =
   const activePts: Array<{ x: number; y: number; point: SparklinePoint }> =
     graphType === 'step'
       ? stepPts
-      : graphType === 'bar' || graphType === 'microbar' || graphType === 'pin' || graphType === 'lollipop'
-        ? barData.map((b) => ({ x: b.x + b.barW / 2, y: b.y, point: b.point }))
-        : pts;
+      : graphType === 'square'
+        ? effectivePoints.map((p, i) => ({
+            x: 6 + i * (88 / Math.max(1, effectivePoints.length - 1)),
+            y: 22,
+            point: p,
+          }))
+        : graphType === 'bar' || graphType === 'microbar' || graphType === 'pin' || graphType === 'lollipop'
+          ? barData.map((b) => ({ x: b.x + b.barW / 2, y: b.y, point: b.point }))
+          : pts;
 
   const activePt = hoveredIdx !== null && activePts[hoveredIdx] ? activePts[hoveredIdx] : null;
 
@@ -548,8 +556,8 @@ export const AttendanceGenericKpiCard: React.FC<AttendanceGenericKpiCardProps> =
               );
             })()}
           </svg>
-        ) : graphType === 'microbar' || graphType === 'pin' ? (
-          /* ── Graph 4: Slim Vertical Micro-Pillars (On Approved Leave - Amber) ── */
+        ) : graphType === 'square' || graphType === 'microbar' || graphType === 'pin' ? (
+          /* ── Graph 4: 7-Day Square Date Tiles (On Approved Leave - Amber) ── */
           <svg
             className="bezent-att-kpi-sparkline-svg"
             viewBox="0 0 100 44"
@@ -559,33 +567,31 @@ export const AttendanceGenericKpiCard: React.FC<AttendanceGenericKpiCardProps> =
             <defs>
               <linearGradient id={gradId} x1="0" y1="0" x2="0" y2="1">
                 <stop offset="0%" stopColor={stopColorHex} stopOpacity="0.85" />
-                <stop offset="100%" stopColor={stopColorHex} stopOpacity="0.2" />
+                <stop offset="100%" stopColor={stopColorHex} stopOpacity="0.25" />
               </linearGradient>
             </defs>
             <line x1={4} y1={38} x2={96} y2={38} className="bezent-att-sparkline-baseline" strokeDasharray="2 2" />
-            {barData.length > 1 && (
-              <polygon
-                points={`4,38 ${barData.map((b) => `${(b.x + b.barW / 2).toFixed(1)},${b.y.toFixed(1)}`).join(' ')} 96,38`}
-                fill={`url(#${gradId})`}
-                opacity="0.35"
-                pointerEvents="none"
-              />
-            )}
-            {barData.map((b, i) => {
-              const cx = b.x + b.barW / 2;
+            {effectivePoints.map((p, i) => {
+              const totalW = 88;
+              const step = totalW / Math.max(1, effectivePoints.length - 1);
+              const cx = 6 + i * step;
               const isHovered = hoveredIdx === i;
-              const pillarW = 3.5;
+              const hasVal = p.value > 0;
+              const sqSize = isHovered ? 10 : 8.5;
+              const cy = 20;
               return (
                 <rect
                   key={i}
-                  x={cx - pillarW / 2}
-                  y={b.y}
-                  width={pillarW}
-                  height={b.barH}
-                  rx={1.75}
+                  x={cx - sqSize / 2}
+                  y={cy - sqSize / 2}
+                  width={sqSize}
+                  height={sqSize}
+                  rx={2}
                   className={`bezent-att-sparkline-bar${isHovered ? ' is-active' : ''}`}
-                  fill={isHovered ? stopColorHex : `url(#${gradId})`}
-                  opacity={hoveredIdx !== null && !isHovered ? 0.4 : 0.95}
+                  fill={isHovered ? stopColorHex : hasVal ? stopColorHex : `url(#${gradId})`}
+                  opacity={hoveredIdx !== null && !isHovered ? 0.35 : hasVal ? 1 : 0.45}
+                  stroke={hasVal ? stopColorHex : 'none'}
+                  strokeWidth="1"
                   onMouseEnter={() => setHoveredIdx(i)}
                 />
               );
@@ -1032,7 +1038,7 @@ export const AttendanceKpiDeck: React.FC<AttendanceKpiDeckProps> = ({
         points={leavePoints}
         ariaLabel="On Approved Leave KPI Card"
         onClick={() => navigate('/hrms/leave/records')}
-        graphType="pin"
+        graphType="square"
       />
 
       {/* Card 5: Exceptions & Queue */}
