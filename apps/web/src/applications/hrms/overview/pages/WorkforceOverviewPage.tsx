@@ -362,10 +362,10 @@ export function WorkforceOverviewPage({
   const [totalJobLevelsCount, setTotalJobLevelsCount] = useState(0);
 
   // Workforce Planning States
-  const [approvedHeadcount, setApprovedHeadcount] = useState(22);
-  const [openPositionsCount, setOpenPositionsCount] = useState(6);
-  const [headcountGap, setHeadcountGap] = useState(-6);
-  const [capacityUtilizationPct, setCapacityUtilizationPct] = useState(73);
+  const [approvedHeadcount, setApprovedHeadcount] = useState(0);
+  const [openPositionsCount, setOpenPositionsCount] = useState(0);
+  const [headcountGap, setHeadcountGap] = useState(0);
+  const [capacityUtilizationPct, setCapacityUtilizationPct] = useState(100);
 
   const [deptCapacities, setDeptCapacities] = useState<DeptCapacityItem[]>([]);
 
@@ -1069,10 +1069,10 @@ export function WorkforceOverviewPage({
       setTotalJobLevelsCount(jobArr.filter((j) => j.count > 0).length);
 
       // ── 04. Workforce Planning Calculations ──
-      const calculatedApproved = Math.max(22, totalBase + 6);
-      const calculatedOpen = Math.max(0, calculatedApproved - totalBase);
-      const calculatedGap = totalBase - calculatedApproved;
-      const calculatedUtil = Math.round((totalBase / calculatedApproved) * 100);
+      const calculatedApproved = totalBase;
+      const calculatedOpen = 0;
+      const calculatedGap = 0;
+      const calculatedUtil = totalBase > 0 ? 100 : 0;
 
       setApprovedHeadcount(calculatedApproved);
       setOpenPositionsCount(calculatedOpen);
@@ -1080,19 +1080,12 @@ export function WorkforceOverviewPage({
       setCapacityUtilizationPct(calculatedUtil);
 
       // Department capacity calculations
-      const defaultApprovedByDept: Record<string, number> = {
-        'General Operations': 15,
-        Engineering: 3,
-        Finance: 2,
-        'Human Resources': 2,
-      };
       const deptCapItems: DeptCapacityItem[] = Array.from(deptCounts.entries()).map(
         ([name, current]) => {
-          const approved =
-            defaultApprovedByDept[name] || Math.max(current + 1, Math.round(current * 1.25));
-          const open = Math.max(0, approved - current);
-          const gap = approved - current;
-          const util = Math.round((current / approved) * 100);
+          const approved = current;
+          const open = 0;
+          const gap = 0;
+          const util = current > 0 ? 100 : 0;
           return {
             name,
             current,
@@ -1103,7 +1096,7 @@ export function WorkforceOverviewPage({
           };
         },
       );
-      deptCapItems.sort((a, b) => b.gap - a.gap || b.current - a.current);
+      deptCapItems.sort((a, b) => b.current - a.current || a.name.localeCompare(b.name));
       setDeptCapacities(deptCapItems);
 
       // ── 05. Employee Lifecycle (5 Stages) ──

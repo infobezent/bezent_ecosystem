@@ -38,7 +38,6 @@ import {
   countActiveTransfersFilters,
 } from '../components/TransfersFilterPanel';
 import { TransfersTable } from '../components/TransfersTable';
-import { DEMO_TRANSFERS } from '../model/demoTransfers';
 
 const PAGE_SIZE_OPTIONS = [10, 25, 50, 100] as const;
 type PageSizeOption = (typeof PAGE_SIZE_OPTIONS)[number];
@@ -176,95 +175,27 @@ export function TransfersPage({
       })
         .then((res) => {
           if (!active) return;
-          if (res.data.length > 0) {
-            setItems(res.data);
-            setPagination(res.pagination);
-            if (res.statusCounts) {
-              setStatusCounts(res.statusCounts);
-            }
+          setItems(res.data || []);
+          setPagination(res.pagination || null);
+          if (res.statusCounts) {
+            setStatusCounts(res.statusCounts);
           } else {
-            // Populate with rich realistic demo transfers when empty
-            let filteredDemo = [...DEMO_TRANSFERS];
-            if (activeStatusTab !== 'all') {
-              if (activeStatusTab === 'upcoming') {
-                filteredDemo = filteredDemo.filter(
-                  (item) => item.status === 'pending' && item.effectiveDate > today,
-                );
-              } else {
-                filteredDemo = filteredDemo.filter((item) => item.status === activeStatusTab);
-              }
-            }
-            if (search.trim()) {
-              const q = search.toLowerCase();
-              filteredDemo = filteredDemo.filter(
-                (item) =>
-                  item.employeeName.toLowerCase().includes(q) ||
-                  item.employeeNumber.toLowerCase().includes(q) ||
-                  item.reason.toLowerCase().includes(q),
-              );
-            }
-            if (appliedFilters.actionType) {
-              filteredDemo = filteredDemo.filter(
-                (item) => item.actionType === appliedFilters.actionType,
-              );
-            }
-
-            setItems(filteredDemo);
-            setPagination({
-              page: 1,
-              pageSize,
-              totalItems: filteredDemo.length,
-              totalPages: Math.ceil(filteredDemo.length / pageSize) || 1,
-            });
             setStatusCounts({
-              all: DEMO_TRANSFERS.length,
-              pending: DEMO_TRANSFERS.filter((t) => t.status === 'pending').length,
-              upcoming: DEMO_TRANSFERS.filter(
-                (t) => t.status === 'pending' && t.effectiveDate > today,
-              ).length,
-              applied: DEMO_TRANSFERS.filter((t) => t.status === 'applied').length,
-              cancelled: DEMO_TRANSFERS.filter((t) => t.status === 'cancelled').length,
+              all: res.data?.length ?? 0,
+              pending: 0,
+              upcoming: 0,
+              applied: 0,
+              cancelled: 0,
             });
           }
           setLoading(false);
         })
-        .catch(() => {
+        .catch((err) => {
           if (!active) return;
-          // Fallback to demo data
-          let filteredDemo = [...DEMO_TRANSFERS];
-          if (activeStatusTab !== 'all') {
-            if (activeStatusTab === 'upcoming') {
-              filteredDemo = filteredDemo.filter(
-                (item) => item.status === 'pending' && item.effectiveDate > today,
-              );
-            } else {
-              filteredDemo = filteredDemo.filter((item) => item.status === activeStatusTab);
-            }
-          }
-          if (search.trim()) {
-            const q = search.toLowerCase();
-            filteredDemo = filteredDemo.filter(
-              (item) =>
-                item.employeeName.toLowerCase().includes(q) ||
-                item.employeeNumber.toLowerCase().includes(q),
-            );
-          }
-          setItems(filteredDemo);
-          setPagination({
-            page: 1,
-            pageSize,
-            totalItems: filteredDemo.length,
-            totalPages: Math.ceil(filteredDemo.length / pageSize) || 1,
-          });
-          setStatusCounts({
-            all: DEMO_TRANSFERS.length,
-            pending: DEMO_TRANSFERS.filter((t) => t.status === 'pending').length,
-            upcoming: DEMO_TRANSFERS.filter(
-              (t) => t.status === 'pending' && t.effectiveDate > today,
-            ).length,
-            applied: DEMO_TRANSFERS.filter((t) => t.status === 'applied').length,
-            cancelled: DEMO_TRANSFERS.filter((t) => t.status === 'cancelled').length,
-          });
+          setItems([]);
+          setPagination(null);
+          setStatusCounts({ all: 0, pending: 0, upcoming: 0, applied: 0, cancelled: 0 });
+          setError(err instanceof Error ? err.message : 'Failed to load transfers');
           setLoading(false);
         });
     }, 200);
@@ -333,7 +264,11 @@ export function TransfersPage({
   const handleExportCsv = async () => {
     setExporting(true);
     try {
-      const records = items.length > 0 ? items : DEMO_TRANSFERS;
+      const records = items;
+      if (records.length === 0) {
+        setExporting(false);
+        return;
+      }
       const headers = [
         'Employee ID',
         'Employee Name',

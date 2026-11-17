@@ -38,7 +38,6 @@ import {
   countActivePromotionsFilters,
 } from '../components/PromotionsFilterPanel';
 import { PromotionsTable } from '../components/PromotionsTable';
-import { DEMO_PROMOTIONS } from '../model/demoPromotions';
 
 const PAGE_SIZE_OPTIONS = [10, 25, 50, 100] as const;
 type PageSizeOption = (typeof PAGE_SIZE_OPTIONS)[number];
@@ -183,91 +182,22 @@ export function PromotionsPage({
       })
         .then((res) => {
           if (!active) return;
-          if (res.data.length > 0) {
-            setListState({
-              status: 'ready',
-              items: res.data,
-              pagination: res.pagination,
-              statusCounts: res.statusCounts ?? null,
-              error: null,
-            });
-          } else {
-            // Fallback to rich demo promotions
-            let filteredDemo = [...DEMO_PROMOTIONS];
-            if (activeStatusTab !== 'all') {
-              if (activeStatusTab === 'upcoming') {
-                filteredDemo = filteredDemo.filter(
-                  (item) => item.status === 'pending' && item.effectiveDate > today,
-                );
-              } else {
-                filteredDemo = filteredDemo.filter((item) => item.status === activeStatusTab);
-              }
-            }
-            if (search.trim()) {
-              const q = search.toLowerCase();
-              filteredDemo = filteredDemo.filter(
-                (item) =>
-                  item.employeeName.toLowerCase().includes(q) ||
-                  item.employeeNumber.toLowerCase().includes(q) ||
-                  item.reason.toLowerCase().includes(q),
-              );
-            }
-
-            setListState({
-              status: 'ready',
-              items: filteredDemo,
-              pagination: {
-                page: 1,
-                pageSize,
-                totalItems: filteredDemo.length,
-                totalPages: Math.ceil(filteredDemo.length / pageSize) || 1,
-              },
-              statusCounts: {
-                all: DEMO_PROMOTIONS.length,
-                pending: DEMO_PROMOTIONS.filter((p) => p.status === 'pending').length,
-                upcoming: DEMO_PROMOTIONS.filter(
-                  (p) => p.status === 'pending' && p.effectiveDate > today,
-                ).length,
-                applied: DEMO_PROMOTIONS.filter((p) => p.status === 'applied').length,
-                cancelled: DEMO_PROMOTIONS.filter((p) => p.status === 'cancelled').length,
-              },
-              error: null,
-            });
-          }
-        })
-        .catch(() => {
-          if (!active) return;
-          let filteredDemo = [...DEMO_PROMOTIONS];
-          if (activeStatusTab !== 'all') {
-            filteredDemo = filteredDemo.filter((item) => item.status === activeStatusTab);
-          }
-          if (search.trim()) {
-            const q = search.toLowerCase();
-            filteredDemo = filteredDemo.filter(
-              (item) =>
-                item.employeeName.toLowerCase().includes(q) ||
-                item.employeeNumber.toLowerCase().includes(q),
-            );
-          }
           setListState({
             status: 'ready',
-            items: filteredDemo,
-            pagination: {
-              page: 1,
-              pageSize,
-              totalItems: filteredDemo.length,
-              totalPages: Math.ceil(filteredDemo.length / pageSize) || 1,
-            },
-            statusCounts: {
-              all: DEMO_PROMOTIONS.length,
-              pending: DEMO_PROMOTIONS.filter((p) => p.status === 'pending').length,
-              upcoming: DEMO_PROMOTIONS.filter(
-                (p) => p.status === 'pending' && p.effectiveDate > today,
-              ).length,
-              applied: DEMO_PROMOTIONS.filter((p) => p.status === 'applied').length,
-              cancelled: DEMO_PROMOTIONS.filter((p) => p.status === 'cancelled').length,
-            },
+            items: res.data || [],
+            pagination: res.pagination || null,
+            statusCounts: res.statusCounts ?? null,
             error: null,
+          });
+        })
+        .catch((err) => {
+          if (!active) return;
+          setListState({
+            status: 'error',
+            items: [],
+            pagination: null,
+            statusCounts: null,
+            error: err instanceof Error ? err.message : 'Failed to load promotions',
           });
         });
     }, 200);
@@ -334,7 +264,11 @@ export function PromotionsPage({
   const handleExportCsv = async () => {
     setExporting(true);
     try {
-      const records = listState.items.length > 0 ? listState.items : DEMO_PROMOTIONS;
+      const records = listState.items;
+      if (records.length === 0) {
+        setExporting(false);
+        return;
+      }
       const headers = [
         'Employee ID',
         'Employee Name',
