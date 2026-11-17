@@ -64,6 +64,7 @@ export interface AttendanceGenericKpiCardProps {
   graphTag?: string;
   points?: SparklinePoint[];
   sparklineData?: number[];
+  graphType?: 'sparkline' | 'bar' | 'step' | 'donut' | 'pulse';
 }
 
 function formatDateShort(dateStr: string): string {
@@ -176,6 +177,94 @@ function generateSparkline(
   };
 }
 
+/** Step (staircase) path — horizontal then vertical segments */
+function generateStepPath(
+  pointList: SparklinePoint[],
+  width = 100,
+  height = 44,
+  padX = 5,
+  padY = 6,
+): { stepPath: string; pts: Array<{ x: number; y: number; point: SparklinePoint }> } {
+  const n = pointList.length;
+  if (n === 0) return { stepPath: '', pts: [] };
+  const values = pointList.map((p) => p.value);
+  const minVal = Math.min(...values);
+  const maxVal = Math.max(...values);
+  const allZero = maxVal === 0 && minVal === 0;
+  const baselineY = height - padY;
+  const range = allZero ? 1 : Math.max(maxVal, 1) - Math.min(0, minVal);
+  const effectiveMin = allZero ? 0 : Math.min(0, minVal);
+  const pts = pointList.map((p, i) => ({
+    x: padX + (i / Math.max(1, n - 1)) * (width - 2 * padX),
+    y: allZero
+      ? baselineY
+      : Math.max(padY, baselineY - ((p.value - effectiveMin) / range) * (baselineY - padY)),
+    point: p,
+  }));
+  let path = `M ${pts[0]!.x.toFixed(1)} ${pts[0]!.y.toFixed(1)}`;
+  for (let i = 1; i < n; i++) {
+    path += ` H ${pts[i]!.x.toFixed(1)} V ${pts[i]!.y.toFixed(1)}`;
+  }
+  return { stepPath: path, pts };
+}
+
+/** Bar chart data — returns rect geometry for each point */
+function generateBarData(
+  pointList: SparklinePoint[],
+  width = 100,
+  height = 44,
+  padX = 5,
+  padY = 6,
+): Array<{ x: number; barH: number; y: number; barW: number; point: SparklinePoint }> {
+  const n = pointList.length;
+  if (n === 0) return [];
+  const maxVal = Math.max(...pointList.map((p) => p.value), 1);
+  const plotH = height - padY - padY;
+  const totalW = width - 2 * padX;
+  const step = totalW / n;
+  const barW = Math.max(2, step - 3);
+  return pointList.map((p, i) => {
+    const barH = Math.max(2, (p.value / maxVal) * plotH);
+    const x = padX + i * step + (step - barW) / 2;
+    return { x, barH, y: height - padY - barH, barW, point: p };
+  });
+}
+
+/** ECG-style pulse path — baseline with spikes at each data point */
+function generatePulsePath(
+  pointList: SparklinePoint[],
+  width = 100,
+  height = 44,
+  padX = 5,
+  padY = 6,
+): { pulsePath: string; pts: Array<{ x: number; y: number; point: SparklinePoint }> } {
+  const n = pointList.length;
+  if (n === 0) return { pulsePath: '', pts: [] };
+  const values = pointList.map((p) => p.value);
+  const maxVal = Math.max(...values, 1);
+  const baselineY = height - padY;
+  const midY = height / 2;
+  const pts = pointList.map((p, i) => ({
+    x: padX + (i / Math.max(1, n - 1)) * (width - 2 * padX),
+    y:
+      p.value === 0
+        ? midY
+        : Math.max(padY, baselineY - (p.value / maxVal) * (baselineY - padY)),
+    point: p,
+  }));
+  let path = `M ${pts[0]!.x.toFixed(1)} ${midY}`;
+  pts.forEach((pt, i) => {
+    if (i === 0) return;
+    const prev = pts[i - 1]!;
+    const midX = (prev.x + pt.x) / 2;
+    path += ` L ${midX.toFixed(1)} ${midY}`;
+    path += ` L ${(midX + 2).toFixed(1)} ${pt.y.toFixed(1)}`;
+    path += ` L ${(pt.x - 2).toFixed(1)} ${pt.y.toFixed(1)}`;
+    path += ` L ${pt.x.toFixed(1)} ${midY}`;
+  });
+  return { pulsePath: path, pts };
+}
+
 export const AttendanceGenericKpiCard: React.FC<AttendanceGenericKpiCardProps> = ({
   heading,
   value,
@@ -188,6 +277,7 @@ export const AttendanceGenericKpiCard: React.FC<AttendanceGenericKpiCardProps> =
   graphTag,
   points,
   sparklineData,
+  graphType = 'sparkline',
 }) => {
   const gradId = useId();
   const navigate = useNavigate();
@@ -243,7 +333,38 @@ export const AttendanceGenericKpiCard: React.FC<AttendanceGenericKpiCardProps> =
     [effectivePoints],
   );
 
-  const activePt = hoveredIdx !== null && pts[hoveredIdx] ? pts[hoveredIdx] : null;
+  const barData = useMemo(
+    () => (graphType === 'bar' ? generateBarData(effectivePoints, 100, 44) : []),
+    [graphType, effectivePoints],
+  );
+
+  const { stepPath, pts: stepPts } = useMemo(
+    () =>
+      graphType === 'step'
+        ? generateStepPath(effectivePoints, 100, 44)
+        : { stepPath: '', pts: [] },
+    [graphType, effectivePoints],
+  );
+
+  const { pulsePath, pts: pulsePts } = useMemo(
+    () =>
+      graphType === 'pulse'
+        ? generatePulsePath(effectivePoints, 100, 44)
+        : { pulsePath: '', pts: [] },
+    [graphType, effectivePoints],
+  );
+
+  // Resolve the active point source depending on graph type
+  const activePts: Array<{ x: number; y: number; point: SparklinePoint }> =
+    graphType === 'step'
+      ? stepPts
+      : graphType === 'pulse'
+        ? pulsePts
+        : graphType === 'bar'
+          ? barData.map((b) => ({ x: b.x + b.barW / 2, y: b.y, point: b.point }))
+          : pts;
+
+  const activePt = hoveredIdx !== null && activePts[hoveredIdx] ? activePts[hoveredIdx] : null;
 
   const displayValue = activePt ? activePt.point.value : value;
   const displayPillText = activePt
@@ -297,12 +418,12 @@ export const AttendanceGenericKpiCard: React.FC<AttendanceGenericKpiCardProps> =
         className={`bezent-att-kpi-right bezent-att-kpi-right--${variantKey}`}
         onMouseMove={(e) => {
           const rect = e.currentTarget.getBoundingClientRect();
-          if (rect.width <= 0 || pts.length === 0) return;
+          if (rect.width <= 0 || activePts.length === 0) return;
           const relX = (e.clientX - rect.left) / rect.width;
           const svgX = relX * 100;
           let bestIdx = 0;
           let bestDist = Infinity;
-          pts.forEach((pt, idx) => {
+          activePts.forEach((pt, idx) => {
             const dist = Math.abs(pt.x - svgX);
             if (dist < bestDist) {
               bestDist = dist;
@@ -335,7 +456,213 @@ export const AttendanceGenericKpiCard: React.FC<AttendanceGenericKpiCardProps> =
 
         {loading ? (
           <div className="bezent-att-kpi-graph-skeleton" aria-hidden="true" />
+        ) : graphType === 'bar' ? (
+          /* ── Card 1: Vertical Bar Chart (blue / Scheduled Workforce) ── */
+          <svg
+            className="bezent-att-kpi-sparkline-svg"
+            viewBox="0 0 100 44"
+            role="img"
+            aria-hidden="true"
+          >
+            <defs>
+              <linearGradient id={gradId} x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stopColor={stopColorHex} stopOpacity="0.9" />
+                <stop offset="100%" stopColor={stopColorHex} stopOpacity="0.4" />
+              </linearGradient>
+            </defs>
+            {barData.map((b, i) => (
+              <rect
+                key={i}
+                x={b.x}
+                y={b.y}
+                width={b.barW}
+                height={b.barH}
+                rx={2}
+                className={`bezent-att-sparkline-bar${hoveredIdx === i ? ' is-active' : ''}`}
+                fill={hoveredIdx === i ? stopColorHex : `url(#${gradId})`}
+                opacity={hoveredIdx !== null && hoveredIdx !== i ? 0.45 : 1}
+                onMouseEnter={() => setHoveredIdx(i)}
+              />
+            ))}
+            {activePt && (() => {
+              const tipW = 48; const tipH = 12;
+              let tipX = activePt.x - tipW / 2;
+              if (tipX < 2) tipX = 2;
+              if (tipX + tipW > 98) tipX = 98 - tipW;
+              const tipY = Math.max(1, activePt.y - tipH - 4);
+              return (
+                <g transform={`translate(${tipX}, ${tipY})`} pointerEvents="none">
+                  <rect width={tipW} height={tipH} rx={3} className="bezent-att-sparkline-tip-bg" />
+                  <text x={tipW / 2} y={8.5} textAnchor="middle" className="bezent-att-sparkline-tip-text">
+                    {activePt.point.formattedDate}: {activePt.point.value}
+                  </text>
+                </g>
+              );
+            })()}
+          </svg>
+        ) : graphType === 'step' ? (
+          /* ── Card 3: Step (Staircase) Chart (rose / Absent) ── */
+          <svg
+            className="bezent-att-kpi-sparkline-svg"
+            viewBox="0 0 100 44"
+            role="img"
+            aria-hidden="true"
+          >
+            <line x1={4} y1={38} x2={96} y2={38} className="bezent-att-sparkline-baseline" strokeDasharray="2 2" />
+            {stepPath && (
+              <path d={stepPath} className="bezent-att-sparkline-step" pointerEvents="none" />
+            )}
+            {stepPts.map((pt, i) => (
+              <polygon
+                key={i}
+                points={`${pt.x},${pt.y - 4} ${pt.x + 3.5},${pt.y} ${pt.x},${pt.y + 4} ${pt.x - 3.5},${pt.y}`}
+                className={`bezent-att-sparkline-diamond${hoveredIdx === i ? ' is-active' : ''}`}
+                fill={hoveredIdx === i ? '#f43f5e' : '#fff'}
+                stroke="#f43f5e"
+                strokeWidth="1.5"
+                onMouseEnter={() => setHoveredIdx(i)}
+              />
+            ))}
+            {activePt && (() => {
+              const tipW = 48; const tipH = 12;
+              let tipX = activePt.x - tipW / 2;
+              if (tipX < 2) tipX = 2;
+              if (tipX + tipW > 98) tipX = 98 - tipW;
+              const tipY = Math.max(1, activePt.y - tipH - 8);
+              return (
+                <g transform={`translate(${tipX}, ${tipY})`} pointerEvents="none">
+                  <rect width={tipW} height={tipH} rx={3} className="bezent-att-sparkline-tip-bg" />
+                  <text x={tipW / 2} y={8.5} textAnchor="middle" className="bezent-att-sparkline-tip-text">
+                    {activePt.point.formattedDate}: {activePt.point.value}
+                  </text>
+                </g>
+              );
+            })()}
+          </svg>
+        ) : graphType === 'donut' ? (
+          /* ── Card 4: Donut Ring Gauge (amber / On Approved Leave) ── */
+          <svg
+            className="bezent-att-kpi-sparkline-svg"
+            viewBox="0 0 100 44"
+            role="img"
+            aria-hidden="true"
+          >
+            {(() => {
+              const cx = 22; const cy = 22; const r = 15;
+              const circumference = 2 * Math.PI * r;
+              const numericValue = typeof value === 'number' ? value : 0;
+              const totalExpected = Math.max(effectivePoints.reduce((s, p) => s + p.value, 0), numericValue, 1);
+              const rate = Math.min(100, (numericValue / (totalExpected > 0 ? totalExpected : 1)) * 100);
+              const fillLen = (rate / 100) * circumference;
+              const offset = circumference / 4;
+              return (
+                <>
+                  <circle cx={cx} cy={cy} r={r} fill="none" strokeWidth={6} className="bezent-att-sparkline-donut-bg" />
+                  <circle
+                    cx={cx} cy={cy} r={r} fill="none"
+                    stroke="#f59e0b" strokeWidth={6}
+                    strokeDasharray={`${fillLen.toFixed(2)} ${circumference.toFixed(2)}`}
+                    strokeLinecap="round"
+                    strokeDashoffset={offset}
+                    className="bezent-att-sparkline-donut-fill"
+                    transform={`rotate(-90 ${cx} ${cy})`}
+                  />
+                  <text x={cx} y={cy + 3.5} textAnchor="middle" className="bezent-att-sparkline-donut-text" fontSize={9} fontWeight={800}>
+                    {numericValue}
+                  </text>
+                  {/* Pip dots for each day around the ring bottom */}
+                  {effectivePoints.slice(-7).map((p, i, arr) => {
+                    const angle = ((i / Math.max(arr.length - 1, 1)) * 180 - 90) * (Math.PI / 180);
+                    const px = cx + (r + 7) * Math.cos(angle);
+                    const py = cy + (r + 7) * Math.sin(angle);
+                    return (
+                      <circle
+                        key={i}
+                        cx={px}
+                        cy={py}
+                        r={2}
+                        className={p.value > 0 ? 'bezent-att-sparkline-pip-active' : 'bezent-att-sparkline-pip-inactive'}
+                      />
+                    );
+                  })}
+                  {/* Mini sparkline on the right 55% */}
+                  {effectivePoints.length > 1 && (() => {
+                    const sx = 48; const sw = 48; const sy = 6; const sh = 32;
+                    const maxV = Math.max(...effectivePoints.map((p) => p.value), 1);
+                    const spPts = effectivePoints.map((p, i) => ({
+                      x: sx + (i / Math.max(effectivePoints.length - 1, 1)) * sw,
+                      y: sy + sh - (p.value / maxV) * sh,
+                    }));
+                    const lineD = spPts.map((pt, i) => `${i === 0 ? 'M' : 'L'} ${pt.x.toFixed(1)} ${pt.y.toFixed(1)}`).join(' ');
+                    return (
+                      <path
+                        d={lineD}
+                        fill="none"
+                        stroke="#f59e0b"
+                        strokeWidth="1.5"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        opacity="0.6"
+                        pointerEvents="none"
+                      />
+                    );
+                  })()}
+                </>
+              );
+            })()}
+          </svg>
+        ) : graphType === 'pulse' ? (
+          /* ── Card 5: ECG Pulse Telemetry (purple / Exceptions & Queue) ── */
+          <svg
+            className="bezent-att-kpi-sparkline-svg"
+            viewBox="0 0 100 44"
+            role="img"
+            aria-hidden="true"
+          >
+            <line x1={4} y1={22} x2={96} y2={22} className="bezent-att-sparkline-baseline" strokeDasharray="2 2" />
+            {pulsePath && (
+              <path d={pulsePath} className="bezent-att-sparkline-pulse" pointerEvents="none" />
+            )}
+            {!activePt && pulsePts.length > 0 && (() => {
+              const last = pulsePts[pulsePts.length - 1]!;
+              return (
+                <>
+                  <circle
+                    cx={last.x} cy={last.y} r={7}
+                    className={`bezent-att-sparkline-halo bezent-att-sparkline-halo--${variantKey} bezent-att-sparkline-alert-beacon`}
+                  />
+                  <circle
+                    cx={last.x} cy={last.y} r={2.5}
+                    className={`bezent-att-sparkline-dot bezent-att-sparkline-dot--${variantKey}`}
+                  />
+                </>
+              );
+            })()}
+            {activePt && (
+              <g className="bezent-att-sparkline-tracker" pointerEvents="none">
+                <line x1={activePt.x} y1={2} x2={activePt.x} y2={38} className="bezent-att-sparkline-guideline" />
+                <circle cx={activePt.x} cy={activePt.y} r={6} className={`bezent-att-sparkline-halo bezent-att-sparkline-halo--${variantKey}`} />
+                <circle cx={activePt.x} cy={activePt.y} r={2.8} className={`bezent-att-sparkline-dot bezent-att-sparkline-dot--${variantKey}`} />
+                {(() => {
+                  const tipW = 48; const tipH = 12;
+                  let tipX = activePt.x - tipW / 2;
+                  if (tipX < 2) tipX = 2;
+                  if (tipX + tipW > 98) tipX = 98 - tipW;
+                  const tipY = Math.max(1, activePt.y - tipH - 4);
+                  return (
+                    <g transform={`translate(${tipX}, ${tipY})`}>
+                      <rect width={tipW} height={tipH} rx={3} className="bezent-att-sparkline-tip-bg" />
+                      <text x={tipW / 2} y={8.5} textAnchor="middle" className="bezent-att-sparkline-tip-text">
+                        {activePt.point.formattedDate}: {activePt.point.value}
+                      </text>
+                    </g>
+                  );
+                })()}
+              </g>
+            )}
+          </svg>
         ) : (
+          /* ── Cards 2 (green / Present Today): Smooth Sparkline (default) ── */
           <svg
             className="bezent-att-kpi-sparkline-svg"
             viewBox="0 0 100 44"
@@ -349,7 +676,6 @@ export const AttendanceGenericKpiCard: React.FC<AttendanceGenericKpiCardProps> =
               </linearGradient>
             </defs>
 
-            {/* Baseline Guide */}
             <line
               x1={4}
               y1={38}
@@ -359,12 +685,10 @@ export const AttendanceGenericKpiCard: React.FC<AttendanceGenericKpiCardProps> =
               strokeDasharray="2 2"
             />
 
-            {/* Glowing Gradient Area */}
             {areaPath && (
               <path d={areaPath} fill={`url(#${gradId})`} pointerEvents="none" />
             )}
 
-            {/* Smooth Spline Curve Line */}
             {linePath && (
               <path
                 d={linePath}
@@ -373,7 +697,6 @@ export const AttendanceGenericKpiCard: React.FC<AttendanceGenericKpiCardProps> =
               />
             )}
 
-            {/* Default Beacon Node at Line End (when not scrubbing) */}
             {!activePt && linePath && (
               <>
                 <circle
@@ -391,7 +714,6 @@ export const AttendanceGenericKpiCard: React.FC<AttendanceGenericKpiCardProps> =
               </>
             )}
 
-            {/* Interactive Tracker when Hovered / Scrubbing */}
             {activePt && (
               <g className="bezent-att-sparkline-tracker" pointerEvents="none">
                 <line
@@ -414,7 +736,6 @@ export const AttendanceGenericKpiCard: React.FC<AttendanceGenericKpiCardProps> =
                   className={`bezent-att-sparkline-dot bezent-att-sparkline-dot--${variantKey}`}
                 />
 
-                {/* Vector Tooltip Pill Floating Over Hovered Point */}
                 {(() => {
                   const tipW = 48;
                   const tipH = 12;
@@ -689,6 +1010,7 @@ export const AttendanceKpiDeck: React.FC<AttendanceKpiDeckProps> = ({
         points={scheduledPoints}
         ariaLabel="Scheduled Workforce KPI Card"
         onClick={() => navigate('/hrms/attendance/shifts')}
+        graphType="bar"
       />
 
       {/* Card 2: Present Today */}
@@ -705,6 +1027,7 @@ export const AttendanceKpiDeck: React.FC<AttendanceKpiDeckProps> = ({
         points={presentPoints}
         ariaLabel="Present Today KPI Card"
         onClick={() => navigate('/hrms/attendance/daily-log')}
+        graphType="sparkline"
       />
 
       {/* Card 3: Absent */}
@@ -721,6 +1044,7 @@ export const AttendanceKpiDeck: React.FC<AttendanceKpiDeckProps> = ({
         points={absentPoints}
         ariaLabel="Absent KPI Card"
         onClick={() => navigate('/hrms/attendance/daily-log?status=absent')}
+        graphType="step"
       />
 
       {/* Card 4: On Approved Leave */}
@@ -737,6 +1061,7 @@ export const AttendanceKpiDeck: React.FC<AttendanceKpiDeckProps> = ({
         points={leavePoints}
         ariaLabel="On Approved Leave KPI Card"
         onClick={() => navigate('/hrms/leave/records')}
+        graphType="donut"
       />
 
       {/* Card 5: Exceptions & Queue */}
@@ -753,6 +1078,7 @@ export const AttendanceKpiDeck: React.FC<AttendanceKpiDeckProps> = ({
         points={exceptionPoints}
         ariaLabel="Attendance Exceptions & Regularization Queue KPI Card"
         onClick={() => navigate('/hrms/attendance/regularization')}
+        graphType="pulse"
       />
     </div>
   );

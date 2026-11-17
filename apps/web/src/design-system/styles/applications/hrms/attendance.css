@@ -2421,6 +2421,96 @@
   letter-spacing: -0.01em;
 }
 
+/* ── Specialized KPI Graph Primitives ── */
+
+/* 1. Bar Chart (Scheduled Workforce) */
+.bezent-att-sparkline-bar {
+  transition: all 0.16s cubic-bezier(0.16, 1, 0.3, 1);
+  cursor: pointer;
+}
+
+.bezent-att-sparkline-bar:hover,
+.bezent-att-sparkline-bar.is-active {
+  filter: drop-shadow(0 2px 6px rgba(37, 99, 235, 0.45));
+}
+
+/* 2. Step Chart (Absent) */
+.bezent-att-sparkline-step {
+  fill: none;
+  stroke: #f43f5e;
+  stroke-width: 2.2;
+  stroke-linecap: square;
+  stroke-linejoin: miter;
+  filter: drop-shadow(0 2px 4px rgba(244, 63, 94, 0.3));
+}
+
+[data-theme='dark'] .bezent-att-sparkline-step {
+  stroke: #fb7185;
+}
+
+.bezent-att-sparkline-diamond {
+  transition: all 0.14s ease;
+}
+
+/* 3. Donut Ring Gauge (On Approved Leave) */
+.bezent-att-sparkline-donut-bg {
+  stroke: #fde68a;
+  opacity: 0.35;
+}
+
+[data-theme='dark'] .bezent-att-sparkline-donut-bg {
+  stroke: #78350f;
+  opacity: 0.45;
+}
+
+.bezent-att-sparkline-donut-fill {
+  transition: stroke-dasharray 0.3s ease;
+  filter: drop-shadow(0 2px 4px rgba(245, 158, 11, 0.35));
+}
+
+.bezent-att-sparkline-donut-text {
+  font-family: inherit;
+  font-feature-settings: 'tnum';
+  user-select: none;
+}
+
+.bezent-att-sparkline-pip-active {
+  filter: drop-shadow(0 1px 3px rgba(245, 158, 11, 0.4));
+}
+
+.bezent-att-sparkline-pip-inactive {
+  transition: opacity 0.15s ease;
+}
+
+/* 4. Pulse Telemetry (Exceptions & Queue) */
+.bezent-att-sparkline-pulse {
+  fill: none;
+  stroke: #7c3aed;
+  stroke-width: 2.2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  filter: drop-shadow(0 2px 4px rgba(124, 58, 237, 0.3));
+}
+
+[data-theme='dark'] .bezent-att-sparkline-pulse {
+  stroke: #c084fc;
+}
+
+.bezent-att-sparkline-alert-beacon {
+  animation: bezentPulseBeacon 2s ease-in-out infinite;
+}
+
+@keyframes bezentPulseBeacon {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 0.35;
+  }
+  50% {
+    transform: scale(1.35);
+    opacity: 0.15;
+  }
+}
+
 .bezent-att-kpi-right {
   cursor: crosshair;
 }
