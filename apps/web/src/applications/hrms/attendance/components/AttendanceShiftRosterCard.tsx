@@ -30,9 +30,6 @@ export const AttendanceShiftRosterCard: React.FC<AttendanceShiftRosterCardProps>
   const totalEligible = overviewData?.todayKpis?.totalEligibleEmployees ?? 45;
   const presentCount = Math.round(overviewData?.todayKpis?.presentCount ?? 38);
   const onDutyCount = Math.round(overviewData?.todayKpis?.onDutyCount ?? 1);
-  const scheduledCount = overviewData?.processingHealth?.assignedScheduleCount ?? totalEligible;
-  const scheduleIntegrityRate =
-    totalEligible > 0 ? Math.min(100, Math.round((scheduledCount / totalEligible) * 100)) : 100;
 
   // Process shifts list or fallback to standard roster distribution
   const displayShifts: DisplayShift[] = useMemo(() => {
@@ -88,6 +85,18 @@ export const AttendanceShiftRosterCard: React.FC<AttendanceShiftRosterCardProps>
       },
     ];
   }, [shifts, totalEligible, presentCount]);
+
+  // Compute roster coverage from scheduled assignments
+  const totalAllocated = displayShifts.reduce((acc, s) => acc + s.total, 0);
+  const scheduledCount =
+    overviewData?.processingHealth?.assignedScheduleCount &&
+    overviewData.processingHealth.assignedScheduleCount > 0
+      ? overviewData.processingHealth.assignedScheduleCount
+      : totalAllocated > 0
+        ? totalAllocated
+        : totalEligible;
+  const scheduleIntegrityRate =
+    totalEligible > 0 ? Math.min(100, Math.round((scheduledCount / totalEligible) * 100)) : 100;
 
   return (
     <Card className="bezent-att-insights-card bezent-att-roster-card">
@@ -156,7 +165,11 @@ export const AttendanceShiftRosterCard: React.FC<AttendanceShiftRosterCardProps>
                       <span className="bezent-att-roster-shift-count">
                         {shift.headcount}/{shift.total} Present
                       </span>
-                      <span className="bezent-att-roster-shift-rate">
+                      <span
+                        className={`bezent-att-roster-shift-rate ${
+                          shift.rate > 0 ? 'tone-blue' : 'tone-slate'
+                        }`}
+                      >
                         {shift.rate}%
                       </span>
                     </div>
@@ -175,21 +188,24 @@ export const AttendanceShiftRosterCard: React.FC<AttendanceShiftRosterCardProps>
                         height={4}
                         rx={2}
                         className="bezent-att-roster-bar-bg"
+                        fill="#f1f5f9"
                       />
-                      <rect
-                        x={0}
-                        y={0}
-                        width={Math.min(100, Math.max(6, shift.rate))}
-                        height={4}
-                        rx={2}
-                        className={`bezent-att-roster-bar-fill ${
-                          idx === 0
-                            ? 'bezent-att-roster-bar-fill--blue'
-                            : idx === 1
-                              ? 'bezent-att-roster-bar-fill--emerald'
-                              : 'bezent-att-roster-bar-fill--teal'
-                        }`}
-                      />
+                      {shift.rate > 0 && (
+                        <rect
+                          x={0}
+                          y={0}
+                          width={Math.min(100, Math.max(3, shift.rate))}
+                          height={4}
+                          rx={2}
+                          className={`bezent-att-roster-bar-fill ${
+                            idx === 0
+                              ? 'bezent-att-roster-bar-fill--blue'
+                              : idx === 1
+                                ? 'bezent-att-roster-bar-fill--emerald'
+                                : 'bezent-att-roster-bar-fill--teal'
+                          }`}
+                        />
+                      )}
                     </svg>
                   </div>
                 </div>
