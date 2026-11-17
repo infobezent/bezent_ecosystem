@@ -2940,7 +2940,8 @@
 .bezent-att-legend-pill {
   width: 7px;
   height: 7px;
-  border-radius: 50%;
+  border-radius: 1.5px;
+  transform: rotate(45deg);
   display: inline-block;
   flex-shrink: 0;
 }
@@ -2997,7 +2998,8 @@
 .bezent-att-summary-dot {
   width: 7px;
   height: 7px;
-  border-radius: 50%;
+  border-radius: 1.5px;
+  transform: rotate(45deg);
   flex-shrink: 0;
 }
 
@@ -3228,6 +3230,72 @@
 
 .bezent-att-trend-tracker {
   pointer-events: none;
+}
+
+/* ── Chamfered Line Diamond Nodes & Hover Elements ── */
+.bezent-att-diamond-node {
+  stroke-width: 2;
+  fill: #ffffff;
+  transition: transform 0.15s cubic-bezier(0.16, 1, 0.3, 1), stroke-width 0.15s ease;
+}
+
+[data-theme='dark'] .bezent-att-diamond-node {
+  fill: #0f172a;
+}
+
+.bezent-att-diamond-node--present {
+  stroke: #2563eb;
+}
+
+[data-theme='dark'] .bezent-att-diamond-node--present {
+  stroke: #3b82f6;
+}
+
+.bezent-att-diamond-node--absent {
+  stroke: #7c3aed;
+}
+
+[data-theme='dark'] .bezent-att-diamond-node--absent {
+  stroke: #a78bfa;
+}
+
+.bezent-att-diamond-node--late {
+  stroke: #10b981;
+}
+
+[data-theme='dark'] .bezent-att-diamond-node--late {
+  stroke: #34d399;
+}
+
+.bezent-att-diamond-node.is-active {
+  stroke-width: 2.5;
+}
+
+.bezent-att-diamond-halo {
+  opacity: 0.25;
+  pointer-events: none;
+}
+
+.bezent-att-diamond-halo--present {
+  fill: #2563eb;
+}
+
+.bezent-att-diamond-halo--absent {
+  fill: #7c3aed;
+}
+
+.bezent-att-diamond-halo--late {
+  fill: #10b981;
+}
+
+.bezent-att-col-hover-beam {
+  fill: rgba(37, 99, 235, 0.04);
+  pointer-events: none;
+  transition: x 0.1s ease;
+}
+
+[data-theme='dark'] .bezent-att-col-hover-beam {
+  fill: rgba(96, 165, 250, 0.08);
 }
 
 /* ── Segmented Daily Columns ── */
