@@ -39,17 +39,17 @@
 }
 
 .bezent-selectable-list__item:hover:not(.is-disabled):not(.is-selected) {
-  background: var(--teal-50);
+  background: var(--bg-hover, #c2e7ff);
 }
 
 .bezent-selectable-list__item.is-selected {
-  background: var(--teal-50);
-  border-color: var(--teal-200);
-  color: var(--teal-700);
+  background: var(--bg-hover, #c2e7ff);
+  border-color: var(--accent-hover, #a8dbfc);
+  color: var(--brand-primary, #041e49);
 }
 
 .bezent-selectable-list__item:focus-visible {
-  outline: 2px solid var(--teal-500);
+  outline: 2px solid var(--blue-interactive, #1a73e8);
   outline-offset: 1px;
 }
 

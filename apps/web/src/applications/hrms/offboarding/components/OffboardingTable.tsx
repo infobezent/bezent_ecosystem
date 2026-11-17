@@ -103,11 +103,12 @@ export const OffboardingTable: React.FC<OffboardingTableProps> = ({
             <TableHeaderCell>Exit Type</TableHeaderCell>
             <TableHeaderCell>Last Working Day</TableHeaderCell>
             <TableHeaderCell>Notice Status</TableHeaderCell>
+            <TableHeaderCell>Clearance</TableHeaderCell>
             <TableHeaderCell>Status</TableHeaderCell>
             <TableHeaderCell align="right">Actions</TableHeaderCell>
           </TableRow>
         </TableHead>
-        <TableSkeleton rows={8} columns={7} label="Loading offboarding records…" />
+        <TableSkeleton rows={8} columns={8} label="Loading offboarding records…" />
       </Table>
     );
   }
@@ -241,6 +242,18 @@ export const OffboardingTable: React.FC<OffboardingTableProps> = ({
                               Complete Separation
                             </button>
                           )}
+                          {isServingNotice && (
+                            <button
+                              type="button"
+                              role="menuitem"
+                              className="bezent-table-action-menu__item"
+                              disabled
+                              title="Separation can be completed once the last working date arrives."
+                            >
+                              <BezentIcon name="calendar" size={16} />
+                              Completes on {formatDate(action.effectiveDate)}
+                            </button>
+                          )}
                           {isPending && (
                             <button
                               type="button"
@@ -332,6 +345,7 @@ export const OffboardingTable: React.FC<OffboardingTableProps> = ({
             <TableHeaderCell>Exit Type</TableHeaderCell>
             <TableHeaderCell>Last Working Day</TableHeaderCell>
             <TableHeaderCell>Notice Status</TableHeaderCell>
+            <TableHeaderCell>Clearance</TableHeaderCell>
             <TableHeaderCell>Status</TableHeaderCell>
             <TableHeaderCell align="right">Actions</TableHeaderCell>
           </TableRow>
@@ -427,6 +441,17 @@ export const OffboardingTable: React.FC<OffboardingTableProps> = ({
                   )}
                 </TableCell>
 
+                {/* Clearance progress (Settings checklist) */}
+                <TableCell>
+                  {action.clearance && action.clearance.total > 0 ? (
+                    <span className="bezent-table-meta-date">
+                      {action.clearance.cleared}/{action.clearance.total} cleared
+                    </span>
+                  ) : (
+                    '—'
+                  )}
+                </TableCell>
+
                 {/* Overall Action Status Badge */}
                 <TableCell>
                   <span
@@ -487,6 +512,18 @@ export const OffboardingTable: React.FC<OffboardingTableProps> = ({
                           >
                             <BezentIcon name="checkCircle" size={16} />
                             Complete Separation
+                          </button>
+                        )}
+                        {isServingNotice && (
+                          <button
+                            type="button"
+                            role="menuitem"
+                            className="bezent-table-action-menu__item"
+                            disabled
+                            title="Separation can be completed once the last working date arrives."
+                          >
+                            <BezentIcon name="calendar" size={16} />
+                            Completes on {formatDate(action.effectiveDate)}
                           </button>
                         )}
 

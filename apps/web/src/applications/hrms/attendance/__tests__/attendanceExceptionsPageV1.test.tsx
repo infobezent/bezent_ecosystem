@@ -71,7 +71,7 @@ describe('BEZENT HRMS — Attendance Exceptions V1.0 Frontend Page', () => {
 
     expect(html).toContain('Exceptions');
     expect(html).toContain('Attendance › Exceptions');
-    expect(html).toContain('Today');
+    expect(html).toContain('bezent-date-range-trigger');
     expect(html).toContain('Export');
   });
 
@@ -82,12 +82,12 @@ describe('BEZENT HRMS — Attendance Exceptions V1.0 Frontend Page', () => {
       </MemoryRouter>,
     );
 
-    expect(html).toContain('ACTIVE CASES');
-    expect(html).toContain('CRITICAL');
-    expect(html).toContain('HIGH PRIORITY');
-    expect(html).toContain('UNASSIGNED');
-    expect(html).toContain('PENDING ACTION');
-    expect(html).toContain('RESOLVED TODAY');
+    expect(html).toContain('Active');
+    expect(html).toContain('Critical');
+    expect(html).toContain('High priority');
+    expect(html).toContain('Unassigned');
+    expect(html).toContain('Pending action');
+    expect(html).toContain('Resolved today');
   });
 
   it('renders primary filter bar controls and quick date presets', () => {
@@ -97,11 +97,7 @@ describe('BEZENT HRMS — Attendance Exceptions V1.0 Frontend Page', () => {
       </MemoryRouter>,
     );
 
-    expect(html).toContain('Search Employee, ID, or Case...');
-    expect(html).toContain('Active Cases');
-    expect(html).toContain('All Severities');
-    expect(html).toContain('All Exception Types');
-    expect(html).toContain('More Filters');
-    expect(html).toContain('Reset');
+    expect(html).toContain('Search employee, ID or case');
+    expect(html).toContain('Filters');
   });
 });

@@ -1,6 +1,6 @@
 import type { EmployeeActionListItem } from '../../employee-administration/api/employeeAdministrationApi';
 
-export const DEMO_OFFBOARDING: EmployeeActionListItem[] = [
+const SAMPLE_DEMO_OFFBOARDING: EmployeeActionListItem[] = [
   {
     id: 'ea_off_001',
     employeeId: 'emp_demo_011',
@@ -205,3 +205,12 @@ export const DEMO_OFFBOARDING: EmployeeActionListItem[] = [
     updatedAt: '2026-09-01T15:00:00Z',
   },
 ];
+
+/**
+ * Sample rows are opt-in (VITE_USE_DEMO_DATA=true in a dev build). By default these
+ * pages show only real data, so an empty database shows an honest empty state.
+ */
+export const DEMO_OFFBOARDING: EmployeeActionListItem[] =
+  import.meta.env.DEV && import.meta.env.VITE_USE_DEMO_DATA === 'true'
+    ? SAMPLE_DEMO_OFFBOARDING
+    : [];

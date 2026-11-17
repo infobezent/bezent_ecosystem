@@ -516,7 +516,9 @@ export const RecordsKpiCard: React.FC<RecordsKpiCardProps> = ({
         ) : (
           <>
             <span className="bezent-kpi-sub-pill-dot" />
-            Compliant
+            {effectivePending + effectiveExpiring + effectiveExpired === 0
+              ? 'All compliant'
+              : `${effectivePending + effectiveExpiring + effectiveExpired} need attention`}
           </>
         )}
       </div>

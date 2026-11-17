@@ -154,6 +154,7 @@ export function EmployeeRegistrationPage({ onCancel }: { onCancel?: () => void }
   return (
     <RegistrationConfigLoader>
       <EmployeeRegistration
+        masters={masters}
         onCancel={handleCancel}
         initialDraft={initialDraft}
         onSubmit={handleSubmit}

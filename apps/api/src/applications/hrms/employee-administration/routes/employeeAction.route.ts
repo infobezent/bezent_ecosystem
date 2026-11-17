@@ -15,6 +15,11 @@ employeeActionRouter.use(
 employeeActionRouter.get('/hrms/employee-actions', controller.listActions);
 employeeActionRouter.post('/hrms/employee-actions', controller.createAction);
 employeeActionRouter.get('/hrms/employee-actions/:actionId', controller.getAction);
+employeeActionRouter.get('/hrms/employee-actions/:actionId/clearance', controller.listClearance);
+employeeActionRouter.patch(
+  '/hrms/employee-actions/:actionId/clearance/:itemId',
+  controller.updateClearanceItem,
+);
 employeeActionRouter.patch('/hrms/employee-actions/:actionId', controller.updateAction);
 employeeActionRouter.post('/hrms/employee-actions/:actionId/cancel', controller.cancelAction);
 employeeActionRouter.post('/hrms/employee-actions/:actionId/apply', controller.applyAction);
