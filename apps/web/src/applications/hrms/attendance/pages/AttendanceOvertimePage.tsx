@@ -746,23 +746,10 @@ export function AttendanceOvertimePage() {
   return (
     <Page maxWidth="default" gap="md">
       {/* ── 1. Page Header (Spec Section 1) ── */}
-      <PageHeader
-        eyebrow="Attendance › Requests"
-        title="Requests"
-        subtitle="Review overtime hours and choose how each record is settled."
-        actions={
-          <AttendanceDateRangeControl
-            startDate={range.startDate}
-            endDate={range.endDate}
-            onChange={(r) => {
-              setRange(r);
-              setPage(1);
-            }}
-          />
-        }
-      />
-
-      <AttendanceSectionTabs group="requests" />
+      <PageHeader title="Requests" actions={<AttendanceSectionTabs group="requests" />} />
+      <span className="bezent-sr-only">
+        Attendance › Requests — Review overtime hours and choose how each record is settled.
+      </span>
 
       <Stack gap="md">
         {/* Banner Notification */}
@@ -839,7 +826,7 @@ export function AttendanceOvertimePage() {
         />
 
         {/* ── 3. Filter Bar (Spec Section 3 — Workforce Directory Pattern) ── */}
-        <div className="bezent-directory-toolbar">
+        <div className="bezent-directory-toolbar bezent-att-requests-toolbar">
           <div className="bezent-directory-toolbar__search">
             <SearchInput
               value={search}
@@ -852,6 +839,15 @@ export function AttendanceOvertimePage() {
           </div>
 
           <div className="bezent-directory-toolbar__actions">
+            <AttendanceDateRangeControl
+              startDate={range.startDate}
+              endDate={range.endDate}
+              onChange={(r) => {
+                setRange(r);
+                setPage(1);
+              }}
+            />
+
             <div className="bezent-filter-anchor">
               <Button
                 variant={activeFilterCount > 0 || isFilterPanelOpen ? 'secondary' : 'outline'}

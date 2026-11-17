@@ -827,20 +827,10 @@ export function AttendanceCompOffPage() {
   return (
     <Page maxWidth="default" gap="md">
       {/* ── 1. Page Header (Spec Section 1) ── */}
-      <PageHeader
-        eyebrow="Attendance › Requests"
-        title="Requests"
-        subtitle="Track comp-off earned, used and expired for each employee."
-        actions={
-          <AttendanceDateRangeControl
-            startDate={range.startDate}
-            endDate={range.endDate}
-            onChange={setRange}
-          />
-        }
-      />
-
-      <AttendanceSectionTabs group="requests" />
+      <PageHeader title="Requests" actions={<AttendanceSectionTabs group="requests" />} />
+      <span className="bezent-sr-only">
+        Attendance › Requests — Track comp-off earned, used and expired for each employee.
+      </span>
 
       <Stack gap="md">
         {/* Banner Notification */}
@@ -893,7 +883,7 @@ export function AttendanceCompOffPage() {
         />
 
         {/* ── 4. Filter Bar (Spec Section 4 — Workforce Directory Pattern) ── */}
-        <div className="bezent-directory-toolbar">
+        <div className="bezent-directory-toolbar bezent-att-requests-toolbar">
           <div className="bezent-directory-toolbar__search">
             <SearchInput
               value={search}
@@ -906,6 +896,12 @@ export function AttendanceCompOffPage() {
           </div>
 
           <div className="bezent-directory-toolbar__actions">
+            <AttendanceDateRangeControl
+              startDate={range.startDate}
+              endDate={range.endDate}
+              onChange={setRange}
+            />
+
             <div className="bezent-filter-anchor">
               <Button
                 variant={activeFilterCount > 0 || isFilterPanelOpen ? 'secondary' : 'outline'}

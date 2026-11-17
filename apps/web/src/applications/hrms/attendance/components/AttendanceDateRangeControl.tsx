@@ -38,12 +38,14 @@ export const AttendanceDateRangeControl: React.FC<AttendanceDateRangeControlProp
   endDate,
   onChange,
 }) => (
-  <DateRangePicker
-    startDate={startDate}
-    endDate={endDate}
-    placeholder="Select date or range"
-    onChange={(r) => {
-      if (r.startDate && r.endDate) onChange({ startDate: r.startDate, endDate: r.endDate });
-    }}
-  />
+  <div className="bezent-att-date-range-control">
+    <DateRangePicker
+      startDate={startDate}
+      endDate={endDate}
+      placeholder="Select date or range"
+      onChange={(r) => {
+        if (r.startDate && r.endDate) onChange({ startDate: r.startDate, endDate: r.endDate });
+      }}
+    />
+  </div>
 );

@@ -621,25 +621,11 @@ export function AttendanceRegularizationPage() {
 
   return (
     <Page>
-      {/* 1. Header & Actions Strip */}
-      <PageHeader
-        eyebrow="Attendance › Requests"
-        title="Requests"
-        subtitle="Submit, review and manage attendance correction requests."
-        actions={
-          <AttendanceDateRangeControl
-            startDate={workdayFrom}
-            endDate={workdayTo}
-            onChange={(r) => {
-              setWorkdayFrom(r.startDate);
-              setWorkdayTo(r.endDate);
-              setPage(1);
-            }}
-          />
-        }
-      />
-
-      <AttendanceSectionTabs group="requests" />
+      {/* 1. Header & Section Tabs */}
+      <PageHeader title="Requests" actions={<AttendanceSectionTabs group="requests" />} />
+      <span className="bezent-sr-only">
+        Attendance › Requests — Submit, review and manage attendance correction requests.
+      </span>
 
       <Stack gap="md">
         {/* 2. Summary counters (same KPI cards as Workforce overview) */}
@@ -697,7 +683,7 @@ export function AttendanceRegularizationPage() {
         />
 
         {/* 3. Search & filter toolbar (Workforce Directory pattern) */}
-        <div className="bezent-directory-toolbar">
+        <div className="bezent-directory-toolbar bezent-att-requests-toolbar">
           <div className="bezent-directory-toolbar__search">
             <SearchInput
               shape="rounded"
@@ -710,6 +696,16 @@ export function AttendanceRegularizationPage() {
           </div>
 
           <div className="bezent-directory-toolbar__actions">
+            <AttendanceDateRangeControl
+              startDate={workdayFrom}
+              endDate={workdayTo}
+              onChange={(r) => {
+                setWorkdayFrom(r.startDate);
+                setWorkdayTo(r.endDate);
+                setPage(1);
+              }}
+            />
+
             <div className="bezent-filter-anchor">
               <Button
                 variant={showAdvancedFilters || totalFilterCount > 0 ? 'secondary' : 'outline'}

@@ -761,25 +761,11 @@ export function AttendanceOnDutyPage() {
 
   return (
     <Page>
-      {/* 1. Header & Actions Strip */}
-      <PageHeader
-        eyebrow="Attendance › Requests"
-        title="Requests"
-        subtitle="Review client visits, field duties and other official external work."
-        actions={
-          <AttendanceDateRangeControl
-            startDate={startDate}
-            endDate={endDate}
-            onChange={(r) => {
-              setStartDate(r.startDate);
-              setEndDate(r.endDate);
-              setPage(1);
-            }}
-          />
-        }
-      />
-
-      <AttendanceSectionTabs group="requests" />
+      {/* 1. Header & Section Tabs */}
+      <PageHeader title="Requests" actions={<AttendanceSectionTabs group="requests" />} />
+      <span className="bezent-sr-only">
+        Attendance › Requests — Review client visits, field duties and other official external work.
+      </span>
 
       <Stack gap="md">
         {/* 2. Summary counters (same KPI cards as Workforce overview) */}
@@ -826,7 +812,7 @@ export function AttendanceOnDutyPage() {
         />
 
         {/* 3. Search & filter toolbar (Workforce Directory pattern) */}
-        <div className="bezent-directory-toolbar">
+        <div className="bezent-directory-toolbar bezent-att-requests-toolbar">
           <div className="bezent-directory-toolbar__search">
             <SearchInput
               shape="rounded"
@@ -839,6 +825,16 @@ export function AttendanceOnDutyPage() {
           </div>
 
           <div className="bezent-directory-toolbar__actions">
+            <AttendanceDateRangeControl
+              startDate={startDate}
+              endDate={endDate}
+              onChange={(r) => {
+                setStartDate(r.startDate);
+                setEndDate(r.endDate);
+                setPage(1);
+              }}
+            />
+
             <div className="bezent-filter-anchor">
               <Button
                 variant={showAdvancedFilters || totalFilterCount > 0 ? 'secondary' : 'outline'}
