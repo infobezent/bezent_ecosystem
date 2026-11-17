@@ -26,6 +26,7 @@ export class EmployeeController {
       res.json({
         data: result.items,
         pagination: result.pagination,
+        statusCounts: result.statusCounts,
       });
     } catch (err) {
       next(err);

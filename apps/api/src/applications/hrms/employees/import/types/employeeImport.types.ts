@@ -57,6 +57,8 @@ export interface ParsedEmployeeRow {
   designationId?: string | null;
   locationId?: string | null;
   resolvedReportingManagerId?: string | null;
+  inFileManagerEmployeeNumber?: string | null;
+  hierarchyDepth?: number;
 }
 
 export interface ValidationSummary {

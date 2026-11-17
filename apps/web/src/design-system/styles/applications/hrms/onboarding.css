@@ -62,3 +62,46 @@
   gap: var(--spacing-lg, 24px);
   width: 100%;
 }
+
+/* ==========================================================================
+   4. Onboarding Directory Toolbar Refinements (Single-Row Balance)
+   ========================================================================== */
+
+.onboarding-directory-page .bezent-toolbar {
+  gap: var(--space-2, 8px);
+}
+
+.onboarding-directory-page .bezent-search-bar {
+  width: 240px;
+  min-width: 190px;
+  max-width: 260px;
+  flex-shrink: 0;
+}
+
+.onboarding-directory-page .bezent-filter-tabs {
+  margin-left: 0;
+  padding: 3px;
+  gap: 3px;
+  overflow-x: auto;
+  white-space: nowrap;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  flex-shrink: 1;
+  min-width: 0;
+}
+
+.onboarding-directory-page .bezent-filter-tabs::-webkit-scrollbar {
+  display: none;
+}
+
+.onboarding-directory-page .bezent-filter-tab {
+  padding: 4px 10px;
+  font-size: 12.5px;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.onboarding-directory-page .bezent-filter-tab-count {
+  font-size: 11px;
+  padding: 1px 6px;
+}

@@ -330,9 +330,9 @@ describe('Employees Directory page', () => {
 
   it('renders candidate-style status filter tabs and view mode toggle', () => {
     const html = renderDirectory();
-    expect(html).toContain('All Employees');
+    expect(html).toContain('All');
     expect(html).toContain('Probation');
-    expect(html).toContain('Pending Activation');
+    expect(html).toContain('Pending');
     expect(html).toContain('Separated');
     expect(html).toContain('bezent-view-toggle');
     expect(html).toContain('bezent-filter-tabs');

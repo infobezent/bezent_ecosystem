@@ -1,6 +1,6 @@
 import crypto from 'node:crypto';
 import ExcelJS from 'exceljs';
-import { eq, and } from 'drizzle-orm';
+import { eq, and, or } from 'drizzle-orm';
 import { getDb } from '../../../../../db/connection.js';
 import {
   employees,
@@ -145,19 +145,29 @@ export class EmployeeImportService {
     ]);
 
     const deptMap = new Map<string, string>(
-      deptList.map((d: { id: string; name: string }) => [d.name.trim().toLowerCase(), d.id]),
+      (deptList || [])
+        .filter((d: { id: string; name?: string }) => Boolean(d?.name))
+        .map((d: { id: string; name: string }) => [d.name.trim().toLowerCase(), d.id]),
     );
     const desigMap = new Map<string, string>(
-      desigList.map((d: { id: string; name: string }) => [d.name.trim().toLowerCase(), d.id]),
+      (desigList || [])
+        .filter((d: { id: string; name?: string }) => Boolean(d?.name))
+        .map((d: { id: string; name: string }) => [d.name.trim().toLowerCase(), d.id]),
     );
     const locMap = new Map<string, string>(
-      locList.map((l: { id: string; name: string }) => [l.name.trim().toLowerCase(), l.id]),
+      (locList || [])
+        .filter((l: { id: string; name?: string }) => Boolean(l?.name))
+        .map((l: { id: string; name: string }) => [l.name.trim().toLowerCase(), l.id]),
     );
     const existingEmpNumbers = new Set(
-      existingEmps.map((e: { employeeNumber: string }) => e.employeeNumber.trim().toLowerCase()),
+      (existingEmps || [])
+        .filter((e: { employeeNumber?: string }) => Boolean(e?.employeeNumber))
+        .map((e: { employeeNumber: string }) => e.employeeNumber.trim().toLowerCase()),
     );
     const existingEmails = new Set(
-      existingEmps.map((e: { email: string }) => e.email.trim().toLowerCase()),
+      (existingEmps || [])
+        .filter((e: { email?: string }) => Boolean(e?.email))
+        .map((e: { email: string }) => e.email.trim().toLowerCase()),
     );
 
     // Internal duplicate tracking
@@ -369,23 +379,7 @@ export class EmployeeImportService {
         }
       }
 
-      let resolvedReportingManagerId: string | null = null;
-      if (reportingManagerId) {
-        const matched = existingEmps.find(
-          (e: { id: string; employeeNumber: string }) =>
-            e.employeeNumber.toLowerCase() === reportingManagerId.toLowerCase() ||
-            e.id === reportingManagerId,
-        );
-        if (matched) {
-          resolvedReportingManagerId = matched.id;
-        } else {
-          issues.push({
-            category: 'reference',
-            field: 'Reporting Manager ID',
-            message: `Reporting manager '${reportingManagerId}' not found.`,
-          });
-        }
-      }
+      const resolvedReportingManagerId: string | null = null;
 
       // Normalize employment type
       const normalizedEmploymentType = this.normalizeEmploymentType(employmentTypeRaw);
@@ -461,6 +455,161 @@ export class EmployeeImportService {
 
     if (parsedRows.length === 0) {
       throw new BadRequestError('The uploaded file contains no employee records.');
+    }
+
+    // ── Phase 2: Reporting Manager Validation & Graph Analysis ──
+    const fileEmpMap = new Map<string, ParsedEmployeeRow>();
+    const fileEmpRowsByNumber = new Map<string, ParsedEmployeeRow[]>();
+
+    for (const r of parsedRows) {
+      if (r.employeeNumber) {
+        const lowerEmp = r.employeeNumber.trim().toLowerCase();
+        fileEmpMap.set(lowerEmp, r);
+        const list = fileEmpRowsByNumber.get(lowerEmp) || [];
+        list.push(r);
+        fileEmpRowsByNumber.set(lowerEmp, list);
+      }
+    }
+
+    const existingEmpNumberMap = new Map<string, string>();
+    for (const e of existingEmps) {
+      existingEmpNumberMap.set(e.employeeNumber.trim().toLowerCase(), e.id);
+      existingEmpNumberMap.set(e.id, e.id);
+    }
+
+    // Step 2.1: Individual Manager Reference & Cycle Validations
+    for (const row of parsedRows) {
+      if (!row.reportingManagerId) continue;
+      const mgrRef = row.reportingManagerId.trim();
+      const mgrLower = mgrRef.toLowerCase();
+      const curEmpNoLower = row.employeeNumber ? row.employeeNumber.trim().toLowerCase() : '';
+
+      // 1. Self-reporting check
+      if (curEmpNoLower && mgrLower === curEmpNoLower) {
+        row.issues.push({
+          category: 'reference',
+          field: 'Reporting Manager ID',
+          message: 'An employee cannot be their own reporting manager.',
+        });
+        row.status = 'error';
+        continue;
+      }
+
+      // 2. Existence check: in DB or in File
+      const inDbId = existingEmpNumberMap.get(mgrLower);
+      const inFileRows = fileEmpRowsByNumber.get(mgrLower);
+      const inFileRow = inFileRows && inFileRows.length === 1 ? inFileRows[0] : undefined;
+
+      if (!inDbId && !inFileRow) {
+        row.issues.push({
+          category: 'reference',
+          field: 'Reporting Manager ID',
+          message: `Reporting manager '${mgrRef}' not found.`,
+        });
+        row.status = 'error';
+        continue;
+      }
+
+      // If in DB, store resolved ID
+      if (inDbId) {
+        row.resolvedReportingManagerId = inDbId;
+        row.hierarchyDepth = 1;
+      }
+
+      // 3. Circular chain check for in-file manager references
+      if (inFileRow) {
+        row.inFileManagerEmployeeNumber = inFileRow.employeeNumber;
+        const chainPath: string[] = [
+          row.employeeNumber ? row.employeeNumber.trim() : `Row ${row.rowNumber}`,
+        ];
+        const visitedInChain = new Set<string>([
+          row.employeeNumber ? curEmpNoLower : `row_${row.rowNumber}`,
+        ]);
+
+        let currStep: ParsedEmployeeRow | undefined = inFileRow;
+        let cycleDetected = false;
+
+        while (currStep) {
+          const stepEmpNo = currStep.employeeNumber
+            ? currStep.employeeNumber.trim()
+            : `Row ${currStep.rowNumber}`;
+          const stepEmpNoLower = stepEmpNo.toLowerCase();
+          chainPath.push(stepEmpNo);
+
+          if (visitedInChain.has(stepEmpNoLower)) {
+            cycleDetected = true;
+            break;
+          }
+          visitedInChain.add(stepEmpNoLower);
+
+          if (!currStep.reportingManagerId) break;
+          const nextMgrLower = currStep.reportingManagerId.trim().toLowerCase();
+          currStep = fileEmpMap.get(nextMgrLower);
+        }
+
+        if (cycleDetected) {
+          row.issues.push({
+            category: 'reference',
+            field: 'Reporting Manager ID',
+            message: `Circular reporting chain detected (${chainPath.join(' -> ')}).`,
+          });
+          row.status = 'error';
+          continue;
+        }
+      }
+    }
+
+    // Step 2.2: Manager Row Validation Failure Propagation
+    // If a manager's own row fails validation, report its dependents as
+    // "Reporting manager row N failed validation" instead of "not found".
+    let propagated = true;
+    while (propagated) {
+      propagated = false;
+      for (const row of parsedRows) {
+        if (!row.reportingManagerId) continue;
+        const mgrLower = row.reportingManagerId.trim().toLowerCase();
+        const inFileRow = fileEmpMap.get(mgrLower);
+
+        if (
+          inFileRow &&
+          (inFileRow.status === 'error' ||
+            inFileRow.status === 'duplicate' ||
+            inFileRow.issues.length > 0)
+        ) {
+          const alreadyHasManagerIssue = row.issues.some(
+            (i) => i.field === 'Reporting Manager ID',
+          );
+          if (!alreadyHasManagerIssue) {
+            row.issues.push({
+              category: 'reference',
+              field: 'Reporting Manager ID',
+              message: `Reporting manager row ${inFileRow.rowNumber} failed validation.`,
+            });
+            row.status = 'error';
+            propagated = true;
+          }
+        }
+      }
+    }
+
+    // Step 2.3: Calculate hierarchy depth for topological sorting
+    for (const row of parsedRows) {
+      if (row.status !== 'valid') continue;
+      if (!row.reportingManagerId) {
+        row.hierarchyDepth = 0;
+        continue;
+      }
+      let depth = 0;
+      let curr: ParsedEmployeeRow | undefined = row;
+      const seen = new Set<number>();
+      while (curr && curr.reportingManagerId) {
+        if (seen.has(curr.rowNumber)) break;
+        seen.add(curr.rowNumber);
+        depth++;
+        const mgrLower = curr.reportingManagerId.trim().toLowerCase();
+        curr = fileEmpMap.get(mgrLower);
+      }
+      row.hierarchyDepth = depth;
     }
 
     const totalRecords = parsedRows.length;
@@ -559,19 +708,32 @@ export class EmployeeImportService {
     let skippedCount = 0;
     let errorCount = 0;
 
+    const validRows = rows.filter((r) => r.status === 'valid');
+    // Sort valid rows by hierarchy depth so managers land in earlier or same batch
+    validRows.sort((a, b) => {
+      const depthA = (a.rawData as { _parsed?: ParsedEmployeeRow })?._parsed?.hierarchyDepth ?? 0;
+      const depthB = (b.rawData as { _parsed?: ParsedEmployeeRow })?._parsed?.hierarchyDepth ?? 0;
+      return depthA - depthB;
+    });
+
+    const BATCH_SIZE = 50;
+    const insertedEmpIdByNumber = new Map<string, string>();
+    const insertedEmpIdByRowId = new Map<string, string>();
+
+    // 1. Process non-valid rows
     for (const row of rows) {
       if (row.status === 'duplicate') {
         skippedCount++;
         await this.repo.updateImportRowStatus(row.id, 'skipped');
-        continue;
-      }
-
-      if (row.status === 'error') {
+      } else if (row.status === 'error') {
         errorCount++;
-        continue;
       }
+    }
 
-      if (row.status === 'valid') {
+    // 2. Process valid rows in batches of BATCH_SIZE
+    for (let i = 0; i < validRows.length; i += BATCH_SIZE) {
+      const batch = validRows.slice(i, i + BATCH_SIZE);
+      for (const row of batch) {
         try {
           const rawParsed = (row.rawData as { _parsed?: ParsedEmployeeRow })?._parsed;
           if (!rawParsed) {
@@ -588,6 +750,19 @@ export class EmployeeImportService {
           }
 
           const empId = `emp_${crypto.randomUUID().replace(/-/g, '').slice(0, 20)}`;
+          insertedEmpIdByNumber.set(employeeNumber.trim().toLowerCase(), empId);
+          insertedEmpIdByRowId.set(row.id, empId);
+
+          let initialManagerId = rawParsed.resolvedReportingManagerId ?? null;
+          if (!initialManagerId && rawParsed.reportingManagerId) {
+            const inMem = insertedEmpIdByNumber.get(
+              rawParsed.reportingManagerId.trim().toLowerCase(),
+            );
+            if (inMem) {
+              initialManagerId = inMem;
+            }
+          }
+
           await this.db.insert(employees).values({
             id: empId,
             tenantId,
@@ -600,7 +775,7 @@ export class EmployeeImportService {
             departmentId: rawParsed.departmentId ?? null,
             designationId: rawParsed.designationId ?? null,
             locationId: rawParsed.locationId ?? null,
-            reportingManagerId: rawParsed.resolvedReportingManagerId ?? null,
+            reportingManagerId: initialManagerId,
             joiningDate: rawParsed.dateOfJoining,
             probationEndDate: rawParsed.probationEndDate ?? null,
             confirmationDate: rawParsed.confirmationDate ?? null,
@@ -658,6 +833,48 @@ export class EmployeeImportService {
           errorCount++;
           await this.repo.updateImportRowStatus(row.id, 'error');
         }
+      }
+    }
+
+    // ── 3. Option (b): Final Link-Resolution Pass after all batches ──
+    for (const row of validRows) {
+      const empId = insertedEmpIdByRowId.get(row.id);
+      if (!empId) continue;
+      const rawParsed = (row.rawData as { _parsed?: ParsedEmployeeRow })?._parsed;
+      if (!rawParsed?.reportingManagerId) continue;
+
+      const mgrRef = rawParsed.reportingManagerId.trim();
+      const mgrLower = mgrRef.toLowerCase();
+
+      let targetManagerId = insertedEmpIdByNumber.get(mgrLower);
+      if (!targetManagerId) {
+        const [dbMgr] = await this.db
+          .select({ id: employees.id })
+          .from(employees)
+          .where(
+            and(
+              eq(employees.tenantId, tenantId),
+              eq(employees.companyId, companyId),
+              or(eq(employees.employeeNumber, mgrRef), eq(employees.id, mgrRef)),
+            ),
+          )
+          .limit(1);
+        if (dbMgr) {
+          targetManagerId = dbMgr.id;
+        }
+      }
+
+      if (targetManagerId) {
+        await this.db
+          .update(employees)
+          .set({ reportingManagerId: targetManagerId })
+          .where(
+            and(
+              eq(employees.id, empId),
+              eq(employees.tenantId, tenantId),
+              eq(employees.companyId, companyId),
+            ),
+          );
       }
     }
 

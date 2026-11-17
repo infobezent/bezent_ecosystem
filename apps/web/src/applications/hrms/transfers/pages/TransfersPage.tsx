@@ -324,7 +324,7 @@ export function TransfersPage({
   const totalPages = pagination?.totalPages ?? 1;
 
   const statusTabs = [
-    { id: 'all', label: 'All Transfers', count: statusCounts?.all ?? items.length },
+    { id: 'all', label: 'All', count: statusCounts?.all ?? items.length },
     { id: 'pending', label: 'Pending', count: statusCounts?.pending },
     { id: 'upcoming', label: 'Upcoming', count: statusCounts?.upcoming },
     { id: 'applied', label: 'Completed', count: statusCounts?.applied },
@@ -365,23 +365,25 @@ export function TransfersPage({
               />
             </div>
 
-            {/* Filter Toggle Button */}
+            {/* Filter Toggle Button (Icon-only) */}
             <div className="bezent-filter-anchor">
-              <Button
-                variant={appliedCount > 0 || isFilterPanelOpen ? 'secondary' : 'outline'}
-                size="md"
-                shape="rounded"
-                className={appliedCount > 0 ? 'bezent-btn--filters-active' : ''}
-                leftIcon={<BezentIcon name="filter" size={16} />}
+              <IconButton
+                label={appliedCount > 0 ? `Filters (${appliedCount} active)` : 'Filters'}
+                variant={appliedCount > 0 || isFilterPanelOpen ? 'solid' : 'ghost'}
+                active={isFilterPanelOpen || appliedCount > 0}
+                tooltipDirection="down"
                 onClick={() => setIsFilterPanelOpen((prev) => !prev)}
                 aria-expanded={isFilterPanelOpen}
-                aria-label="Filters"
+                aria-label={appliedCount > 0 ? `Filters (${appliedCount} active)` : 'Filters'}
+                className={appliedCount > 0 ? 'bezent-btn--filters-active' : ''}
               >
-                <span>Filters</span>
+                <BezentIcon name="filter" size={16} />
                 {appliedCount > 0 && (
-                  <span className="bezent-btn__filter-count">{appliedCount}</span>
+                  <span className="bezent-btn__filter-count bezent-btn__filter-count--icon-btn">
+                    {appliedCount}
+                  </span>
                 )}
-              </Button>
+              </IconButton>
 
               <TransfersFilterPanel
                 isOpen={isFilterPanelOpen}
@@ -395,17 +397,17 @@ export function TransfersPage({
               />
             </div>
 
-            {/* Reset Button */}
-            <Button
-              variant="outline"
-              size="md"
-              shape="rounded"
-              leftIcon={<BezentIcon name="reset" size={16} />}
+            {/* Reset Button (Icon-only) */}
+            <IconButton
+              label="Reset filters"
+              variant="ghost"
+              tooltipDirection="down"
               onClick={handleResetFilters}
               disabled={!hasActiveFilters}
+              aria-label="Reset filters"
             >
-              Reset
-            </Button>
+              <BezentIcon name="reset" size={16} />
+            </IconButton>
 
             {/* View Mode Toggle: List vs Grid */}
             <div
@@ -452,7 +454,7 @@ export function TransfersPage({
                 >
                   <span>{tab.label}</span>
                   {tab.count !== undefined && (
-                    <span className="bezent-filter-tab__count">{tab.count}</span>
+                    <span className="bezent-filter-tab-count">{tab.count}</span>
                   )}
                 </button>
               ))}

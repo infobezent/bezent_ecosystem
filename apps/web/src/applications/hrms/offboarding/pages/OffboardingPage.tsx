@@ -309,7 +309,7 @@ export function OffboardingPage({
   const statusTabs = [
     {
       id: 'all',
-      label: 'All Offboarding',
+      label: 'All',
       count: listState.statusCounts?.all ?? listState.items.length,
     },
     { id: 'pending', label: 'Pending', count: listState.statusCounts?.pending },
@@ -352,23 +352,25 @@ export function OffboardingPage({
               />
             </div>
 
-            {/* Filter Toggle Button */}
+            {/* Filter Toggle Button (Icon-only) */}
             <div className="bezent-filter-anchor">
-              <Button
-                variant={appliedCount > 0 || isFilterPanelOpen ? 'secondary' : 'outline'}
-                size="md"
-                shape="rounded"
-                className={appliedCount > 0 ? 'bezent-btn--filters-active' : ''}
-                leftIcon={<BezentIcon name="filter" size={16} />}
+              <IconButton
+                label={appliedCount > 0 ? `Filters (${appliedCount} active)` : 'Filters'}
+                variant={appliedCount > 0 || isFilterPanelOpen ? 'solid' : 'ghost'}
+                active={isFilterPanelOpen || appliedCount > 0}
+                tooltipDirection="down"
                 onClick={() => setIsFilterPanelOpen((prev) => !prev)}
                 aria-expanded={isFilterPanelOpen}
-                aria-label="Filters"
+                aria-label={appliedCount > 0 ? `Filters (${appliedCount} active)` : 'Filters'}
+                className={appliedCount > 0 ? 'bezent-btn--filters-active' : ''}
               >
-                <span>Filters</span>
+                <BezentIcon name="filter" size={16} />
                 {appliedCount > 0 && (
-                  <span className="bezent-btn__filter-count">{appliedCount}</span>
+                  <span className="bezent-btn__filter-count bezent-btn__filter-count--icon-btn">
+                    {appliedCount}
+                  </span>
                 )}
-              </Button>
+              </IconButton>
 
               <OffboardingFilterPanel
                 isOpen={isFilterPanelOpen}
@@ -382,17 +384,17 @@ export function OffboardingPage({
               />
             </div>
 
-            {/* Reset Button */}
-            <Button
-              variant="outline"
-              size="md"
-              shape="rounded"
-              leftIcon={<BezentIcon name="reset" size={16} />}
+            {/* Reset Button (Icon-only) */}
+            <IconButton
+              label="Reset filters"
+              variant="ghost"
+              tooltipDirection="down"
               onClick={handleResetFilters}
               disabled={!hasActiveFilters}
+              aria-label="Reset filters"
             >
-              Reset
-            </Button>
+              <BezentIcon name="reset" size={16} />
+            </IconButton>
 
             {/* View Mode Toggle: List vs Grid */}
             <div
@@ -439,7 +441,7 @@ export function OffboardingPage({
                 >
                   <span>{tab.label}</span>
                   {tab.count !== undefined && (
-                    <span className="bezent-filter-tab__count">{tab.count}</span>
+                    <span className="bezent-filter-tab-count">{tab.count}</span>
                   )}
                 </button>
               ))}

@@ -7,6 +7,7 @@ import {
   Button,
   Card,
   CardBody,
+  Divider,
   EmptyState,
   Grid,
   IconButton,
@@ -496,23 +497,25 @@ export function OnboardingPage({ title = 'Onboarding', onAddNewHire }: Onboardin
                   />
                 </div>
 
-                {/* Filter Toggle Button */}
+                {/* Filter Toggle Button (Icon-only) */}
                 <div className="bezent-filter-anchor">
-                  <Button
-                    variant={appliedCount > 0 || isFilterPanelOpen ? 'secondary' : 'outline'}
-                    size="md"
-                    shape="rounded"
-                    className={appliedCount > 0 ? 'bezent-btn--filters-active' : ''}
-                    leftIcon={<BezentIcon name="filter" size={16} />}
+                  <IconButton
+                    label={appliedCount > 0 ? `Filters (${appliedCount} active)` : 'Filters'}
+                    variant={appliedCount > 0 || isFilterPanelOpen ? 'solid' : 'ghost'}
+                    active={isFilterPanelOpen || appliedCount > 0}
+                    tooltipDirection="down"
                     onClick={() => setIsFilterPanelOpen((prev) => !prev)}
                     aria-expanded={isFilterPanelOpen}
-                    aria-label="Filters"
+                    aria-label={appliedCount > 0 ? `Filters (${appliedCount} active)` : 'Filters'}
+                    className={appliedCount > 0 ? 'bezent-btn--filters-active' : ''}
                   >
-                    <span>Filters</span>
+                    <BezentIcon name="filter" size={16} />
                     {appliedCount > 0 && (
-                      <span className="bezent-btn__filter-count">{appliedCount}</span>
+                      <span className="bezent-btn__filter-count bezent-btn__filter-count--icon-btn">
+                        {appliedCount}
+                      </span>
                     )}
-                  </Button>
+                  </IconButton>
 
                   <OnboardingFilterPanel
                     isOpen={isFilterPanelOpen}
@@ -526,17 +529,17 @@ export function OnboardingPage({ title = 'Onboarding', onAddNewHire }: Onboardin
                   />
                 </div>
 
-                {/* Reset Button */}
-                <Button
-                  variant="outline"
-                  size="md"
-                  shape="rounded"
-                  leftIcon={<BezentIcon name="reset" size={16} />}
+                {/* Reset Button (Icon-only) */}
+                <IconButton
+                  label="Reset filters"
+                  variant="ghost"
+                  tooltipDirection="down"
                   onClick={handleResetFilters}
                   disabled={!hasActiveFilters}
+                  aria-label="Reset filters"
                 >
-                  Reset
-                </Button>
+                  <BezentIcon name="reset" size={16} />
+                </IconButton>
 
                 {/* View Mode Toggle: List vs Grid */}
                 <div
@@ -584,7 +587,7 @@ export function OnboardingPage({ title = 'Onboarding', onAddNewHire }: Onboardin
                         onClick={() => handleTabChange(tab.id)}
                       >
                         <span>{tab.label}</span>
-                        {tab.count !== undefined && tab.count > 0 && (
+                        {tab.count !== undefined && (
                           <span className="bezent-filter-tab-count">{tab.count}</span>
                         )}
                       </button>
@@ -811,7 +814,10 @@ export function OnboardingPage({ title = 'Onboarding', onAddNewHire }: Onboardin
                                 />
                                 <Stack gap="none">
                                   <span className="bezent-table-meta-title">{item.fullName}</span>
-                                  <span className="bezent-table-meta-subtitle">
+                                  <span
+                                    className="bezent-table-meta-subtitle"
+                                    title={item.email || undefined}
+                                  >
                                     {item.email || '—'}
                                   </span>
                                 </Stack>
@@ -958,7 +964,14 @@ export function OnboardingPage({ title = 'Onboarding', onAddNewHire }: Onboardin
                                   >
                                     {item.fullName}
                                   </button>
-                                  <span className="bezent-table-meta-subtitle">
+                                  <span
+                                    className="bezent-table-meta-subtitle"
+                                    title={
+                                      item.email
+                                        ? `${item.email}${item.designationName ? ` • ${item.designationName}` : ''}`
+                                        : undefined
+                                    }
+                                  >
                                     {item.email || '—'}
                                     {item.designationName ? ` • ${item.designationName}` : ''}
                                   </span>

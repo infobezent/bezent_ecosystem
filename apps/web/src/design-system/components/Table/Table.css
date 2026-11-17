@@ -147,6 +147,9 @@ button.bezent-table-meta-title:hover {
   color: var(--text-secondary, #5f6368);
   line-height: 1.2;
   white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 260px;
 }
 
 button.bezent-table-meta-subtitle {

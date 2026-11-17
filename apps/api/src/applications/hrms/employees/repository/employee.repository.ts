@@ -18,6 +18,7 @@ import type {
   EmployeeDetails,
   ListEmployeesParams,
   PaginatedEmployeesResult,
+  EmployeeStatusCounts,
   DistributionTrendGranularity,
   DistributionTrendsResult,
 } from '../types/employee.types.js';
@@ -384,17 +385,56 @@ export class EmployeeRepository {
 
     const whereClause = and(...conditions);
 
-    const [countResult, rows] = await Promise.all([
+    const [countResult, rows, statusCountRows] = await Promise.all([
       db.select({ total: count() }).from(employees).where(whereClause),
       this.selectDetails(db, tenantId, companyId)
         .where(whereClause)
         .orderBy(desc(employees.createdAt), desc(employees.id))
         .limit(pageSize)
         .offset(offset),
+      db
+        .select({
+          status: employees.employmentStatus,
+          total: count(),
+        })
+        .from(employees)
+        .where(and(eq(employees.tenantId, tenantId), eq(employees.companyId, companyId)))
+        .groupBy(employees.employmentStatus),
     ]);
 
     const totalItems = countResult[0]?.total ?? 0;
     const totalPages = Math.ceil(totalItems / pageSize) || 1;
+
+    const statusCounts: EmployeeStatusCounts = {
+      all: 0,
+      active: 0,
+      probation: 0,
+      pending_activation: 0,
+      inactive: 0,
+    };
+
+    let totalStatus = 0;
+    for (const r of statusCountRows) {
+      const c = Number(r.total ?? 0);
+      totalStatus += c;
+      const st = r.status as string;
+      if (st === 'active') {
+        statusCounts.active += c;
+      } else if (st === 'probation') {
+        statusCounts.probation += c;
+      } else if (st === 'pending_activation') {
+        statusCounts.pending_activation += c;
+      } else if (
+        st === 'terminated' ||
+        st === 'suspended' ||
+        st === 'resigned' ||
+        st === 'notice' ||
+        st === 'inactive'
+      ) {
+        statusCounts.inactive += c;
+      }
+    }
+    statusCounts.all = totalStatus;
 
     return {
       items: rows.map((r) => this.formatEmployeeRow(r)),
@@ -404,6 +444,7 @@ export class EmployeeRepository {
         totalItems,
         totalPages,
       },
+      statusCounts,
     };
   }
 
