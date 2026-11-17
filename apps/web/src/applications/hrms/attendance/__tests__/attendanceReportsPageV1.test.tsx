@@ -220,4 +220,100 @@ describe('HRMS Attendance — Reports V1.0 Frontend Tests', () => {
     expect(html).toContain('Absent');
     expect(html).toContain('Clear Chart Filter');
   });
+
+  // ── Redesign Batch 1 Tests ─────────────────────────────────────────────────
+
+  it('fails if any canonical config ID is missing from canonical catalog definition', async () => {
+    const { CANONICAL_REPORT_IDS } = await import('../pages/reports/reportsConfig');
+    const { CANONICAL_REPORTS } = await import('../pages/AttendanceReportsPage');
+
+    const canonicalIdsInPage = CANONICAL_REPORTS.map((r) => r.id);
+    for (const configId of CANONICAL_REPORT_IDS) {
+      expect(canonicalIdsInPage).toContain(configId);
+    }
+  });
+
+  it('renders CategoryChips with All and dynamic categories', async () => {
+    const { CategoryChips } = await import('../pages/reports/CategoryChips');
+    const categories = ['Daily Operations', 'Monthly Registers', 'Payroll Handover'];
+    const html = renderToStaticMarkup(
+      <CategoryChips categories={categories} selectedCategory="all" onSelectCategory={() => {}} />,
+    );
+
+    expect(html).toContain('All');
+    expect(html).toContain('Daily Operations');
+    expect(html).toContain('Monthly Registers');
+    expect(html).toContain('Payroll Handover');
+  });
+
+  it('renders ReportsToolbar with search input and live count badge', async () => {
+    const { ReportsToolbar } = await import('../pages/reports/ReportsToolbar');
+    const html = renderToStaticMarkup(
+      <ReportsToolbar searchQuery="" onSearchChange={() => {}} totalCount={7} filteredCount={7} />,
+    );
+
+    expect(html).toContain('Search reports by name or category…');
+    expect(html).toContain('7 Available Reports');
+  });
+
+  it('renders ReportsToolbar filtered count badge accurately', async () => {
+    const { ReportsToolbar } = await import('../pages/reports/ReportsToolbar');
+    const html = renderToStaticMarkup(
+      <ReportsToolbar
+        searchQuery="daily"
+        onSearchChange={() => {}}
+        totalCount={7}
+        filteredCount={2}
+      />,
+    );
+
+    expect(html).toContain('2 of 7 Available Reports');
+  });
+
+  it('renders ReportCard with effective period and Open Report button', async () => {
+    const { ReportCard } = await import('../pages/reports/ReportCard');
+    const { REPORT_UI_CONFIGS } = await import('../pages/reports/reportsConfig');
+    const mockReport = {
+      id: 'R01' as const,
+      code: 'R01',
+      name: 'Daily Attendance',
+      category: 'daily_operations' as any,
+      categoryLabel: 'Daily Operations',
+      description: 'In/out times, hours worked, late and early minutes for each employee.',
+      authoritativeSource: 'attendance_daily_log',
+      columns: [],
+      allowedFilters: [],
+      defaultSorting: { column: 'date', direction: 'desc' as const },
+      requiredPermission: 'hrms.attendance.view',
+      sensitiveClassification: 'standard' as const,
+      supportedExportFormats: ['csv' as const, 'xlsx' as const, 'pdf' as const],
+      isPermitted: true,
+    };
+
+    const html = renderToStaticMarkup(
+      <ReportCard report={mockReport} config={REPORT_UI_CONFIGS.R01} onOpen={() => {}} />,
+    );
+
+    expect(html).toContain('Daily Attendance');
+    expect(html).toContain('Daily Operations');
+    expect(html).toContain('In/out times, hours worked');
+    expect(html).toContain('Period: <strong>Today (Single Date)</strong>');
+    expect(html).toContain('Open Report');
+  });
+
+  it('renders ReportEmptyState when search or category filter matches zero reports', async () => {
+    const { ReportEmptyState } = await import('../pages/reports/ReportEmptyState');
+    const html = renderToStaticMarkup(
+      <ReportEmptyState
+        searchQuery="nonexistent"
+        selectedCategory="all"
+        onClearFilters={() => {}}
+      />,
+    );
+
+    expect(html).toContain('No reports match your filters');
+    expect(html).toContain('nonexistent');
+    expect(html).toContain('Clear filters to see all reports.');
+    expect(html).toContain('Clear filters');
+  });
 });
