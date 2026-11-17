@@ -2438,18 +2438,30 @@
 .bezent-att-sparkline-step {
   fill: none;
   stroke: #f43f5e;
-  stroke-width: 2.2;
-  stroke-linecap: square;
-  stroke-linejoin: miter;
-  filter: drop-shadow(0 2px 4px rgba(244, 63, 94, 0.3));
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  filter: drop-shadow(0 2px 4px rgba(244, 63, 94, 0.25));
 }
 
 [data-theme='dark'] .bezent-att-sparkline-step {
   stroke: #fb7185;
 }
 
-.bezent-att-sparkline-diamond {
-  transition: all 0.14s ease;
+/* 3. Pin / Milestone Chart (On Approved Leave) */
+.bezent-att-sparkline-pin-stem {
+  stroke-linecap: round;
+  transition: all 0.16s ease;
+}
+
+.bezent-att-sparkline-pin-head {
+  transition: all 0.16s cubic-bezier(0.16, 1, 0.3, 1);
+  cursor: pointer;
+}
+
+.bezent-att-sparkline-pin-head:hover,
+.bezent-att-sparkline-pin-head.is-active {
+  filter: drop-shadow(0 2px 6px rgba(245, 158, 11, 0.5));
 }
 
 /* 3. Donut Ring Gauge (On Approved Leave) */
