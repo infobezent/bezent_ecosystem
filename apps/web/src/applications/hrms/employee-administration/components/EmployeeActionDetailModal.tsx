@@ -17,6 +17,7 @@ import {
 } from '../api/employeeAdministrationApi';
 import { actionTypeLabel } from '../model/actionCatalog';
 import { EmployeeActionDetail } from './EmployeeActionDetail';
+import { ClearanceChecklist } from './ClearanceChecklist';
 
 export interface EmployeeActionDetailModalProps {
   actionId: string | null;
@@ -188,6 +189,9 @@ export function EmployeeActionDetailModal({
             </FormField>
           )}
           <EmployeeActionDetail action={action} today={today} onOpenEmployee={onOpenEmployee} />
+          {(action.actionType === 'resignation' || action.actionType === 'termination') && (
+            <ClearanceChecklist actionId={action.id} />
+          )}
         </Stack>
       )}
     </Modal>

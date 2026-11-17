@@ -1,6 +1,8 @@
 import { and, asc, count, desc, eq, gte, inArray, like, lte, or, type SQL } from 'drizzle-orm';
 import { getDb } from '../../../../db/connection.js';
 import {
+  employeeClearanceItems,
+  type NewEmployeeClearanceItem,
   employeeActionHistory,
   employeeActions,
   employees,
@@ -15,6 +17,7 @@ import {
   type ActionCategoryCounts,
   type ActionStatusCounts,
   type EmployeeActionChangeSet,
+  type EmployeeActionType,
   type EmployeeActionHistoryItem,
   type EmployeeActionListItem,
   type ListEmployeeActionsParams,
@@ -150,6 +153,108 @@ export class EmployeeActionRepository {
       .limit(1);
 
     return rows[0] ? this.toListItem(rows[0]) : null;
+  }
+
+  /** How many actions of a type have been applied to an employee (policy limits, e.g. probation extensions). */
+  async countApplied(
+    tenantId: string,
+    companyId: string,
+    employeeId: string,
+    actionType: EmployeeActionType,
+  ): Promise<number> {
+    const [row] = await getDb()
+      .select({ total: count() })
+      .from(employeeActions)
+      .where(
+        and(
+          ...this.scope(tenantId, companyId),
+          eq(employeeActions.employeeId, employeeId),
+          eq(employeeActions.actionType, actionType),
+          eq(employeeActions.status, 'applied'),
+        ),
+      );
+    return Number(row?.total ?? 0);
+  }
+
+  async insertClearanceItems(
+    executor: DbExecutor,
+    rows: NewEmployeeClearanceItem[],
+  ): Promise<void> {
+    if (rows.length === 0) return;
+    await executor.insert(employeeClearanceItems).values(rows);
+  }
+
+  async listClearanceItems(tenantId: string, companyId: string, actionId: string) {
+    return getDb()
+      .select()
+      .from(employeeClearanceItems)
+      .where(
+        and(
+          eq(employeeClearanceItems.tenantId, tenantId),
+          eq(employeeClearanceItems.companyId, companyId),
+          eq(employeeClearanceItems.actionId, actionId),
+        ),
+      )
+      .orderBy(asc(employeeClearanceItems.department), asc(employeeClearanceItems.displayOrder));
+  }
+
+  /** Cleared (cleared or waived) vs total clearance items per action, for list views. */
+  async clearanceSummaries(
+    tenantId: string,
+    companyId: string,
+    actionIds: string[],
+  ): Promise<Map<string, { total: number; cleared: number }>> {
+    const map = new Map<string, { total: number; cleared: number }>();
+    if (actionIds.length === 0) return map;
+    const rows = await getDb()
+      .select({
+        actionId: employeeClearanceItems.actionId,
+        status: employeeClearanceItems.status,
+      })
+      .from(employeeClearanceItems)
+      .where(
+        and(
+          eq(employeeClearanceItems.tenantId, tenantId),
+          eq(employeeClearanceItems.companyId, companyId),
+          inArray(employeeClearanceItems.actionId, actionIds),
+        ),
+      );
+    for (const row of rows) {
+      const entry = map.get(row.actionId) ?? { total: 0, cleared: 0 };
+      entry.total += 1;
+      if (row.status !== 'pending') entry.cleared += 1;
+      map.set(row.actionId, entry);
+    }
+    return map;
+  }
+
+  async updateClearanceItem(
+    tenantId: string,
+    companyId: string,
+    actionId: string,
+    itemId: string,
+    patch: {
+      status: 'pending' | 'cleared' | 'waived';
+      remarks: string | null;
+      clearedBy: string | null;
+    },
+  ): Promise<void> {
+    await getDb()
+      .update(employeeClearanceItems)
+      .set({
+        status: patch.status,
+        remarks: patch.remarks,
+        clearedBy: patch.status === 'pending' ? null : patch.clearedBy,
+        clearedAt: patch.status === 'pending' ? null : new Date(),
+      })
+      .where(
+        and(
+          eq(employeeClearanceItems.tenantId, tenantId),
+          eq(employeeClearanceItems.companyId, companyId),
+          eq(employeeClearanceItems.actionId, actionId),
+          eq(employeeClearanceItems.id, itemId),
+        ),
+      );
   }
 
   async listPendingForEmployee(

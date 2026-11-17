@@ -1,6 +1,6 @@
 import type { EmployeeDocument } from '../../documents/api/documentsApi';
 
-export const DEMO_RECORDS: EmployeeDocument[] = [
+const SAMPLE_DEMO_RECORDS: EmployeeDocument[] = [
   {
     id: 'edoc_demo_001',
     employeeId: 'emp_demo_019',
@@ -146,3 +146,10 @@ export const DEMO_RECORDS: EmployeeDocument[] = [
     updatedAt: '2026-11-01T15:45:00.000Z',
   },
 ];
+
+/**
+ * Sample rows are opt-in (VITE_USE_DEMO_DATA=true in a dev build). By default these
+ * pages show only real data, so an empty database shows an honest empty state.
+ */
+export const DEMO_RECORDS: EmployeeDocument[] =
+  import.meta.env.DEV && import.meta.env.VITE_USE_DEMO_DATA === 'true' ? SAMPLE_DEMO_RECORDS : [];

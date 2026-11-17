@@ -12,6 +12,7 @@ import {
   departments,
   employeeActionHistory,
   employeeActions,
+  employeeClearanceItems,
   employees,
 } from '../../../../db/schema.js';
 import { EmployeeRepository } from '../../employees/repository/employee.repository.js';
@@ -123,6 +124,9 @@ describe('HRMS Employee Administration API (MySQL)', () => {
         .from(employeeActions)
         .where(inArray(employeeActions.employeeId, createdEmployeeIds));
       const actionIds = actionRows.map((row) => row.id);
+      await db
+        .delete(employeeClearanceItems)
+        .where(inArray(employeeClearanceItems.employeeId, createdEmployeeIds));
       if (actionIds.length > 0) {
         await db
           .delete(employeeActionHistory)
@@ -453,13 +457,13 @@ describe('HRMS Employee Administration API (MySQL)', () => {
       actionType: 'extend_probation',
       effectiveDate: '2025-07-01',
       reason: 'Needs more time on core skills',
-      values: { probationEndDate: '2025-10-06' },
+      values: { probationEndDate: '2025-09-30' },
     });
     expect(res.status).toBe(201);
     expect(res.body.data.changes[0]).toMatchObject({
       field: 'probationEndDate',
       from: '2025-07-06',
-      to: '2025-10-06',
+      to: '2025-09-30',
     });
 
     await hrms
@@ -468,8 +472,47 @@ describe('HRMS Employee Administration API (MySQL)', () => {
       .expect(200);
 
     const current = await getEmployee(employee.id);
-    expect(current.probationEndDate).toBe('2025-10-06');
+    expect(current.probationEndDate).toBe('2025-09-30');
     expect(current.employmentStatus).toBe('probation');
+  });
+
+  it('enforces the probation policy extension length and count limits', async () => {
+    const employee = await createEmployee({ employmentStatus: 'probation' });
+
+    // Default policy: at most 90 days per extension (2025-07-06 + 120 days is too long)
+    const tooLong = await createAction({
+      employeeId: employee.id,
+      actionType: 'extend_probation',
+      effectiveDate: '2025-07-01',
+      reason: 'Too long',
+      values: { probationEndDate: '2025-11-03' },
+    });
+    expect(tooLong.status).toBe(400);
+    expect(tooLong.body.error.code).toBe('PROBATION_EXTENSION_TOO_LONG');
+
+    const first = await createAction({
+      employeeId: employee.id,
+      actionType: 'extend_probation',
+      effectiveDate: '2025-07-01',
+      reason: 'First extension',
+      values: { probationEndDate: '2025-08-30' },
+    });
+    expect(first.status).toBe(201);
+    await hrms
+      .post(`/api/v1/hrms/employee-actions/${first.body.data.id}/apply`)
+      .send({ version: 1 })
+      .expect(200);
+
+    // Default policy: one extension allowed, so a second is refused
+    const second = await createAction({
+      employeeId: employee.id,
+      actionType: 'extend_probation',
+      effectiveDate: '2025-07-01',
+      reason: 'Second extension',
+      values: { probationEndDate: '2025-09-15' },
+    });
+    expect(second.status).toBe(409);
+    expect(second.body.error.code).toBe('PROBATION_EXTENSIONS_EXHAUSTED');
   });
 
   it('changes employment status and requires confirmation to end probation', async () => {

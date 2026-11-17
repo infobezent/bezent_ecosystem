@@ -7622,3 +7622,33 @@
   font-weight: 600;
   color: var(--brand-primary, #041e49);
 }
+
+/* ── Offboarding: clearance checklist ─────────────────────────────────── */
+.bezent-clearance-group {
+  border: 0.8px solid #e9eaf4;
+  border-radius: var(--radius-card, 12px);
+  overflow: hidden;
+}
+
+.bezent-clearance-group__title {
+  padding: 8px 14px;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--brand-primary, #041e49);
+  background: var(--bg-hover, #c2e7ff);
+}
+
+.bezent-clearance-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 14px;
+  border-top: 0.8px solid #e9eaf4;
+}
+
+.bezent-clearance-item__text {
+  flex: 1;
+  min-width: 0;
+}

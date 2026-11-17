@@ -2,7 +2,7 @@
  * BEZENT Design System — Universal Forms & Data Collection Styles
  *
  * Consistent typography, uniform font sizes, semantic tokens, grid alignments,
- * and button/toggle color system (#f0fdfa secondary, #0d9488 primary & toggles).
+ * and button/toggle color system (#e8f0fe secondary, #1a73e8 primary & toggles).
  */
 
 /* ─── 1. Uniform Typography & Color Palette ──────────────────────────────── */
@@ -25,11 +25,11 @@
 }
 
 [data-theme='dark'] {
-  --bezent-btn-sec-bg: rgba(20, 184, 166, 0.16);
-  --bezent-btn-sec-hover: rgba(20, 184, 166, 0.25);
-  --bezent-btn-sec-text: var(--teal-300);
-  --bezent-toggle-active-bg: var(--teal-500);
-  --bezent-toggle-active-hover: var(--teal-400);
+  --bezent-btn-sec-bg: rgba(22, 131, 255, 0.16);
+  --bezent-btn-sec-hover: rgba(22, 131, 255, 0.25);
+  --bezent-btn-sec-text: #c2e7ff;
+  --bezent-toggle-active-bg: #1683ff;
+  --bezent-toggle-active-hover: #3f9bff;
 }
 
 /* ─── 2. Core Form Field & Control Primitives ─────────────────────────────── */
@@ -102,7 +102,7 @@
 .personal-info__input:hover:not(:disabled):not([readonly]),
 .working-hours-section__input:hover:not(:disabled):not([readonly]),
 .accounts-section__input:hover:not(:disabled):not([readonly]) {
-  border-color: var(--teal-300);
+  border-color: #8ab4f8;
 }
 
 .employee-registration__input:focus,
@@ -113,8 +113,8 @@
 .skills-section__input:focus,
 .emergency-contact-section__input:focus {
   outline: none;
-  border-color: var(--teal-500);
-  box-shadow: 0 0 0 3px rgba(20, 184, 166, 0.12);
+  border-color: #1a73e8;
+  box-shadow: 0 0 0 3px rgba(26, 115, 232, 0.12);
 }
 
 .employee-registration__input--disabled,
@@ -166,15 +166,15 @@
 .employee-registration__select:hover:not(:disabled),
 .working-hours-section__select:hover:not(:disabled),
 .accounts-section__select:hover:not(:disabled) {
-  border-color: var(--teal-300);
+  border-color: #8ab4f8;
 }
 
 .employee-registration__select:focus,
 .working-hours-section__select:focus,
 .accounts-section__select:focus {
   outline: none;
-  border-color: var(--teal-500);
-  box-shadow: 0 0 0 3px rgba(20, 184, 166, 0.14);
+  border-color: #1a73e8;
+  box-shadow: 0 0 0 3px rgba(26, 115, 232, 0.14);
 }
 
 .employee-registration__select:disabled {
@@ -265,14 +265,14 @@
 
 .employee-registration__textarea:hover:not(:disabled),
 .emergency-contact-section__textarea:hover:not(:disabled) {
-  border-color: var(--teal-300);
+  border-color: #8ab4f8;
 }
 
 .employee-registration__textarea:focus,
 .emergency-contact-section__textarea:focus {
   outline: none;
-  border-color: var(--teal-500);
-  box-shadow: 0 0 0 3px rgba(20, 184, 166, 0.14);
+  border-color: #1a73e8;
+  box-shadow: 0 0 0 3px rgba(26, 115, 232, 0.14);
 }
 
 /* ─── 5. Section Headers & Banners ───────────────────────────────────────── */
@@ -291,8 +291,8 @@
   width: 40px;
   height: 40px;
   border-radius: 10px;
-  background: var(--bezent-btn-sec-bg, var(--teal-50));
-  color: var(--bezent-btn-sec-text, var(--teal-700));
+  background: var(--bezent-btn-sec-bg, #c2e7ff);
+  color: var(--bezent-btn-sec-text, #071e49);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1054,8 +1054,8 @@
 }
 
 .documents-section__photo-placeholder-box:hover {
-  background: var(--teal-50);
-  border-color: var(--teal-500);
+  background: #e8f0fe;
+  border-color: #1a73e8;
 }
 
 .documents-section__photo-placeholder-text {
@@ -1089,13 +1089,13 @@
 }
 
 .working-hours-section__day-chip:hover {
-  border-color: var(--teal-500);
-  background: var(--teal-50);
+  border-color: #1a73e8;
+  background: #e8f0fe;
 }
 
 .working-hours-section__day-chip--active {
-  background: var(--bezent-toggle-active-bg, var(--teal-600));
-  border-color: var(--bezent-toggle-active-bg, var(--teal-600));
+  background: var(--bezent-toggle-active-bg, #071e49);
+  border-color: var(--bezent-toggle-active-bg, #071e49);
   color: #ffffff;
 }
 
@@ -1298,12 +1298,12 @@
 }
 
 .online-access-section__module-card:hover {
-  border-color: var(--teal-500);
+  border-color: #1a73e8;
 }
 
 .online-access-section__module-card--active {
-  border-color: var(--teal-500);
-  background: var(--teal-50);
+  border-color: #1a73e8;
+  background: #e8f0fe;
 }
 
 .online-access-section__module-name {
@@ -2288,9 +2288,9 @@
 
 .onboarding-page__drafts-btn:hover,
 .bezent-btn-draft:hover {
-  background: var(--teal-50);
-  border-color: var(--teal-500);
-  color: var(--teal-700);
+  background: #e8f0fe;
+  border-color: #1a73e8;
+  color: #0b57d0;
 }
 
 .onboarding-page__btn-content {
@@ -2490,9 +2490,9 @@
   width: 28px;
   height: 28px;
   padding: 0;
-  background: var(--bezent-btn-sec-bg, var(--teal-50));
-  color: var(--bezent-btn-sec-text, var(--teal-700));
-  border: 1px solid var(--teal-200);
+  background: var(--bezent-btn-sec-bg, #c2e7ff);
+  color: var(--bezent-btn-sec-text, #071e49);
+  border: 1px solid var(--accent-hover, #a8dbfc);
   border-radius: 8px;
   cursor: pointer;
   transition: all 0.15s ease;
@@ -2500,12 +2500,12 @@
 }
 
 .admin-builder-action-btn:hover:not(:disabled) {
-  background: var(--bezent-btn-sec-hover, var(--teal-100));
-  color: var(--bezent-btn-sec-text, var(--teal-700));
+  background: var(--bezent-btn-sec-hover, #a8dbfc);
+  color: var(--bezent-btn-sec-text, #071e49);
 }
 
 .admin-builder-action-btn:active:not(:disabled) {
-  background: var(--teal-200);
+  background: var(--accent-pressed, #90cefa);
 }
 
 .admin-builder-action-btn:disabled {
@@ -2544,12 +2544,12 @@
 }
 
 [data-theme='dark'] .admin-builder-action-btn {
-  background: var(--bezent-btn-sec-bg, rgba(20, 184, 166, 0.16));
-  color: var(--bezent-btn-sec-text, var(--teal-300));
+  background: var(--bezent-btn-sec-bg, rgba(22, 131, 255, 0.16));
+  color: var(--bezent-btn-sec-text, #c2e7ff);
 }
 
 [data-theme='dark'] .admin-builder-action-btn:hover:not(:disabled) {
-  background: var(--bezent-btn-sec-hover, rgba(20, 184, 166, 0.25));
+  background: var(--bezent-btn-sec-hover, rgba(22, 131, 255, 0.25));
 }
 
 [data-theme='dark'] .admin-builder-action-btn:disabled {
