@@ -107,7 +107,11 @@ export const AttendancePayrollReadinessCard: React.FC<AttendancePayrollReadiness
                 <div className="bezent-att-readiness-stat-sub">{reviewPct}% Pending Sign-off</div>
               </div>
 
-              <div className="bezent-att-readiness-stat-tile is-blocked">
+              <div
+                className={`bezent-att-readiness-stat-tile is-blocked ${
+                  blocked > 0 ? 'has-blockers' : 'is-clear'
+                }`}
+              >
                 <div className="bezent-att-readiness-stat-top">
                   <span className="bezent-att-readiness-dot is-blocked" />
                   <span className="bezent-att-readiness-stat-label">Blocked</span>
@@ -170,7 +174,11 @@ export const AttendancePayrollReadinessCard: React.FC<AttendancePayrollReadiness
             <div className="bezent-att-readiness-checklist">
               <div className="bezent-att-readiness-check-item">
                 <div className="bezent-att-readiness-check-left">
-                  <div className="bezent-att-readiness-check-icon">
+                  <div
+                    className={`bezent-att-readiness-check-icon ${
+                      isFullyLocked ? 'is-complete' : 'is-pending'
+                    }`}
+                  >
                     <BezentIcon name="lock" size={14} />
                   </div>
                   <div>
@@ -181,7 +189,9 @@ export const AttendancePayrollReadinessCard: React.FC<AttendancePayrollReadiness
                   </div>
                 </div>
                 <span
-                  className={`bezent-att-readiness-check-badge ${isFullyLocked ? 'is-complete' : 'is-pending'}`}
+                  className={`bezent-att-readiness-check-badge ${
+                    isFullyLocked ? 'is-complete' : 'is-pending'
+                  }`}
                 >
                   {isFullyLocked ? 'Locked' : 'Unlocked'}
                 </span>
@@ -189,7 +199,11 @@ export const AttendancePayrollReadinessCard: React.FC<AttendancePayrollReadiness
 
               <div className="bezent-att-readiness-check-item">
                 <div className="bezent-att-readiness-check-left">
-                  <div className="bezent-att-readiness-check-icon">
+                  <div
+                    className={`bezent-att-readiness-check-icon ${
+                      reviewed === total && total > 0 ? 'is-complete' : 'is-pending'
+                    }`}
+                  >
                     <BezentIcon name="reports" size={14} />
                   </div>
                   <div>
