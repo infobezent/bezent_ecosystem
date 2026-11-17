@@ -491,19 +491,19 @@ export function AttendanceOverviewPage({
           />
         </div>
 
-        {/* ── Attendance Intelligence & Roster Deck: Insights (50%) + Shift Roster (50%) ── */}
-        <div className="bezent-att-intelligence-grid">
-          <AttendanceInsightsCard overviewData={overviewData} loading={loading} />
-          <AttendanceShiftRosterCard
-            overviewData={overviewData}
-            shifts={shiftsList}
-            loading={loading}
-          />
-        </div>
-
-        {/* ── Attendance Monthly Calendar Deck (Medium Card) ── */}
-        <div className="bezent-att-calendar-deck">
-          <AttendanceCalendarCard overviewData={overviewData} loading={loading} />
+        {/* ── Attendance Calendar (Left) & Operational Duo (Right) Deck ── */}
+        <div className="bezent-att-calendar-split-deck">
+          <div className="bezent-att-calendar-split-left">
+            <AttendanceCalendarCard overviewData={overviewData} loading={loading} />
+          </div>
+          <div className="bezent-att-calendar-split-right">
+            <AttendanceInsightsCard overviewData={overviewData} loading={loading} />
+            <AttendanceShiftRosterCard
+              overviewData={overviewData}
+              shifts={shiftsList}
+              loading={loading}
+            />
+          </div>
         </div>
       </div>
     </Page>

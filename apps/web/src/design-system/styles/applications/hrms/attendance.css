@@ -5014,7 +5014,144 @@
   animation: bezent-pulse 1.4s ease-in-out infinite;
 }
 
-/* ── 9. Attendance Calendar Card ── */
+/* ── 9. Attendance Calendar & Operations Split Deck ── */
+.bezent-att-calendar-split-deck {
+  display: grid;
+  grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.85fr);
+  gap: 16px;
+  width: 100%;
+  align-items: stretch;
+}
+
+@media (max-width: 1100px) {
+  .bezent-att-calendar-split-deck {
+    grid-template-columns: 1fr;
+  }
+}
+
+.bezent-att-calendar-split-left {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+}
+
+.bezent-att-calendar-split-left .bezent-att-cal-card {
+  height: 100%;
+  max-width: 100%;
+  width: 100%;
+}
+
+.bezent-att-calendar-split-right {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  width: 100%;
+  height: 100%;
+}
+
+.bezent-att-calendar-split-right .bezent-att-insights-card {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+/* Compact "Small Card" refinements for right-side split cards */
+.bezent-att-calendar-split-right .bezent-att-insights-header {
+  padding: 10px 14px 8px 14px !important;
+}
+
+.bezent-att-calendar-split-right .bezent-att-insights-icon,
+.bezent-att-calendar-split-right .bezent-att-roster-icon {
+  width: 22px;
+  height: 22px;
+}
+
+.bezent-att-calendar-split-right .bezent-att-insights-title {
+  font-size: 13px !important;
+}
+
+.bezent-att-calendar-split-right .bezent-att-insights-subtitle {
+  font-size: 10px;
+}
+
+.bezent-att-calendar-split-right .bezent-att-insights-pill {
+  font-size: 9.5px;
+  padding: 1px 6px;
+}
+
+.bezent-att-calendar-split-right .bezent-att-insights-body {
+  padding: 8px 14px !important;
+  gap: 6px;
+}
+
+.bezent-att-calendar-split-right .bezent-att-insights-kpis-grid {
+  gap: 6px;
+}
+
+.bezent-att-calendar-split-right .bezent-att-insights-kpi {
+  padding: 4px 8px;
+}
+
+.bezent-att-calendar-split-right .bezent-att-insights-kpi-label {
+  font-size: 9px;
+}
+
+.bezent-att-calendar-split-right .bezent-att-insights-kpi-val {
+  font-size: 15px;
+  margin: 1px 0;
+}
+
+.bezent-att-calendar-split-right .bezent-att-insights-kpi-sub {
+  font-size: 9.5px;
+}
+
+.bezent-att-calendar-split-right .bezent-att-insights-callout {
+  padding: 4px 8px;
+  gap: 6px;
+}
+
+.bezent-att-calendar-split-right .bezent-att-insights-callout-title {
+  font-size: 11px;
+}
+
+.bezent-att-calendar-split-right .bezent-att-insights-callout-desc {
+  font-size: 10px;
+  line-height: 1.25;
+}
+
+.bezent-att-calendar-split-right .bezent-att-roster-shift-item {
+  padding: 2px 0;
+}
+
+.bezent-att-calendar-split-right .bezent-att-roster-shift-name {
+  font-size: 11px;
+  font-weight: 650;
+}
+
+.bezent-att-calendar-split-right .bezent-att-roster-shift-time {
+  font-size: 10px;
+}
+
+.bezent-att-calendar-split-right .bezent-att-roster-shift-count {
+  font-size: 10px;
+}
+
+.bezent-att-calendar-split-right .bezent-att-roster-shift-rate {
+  font-size: 10.5px;
+}
+
+.bezent-att-calendar-split-right .bezent-att-insights-footer {
+  padding: 6px 14px !important;
+}
+
+.bezent-att-calendar-split-right .bezent-att-insights-footer-link {
+  font-size: 10.5px !important;
+  height: 24px !important;
+  padding: 0 6px !important;
+}
+
 .bezent-att-calendar-deck {
   width: 100%;
   display: flex;
