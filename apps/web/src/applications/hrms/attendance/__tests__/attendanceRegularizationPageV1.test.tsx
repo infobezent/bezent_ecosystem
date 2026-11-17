@@ -86,9 +86,9 @@ describe('BEZENT HRMS — Attendance Regularization V1.0 Frontend Workspace', ()
     expect(html).toContain('Pending Review');
     expect(html).toContain('Under Review');
     expect(html).toContain('Awaiting Info');
-    expect(html).toContain('Approved Today');
+    expect(html).toContain('Approved');
     expect(html).toContain('Application Issues');
-    expect(html).toContain('Rejected Today');
+    expect(html).toContain('Rejected');
   });
 
   it('renders primary filter bar and loading state', () => {

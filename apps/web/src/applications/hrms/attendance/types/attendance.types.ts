@@ -427,8 +427,10 @@ export interface RegularizationSummaryCounters {
   pendingReview: number;
   underReview: number;
   awaitingInfo: number;
+  approved?: number;
   approvedToday: number;
   applicationIssues: number;
+  rejected?: number;
   rejectedToday: number;
 }
 

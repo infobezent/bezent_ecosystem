@@ -502,10 +502,12 @@ function buildCounters(items: RegularizationItemV1[]): RegularizationSummaryCoun
     pendingReview: items.filter((i) => i.approvalStatus === 'submitted').length,
     underReview: items.filter((i) => i.approvalStatus === 'under_review').length,
     awaitingInfo: items.filter((i) => i.approvalStatus === 'awaiting_info').length,
+    approved: items.filter((i) => i.approvalStatus === 'approved').length,
     approvedToday: items.filter((i) => i.approvalStatus === 'approved' && decidedToday(i)).length,
     applicationIssues: items.filter(
       (i) => i.applicationStatus === 'failed' || i.applicationStatus === 'blocked',
     ).length,
+    rejected: items.filter((i) => i.approvalStatus === 'rejected').length,
     rejectedToday: items.filter((i) => i.approvalStatus === 'rejected' && decidedToday(i)).length,
   };
 }

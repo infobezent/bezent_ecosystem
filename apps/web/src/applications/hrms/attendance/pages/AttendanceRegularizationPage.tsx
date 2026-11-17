@@ -175,8 +175,10 @@ export function AttendanceRegularizationPage() {
     pendingReview: 0,
     underReview: 0,
     awaitingInfo: 0,
+    approved: 0,
     approvedToday: 0,
     applicationIssues: 0,
+    rejected: 0,
     rejectedToday: 0,
   });
   const [totalCount, setTotalCount] = useState(0);
@@ -371,10 +373,10 @@ export function AttendanceRegularizationPage() {
     if (targetStatus === 'application_issues') {
       setApprovalStatus('all');
       setApplicationStatus(applicationStatus === 'failed' ? 'all' : 'failed');
-    } else if (targetStatus === 'approved_today') {
+    } else if (targetStatus === 'approved' || targetStatus === 'approved_today') {
       setApprovalStatus(approvalStatus === 'approved' ? 'all' : 'approved');
       setApplicationStatus('all');
-    } else if (targetStatus === 'rejected_today') {
+    } else if (targetStatus === 'rejected' || targetStatus === 'rejected_today') {
       setApprovalStatus(approvalStatus === 'rejected' ? 'all' : 'rejected');
       setApplicationStatus('all');
     } else {
@@ -648,10 +650,10 @@ export function AttendanceRegularizationPage() {
               onClick: () => handleCounterClick('awaiting_info'),
             },
             {
-              label: 'Approved Today',
-              value: counters.approvedToday,
+              label: 'Approved',
+              value: counters.approved ?? counters.approvedToday,
               tone: 'success',
-              onClick: () => handleCounterClick('approved_today'),
+              onClick: () => handleCounterClick('approved'),
             },
             {
               label: 'Application Issues',
@@ -660,10 +662,10 @@ export function AttendanceRegularizationPage() {
               onClick: () => handleCounterClick('application_issues'),
             },
             {
-              label: 'Rejected Today',
-              value: counters.rejectedToday,
-              tone: 'danger',
-              onClick: () => handleCounterClick('rejected_today'),
+              label: 'Rejected',
+              value: counters.rejected ?? counters.rejectedToday,
+              tone: 'neutral',
+              onClick: () => handleCounterClick('rejected'),
             },
           ]}
         />
