@@ -95,7 +95,7 @@ export const AttendanceDistributionCard: React.FC<AttendanceDistributionCardProp
         <div className="bezent-att-trends-header-left">
           <CardTitle className="bezent-att-trends-title">Attendance Distribution</CardTitle>
           <span className="bezent-att-trends-subtitle">
-            Workforce presence, absenteeism, and leave by department
+            Presence &amp; leave by department
           </span>
         </div>
 

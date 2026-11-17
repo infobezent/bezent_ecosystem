@@ -60,7 +60,7 @@ export const AttendancePayrollReadinessCard: React.FC<AttendancePayrollReadiness
           <div>
             <CardTitle className="bezent-att-readiness-title">Payroll Readiness</CardTitle>
             <p className="bezent-att-readiness-subtitle">
-              Monthly cutoff, supervisor sign-offs, and lock status for {monthLabel}
+              Cutoff &amp; supervisor lock status for {monthLabel}
             </p>
           </div>
         </div>
@@ -164,21 +164,6 @@ export const AttendancePayrollReadinessCard: React.FC<AttendancePayrollReadiness
                   )}
                 </svg>
               </div>
-
-              <div className="bezent-att-readiness-legend">
-                <div className="bezent-att-readiness-legend-item">
-                  <span className="bezent-att-readiness-legend-dot is-ready" />
-                  <span>Ready ({ready})</span>
-                </div>
-                <div className="bezent-att-readiness-legend-item">
-                  <span className="bezent-att-readiness-legend-dot is-review" />
-                  <span>Review ({review})</span>
-                </div>
-                <div className="bezent-att-readiness-legend-item">
-                  <span className="bezent-att-readiness-legend-dot is-blocked" />
-                  <span>Blocked ({blocked})</span>
-                </div>
-              </div>
             </div>
 
             {/* Governance & Cutoff Checklist */}
@@ -226,9 +211,6 @@ export const AttendancePayrollReadinessCard: React.FC<AttendancePayrollReadiness
       </div>
 
       <div className="bezent-att-readiness-footer">
-        <span className="bezent-att-readiness-footer-note">
-          Standard monthly payroll cycle: 1st – End of Month
-        </span>
         <Button
           variant="ghost"
           size="sm"

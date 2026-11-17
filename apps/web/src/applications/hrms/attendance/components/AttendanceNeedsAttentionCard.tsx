@@ -61,7 +61,7 @@ export const AttendanceNeedsAttentionCard: React.FC<AttendanceNeedsAttentionCard
           <div>
             <CardTitle className="bezent-att-action-title">Needs Attention</CardTitle>
             <p className="bezent-att-action-subtitle">
-              Prioritized triage queue of exceptions, missed punches, and approvals
+              Pending approvals &amp; exceptions queue
             </p>
           </div>
         </div>
@@ -141,7 +141,6 @@ export const AttendanceNeedsAttentionCard: React.FC<AttendanceNeedsAttentionCard
                           </span>
                         )}
                       </div>
-                      <p className="bezent-att-action-item-desc">{item.description}</p>
                     </div>
                   </div>
 
@@ -169,9 +168,6 @@ export const AttendanceNeedsAttentionCard: React.FC<AttendanceNeedsAttentionCard
       </div>
 
       <div className="bezent-att-action-footer">
-        <span className="bezent-att-action-footer-note">
-          Ranked by operational severity & payroll impact
-        </span>
         <Button
           variant="ghost"
           size="sm"

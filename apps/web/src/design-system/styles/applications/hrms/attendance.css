@@ -2723,7 +2723,7 @@
 }
 
 .bezent-att-trends-header {
-  padding: 16px 20px 14px 20px !important;
+  padding: 12px 18px 10px 18px !important;
   border-bottom: 1px solid #f1f5f9 !important;
   display: flex !important;
   align-items: center !important;
@@ -2744,13 +2744,13 @@
 .bezent-att-trends-title-group {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
 }
 
 .bezent-att-trends-icon {
-  width: 32px;
-  height: 32px;
-  border-radius: 8px;
+  width: 26px;
+  height: 26px;
+  border-radius: 6px;
   background: #eff6ff;
   color: #2563eb;
   display: flex;
@@ -2766,7 +2766,7 @@
 }
 
 .bezent-att-trends-title {
-  font-size: 15px !important;
+  font-size: 14px !important;
   font-weight: 750 !important;
   color: #0f172a !important;
   letter-spacing: -0.015em;
@@ -2779,9 +2779,9 @@
 }
 
 .bezent-att-trends-subtitle {
-  font-size: 11.5px;
+  font-size: 11px;
   color: #64748b;
-  margin: 2px 0 0 0;
+  margin: 1px 0 0 0;
   font-weight: 450;
   line-height: 1.3;
 }
@@ -2860,23 +2860,23 @@
 }
 
 .bezent-att-trends-body {
-  padding: 16px 20px !important;
+  padding: 12px 18px !important;
   flex: 1;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  gap: 14px;
+  gap: 10px;
 }
 
 .bezent-att-trends-summary-strip {
   background: #f8fafc;
   border: 1px solid #edf2f7;
-  border-radius: 10px;
-  padding: 10px 18px;
+  border-radius: 8px;
+  padding: 6px 14px;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 16px;
+  gap: 12px;
   transition: all 0.15s ease;
 }
 
@@ -2888,30 +2888,30 @@
 .bezent-att-summary-item {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
   flex: 1;
 }
 
 .bezent-att-summary-dot {
-  width: 8px;
-  height: 8px;
+  width: 7px;
+  height: 7px;
   border-radius: 50%;
   flex-shrink: 0;
 }
 
 .bezent-att-summary-dot.is-present {
   background: #2563eb;
-  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.15);
 }
 
 .bezent-att-summary-dot.is-absent {
   background: #7c3aed;
-  box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.15);
+  box-shadow: 0 0 0 2px rgba(124, 58, 237, 0.15);
 }
 
 .bezent-att-summary-dot.is-late {
   background: #10b981;
-  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.15);
+  box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.15);
 }
 
 .bezent-att-summary-meta {
@@ -2921,7 +2921,7 @@
 }
 
 .bezent-att-summary-label {
-  font-size: 11px;
+  font-size: 10.5px;
   font-weight: 550;
   color: #64748b;
   letter-spacing: -0.01em;
@@ -2932,7 +2932,7 @@
 }
 
 .bezent-att-summary-val {
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 750;
   color: #0f172a;
   font-variant-numeric: tabular-nums;
@@ -2969,7 +2969,7 @@
 
 .bezent-att-summary-divider {
   width: 1px;
-  height: 24px;
+  height: 20px;
   background: #e2e8f0;
   flex-shrink: 0;
 }
@@ -2985,14 +2985,14 @@
   flex-direction: column;
   justify-content: center;
   position: relative;
-  min-height: 250px;
+  min-height: 140px;
 }
 
 .bezent-att-trend-svg {
   width: 100%;
   height: auto;
-  min-height: 240px;
-  max-height: 320px;
+  min-height: 135px;
+  max-height: 155px;
   display: block;
   overflow: visible;
 }
@@ -3228,7 +3228,7 @@
 
 .bezent-att-trends-skeleton {
   width: 100%;
-  height: 240px;
+  height: 140px;
   background: #f1f5f9;
   border-radius: 8px;
   animation: bezent-pulse 1.4s ease-in-out infinite;
@@ -3236,7 +3236,7 @@
 
 /* ── 5. Attendance Distribution Card ── */
 .bezent-att-dist-card {
-  min-height: 280px;
+  min-height: 240px;
 }
 
 .bezent-att-dist-meta {
@@ -3245,9 +3245,9 @@
 }
 
 .bezent-att-dist-badge {
-  font-size: 11px;
+  font-size: 10.5px;
   font-weight: 600;
-  padding: 3px 8px;
+  padding: 2px 7px;
   background: #f1f5f9;
   color: #475569;
   border-radius: 6px;
@@ -3263,14 +3263,17 @@
 .bezent-att-dist-list {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 5px;
+  max-height: 165px;
+  overflow-y: auto;
+  padding-right: 4px;
 }
 
 .bezent-att-dist-item {
   display: flex;
   flex-direction: column;
-  gap: 5px;
-  padding: 6px 8px;
+  gap: 3px;
+  padding: 4px 6px;
   border-radius: 6px;
   transition: background 0.15s ease;
 }
@@ -3290,7 +3293,7 @@
 }
 
 .bezent-att-dist-dept-name {
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 600;
   color: #0f172a;
 }
@@ -3302,11 +3305,11 @@
 .bezent-att-dist-row-stats {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
 }
 
 .bezent-att-dist-counts {
-  font-size: 12px;
+  font-size: 11px;
   color: #64748b;
   font-variant-numeric: tabular-nums;
 }
@@ -3423,7 +3426,7 @@
 }
 
 .bezent-att-action-header {
-  padding: 16px 20px 14px 20px !important;
+  padding: 12px 18px 10px 18px !important;
   border-bottom: 1px solid #f1f5f9 !important;
   display: flex !important;
   align-items: center !important;
@@ -3442,9 +3445,9 @@
 }
 
 .bezent-att-action-icon {
-  width: 28px;
-  height: 28px;
-  border-radius: 8px;
+  width: 26px;
+  height: 26px;
+  border-radius: 6px;
   background: #fffbeb;
   color: #b45309;
   display: flex;
@@ -3459,7 +3462,7 @@
 }
 
 .bezent-att-action-title {
-  font-size: 15px !important;
+  font-size: 14px !important;
   font-weight: 750 !important;
   color: #0f172a !important;
   letter-spacing: -0.015em;
@@ -3471,9 +3474,9 @@
 }
 
 .bezent-att-action-subtitle {
-  font-size: 11.5px;
+  font-size: 11px;
   color: #64748b;
-  margin: 0;
+  margin: 1px 0 0 0;
 }
 
 [data-theme='dark'] .bezent-att-action-subtitle {
@@ -3675,7 +3678,7 @@
 }
 
 .bezent-att-action-body {
-  padding: 16px 20px !important;
+  padding: 12px 18px !important;
   flex: 1;
   display: flex;
   flex-direction: column;
@@ -3684,15 +3687,15 @@
 .bezent-att-action-list {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 6px;
 }
 
 .bezent-att-action-item {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 10px 12px;
-  border-radius: 8px;
+  padding: 6px 10px;
+  border-radius: 6px;
   border: 1px solid #f1f5f9;
   background: #ffffff;
   transition: all 0.15s ease;
@@ -3715,19 +3718,18 @@
 
 .bezent-att-action-item-left {
   display: flex;
-  align-items: flex-start;
-  gap: 10px;
+  align-items: center;
+  gap: 8px;
 }
 
 .bezent-att-action-item-icon {
-  width: 24px;
-  height: 24px;
+  width: 22px;
+  height: 22px;
   border-radius: 6px;
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  margin-top: 1px;
 }
 
 .bezent-att-action-item-details {
@@ -3900,7 +3902,7 @@
 }
 
 .bezent-att-readiness-header {
-  padding: 16px 20px 14px 20px !important;
+  padding: 12px 18px 10px 18px !important;
   border-bottom: 1px solid #f1f5f9 !important;
   display: flex !important;
   align-items: center !important;
@@ -3919,9 +3921,9 @@
 }
 
 .bezent-att-readiness-icon {
-  width: 28px;
-  height: 28px;
-  border-radius: 8px;
+  width: 26px;
+  height: 26px;
+  border-radius: 6px;
   background: #eff6ff;
   color: #1d4ed8;
   display: flex;
@@ -3936,7 +3938,7 @@
 }
 
 .bezent-att-readiness-title {
-  font-size: 15px !important;
+  font-size: 14px !important;
   font-weight: 750 !important;
   color: #0f172a !important;
   letter-spacing: -0.015em;
@@ -3948,9 +3950,9 @@
 }
 
 .bezent-att-readiness-subtitle {
-  font-size: 11.5px;
+  font-size: 11px;
   color: #64748b;
-  margin: 0;
+  margin: 1px 0 0 0;
 }
 
 [data-theme='dark'] .bezent-att-readiness-subtitle {
@@ -3983,24 +3985,24 @@
 }
 
 .bezent-att-readiness-body {
-  padding: 16px 20px !important;
+  padding: 12px 18px !important;
   flex: 1;
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  gap: 10px;
 }
 
 .bezent-att-readiness-stats-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 10px;
+  gap: 8px;
 }
 
 .bezent-att-readiness-stat-tile {
   background: #f8fafc;
   border: 1px solid #e2e8f0;
-  border-radius: 8px;
-  padding: 10px 12px;
+  border-radius: 6px;
+  padding: 6px 10px;
   display: flex;
   flex-direction: column;
 }
@@ -4017,7 +4019,7 @@
 }
 
 .bezent-att-readiness-stat-label {
-  font-size: 11px;
+  font-size: 10px;
   font-weight: 600;
   text-transform: uppercase;
   color: #64748b;
@@ -4029,34 +4031,34 @@
 }
 
 .bezent-att-readiness-stat-value {
-  font-size: 20px;
+  font-size: 17px;
   font-weight: 800;
   letter-spacing: -0.02em;
-  margin: 4px 0 2px;
+  margin: 2px 0 1px;
   font-variant-numeric: tabular-nums;
 }
 
 .bezent-att-readiness-stat-sub {
-  font-size: 11px;
+  font-size: 10.5px;
   color: #94a3b8;
 }
 
 .bezent-att-readiness-progress-container {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 4px;
 }
 
 .bezent-att-readiness-bar-track {
   width: 100%;
-  height: 8px;
-  border-radius: 4px;
+  height: 5px;
+  border-radius: 3px;
   overflow: hidden;
 }
 
 .bezent-att-readiness-bar-svg {
   width: 100%;
-  height: 8px;
+  height: 5px;
   display: block;
 }
 
@@ -4108,14 +4110,14 @@
 .bezent-att-readiness-checklist {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 4px;
 }
 
 .bezent-att-readiness-check-item {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 8px 10px;
+  padding: 5px 8px;
   border-radius: 6px;
   border: 1px solid #f1f5f9;
   background: #ffffff;
@@ -4250,7 +4252,7 @@
 }
 
 .bezent-att-insights-header {
-  padding: 16px 20px 14px 20px !important;
+  padding: 12px 18px 10px 18px !important;
   border-bottom: 1px solid #f1f5f9 !important;
   display: flex !important;
   align-items: center !important;
@@ -4269,9 +4271,9 @@
 }
 
 .bezent-att-insights-icon {
-  width: 28px;
-  height: 28px;
-  border-radius: 8px;
+  width: 26px;
+  height: 26px;
+  border-radius: 6px;
   background: #ecfdf5;
   color: #047857;
   display: flex;
@@ -4286,7 +4288,7 @@
 }
 
 .bezent-att-insights-title {
-  font-size: 15px !important;
+  font-size: 14px !important;
   font-weight: 750 !important;
   color: #0f172a !important;
   letter-spacing: -0.015em;
@@ -4298,9 +4300,9 @@
 }
 
 .bezent-att-insights-subtitle {
-  font-size: 11.5px;
+  font-size: 11px;
   color: #64748b;
-  margin: 0;
+  margin: 1px 0 0 0;
 }
 
 [data-theme='dark'] .bezent-att-insights-subtitle {
@@ -4313,9 +4315,9 @@
 }
 
 .bezent-att-insights-pill {
-  font-size: 11px;
+  font-size: 10.5px;
   font-weight: 600;
-  padding: 3px 8px;
+  padding: 2px 7px;
   border-radius: 6px;
   background: #f8fafc;
   border: 1px solid #e2e8f0;
@@ -4329,24 +4331,24 @@
 }
 
 .bezent-att-insights-body {
-  padding: 16px 20px !important;
+  padding: 12px 18px !important;
   flex: 1;
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  gap: 10px;
 }
 
 .bezent-att-insights-kpis-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 10px;
+  gap: 8px;
 }
 
 .bezent-att-insights-kpi {
   background: #f8fafc;
   border: 1px solid #e2e8f0;
-  border-radius: 8px;
-  padding: 10px 12px;
+  border-radius: 6px;
+  padding: 6px 10px;
   display: flex;
   flex-direction: column;
 }
@@ -4357,7 +4359,7 @@
 }
 
 .bezent-att-insights-kpi-label {
-  font-size: 11px;
+  font-size: 10px;
   font-weight: 600;
   text-transform: uppercase;
   color: #64748b;
@@ -4369,30 +4371,30 @@
 }
 
 .bezent-att-insights-kpi-val {
-  font-size: 20px;
+  font-size: 17px;
   font-weight: 800;
-  margin: 4px 0 2px;
+  margin: 2px 0 1px;
   letter-spacing: -0.02em;
   font-variant-numeric: tabular-nums;
 }
 
 .bezent-att-insights-kpi-sub {
-  font-size: 11px;
+  font-size: 10.5px;
   color: #94a3b8;
 }
 
 .bezent-att-insights-callouts-list {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 6px;
 }
 
 .bezent-att-insights-callout {
   display: flex;
-  align-items: flex-start;
-  gap: 10px;
-  padding: 10px 12px;
-  border-radius: 8px;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 10px;
+  border-radius: 6px;
   border: 1px solid #f1f5f9;
   background: #ffffff;
   transition: all 0.15s ease;
@@ -4414,24 +4416,24 @@
 }
 
 .bezent-att-insights-callout-icon {
-  width: 24px;
-  height: 24px;
-  border-radius: 6px;
+  width: 20px;
+  height: 20px;
+  border-radius: 4px;
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  margin-top: 1px;
 }
 
 .bezent-att-insights-callout-text {
   display: flex;
-  flex-direction: column;
-  gap: 2px;
+  align-items: baseline;
+  gap: 6px;
+  flex-wrap: wrap;
 }
 
 .bezent-att-insights-callout-title {
-  font-size: 12.5px;
+  font-size: 12px;
   font-weight: 600;
   color: #0f172a;
 }
@@ -4441,9 +4443,9 @@
 }
 
 .bezent-att-insights-callout-desc {
-  font-size: 11.5px;
+  font-size: 11px;
   color: #64748b;
-  line-height: 1.35;
+  line-height: 1.25;
   margin: 0;
 }
 
@@ -4522,7 +4524,7 @@
 }
 
 .bezent-att-cal-header {
-  padding: 16px 20px 14px 20px !important;
+  padding: 12px 18px 10px 18px !important;
   border-bottom: 1px solid #f1f5f9 !important;
   display: flex !important;
   align-items: center !important;
@@ -4537,13 +4539,13 @@
 .bezent-att-cal-title-group {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
 }
 
 .bezent-att-cal-icon {
-  width: 32px;
-  height: 32px;
-  border-radius: 8px;
+  width: 26px;
+  height: 26px;
+  border-radius: 6px;
   background: #eff6ff;
   color: #2563eb;
   display: flex;
@@ -4559,7 +4561,7 @@
 }
 
 .bezent-att-cal-title {
-  font-size: 15px !important;
+  font-size: 14px !important;
   font-weight: 750 !important;
   color: #0f172a !important;
   letter-spacing: -0.015em;
@@ -4572,9 +4574,9 @@
 }
 
 .bezent-att-cal-subtitle {
-  font-size: 11.5px;
+  font-size: 11px;
   color: #64748b;
-  margin: 2px 0 0 0;
+  margin: 1px 0 0 0;
   font-weight: 450;
   line-height: 1.3;
 }
@@ -4678,27 +4680,27 @@
 }
 
 .bezent-att-cal-body {
-  padding: 16px 20px !important;
+  padding: 12px 18px !important;
   flex: 1;
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  gap: 8px;
 }
 
 .bezent-att-cal-grid {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
-  gap: 6px;
+  gap: 4px;
 }
 
 .bezent-att-cal-weekday {
   text-align: center;
-  font-size: 10.5px;
+  font-size: 10px;
   font-weight: 700;
   letter-spacing: 0.05em;
   text-transform: uppercase;
   color: #94a3b8;
-  padding: 2px 0 6px;
+  padding: 1px 0 3px;
   user-select: none;
 }
 
@@ -4715,14 +4717,14 @@
 }
 
 .bezent-att-cal-day {
-  min-height: 50px;
-  border-radius: 8px;
+  min-height: 32px;
+  border-radius: 6px;
   border: 1px solid #edf2f7;
   background: #ffffff;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  padding: 6px 7px 6px;
+  padding: 3px 5px 3px;
   cursor: pointer;
   position: relative;
   transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
@@ -5010,8 +5012,8 @@
 .bezent-att-cal-selected-strip {
   background: #f8fafc;
   border: 1px solid #edf2f7;
-  border-radius: 8px;
-  padding: 10px 14px;
+  border-radius: 6px;
+  padding: 5px 10px;
   display: flex;
   align-items: center;
   justify-content: space-between;

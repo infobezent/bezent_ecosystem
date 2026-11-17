@@ -36,7 +36,7 @@ export const AttendanceInsightsCard: React.FC<AttendanceInsightsCardProps> = ({
           <div>
             <CardTitle className="bezent-att-insights-title">Attendance Insights</CardTitle>
             <p className="bezent-att-insights-subtitle">
-              Behavioral punctuality patterns, shift benchmarks, and compliance anomalies
+              Punctuality benchmarks &amp; telemetry signals
             </p>
           </div>
         </div>
@@ -92,23 +92,7 @@ export const AttendanceInsightsCard: React.FC<AttendanceInsightsCardProps> = ({
                     High Shift Compliance in Core Hours
                   </span>
                   <p className="bezent-att-insights-callout-desc">
-                    Over {onTimeRate}% of active employees logged check-in within the configured
-                    grace period today.
-                  </p>
-                </div>
-              </div>
-
-              <div className="bezent-att-insights-callout">
-                <div className="bezent-att-insights-callout-icon tone-amber">
-                  <BezentIcon name="clock" size={14} />
-                </div>
-                <div className="bezent-att-insights-callout-text">
-                  <span className="bezent-att-insights-callout-title">
-                    Punctuality Trend Pattern
-                  </span>
-                  <p className="bezent-att-insights-callout-desc">
-                    Mid-week days exhibit highest attendance consistency; early morning shifts
-                    account for majority of late arrivals.
+                    Over {onTimeRate}% of active workforce checked in on schedule today.
                   </p>
                 </div>
               </div>
@@ -119,25 +103,10 @@ export const AttendanceInsightsCard: React.FC<AttendanceInsightsCardProps> = ({
                 </div>
                 <div className="bezent-att-insights-callout-text">
                   <span className="bezent-att-insights-callout-title">
-                    Leave &amp; On-Duty Coverage Healthy
-                  </span>
-                  <p className="bezent-att-insights-callout-desc">
-                    All planned absences have verified approvals in place without overlapping shift
-                    schedule conflicts.
-                  </p>
-                </div>
-              </div>
-              <div className="bezent-att-insights-callout">
-                <div className="bezent-att-insights-callout-icon tone-emerald">
-                  <BezentIcon name="check" size={14} />
-                </div>
-                <div className="bezent-att-insights-callout-text">
-                  <span className="bezent-att-insights-callout-title">
                     Biometric &amp; Device Feeds Synchronized
                   </span>
                   <p className="bezent-att-insights-callout-desc">
-                    All branch biometric punch gateways are operating online with real-time sync
-                    active (zero latency).
+                    All branch punch gateways operating online with real-time sync active.
                   </p>
                 </div>
               </div>
@@ -147,9 +116,6 @@ export const AttendanceInsightsCard: React.FC<AttendanceInsightsCardProps> = ({
       </div>
 
       <div className="bezent-att-insights-footer">
-        <span className="bezent-att-insights-footer-note">
-          Derived from live punch feeds &amp; attendance reconciliation
-        </span>
         <Button
           variant="ghost"
           size="sm"

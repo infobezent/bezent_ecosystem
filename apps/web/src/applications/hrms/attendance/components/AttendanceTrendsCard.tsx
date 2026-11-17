@@ -108,13 +108,13 @@ export const AttendanceTrendsCard: React.FC<AttendanceTrendsCardProps> = ({
   const [showAbsent, setShowAbsent] = useState(true);
   const [showLate, setShowLate] = useState(true);
 
-  // Chart Dimensions (taller viewBox for elegant breathing room and proportion)
+  // Chart Dimensions (compact viewBox for streamlined card height)
   const chartW = 760;
-  const chartH = 280;
-  const padLeft = 48;
-  const padRight = 24;
-  const padTop = 26;
-  const padBottom = 38;
+  const chartH = 150;
+  const padLeft = 44;
+  const padRight = 20;
+  const padTop = 14;
+  const padBottom = 24;
   const plotW = chartW - padLeft - padRight;
   const plotH = chartH - padTop - padBottom;
   const baselineY = chartH - padBottom;
@@ -251,7 +251,7 @@ export const AttendanceTrendsCard: React.FC<AttendanceTrendsCardProps> = ({
             <div>
               <CardTitle className="bezent-att-trends-title">Attendance Trends</CardTitle>
               <span className="bezent-att-trends-subtitle">
-                Daily progression of workforce presence, absence, and arrival punctuality
+                Workforce presence, absence &amp; arrival punctuality
               </span>
             </div>
           </div>
@@ -662,12 +662,7 @@ export const AttendanceTrendsCard: React.FC<AttendanceTrendsCardProps> = ({
           <div className="bezent-att-trends-footer-left">
             <span className="bezent-att-trends-footer-pulse" />
             <span className="bezent-att-trends-footer-text">
-              {rawItems.length} Days Active Cycle · Daily Workforce Biometric Flow
-            </span>
-          </div>
-          <div className="bezent-att-trends-footer-right">
-            <span className="bezent-att-trends-footer-hint">
-              Hover along curves to inspect exact headcount
+              {rawItems.length} Days Active Cycle · Daily Workforce Flow
             </span>
           </div>
         </div>
