@@ -149,8 +149,10 @@
   position: absolute;
   top: calc(100% + 4px);
   left: 0;
-  right: 0;
+  right: auto;
   min-width: 100%;
+  width: max-content;
+  max-width: min(90vw, 360px);
   background: var(--bg-surface, #ffffff);
   border: 1px solid #e9eaf4;
   border-radius: 14px;
@@ -163,6 +165,21 @@
   padding: 4px;
   box-sizing: border-box;
   animation: bezentSelectFadeIn 0.14s ease-out;
+}
+
+.bezent-select-wrapper--width-full .bezent-select-dropdown {
+  width: 100%;
+  right: 0;
+  max-width: 100%;
+}
+
+.bezent-select-wrapper--width-auto .bezent-select-dropdown {
+  min-width: max(100%, 140px);
+}
+
+.bezent-select-wrapper--align-right .bezent-select-dropdown {
+  left: auto;
+  right: 0;
 }
 
 @keyframes bezentSelectFadeIn {
@@ -263,6 +280,7 @@
 
 .bezent-select-option-label {
   flex: 1;
+  min-width: 0;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
