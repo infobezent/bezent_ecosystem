@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import request from 'supertest';
 import { hrmsTestHeaders } from '../../../platform/__tests__/support/testSession.js';
-import { inArray } from 'drizzle-orm';
+import { eq, inArray } from 'drizzle-orm';
 import { createApp } from '../../../app/server/createApp.js';
 import { getDb, pingDatabase } from '../../../db/connection.js';
 import {
@@ -262,5 +262,124 @@ describe('Workforce lifecycle (end to end)', () => {
       .get('/api/v1/hrms/employee-actions')
       .query({ actionTypes: 'resignation', employeeId: employee.id });
     expect(relist.body.data[0].clearance.cleared).toBe(1);
+  });
+
+  it('10. a new hire left at pending activation is activated per the Settings activation timing', async () => {
+    const res = await hrms.post('/api/v1/hrms/employees').send({
+      firstName: 'Activation',
+      lastName: `Check ${run}`,
+      email: `activation.${run}@example.com`,
+      joiningDate: '2026-01-05',
+      employmentType: 'full_time',
+      employmentStatus: 'pending_activation',
+      departmentId: masters.departments[0]!.id,
+      designationId: masters.designations[0]!.id,
+      locationId: masters.locations[0]!.id,
+    });
+    expect(res.status, JSON.stringify(res.body)).toBe(201);
+    employeeIds.push(res.body.data.id);
+    expect(['probation', 'active']).toContain(res.body.data.employmentStatus); // default timing: instant
+  });
+
+  it('9. Overview numbers equal the database and move with each action', async () => {
+    // the headline total equals the number of rows the directory actually lists
+    const total = await hrms.get('/api/v1/hrms/employees').query({ pageSize: 100 });
+    expect(total.body.pagination.totalItems).toBe(total.body.data.length);
+
+    const pendingBefore = await hrms
+      .get('/api/v1/hrms/employee-actions')
+      .query({ status: 'pending', pageSize: 1 });
+    const countOf = (b: Record<string, any>) => b.pagination.totalItems;
+    const before = countOf(pendingBefore.body);
+
+    // a second employee with a pending (not yet applied) transfer
+    const other = await hrms.post('/api/v1/hrms/employees').send({
+      firstName: 'Overview',
+      lastName: `Check ${run}`,
+      email: `overview.${run}@example.com`,
+      joiningDate: '2026-01-05',
+      employmentType: 'full_time',
+      employmentStatus: 'active',
+      departmentId: masters.departments[0]!.id,
+      designationId: masters.designations[0]!.id,
+      locationId: masters.locations[0]!.id,
+    });
+    expect(other.status, JSON.stringify(other.body)).toBe(201);
+    employeeIds.push(other.body.data.id);
+    const created = await hrms.post('/api/v1/hrms/employee-actions').send({
+      employeeId: other.body.data.id,
+      actionType: 'department_change',
+      effectiveDate: '2026-09-01',
+      reason: 'Overview check',
+      values: { departmentId: masters.departments[1]!.id },
+    });
+    expect(created.status, JSON.stringify(created.body)).toBe(201);
+
+    const after = countOf(
+      (await hrms.get('/api/v1/hrms/employee-actions').query({ status: 'pending', pageSize: 1 }))
+        .body,
+    );
+    expect(after).toBe(before + 1);
+    const pendingTransfers = await hrms.get('/api/v1/hrms/employee-actions').query({
+      status: 'pending',
+      actionTypes: 'department_change',
+      employeeId: other.body.data.id,
+    });
+    expect(pendingTransfers.body.data).toHaveLength(1);
+    const active = await hrms
+      .get('/api/v1/hrms/employees')
+      .query({ employmentStatus: 'active', search: run });
+    expect(active.body.data.map((e: { id: string }) => e.id)).toContain(other.body.data.id);
+    expect(active.body.data.map((e: { id: string }) => e.id)).not.toContain(employee.id);
+  });
+
+  it('11. previewing the next number does not consume it, and creating with it uses it', async () => {
+    const a = await hrms.get('/api/v1/hrms/employees/next-number');
+    const b = await hrms.get('/api/v1/hrms/employees/next-number');
+    expect(a.status).toBe(200);
+    expect(b.body.data.employeeNumber).toBe(a.body.data.employeeNumber);
+    const res = await hrms.post('/api/v1/hrms/employees').send({
+      firstName: 'Preview',
+      lastName: `Number ${run}`,
+      email: `preview.${run}@example.com`,
+      employeeNumber: a.body.data.employeeNumber,
+      joiningDate: '2026-01-05',
+      employmentType: 'full_time',
+      employmentStatus: 'active',
+      departmentId: masters.departments[0]!.id,
+      designationId: masters.designations[0]!.id,
+      locationId: masters.locations[0]!.id,
+    });
+    expect(res.status, JSON.stringify(res.body)).toBe(201);
+    employeeIds.push(res.body.data.id);
+    expect(res.body.data.employeeNumber).toBe(a.body.data.employeeNumber);
+    const next = await hrms.get('/api/v1/hrms/employees/next-number');
+    expect(next.body.data.employeeNumber).not.toBe(a.body.data.employeeNumber);
+  });
+
+  it('12. a pending hire whose joining date has arrived is activated when employees are listed', async () => {
+    const res = await hrms.post('/api/v1/hrms/employees').send({
+      firstName: 'Sweep',
+      lastName: `Check ${run}`,
+      email: `sweep.${run}@example.com`,
+      joiningDate: '2026-01-05',
+      employmentType: 'full_time',
+      employmentStatus: 'active',
+      departmentId: masters.departments[0]!.id,
+      designationId: masters.designations[0]!.id,
+      locationId: masters.locations[0]!.id,
+    });
+    expect(res.status, JSON.stringify(res.body)).toBe(201);
+    const id = res.body.data.id as string;
+    employeeIds.push(id);
+    await getDb()
+      .update(employees)
+      .set({ employmentStatus: 'pending_activation' })
+      .where(eq(employees.id, id));
+    // the sweep is throttled per company; wait out any sweep triggered by an earlier list
+    await new Promise((r) => setTimeout(r, 0));
+    const list = await hrms.get('/api/v1/hrms/employees').query({ search: run, pageSize: 50 });
+    const swept = list.body.data.find((e: { id: string }) => e.id === id);
+    expect(['probation', 'active']).toContain(swept.employmentStatus);
   });
 });

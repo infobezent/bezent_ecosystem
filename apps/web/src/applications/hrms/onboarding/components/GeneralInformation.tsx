@@ -17,14 +17,31 @@ import type { Chapter01GeneralState } from '../types/registration.types';
 import { authorizedFetch } from '../../../../platform/auth';
 import { appConfig } from '../../../../app/config/env';
 
+export interface MasterOption {
+  id: string;
+  name: string;
+}
+
 export interface GeneralInformationProps {
+  /** Organization masters; when present, Department / Designation / Location come from them. */
+  masters?: {
+    departments: MasterOption[];
+    designations: MasterOption[];
+    locations: MasterOption[];
+  } | null;
   employeeId?: string;
   data?: Partial<Chapter01GeneralState>;
   onChange?: (data: Partial<Chapter01GeneralState>) => void;
   mode?: 'registration' | 'edit';
 }
 
+const toOptions = (items?: MasterOption[]) =>
+  items && items.length > 0
+    ? [...items.map((i) => ({ value: i.name, label: i.name })), { value: 'other', label: 'Other' }]
+    : null;
+
 export function GeneralInformation({
+  masters,
   employeeId: employeeIdProp,
   data,
   onChange,
@@ -57,6 +74,20 @@ export function GeneralInformation({
   );
   const [probationPeriod, setProbationPeriod] = useState(data?.probationPeriod ?? '6_months');
   const [noticePeriod, setNoticePeriod] = useState(data?.noticePeriod ?? '30_days');
+
+  // Registration defaults must be real master records, otherwise the employee is saved without them.
+  useEffect(() => {
+    if (!masters || mode === 'edit') return;
+    const first = (items: MasterOption[]) => items[0]?.name;
+    const pick = (items: MasterOption[], current: string) =>
+      items.length === 0 || items.some((i) => i.name === current) ? null : (first(items) ?? null);
+    const d = pick(masters.departments, department);
+    const g = pick(masters.designations, designation);
+    const l = pick(masters.locations, officeLocation);
+    if (d) handleDepartmentChange(d);
+    if (g) setDesignation(g);
+    if (l) setOfficeLocation(l);
+  }, [masters]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Custom field values state for dynamic custom fields
   const [customValues, setCustomValues] = useState<Record<string, unknown>>({});
@@ -384,13 +415,14 @@ export function GeneralInformation({
               disabled={mode === 'edit'}
               onChange={(e) => handleDepartmentChange(e.target.value)}
               options={(() => {
-                const baseOptions = configuredOptions || [
-                  { value: 'Engineering', label: 'Engineering' },
-                  { value: 'Human Resources', label: 'Human Resources' },
-                  { value: 'Finance', label: 'Finance' },
-                  { value: 'Operations', label: 'Operations' },
-                  { value: 'other', label: 'Other' },
-                ];
+                const baseOptions = configuredOptions ||
+                  toOptions(masters?.departments) || [
+                    { value: 'Engineering', label: 'Engineering' },
+                    { value: 'Human Resources', label: 'Human Resources' },
+                    { value: 'Finance', label: 'Finance' },
+                    { value: 'Operations', label: 'Operations' },
+                    { value: 'other', label: 'Other' },
+                  ];
                 if (department && !baseOptions.some((o) => o.value === department)) {
                   return [{ value: department, label: department }, ...baseOptions];
                 }
@@ -438,13 +470,14 @@ export function GeneralInformation({
               disabled={mode === 'edit'}
               onChange={(e) => setDesignation(e.target.value)}
               options={(() => {
-                const baseOptions = configuredOptions || [
-                  { value: 'Software Engineer', label: 'Software Engineer' },
-                  { value: 'Financial Analyst', label: 'Financial Analyst' },
-                  { value: 'Senior HR Specialist', label: 'Senior HR Specialist' },
-                  { value: 'Product Manager', label: 'Product Manager' },
-                  { value: 'other', label: 'Other' },
-                ];
+                const baseOptions = configuredOptions ||
+                  toOptions(masters?.designations) || [
+                    { value: 'Software Engineer', label: 'Software Engineer' },
+                    { value: 'Financial Analyst', label: 'Financial Analyst' },
+                    { value: 'Senior HR Specialist', label: 'Senior HR Specialist' },
+                    { value: 'Product Manager', label: 'Product Manager' },
+                    { value: 'other', label: 'Other' },
+                  ];
                 if (designation && !baseOptions.some((o) => o.value === designation)) {
                   return [{ value: designation, label: designation }, ...baseOptions];
                 }
@@ -544,12 +577,13 @@ export function GeneralInformation({
               value={officeLocation}
               onChange={(e) => setOfficeLocation(e.target.value)}
               options={(() => {
-                const baseOptions = configuredOptions || [
-                  { value: 'Chennai - Main Office', label: 'Chennai - Main Office' },
-                  { value: 'Bengaluru', label: 'Bengaluru' },
-                  { value: 'Hyderabad', label: 'Hyderabad' },
-                  { value: 'other', label: 'Other' },
-                ];
+                const baseOptions = configuredOptions ||
+                  toOptions(masters?.locations) || [
+                    { value: 'Chennai - Main Office', label: 'Chennai - Main Office' },
+                    { value: 'Bengaluru', label: 'Bengaluru' },
+                    { value: 'Hyderabad', label: 'Hyderabad' },
+                    { value: 'other', label: 'Other' },
+                  ];
                 if (officeLocation && !baseOptions.some((o) => o.value === officeLocation)) {
                   return [{ value: officeLocation, label: officeLocation }, ...baseOptions];
                 }

@@ -1,6 +1,7 @@
 import { and, asc, count, desc, eq, gte, inArray, like, lte, or, type SQL } from 'drizzle-orm';
 import { getDb } from '../../../../db/connection.js';
 import {
+  departments,
   employeeClearanceItems,
   type NewEmployeeClearanceItem,
   employeeActionHistory,
@@ -33,6 +34,7 @@ const listSelection = {
   employeeNumber: employees.employeeNumber,
   employeeFirstName: employees.firstName,
   employeeLastName: employees.lastName,
+  employeeDepartmentName: departments.name,
   actionType: employeeActions.actionType,
   status: employeeActions.status,
   effectiveDate: employeeActions.effectiveDate,
@@ -53,6 +55,7 @@ interface ListRow {
   employeeNumber: string;
   employeeFirstName: string;
   employeeLastName: string | null;
+  employeeDepartmentName: string | null;
   actionType: EmployeeActionListItem['actionType'];
   status: EmployeeActionListItem['status'];
   effectiveDate: string;
@@ -94,6 +97,7 @@ export class EmployeeActionRepository {
       employeeName: row.employeeLastName
         ? `${row.employeeFirstName} ${row.employeeLastName}`
         : row.employeeFirstName,
+      departmentName: row.employeeDepartmentName,
       actionType: row.actionType,
       category: ACTION_TYPE_CATEGORY[row.actionType],
       status: row.status,
@@ -123,7 +127,8 @@ export class EmployeeActionRepository {
           eq(employees.tenantId, tenantId),
           eq(employees.companyId, companyId),
         ),
-      );
+      )
+      .leftJoin(departments, eq(departments.id, employees.departmentId));
   }
 
   private scope(tenantId: string, companyId: string): SQL[] {

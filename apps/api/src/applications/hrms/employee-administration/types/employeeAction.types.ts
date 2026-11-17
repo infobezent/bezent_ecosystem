@@ -143,6 +143,8 @@ export interface EmployeeActionListItem {
   employeeId: string;
   employeeNumber: string;
   employeeName: string;
+  /** The employee's current department. */
+  departmentName: string | null;
   actionType: EmployeeActionType;
   category: EmployeeActionCategory;
   status: EmployeeActionStatus;

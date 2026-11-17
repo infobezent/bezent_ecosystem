@@ -29,6 +29,7 @@ import raccoonEmployeesImg from '../../../../assets/raccoon_employees.png';
 import { fetchEmployees, type EmployeeRecord } from '../../employees/api/employeesApi';
 import { fetchNewHiresPaginated } from '../../onboarding/api/onboardingApi';
 import { fetchEmployeeActions } from '../../employee-administration/api/employeeAdministrationApi';
+import { fetchJobRequisitions } from '../../recruitment/api/recruitmentApi';
 import { leaveOperationsApi } from '../../leave/api/leaveOperationsApi';
 import { fetchRegularizationRequests } from '../../attendance/api/attendanceApi';
 import type { RegularizationItem } from '../../attendance/types/attendance.types';
@@ -362,9 +363,10 @@ export function WorkforceOverviewPage({
   const [totalJobLevelsCount, setTotalJobLevelsCount] = useState(0);
 
   // Workforce Planning States
-  const [approvedHeadcount, setApprovedHeadcount] = useState(22);
-  const [openPositionsCount, setOpenPositionsCount] = useState(6);
-  const [headcountGap, setHeadcountGap] = useState(-6);
+  const [approvedHeadcount, setApprovedHeadcount] = useState(0);
+  const [expectedExits, setExpectedExits] = useState(0);
+  const [openPositionsCount, setOpenPositionsCount] = useState(0);
+  const [headcountGap, setHeadcountGap] = useState(0);
   const [capacityUtilizationPct, setCapacityUtilizationPct] = useState(73);
 
   const [deptCapacities, setDeptCapacities] = useState<DeptCapacityItem[]>([]);
@@ -517,6 +519,11 @@ export function WorkforceOverviewPage({
         pageSize: 1,
         ...scope,
       }),
+      // Exits currently in progress (notice being served): a present-tense queue whose
+      // last working date usually lies after the selected period, so it is fetched unscoped.
+      fetchEmployeeActions({ status: 'pending', category: 'separation', pageSize: 100, ...scope }),
+      // Approved hiring demand: open requisitions (Hiring) define planned headcount.
+      fetchJobRequisitions({ status: 'open', limit: 100, departmentId: scope.departmentId }),
     ]).then((results) => {
       if (!active) return;
 
@@ -536,6 +543,8 @@ export function WorkforceOverviewPage({
         separationActionsRes,
         pendingTransfersRes,
         pendingPromotionsRes,
+        pendingSeparationsRes,
+        requisitionsRes,
       ] = results;
 
       const totalEmployees =
@@ -559,9 +568,10 @@ export function WorkforceOverviewPage({
       const fullList: EmployeeRecord[] = listRes.status === 'fulfilled' ? listRes.value.data : [];
       setRawEmployees(fullList);
       const probationEmployees = fullList.filter((e) => e.employmentStatus === 'probation').length;
-      const confirmedEmployees =
-        fullList.filter((e) => e.employmentStatus === 'active' || e.confirmationDate !== null)
-          .length || Math.max(0, activeEmployees - probationEmployees);
+      const confirmedEmployees = fullList.filter((e) => e.employmentStatus === 'active').length;
+      const pendingActivationEmployees = fullList.filter(
+        (e) => e.employmentStatus === 'pending_activation',
+      ).length;
 
       // Percentage of total workforce
       const activePct =
@@ -753,11 +763,22 @@ export function WorkforceOverviewPage({
         const { pagination, statusCounts } = separationActionsRes.value;
         const pendingByCategory =
           pendingActionsRes.status === 'fulfilled' ? pendingActionsRes.value.counts : null;
-        const noticePeriodCount = pendingByCategory?.separation ?? 0;
+        const inProgress =
+          pendingSeparationsRes?.status === 'fulfilled' ? pendingSeparationsRes.value.data : [];
+        const noticePeriodCount =
+          pendingSeparationsRes?.status === 'fulfilled'
+            ? pendingSeparationsRes.value.pagination.totalItems
+            : (pendingByCategory?.separation ?? 0);
+        // In-progress exits dated after the selected period are not in the windowed total yet.
+        const windowEnd = dateRange?.to;
+        const beyondWindow = windowEnd
+          ? inProgress.filter((a) => a.effectiveDate > windowEnd).length
+          : 0;
         const settledCount = statusCounts?.applied ?? 0;
+        setExpectedExits(noticePeriodCount);
 
         setOffboardingBreakdown({
-          total: pagination.totalItems,
+          total: pagination.totalItems + beyondWindow,
           pendingClearance: noticePeriodCount,
           stages: [
             {
@@ -1068,38 +1089,40 @@ export function WorkforceOverviewPage({
       setLeadWorkforceCount(leadCount);
       setTotalJobLevelsCount(jobArr.filter((j) => j.count > 0).length);
 
-      // ── 04. Workforce Planning Calculations ──
-      const calculatedApproved = Math.max(22, totalBase + 6);
-      const calculatedOpen = Math.max(0, calculatedApproved - totalBase);
-      const calculatedGap = totalBase - calculatedApproved;
-      const calculatedUtil = Math.round((totalBase / calculatedApproved) * 100);
+      // ── 04. Workforce Planning (real: open Hiring requisitions) ──
+      const openRequisitions =
+        requisitionsRes?.status === 'fulfilled' ? requisitionsRes.value.items : [];
+      const vacanciesOf = (r: { openings: number; filledCount: number }) =>
+        Math.max(0, r.openings - r.filledCount);
+      const openRoles = openRequisitions.reduce((sum, r) => sum + vacanciesOf(r), 0);
+      const calculatedApproved = totalBase + openRoles;
+      const calculatedOpen = openRoles;
+      const calculatedGap = -openRoles;
+      const calculatedUtil =
+        calculatedApproved > 0 ? Math.round((totalBase / calculatedApproved) * 100) : 0;
 
       setApprovedHeadcount(calculatedApproved);
       setOpenPositionsCount(calculatedOpen);
       setHeadcountGap(calculatedGap);
       setCapacityUtilizationPct(calculatedUtil);
 
-      // Department capacity calculations
-      const defaultApprovedByDept: Record<string, number> = {
-        'General Operations': 15,
-        Engineering: 3,
-        Finance: 2,
-        'Human Resources': 2,
-      };
+      // Department capacity: current staff plus that department's open requisitions
+      const openByDept = new Map<string, number>();
+      for (const r of openRequisitions) {
+        if (!r.departmentName) continue;
+        openByDept.set(r.departmentName, (openByDept.get(r.departmentName) ?? 0) + vacanciesOf(r));
+      }
       const deptCapItems: DeptCapacityItem[] = Array.from(deptCounts.entries()).map(
         ([name, current]) => {
-          const approved =
-            defaultApprovedByDept[name] || Math.max(current + 1, Math.round(current * 1.25));
-          const open = Math.max(0, approved - current);
-          const gap = approved - current;
-          const util = Math.round((current / approved) * 100);
+          const open = openByDept.get(name) ?? 0;
+          const approved = current + open;
           return {
             name,
             current,
             approved,
             openPositions: open,
-            gap,
-            utilizationPct: util,
+            gap: -open,
+            utilizationPct: approved > 0 ? Math.round((current / approved) * 100) : 0,
           };
         },
       );
@@ -1107,17 +1130,24 @@ export function WorkforceOverviewPage({
       setDeptCapacities(deptCapItems);
 
       // ── 05. Employee Lifecycle (5 Stages) ──
+      // Stages are mutually exclusive: onboarding cases (not yet employees), then each
+      // employee counted once by current status.
       const onboardingCount = newJoiners;
+      const newJoinerCount = pendingActivationEmployees;
       const totalLifecycle =
-        newJoiners + onboardingCount + probationEmployees + confirmedEmployees + exits;
+        newJoinerCount +
+        onboardingCount +
+        probationEmployees +
+        confirmedEmployees +
+        separatedEmployees;
       setTotalLifecycleVolume(totalLifecycle);
 
       const stageItems: LifecycleStageItem[] = [
         {
           id: 'new-joiners',
           name: 'New Joiners',
-          count: newJoiners,
-          percentage: totalLifecycle > 0 ? Math.round((newJoiners / totalLifecycle) * 100) : 0,
+          count: newJoinerCount,
+          percentage: totalLifecycle > 0 ? Math.round((newJoinerCount / totalLifecycle) * 100) : 0,
           color: '#93c5fd',
           iconClass: 'blue',
           iconName: 'onboarding',
@@ -1158,8 +1188,9 @@ export function WorkforceOverviewPage({
         {
           id: 'exited',
           name: 'Exited',
-          count: exits,
-          percentage: totalLifecycle > 0 ? Math.round((exits / totalLifecycle) * 100) : 0,
+          count: separatedEmployees,
+          percentage:
+            totalLifecycle > 0 ? Math.round((separatedEmployees / totalLifecycle) * 100) : 0,
           color: '#bae6fd',
           iconClass: 'blue',
           iconName: 'exit',
@@ -1631,11 +1662,11 @@ export function WorkforceOverviewPage({
                       'Employees in resignation notice period and scheduled departures.',
                     )
                   }
-                  title={`Expected Exits: ${kpiData.exits} departures scheduled or in notice period. Click to view offboarding.`}
+                  title={`Expected Exits: ${expectedExits} departures scheduled or in notice period. Click to view offboarding.`}
                 >
                   <span className="bezent-wf-plan-stat-label">Expected Exits</span>
                   <div className="bezent-wf-plan-sec-stat-main">
-                    <span className="bezent-wf-plan-stat-val">{kpiData.exits}</span>
+                    <span className="bezent-wf-plan-stat-val">{expectedExits}</span>
                     <span className="bezent-wf-plan-sec-pill bezent-wf-plan-sec-pill--blue">
                       Notice
                     </span>
