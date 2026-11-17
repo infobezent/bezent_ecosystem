@@ -103,11 +103,12 @@ export const OffboardingTable: React.FC<OffboardingTableProps> = ({
             <TableHeaderCell>Exit Type</TableHeaderCell>
             <TableHeaderCell>Last Working Day</TableHeaderCell>
             <TableHeaderCell>Notice Status</TableHeaderCell>
+            <TableHeaderCell>Clearance</TableHeaderCell>
             <TableHeaderCell>Status</TableHeaderCell>
             <TableHeaderCell align="right">Actions</TableHeaderCell>
           </TableRow>
         </TableHead>
-        <TableSkeleton rows={8} columns={7} label="Loading offboarding records…" />
+        <TableSkeleton rows={8} columns={8} label="Loading offboarding records…" />
       </Table>
     );
   }
@@ -332,6 +333,7 @@ export const OffboardingTable: React.FC<OffboardingTableProps> = ({
             <TableHeaderCell>Exit Type</TableHeaderCell>
             <TableHeaderCell>Last Working Day</TableHeaderCell>
             <TableHeaderCell>Notice Status</TableHeaderCell>
+            <TableHeaderCell>Clearance</TableHeaderCell>
             <TableHeaderCell>Status</TableHeaderCell>
             <TableHeaderCell align="right">Actions</TableHeaderCell>
           </TableRow>
@@ -424,6 +426,17 @@ export const OffboardingTable: React.FC<OffboardingTableProps> = ({
                     <Badge variant="neutral" size="sm">
                       Cancelled
                     </Badge>
+                  )}
+                </TableCell>
+
+                {/* Clearance progress (Settings checklist) */}
+                <TableCell>
+                  {action.clearance && action.clearance.total > 0 ? (
+                    <span className="bezent-table-meta-date">
+                      {action.clearance.cleared}/{action.clearance.total} cleared
+                    </span>
+                  ) : (
+                    '—'
                   )}
                 </TableCell>
 

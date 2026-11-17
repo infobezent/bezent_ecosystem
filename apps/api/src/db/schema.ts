@@ -5141,6 +5141,47 @@ export type NewWorkforceClearanceChecklistTemplate =
   typeof workforceClearanceChecklistTemplates.$inferInsert;
 
 /**
+ * HRMS Domain: Offboarding — per-employee clearance items.
+ * Created from the Workforce Settings clearance templates when a resignation or
+ * termination is requested, then cleared department by department.
+ */
+export const employeeClearanceItems = mysqlTable(
+  'employee_clearance_items',
+  {
+    id: varchar('id', { length: 64 }).primaryKey(),
+    tenantId: varchar('tenant_id', { length: 64 }).notNull(),
+    companyId: varchar('company_id', { length: 64 })
+      .notNull()
+      .references(() => companies.id),
+    employeeId: varchar('employee_id', { length: 64 })
+      .notNull()
+      .references(() => employees.id),
+    actionId: varchar('action_id', { length: 64 })
+      .notNull()
+      .references(() => employeeActions.id),
+    department: mysqlEnum('department', ['it', 'admin', 'finance', 'hr']).notNull(),
+    itemTitle: varchar('item_title', { length: 255 }).notNull(),
+    description: text('description'),
+    isMandatory: boolean('is_mandatory').default(true).notNull(),
+    displayOrder: int('display_order').default(0).notNull(),
+    status: mysqlEnum('status', ['pending', 'cleared', 'waived']).default('pending').notNull(),
+    remarks: varchar('remarks', { length: 500 }),
+    clearedBy: varchar('cleared_by', { length: 64 }),
+    clearedAt: timestamp('cleared_at'),
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+    updatedAt: timestamp('updated_at').defaultNow().onUpdateNow().notNull(),
+  },
+  (table) => [
+    index('idx_clearance_items_action').on(table.actionId),
+    index('idx_clearance_items_employee').on(table.employeeId),
+    index('idx_clearance_items_tenant_company').on(table.tenantId, table.companyId),
+  ],
+);
+
+export type EmployeeClearanceItem = typeof employeeClearanceItems.$inferSelect;
+export type NewEmployeeClearanceItem = typeof employeeClearanceItems.$inferInsert;
+
+/**
  * HRMS Domain: Recruitment — Pipeline Stages
  */
 export const recruitmentStages = mysqlTable(

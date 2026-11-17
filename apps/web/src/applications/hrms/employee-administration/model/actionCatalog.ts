@@ -398,3 +398,15 @@ export function actionStatusVariant(
   if (status === 'applied') return 'success';
   return 'neutral';
 }
+
+/**
+ * Which action types each Workforce page owns. Shared so the Transfers,
+ * Promotions and Offboarding pages and the Overview KPIs always agree.
+ */
+export const TRANSFER_ACTION_TYPES: EmployeeActionType[] = [
+  'location_transfer',
+  'department_change',
+  'reporting_manager_change',
+];
+export const PROMOTION_ACTION_TYPES: EmployeeActionType[] = ['designation_change'];
+export const SEPARATION_ACTION_TYPES: EmployeeActionType[] = ['resignation', 'termination'];

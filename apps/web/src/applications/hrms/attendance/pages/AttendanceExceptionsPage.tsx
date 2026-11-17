@@ -6,7 +6,6 @@ import {
   Card,
   Stack,
   Inline,
-  Grid,
   Table,
   TableHead,
   TableBody,
@@ -39,6 +38,14 @@ import {
   bulkExceptionCaseAction,
   exportExceptionsCsv,
 } from '../api/attendanceApi';
+import { RequestStatStrip } from '../components/RequestStatStrip';
+import {
+  RequestFilterPanel,
+  countActiveRequestFilters,
+  type RequestFilterField,
+  type RequestFilterValues,
+} from '../components/RequestFilterPanel';
+import { AttendanceDateRangeControl } from '../components/AttendanceDateRangeControl';
 import type {
   AttendanceExceptionCaseItem,
   ExceptionCaseDetail,
@@ -111,6 +118,96 @@ const EXCEPTION_TYPE_LABELS: Record<ExceptionType, string> = {
   regularization_conflict: 'Regularization Conflict',
 };
 
+const EXCEPTION_FILTER_DEFAULTS: RequestFilterValues = {
+  status: 'active',
+  severity: 'all',
+  type: 'all',
+  source: 'all',
+  assignment: 'all',
+  pendingReason: 'all',
+  interpretation: 'workday',
+};
+
+const EXCEPTION_FILTER_FIELDS: RequestFilterField[] = [
+  {
+    key: 'status',
+    label: 'Status',
+    options: [
+      { value: 'active', label: 'Active cases' },
+      { value: 'open', label: 'Open' },
+      { value: 'assigned', label: 'Assigned' },
+      { value: 'in_review', label: 'In review' },
+      { value: 'pending_action', label: 'Pending action' },
+      { value: 'resolved', label: 'Resolved' },
+      { value: 'closed', label: 'Closed' },
+      { value: 'all', label: 'All statuses' },
+    ],
+  },
+  {
+    key: 'severity',
+    label: 'Severity',
+    options: [
+      { value: 'all', label: 'All severities' },
+      { value: 'critical', label: 'Critical' },
+      { value: 'high', label: 'High' },
+      { value: 'medium', label: 'Medium' },
+      { value: 'low', label: 'Low' },
+    ],
+  },
+  {
+    key: 'type',
+    label: 'Exception Type',
+    options: [
+      { value: 'all', label: 'All types' },
+      ...Object.entries(EXCEPTION_TYPE_LABELS).map(([value, label]) => ({ value, label })),
+    ],
+  },
+  {
+    key: 'source',
+    label: 'Source',
+    options: [
+      { value: 'all', label: 'All sources' },
+      { value: 'engine', label: 'Attendance engine' },
+      { value: 'biometric', label: 'Biometric device' },
+      { value: 'web', label: 'Web punch' },
+      { value: 'mobile', label: 'Mobile punch' },
+      { value: 'kiosk', label: 'Kiosk' },
+      { value: 'import', label: 'Import' },
+      { value: 'leave_system', label: 'Leave system' },
+      { value: 'od_system', label: 'On-duty system' },
+      { value: 'regularization_system', label: 'Regularization' },
+    ],
+  },
+  {
+    key: 'assignment',
+    label: 'Assignment',
+    options: [
+      { value: 'all', label: 'All assignments' },
+      { value: 'unassigned', label: 'Unassigned only' },
+      { value: 'assigned_to_me', label: 'Assigned to me' },
+    ],
+  },
+  {
+    key: 'pendingReason',
+    label: 'Pending Reason',
+    options: [
+      { value: 'all', label: 'All reasons' },
+      { value: 'Awaiting employee regularization', label: 'Awaiting regularization' },
+      { value: 'Awaiting manager approval', label: 'Awaiting approval' },
+      { value: 'Awaiting hardware sync', label: 'Awaiting device sync' },
+      { value: 'Awaiting employee clarification', label: 'Awaiting clarification' },
+    ],
+  },
+  {
+    key: 'interpretation',
+    label: 'Date Basis',
+    options: [
+      { value: 'workday', label: 'Attendance workday' },
+      { value: 'detected_at', label: 'Detection timestamp' },
+    ],
+  },
+];
+
 export function AttendanceExceptionsPage() {
   const [searchParams] = useSearchParams();
 
@@ -151,15 +248,7 @@ export function AttendanceExceptionsPage() {
   );
   const [pendingActionReasonFilter, setPendingActionReasonFilter] = useState('all');
 
-  // Progressive Disclosure
-  const [showAdvancedFilters, setShowAdvancedFilters] = useState(() =>
-    Boolean(
-      searchParams.get('source') ||
-      searchParams.get('assignment') ||
-      searchParams.get('departmentId') ||
-      (searchParams.get('severity') && searchParams.get('severity') !== 'all'),
-    ),
-  );
+  const [isFilterPanelOpen, setIsFilterPanelOpen] = useState(false);
 
   // Sync state when URL searchParams update
   useEffect(() => {
@@ -172,7 +261,6 @@ export function AttendanceExceptionsPage() {
     const pSev = searchParams.get('severity');
     if (pSev !== null && pSev !== severityFilter) {
       setSeverityFilter(pSev);
-      if (pSev !== 'all') setShowAdvancedFilters(true);
     }
 
     const pDatePreset = searchParams.get('datePreset') as
@@ -361,6 +449,31 @@ export function AttendanceExceptionsPage() {
   const closeDrawer = () => {
     setDrawerCaseId(null);
     setDrawerDetail(null);
+  };
+
+  const appliedPanelFilters: RequestFilterValues = {
+    status: statusFilter,
+    severity: severityFilter,
+    type: typeFilter,
+    source: sourceFilter,
+    assignment: assignmentFilter,
+    pendingReason: pendingActionReasonFilter,
+    interpretation: dateInterpretation,
+  };
+  const activeFilterCount = countActiveRequestFilters(
+    appliedPanelFilters,
+    EXCEPTION_FILTER_DEFAULTS,
+  );
+
+  const handleApplyPanelFilters = (v: RequestFilterValues) => {
+    setStatusFilter(v.status ?? 'active');
+    setSeverityFilter(v.severity ?? 'all');
+    setTypeFilter(v.type ?? 'all');
+    setSourceFilter(v.source ?? 'all');
+    setAssignmentFilter(v.assignment ?? 'all');
+    setPendingActionReasonFilter(v.pendingReason ?? 'all');
+    setDateInterpretation((v.interpretation as 'workday' | 'detected_at') ?? 'workday');
+    setPage(1);
   };
 
   // Reset Filters
@@ -640,295 +753,129 @@ export function AttendanceExceptionsPage() {
     <Page>
       {/* ── Compact Header ── */}
       <PageHeader
-        breadcrumbs={<span>Attendance › Exceptions</span>}
+        eyebrow="Attendance › Exceptions"
         title="Exceptions"
+        subtitle="Review, assign and resolve attendance exceptions."
         actions={
-          <Inline gap="sm" align="center">
-            <Select
-              value={datePreset}
-              onChange={(e) =>
-                handleDatePresetChange(
-                  e.target.value as
-                    'today' | 'yesterday' | 'last7' | 'this_month' | 'all' | 'custom',
-                )
-              }
-              aria-label="Date preset selector"
-            >
-              <option value="today">Today</option>
-              <option value="yesterday">Yesterday</option>
-              <option value="last7">Last 7 Days</option>
-              <option value="this_month">This Month</option>
-              <option value="all">All Time</option>
-              <option value="custom">Custom Range</option>
-            </Select>
-
-            {datePreset === 'custom' && (
-              <Inline gap="xs" align="center">
-                <Input
-                  type="date"
-                  value={dateFrom}
-                  onChange={(e) => {
-                    setDateFrom(e.target.value);
-                    setPage(1);
-                  }}
-                  aria-label="Start date"
-                />
-                <span className="bezent-table-meta-subtitle">—</span>
-                <Input
-                  type="date"
-                  value={dateTo}
-                  onChange={(e) => {
-                    setDateTo(e.target.value);
-                    setPage(1);
-                  }}
-                  aria-label="End date"
-                />
-              </Inline>
-            )}
-
-            <Button
-              variant="secondary"
-              onClick={() => handleDatePresetChange('today')}
-              disabled={datePreset === 'today'}
-            >
-              Today
-            </Button>
-
-            <Button variant="secondary" onClick={() => setExportModalOpen(true)}>
-              <BezentIcon name="file_download" size={16} /> Export
-            </Button>
-          </Inline>
+          <AttendanceDateRangeControl
+            startDate={dateFrom}
+            endDate={dateTo}
+            onChange={(r) => {
+              setDatePreset('custom');
+              setDateFrom(r.startDate);
+              setDateTo(r.endDate);
+              setPage(1);
+            }}
+          />
         }
       />
 
       <Stack gap="md">
-        {/* ── Six Summary Counters in 1 Horizontal Desktop Row ── */}
-        <Grid columns={6} gap="sm">
-          <div
-            className={`bezent-stat-card ${statusFilter === 'active' ? 'is-active' : ''}`}
-            onClick={() => handleCounterClick('active')}
-            title="Total cases requiring review or action (Open, Assigned, In Review, Pending Action)"
-            role="button"
-            tabIndex={0}
-          >
-            <span className="bezent-stat-card__label">ACTIVE CASES</span>
-            <span className="bezent-stat-card__val">{counters.activeCases}</span>
+        <RequestStatStrip
+          ariaLabel="Exception summary"
+          stats={[
+            {
+              label: 'Active',
+              value: counters.activeCases,
+              tone: 'info',
+              onClick: () => handleCounterClick('active'),
+              hint: 'Open, assigned, in review or pending action',
+            },
+            {
+              label: 'Critical',
+              value: counters.critical,
+              tone: 'danger',
+              onClick: () => handleCounterClick('critical'),
+              hint: 'Active cases with critical impact',
+            },
+            {
+              label: 'High priority',
+              value: counters.highPriority,
+              tone: 'warning',
+              onClick: () => handleCounterClick('high'),
+              hint: 'Active cases with high priority',
+            },
+            {
+              label: 'Unassigned',
+              value: counters.unassigned,
+              tone: 'neutral',
+              onClick: () => handleCounterClick('unassigned'),
+              hint: 'Active cases with no reviewer',
+            },
+            {
+              label: 'Pending action',
+              value: counters.pendingAction,
+              tone: 'warning',
+              onClick: () => handleCounterClick('pending_action'),
+              hint: 'Awaiting employee, manager or technical action',
+            },
+            {
+              label: 'Resolved today',
+              value: counters.resolvedToday,
+              tone: 'success',
+              onClick: () => handleCounterClick('resolved'),
+              hint: 'Resolved today',
+            },
+          ]}
+        />
+
+        {/* ── Filter toolbar ── */}
+        <div className="bezent-directory-toolbar">
+          <div className="bezent-directory-toolbar__search">
+            <SearchInput
+              placeholder="Search employee, ID or case"
+              aria-label="Search employee, ID or case"
+              shape="rounded"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              onClear={() => setSearch('')}
+            />
           </div>
 
-          <div
-            className={`bezent-stat-card ${severityFilter === 'critical' ? 'is-active' : ''}`}
-            onClick={() => handleCounterClick('critical')}
-            title="Active cases classified with critical business or payroll impact"
-            role="button"
-            tabIndex={0}
-          >
-            <span className="bezent-stat-card__label">CRITICAL</span>
-            <span className="bezent-stat-card__val">{counters.critical}</span>
-          </div>
+          <div className="bezent-directory-toolbar__actions">
+            <div className="bezent-filter-anchor">
+              <Button
+                variant={activeFilterCount > 0 || isFilterPanelOpen ? 'secondary' : 'outline'}
+                size="md"
+                shape="rounded"
+                className={activeFilterCount > 0 ? 'bezent-btn--filters-active' : ''}
+                leftIcon={<BezentIcon name="filter" size={16} />}
+                onClick={() => setIsFilterPanelOpen((prev) => !prev)}
+              >
+                Filters
+                {activeFilterCount > 0 && (
+                  <span className="bezent-btn__filter-count">{activeFilterCount}</span>
+                )}
+              </Button>
 
-          <div
-            className={`bezent-stat-card ${severityFilter === 'high' ? 'is-active' : ''}`}
-            onClick={() => handleCounterClick('high')}
-            title="Active cases classified with high priority"
-            role="button"
-            tabIndex={0}
-          >
-            <span className="bezent-stat-card__label">HIGH PRIORITY</span>
-            <span className="bezent-stat-card__val">{counters.highPriority}</span>
-          </div>
+              <RequestFilterPanel
+                isOpen={isFilterPanelOpen}
+                onClose={() => setIsFilterPanelOpen(false)}
+                title="Filter Exceptions"
+                fields={EXCEPTION_FILTER_FIELDS}
+                appliedValues={appliedPanelFilters}
+                defaults={EXCEPTION_FILTER_DEFAULTS}
+                onApply={handleApplyPanelFilters}
+              />
+            </div>
 
-          <div
-            className={`bezent-stat-card ${assignmentFilter === 'unassigned' ? 'is-active' : ''}`}
-            onClick={() => handleCounterClick('unassigned')}
-            title="Active cases with no designated reviewer"
-            role="button"
-            tabIndex={0}
-          >
-            <span className="bezent-stat-card__label">UNASSIGNED</span>
-            <span className="bezent-stat-card__val">{counters.unassigned}</span>
-          </div>
-
-          <div
-            className={`bezent-stat-card ${statusFilter === 'pending_action' ? 'is-active' : ''}`}
-            onClick={() => handleCounterClick('pending_action')}
-            title="Cases currently awaiting employee, manager, or technical action"
-            role="button"
-            tabIndex={0}
-          >
-            <span className="bezent-stat-card__label">PENDING ACTION</span>
-            <span className="bezent-stat-card__val">{counters.pendingAction}</span>
-          </div>
-
-          <div
-            className={`bezent-stat-card ${statusFilter === 'resolved' ? 'is-active' : ''}`}
-            onClick={() => handleCounterClick('resolved')}
-            title="Cases successfully resolved today"
-            role="button"
-            tabIndex={0}
-          >
-            <span className="bezent-stat-card__label">RESOLVED TODAY</span>
-            <span className="bezent-stat-card__val">{counters.resolvedToday}</span>
-          </div>
-        </Grid>
-
-        {/* ── Primary Filter Bar ── */}
-        <Card padding="sm">
-          <Stack gap="sm">
-            <Inline justify="between" align="center" wrap gap="sm">
-              <Inline gap="sm" align="center" wrap>
-                <SearchInput
-                  placeholder="Search Employee, ID, or Case..."
-                  value={search}
-                  onChange={(e) => setSearch(e.target.value)}
-                  onClear={() => setSearch('')}
-                />
-
-                <Select
-                  value={statusFilter}
-                  onChange={(e) => {
-                    setStatusFilter(e.target.value);
-                    setPage(1);
-                  }}
-                  aria-label="Workflow Status Filter"
-                >
-                  <option value="active">Active Cases</option>
-                  <option value="open">Open</option>
-                  <option value="assigned">Assigned</option>
-                  <option value="in_review">In Review</option>
-                  <option value="pending_action">Pending Action</option>
-                  <option value="resolved">Resolved</option>
-                  <option value="closed">Closed</option>
-                  <option value="all">All Statuses</option>
-                </Select>
-
-                <Select
-                  value={severityFilter}
-                  onChange={(e) => {
-                    setSeverityFilter(e.target.value);
-                    setPage(1);
-                  }}
-                  aria-label="Severity Filter"
-                >
-                  <option value="all">All Severities</option>
-                  <option value="critical">Critical</option>
-                  <option value="high">High</option>
-                  <option value="medium">Medium</option>
-                  <option value="low">Low</option>
-                </Select>
-
-                <Select
-                  value={typeFilter}
-                  onChange={(e) => {
-                    setTypeFilter(e.target.value);
-                    setPage(1);
-                  }}
-                  aria-label="Exception Type Filter"
-                >
-                  <option value="all">All Exception Types</option>
-                  <option value="missing_in">Missing IN</option>
-                  <option value="missing_out">Missing OUT</option>
-                  <option value="late_arrival">Late Arrival</option>
-                  <option value="early_exit">Early Exit</option>
-                  <option value="insufficient_hours">Insufficient Hours</option>
-                  <option value="shift_mismatch">Shift Mismatch</option>
-                  <option value="duplicate_punch">Duplicate Punch</option>
-                  <option value="unmatched_employee">Unmatched Employee</option>
-                  <option value="invalid_punch">Invalid Punch</option>
-                  <option value="device_sync_failure">Device Sync Failure</option>
-                  <option value="leave_conflict">Leave Conflict</option>
-                  <option value="on_duty_conflict">On-Duty Conflict</option>
-                  <option value="regularization_conflict">Regularization Conflict</option>
-                </Select>
-              </Inline>
-
-              <Inline gap="sm" align="center">
-                <Button
-                  variant="secondary"
-                  onClick={() => setShowAdvancedFilters(!showAdvancedFilters)}
-                >
-                  <BezentIcon
-                    name={showAdvancedFilters ? 'expand_less' : 'filter_list'}
-                    size={16}
-                  />
-                  {showAdvancedFilters ? 'Less Filters' : 'More Filters'}
-                </Button>
-
-                <Button variant="secondary" onClick={handleResetFilters}>
-                  Reset
-                </Button>
-              </Inline>
-            </Inline>
-
-            {/* ── Progressive Disclosure: Advanced Filters ── */}
-            {showAdvancedFilters && (
-              <Card padding="sm">
-                <Grid columns={4} gap="sm">
-                  <Select
-                    label="Date Interpretation"
-                    value={dateInterpretation}
-                    onChange={(e) => {
-                      setDateInterpretation(e.target.value as 'workday' | 'detected_at');
-                      setPage(1);
-                    }}
-                  >
-                    <option value="workday">Attendance Workday</option>
-                    <option value="detected_at">Detection Timestamp</option>
-                  </Select>
-
-                  <Select
-                    label="Source"
-                    value={sourceFilter}
-                    onChange={(e) => {
-                      setSourceFilter(e.target.value);
-                      setPage(1);
-                    }}
-                  >
-                    <option value="all">All Sources</option>
-                    <option value="engine">Attendance Engine</option>
-                    <option value="biometric">Biometric Device</option>
-                    <option value="web">Web Punch</option>
-                    <option value="mobile">Mobile Punch</option>
-                    <option value="kiosk">Kiosk</option>
-                    <option value="import">Import</option>
-                    <option value="leave_system">Leave System</option>
-                    <option value="od_system">On-Duty System</option>
-                    <option value="regularization_system">Regularization</option>
-                  </Select>
-
-                  <Select
-                    label="Assignment Queue"
-                    value={assignmentFilter}
-                    onChange={(e) => {
-                      setAssignmentFilter(e.target.value);
-                      setPage(1);
-                    }}
-                  >
-                    <option value="all">All Assignments</option>
-                    <option value="unassigned">Unassigned Only</option>
-                    <option value="assigned_to_me">Assigned To Me</option>
-                  </Select>
-
-                  <Select
-                    label="Pending Reason"
-                    value={pendingActionReasonFilter}
-                    onChange={(e) => {
-                      setPendingActionReasonFilter(e.target.value);
-                      setPage(1);
-                    }}
-                  >
-                    <option value="all">All Reasons</option>
-                    <option value="Awaiting employee regularization">
-                      Awaiting Regularization
-                    </option>
-                    <option value="Awaiting manager approval">Awaiting Approval</option>
-                    <option value="Awaiting hardware sync">Awaiting Device Sync</option>
-                    <option value="Awaiting employee clarification">Awaiting Clarification</option>
-                  </Select>
-                </Grid>
-              </Card>
+            {(activeFilterCount > 0 || search) && (
+              <Button variant="ghost" size="md" shape="rounded" onClick={handleResetFilters}>
+                Reset Filters
+              </Button>
             )}
-          </Stack>
-        </Card>
+            <span className="bezent-records-badge">{totalCount} Cases</span>
+
+            <IconButton
+              label="Export"
+              variant="ghost"
+              tooltipDirection="down"
+              onClick={() => setExportModalOpen(true)}
+            >
+              <BezentIcon name="download" size={18} />
+            </IconButton>
+          </div>
+        </div>
 
         {/* ── Contextual Bulk Operations Bar ── */}
         {selectedIds.size > 0 && (
