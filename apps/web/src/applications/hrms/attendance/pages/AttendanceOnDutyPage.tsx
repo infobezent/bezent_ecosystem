@@ -30,7 +30,6 @@ import {
 import { BezentIcon } from '../../../../design-system/icons';
 import { AttendanceSectionTabs } from '../components/AttendanceSectionTabs';
 import { RequestStatStrip } from '../components/RequestStatStrip';
-import { AttendanceDateRangeControl } from '../components/AttendanceDateRangeControl';
 import {
   RequestFilterPanel,
   countActiveRequestFilters,
@@ -38,7 +37,10 @@ import {
   type RequestFilterField,
   type RequestFilterValues,
 } from '../components/RequestFilterPanel';
-import { getDemoOnDutyDetail, getDemoOnDutyWorkspace } from '../model/demoOnDuty';
+import {
+  AttendanceDateRangeControl,
+  getDefaultRequestDateRange,
+} from '../components/AttendanceDateRangeControl';
 import {
   fetchOnDutyWorkspace,
   fetchOnDutyDetails,
@@ -153,9 +155,10 @@ const OD_SUBMITTED_RANGE: RequestFilterDateRange = {
 };
 
 export function AttendanceOnDutyPage() {
-  // 1. Date Range State (defaults to current month)
-  const [startDate, setStartDate] = useState(getStartOfMonthString());
-  const [endDate, setEndDate] = useState(getEndOfMonthString());
+  const defaultRange = useMemo(() => getDefaultRequestDateRange(), []);
+  // 1. Date Range State (defaults to active 60-day operational backlog window)
+  const [startDate, setStartDate] = useState(defaultRange.startDate);
+  const [endDate, setEndDate] = useState(defaultRange.endDate);
 
   // 2. Filter State
   const [search, setSearch] = useState('');
@@ -293,17 +296,10 @@ export function AttendanceOnDutyPage() {
       };
 
       const live = await fetchOnDutyWorkspace(filter);
-      // Nothing recorded yet: show sample requests so the workspace can be reviewed.
-      // Local development only: show sample rows when the API has nothing yet.
-      const noLiveData =
-        import.meta.env.DEV &&
-        live.totalCount === 0 &&
-        Object.values(live.counters).every((n) => n === 0);
-      const res = noLiveData ? getDemoOnDutyWorkspace(filter) : live;
-      setItems(res.items);
-      setCounters(res.counters);
-      setTotalCount(res.totalCount);
-      setTotalPages(res.totalPages);
+      setItems(live.items);
+      setCounters(live.counters);
+      setTotalCount(live.totalCount);
+      setTotalPages(live.totalPages);
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'Failed to load On-Duty requests');
     } finally {
@@ -339,9 +335,7 @@ export function AttendanceOnDutyPage() {
     setClarificationReply('');
     setDrawerTab('overview');
     try {
-      const data = id.startsWith('od_demo_')
-        ? getDemoOnDutyDetail(id)
-        : await fetchOnDutyDetails(id);
+      const data = await fetchOnDutyDetails(id);
       setDrawerDetail(data);
     } catch {
       // Handled gracefully in drawer

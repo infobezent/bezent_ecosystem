@@ -14,10 +14,21 @@ function iso(d: Date): string {
   return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
 }
 
-/** First to last day of the current month (the default period on the request pages). */
+/** First to last day of the current month. */
 export function getMonthRange(): AttendanceDateRange {
   const now = new Date();
   const start = new Date(now.getFullYear(), now.getMonth(), 1);
+  const end = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+  return { startDate: iso(start), endDate: iso(end) };
+}
+
+/**
+ * Operational request window covering previous month through current month end (60-day backlog).
+ * Ensures pending & recent requests from the previous pay cycle are immediately visible in queues.
+ */
+export function getDefaultRequestDateRange(): AttendanceDateRange {
+  const now = new Date();
+  const start = new Date(now.getFullYear(), now.getMonth() - 1, 1);
   const end = new Date(now.getFullYear(), now.getMonth() + 1, 0);
   return { startDate: iso(start), endDate: iso(end) };
 }

@@ -44,9 +44,10 @@ import {
 import { BezentIcon } from '../../../../design-system/icons';
 import { AttendanceSectionTabs } from '../components/AttendanceSectionTabs';
 import { RequestStatStrip } from '../components/RequestStatStrip';
-import { getMonthRange } from '../components/AttendanceDateRangeControl';
-import { AttendanceDateRangeControl } from '../components/AttendanceDateRangeControl';
-import { getDemoOvertimeRequests } from '../model/demoOvertimeCompOff';
+import {
+  AttendanceDateRangeControl,
+  getDefaultRequestDateRange,
+} from '../components/AttendanceDateRangeControl';
 import {
   RequestFilterPanel,
   type RequestFilterField,
@@ -221,7 +222,7 @@ const OT_FILTER_DEFAULTS: RequestFilterValues = {
 
 export function AttendanceOvertimePage() {
   // ── 1. Page Header & Period State (Spec Section 1) ──────────────────────────
-  const [range, setRange] = useState(() => getMonthRange());
+  const [range, setRange] = useState(() => getDefaultRequestDateRange());
   const isLockedMonth = useMemo(() => {
     // A period that ends before the current month is treated as locked for payroll
     const now = new Date();
@@ -325,28 +326,6 @@ export function AttendanceOvertimePage() {
         }),
       ]);
 
-      // Nothing recorded yet: show sample requests so the page can be reviewed.
-      // Local development only: show sample rows when the API has nothing yet.
-      const noLiveData =
-        import.meta.env.DEV && !(requestsRes.items?.length ?? 0) && !(requestsRes.meta?.total ?? 0);
-      if (noLiveData) {
-        const q = search.trim().toLowerCase();
-        const demo = getDemoOvertimeRequests().filter((d) => {
-          if (d.workDate < startOfMonth || d.workDate > endOfMonth) return false;
-          if (statusFilter === 'pending' && d.status !== 'pending_approval') return false;
-          if (statusFilter === 'approved' && d.status !== 'approved') return false;
-          if (statusFilter === 'rejected' && d.status !== 'rejected') return false;
-          if (settlementFilter === 'payable' && d.allocatedPayableMinutes <= 0) return false;
-          if (settlementFilter === 'comp_off' && d.allocatedCompOffMinutes <= 0) return false;
-          if (departmentFilter !== 'all' && d.departmentName !== departmentFilter) return false;
-          if (q && !`${d.employeeName} ${d.employeeCode}`.toLowerCase().includes(q)) return false;
-          return true;
-        });
-        setMetrics(null);
-        setItems(demo);
-        setTotalCount(demo.length);
-        return;
-      }
       setMetrics(overviewRes);
       if (policiesRes && policiesRes.length > 0 && policiesRes[0]) {
         setPolicy(policiesRes[0]);

@@ -39,13 +39,17 @@ const STATUS_FILTER_OPTIONS = [
 
 const TYPE_FILTER_OPTIONS = [
   { value: 'all', label: 'All Request Types' },
-  { value: 'profile_change', label: 'Profile Change' },
   { value: 'attendance_regularization', label: 'Attendance Regularization' },
+  { value: 'on_duty', label: 'On-Duty' },
+  { value: 'overtime', label: 'Overtime' },
+  { value: 'comp_off', label: 'Comp-Off' },
+  { value: 'profile_change', label: 'Profile Change' },
   { value: 'document_request', label: 'Document / Letter Request' },
   { value: 'general_service', label: 'General HR Service' },
 ];
 
 const NEW_REQUEST_TYPES = [
+  { value: 'attendance_regularization', label: 'Attendance Regularization' },
   { value: 'document_request', label: 'Document / Letter Request' },
   { value: 'general_service', label: 'General HR Helpdesk / Service' },
 ];
@@ -73,12 +77,18 @@ export function EssRequestsPage() {
   const [createOpen, setCreateOpen] = useState(false);
   const [createLoading, setCreateLoading] = useState(false);
   const [createError, setCreateError] = useState<string | null>(null);
-  const [requestType, setRequestType] = useState<'document_request' | 'general_service'>(
-    'document_request',
-  );
+  const [requestType, setRequestType] = useState<
+    'attendance_regularization' | 'document_request' | 'general_service'
+  >('attendance_regularization');
   const [documentPreset, setDocumentPreset] = useState('bonafide');
   const [subject, setSubject] = useState('');
   const [description, setDescription] = useState('');
+
+  // Regularization specific fields
+  const [regWorkday, setRegWorkday] = useState(() => new Date().toISOString().slice(0, 10));
+  const [regCheckIn, setRegCheckIn] = useState('09:00');
+  const [regCheckOut, setRegCheckOut] = useState('18:00');
+  const [regReason, setRegReason] = useState('');
 
   // Selected & Cancel
   const [selectedRequest, setSelectedRequest] = useState<EssRequest | null>(null);
@@ -106,6 +116,29 @@ export function EssRequestsPage() {
     setCreateLoading(true);
     setCreateError(null);
     try {
+      if (requestType === 'attendance_regularization') {
+        if (!regWorkday || !regReason.trim()) {
+          setCreateError('Workday date and reason are mandatory for regularization.');
+          setCreateLoading(false);
+          return;
+        }
+        await essApi.regularizeAttendance({
+          date: regWorkday,
+          workday: regWorkday,
+          checkInTime: regCheckIn,
+          checkOutTime: regCheckOut,
+          proposedCheckIn: regCheckIn,
+          proposedCheckOut: regCheckOut,
+          reason: regReason.trim(),
+          requestType: 'punch_correction',
+        });
+        setSuccessMsg('Attendance regularization request submitted successfully.');
+        setCreateOpen(false);
+        setRegReason('');
+        await load();
+        return;
+      }
+
       const finalSubject =
         subject.trim() ||
         (requestType === 'document_request'
@@ -288,11 +321,14 @@ export function EssRequestsPage() {
                       <TableCell>
                         <Badge
                           variant={
-                            req.requestType === 'attendance_regularization'
+                            req.requestType === 'attendance_regularization' ||
+                            req.requestType === 'on_duty'
                               ? 'info'
-                              : req.requestType === 'profile_change'
-                                ? 'warning'
-                                : 'neutral'
+                              : req.requestType === 'overtime' || req.requestType === 'comp_off'
+                                ? 'success'
+                                : req.requestType === 'profile_change'
+                                  ? 'warning'
+                                  : 'neutral'
                           }
                           size="sm"
                         >
@@ -378,37 +414,84 @@ export function EssRequestsPage() {
                 label="Request Type"
                 value={requestType}
                 onChange={(e) =>
-                  setRequestType(e.target.value as 'document_request' | 'general_service')
+                  setRequestType(
+                    e.target.value as
+                      'attendance_regularization' | 'document_request' | 'general_service',
+                  )
                 }
                 options={NEW_REQUEST_TYPES}
               />
 
-              {requestType === 'document_request' && (
-                <Select
-                  label="Document Type Preset"
-                  value={documentPreset}
-                  onChange={(e) => setDocumentPreset(e.target.value)}
-                  options={DOCUMENT_LETTER_PRESETS}
-                />
+              {requestType === 'attendance_regularization' && (
+                <>
+                  <Input
+                    label="Workday Date"
+                    type="date"
+                    value={regWorkday}
+                    onChange={(e) => setRegWorkday(e.target.value)}
+                  />
+                  <Inline gap="md">
+                    <Input
+                      label="Proposed Check-In"
+                      type="time"
+                      value={regCheckIn}
+                      onChange={(e) => setRegCheckIn(e.target.value)}
+                    />
+                    <Input
+                      label="Proposed Check-Out"
+                      type="time"
+                      value={regCheckOut}
+                      onChange={(e) => setRegCheckOut(e.target.value)}
+                    />
+                  </Inline>
+                  <Input
+                    label="Reason for Regularization"
+                    placeholder="e.g., Biometric device unread, official field duty, unexpected client meeting"
+                    value={regReason}
+                    onChange={(e) => setRegReason(e.target.value)}
+                  />
+                </>
               )}
 
-              <Input
-                label="Subject / Purpose"
-                placeholder={
-                  requestType === 'document_request'
-                    ? 'e.g., Bonafide letter for Home Loan application'
-                    : 'e.g., Request for second monitor / IT Helpdesk'
-                }
-                value={subject}
-                onChange={(e) => setSubject(e.target.value)}
-              />
+              {requestType === 'document_request' && (
+                <>
+                  <Select
+                    label="Document Type Preset"
+                    value={documentPreset}
+                    onChange={(e) => setDocumentPreset(e.target.value)}
+                    options={DOCUMENT_LETTER_PRESETS}
+                  />
+                  <Input
+                    label="Subject / Purpose"
+                    placeholder="e.g., Bonafide letter for Home Loan application"
+                    value={subject}
+                    onChange={(e) => setSubject(e.target.value)}
+                  />
+                  <Input
+                    label="Additional Details / Notes"
+                    placeholder="Provide any specific requirements, deadlines, or remarks for HR..."
+                    value={description}
+                    onChange={(e) => setDescription(e.target.value)}
+                  />
+                </>
+              )}
 
-              <Input
-                label="Additional Details / Notes"
-                placeholder="Provide any specific requirements, deadlines, or remarks for HR..."
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-              />
+              {requestType === 'general_service' && (
+                <>
+                  <Input
+                    label="Subject / Purpose"
+                    placeholder="e.g., Request for second monitor / IT Helpdesk"
+                    value={subject}
+                    onChange={(e) => setSubject(e.target.value)}
+                  />
+                  <Input
+                    label="Additional Details / Notes"
+                    placeholder="Provide any specific requirements, deadlines, or remarks for HR..."
+                    value={description}
+                    onChange={(e) => setDescription(e.target.value)}
+                  />
+                </>
+              )}
             </FormGrid>
           </FormSection>
         </Stack>

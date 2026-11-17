@@ -30,16 +30,15 @@ import {
 import { BezentIcon } from '../../../../design-system/icons';
 import { AttendanceSectionTabs } from '../components/AttendanceSectionTabs';
 import { RequestStatStrip } from '../components/RequestStatStrip';
-import { AttendanceDateRangeControl } from '../components/AttendanceDateRangeControl';
+import {
+  AttendanceDateRangeControl,
+  getDefaultRequestDateRange,
+} from '../components/AttendanceDateRangeControl';
 import {
   RegularizationFilterPanel,
   countActiveRegularizationFilters,
   type RegularizationFilterState,
 } from '../components/RegularizationFilterPanel';
-import {
-  getDemoRegularizationDetail,
-  getDemoRegularizationWorkspace,
-} from '../model/demoRegularizations';
 import {
   fetchRegularizationWorkspace,
   fetchRegularizationDetails,
@@ -143,9 +142,10 @@ const QUEUE_TABS = [
 ];
 
 export function AttendanceRegularizationPage() {
-  // 1. Date Range State (defaults to current month)
-  const [workdayFrom, setWorkdayFrom] = useState(getStartOfMonthString());
-  const [workdayTo, setWorkdayTo] = useState(getEndOfMonthString());
+  const defaultRange = useMemo(() => getDefaultRequestDateRange(), []);
+  // 1. Date Range State (defaults to active 60-day operational backlog window)
+  const [workdayFrom, setWorkdayFrom] = useState(defaultRange.startDate);
+  const [workdayTo, setWorkdayTo] = useState(defaultRange.endDate);
 
   // 2. Filter State
   const [assignedQueue, setAssignedQueue] = useState<string>('all');
@@ -269,17 +269,10 @@ export function AttendanceRegularizationPage() {
       };
 
       const live = await fetchRegularizationWorkspace(filter);
-      // Nothing recorded yet: show sample requests so the workspace can be reviewed.
-      // Local development only: show sample rows when the API has nothing yet.
-      const noLiveData =
-        import.meta.env.DEV &&
-        live.total === 0 &&
-        Object.values(live.counters).every((n) => n === 0);
-      const res = noLiveData ? getDemoRegularizationWorkspace(filter) : live;
-      setItems(res.items);
-      setCounters(res.counters);
-      setTotalCount(res.total);
-      setTotalPages(res.totalPages);
+      setItems(live.items);
+      setCounters(live.counters);
+      setTotalCount(live.total);
+      setTotalPages(live.totalPages);
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'Failed to load regularizations');
     } finally {
@@ -314,9 +307,7 @@ export function AttendanceRegularizationPage() {
     setDrawerLoading(true);
     setDecisionNotes('');
     try {
-      const data = id.startsWith('reg_demo_')
-        ? getDemoRegularizationDetail(id)
-        : await fetchRegularizationDetails(id);
+      const data = await fetchRegularizationDetails(id);
       setDrawerDetail(data);
     } catch {
       // Gracefully handled in drawer
@@ -373,6 +364,10 @@ export function AttendanceRegularizationPage() {
   // Counter Click handler
   const handleCounterClick = (targetStatus: string) => {
     setPage(1);
+    // Expand to default active request backlog window if date range was constrained
+    if (workdayFrom > defaultRange.startDate) {
+      setWorkdayFrom(defaultRange.startDate);
+    }
     if (targetStatus === 'application_issues') {
       setApprovalStatus('all');
       setApplicationStatus(applicationStatus === 'failed' ? 'all' : 'failed');
@@ -402,6 +397,8 @@ export function AttendanceRegularizationPage() {
     setLocationId('all');
     setRelatedException('all');
     setSource('all');
+    setWorkdayFrom(defaultRange.startDate);
+    setWorkdayTo(defaultRange.endDate);
     setPage(1);
   };
 

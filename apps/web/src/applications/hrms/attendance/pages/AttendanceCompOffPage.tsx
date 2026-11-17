@@ -51,9 +51,10 @@ import {
   type RequestFilterField,
   type RequestFilterValues,
 } from '../components/RequestFilterPanel';
-import { getDemoCompOffRequests } from '../model/demoOvertimeCompOff';
-import { getMonthRange } from '../components/AttendanceDateRangeControl';
-import { AttendanceDateRangeControl } from '../components/AttendanceDateRangeControl';
+import {
+  AttendanceDateRangeControl,
+  getDefaultRequestDateRange,
+} from '../components/AttendanceDateRangeControl';
 import {
   fetchCompOffOverview,
   fetchCompOffRequests,
@@ -263,7 +264,7 @@ export function AttendanceCompOffPage() {
 
   // ── 4. Filter Bar State (Spec Section 4) ───────────────────────────────────
   const [search, setSearch] = useState('');
-  const [range, setRange] = useState(() => getMonthRange());
+  const [range, setRange] = useState(() => getDefaultRequestDateRange());
   const [statusFilter, setStatusFilter] = useState('all');
   const [sourceFilter, setSourceFilter] = useState('all'); // all | overtime | weekly_off | holiday | manual
   const [departmentFilter, setDepartmentFilter] = useState('all');
@@ -350,14 +351,7 @@ export function AttendanceCompOffPage() {
       ]);
 
       setMetrics(overviewRes);
-      // Nothing recorded yet: show sample requests so the page can be reviewed.
-      // Local development only: show sample rows when the API has nothing yet.
-      const noLiveData =
-        import.meta.env.DEV &&
-        !(requestsRes.items?.length ?? 0) &&
-        !(entitlementsRes.items?.length ?? 0) &&
-        !(handoffsRes.items?.length ?? 0);
-      setRequests(noLiveData ? getDemoCompOffRequests() : requestsRes.items || []);
+      setRequests(requestsRes.items || []);
       setEntitlements(entitlementsRes.items || []);
       setHandoffs(handoffsRes.items || []);
     } catch (err: unknown) {

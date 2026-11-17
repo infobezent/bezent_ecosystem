@@ -22,6 +22,9 @@ import {
   employeeNotifications,
   employeeActions,
   attendanceRegularizations,
+  attendanceOnDutyRequests,
+  attendanceOvertimeRequests,
+  attendanceCompOffRequests,
   type EmployeeAttendance,
   type EmployeeTimesheet,
   type EmployeeDocument,
@@ -29,6 +32,9 @@ import {
   type EmployeeTask,
   type EmployeeNotification,
   type AttendanceRegularization,
+  type AttendanceOnDutyRequest,
+  type AttendanceOvertimeRequest,
+  type AttendanceCompOffRequest,
 } from '../../../../db/schema.js';
 import { generateSurrogateId } from '../../../../platform/auth/security.js';
 import { NotFoundError, ConflictError } from '../../../../app/errors/AppError.js';
@@ -1061,6 +1067,66 @@ export class EssRepository {
         ),
       )
       .orderBy(desc(attendanceRegularizations.submittedAt));
+  }
+
+  // Attendance On-Duty Requests
+  async getAttendanceOnDutyRequests(
+    tenantId: string,
+    companyId: string,
+    employeeId: string,
+  ): Promise<AttendanceOnDutyRequest[]> {
+    const db = getDb();
+    return db
+      .select()
+      .from(attendanceOnDutyRequests)
+      .where(
+        and(
+          eq(attendanceOnDutyRequests.tenantId, tenantId),
+          eq(attendanceOnDutyRequests.companyId, companyId),
+          eq(attendanceOnDutyRequests.employeeId, employeeId),
+        ),
+      )
+      .orderBy(desc(attendanceOnDutyRequests.submittedAt));
+  }
+
+  // Attendance Overtime Requests
+  async getAttendanceOvertimeRequests(
+    tenantId: string,
+    companyId: string,
+    employeeId: string,
+  ): Promise<AttendanceOvertimeRequest[]> {
+    const db = getDb();
+    return db
+      .select()
+      .from(attendanceOvertimeRequests)
+      .where(
+        and(
+          eq(attendanceOvertimeRequests.tenantId, tenantId),
+          eq(attendanceOvertimeRequests.companyId, companyId),
+          eq(attendanceOvertimeRequests.employeeId, employeeId),
+        ),
+      )
+      .orderBy(desc(attendanceOvertimeRequests.createdAt));
+  }
+
+  // Attendance Comp-Off Requests
+  async getAttendanceCompOffRequests(
+    tenantId: string,
+    companyId: string,
+    employeeId: string,
+  ): Promise<AttendanceCompOffRequest[]> {
+    const db = getDb();
+    return db
+      .select()
+      .from(attendanceCompOffRequests)
+      .where(
+        and(
+          eq(attendanceCompOffRequests.tenantId, tenantId),
+          eq(attendanceCompOffRequests.companyId, companyId),
+          eq(attendanceCompOffRequests.employeeId, employeeId),
+        ),
+      )
+      .orderBy(desc(attendanceCompOffRequests.createdAt));
   }
 
   // ---------------------------------------------------------------------------
