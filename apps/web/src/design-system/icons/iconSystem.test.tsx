@@ -139,4 +139,45 @@ describe('BEZENT Icon System — Google Material Symbols Outlined (ADR-015)', ()
       expect(html).toContain(`>${expectedGlyph}</span>`);
     }
   });
+
+  it('Punch Logs KPI icons resolve to correct Material Symbols ligatures', () => {
+    const punchKpiExpectations: Record<string, string> = {
+      fingerprint: 'fingerprint',
+      scanner: 'scanner',
+      check_circle: 'check_circle',
+      checkCircle: 'check_circle',
+      warning: 'warning',
+      alertTriangle: 'warning',
+      cancel: 'cancel',
+      x_circle: 'cancel',
+      error: 'error',
+      circleAlert: 'error',
+      serverError: 'dns',
+    };
+
+    for (const [name, expectedGlyph] of Object.entries(punchKpiExpectations)) {
+      expect(getMaterialSymbolGlyph(name)).toBe(expectedGlyph);
+      const html = renderToStaticMarkup(<BezentIcon name={name as BezentIconName} />);
+      expect(html).toContain(`>${expectedGlyph}</span>`);
+    }
+  });
+
+  it('BezentIcon renders rich infographic SVG graphics when variant="graphic"', () => {
+    const graphicExpectations: Record<string, string> = {
+      fingerprint: 'bezent-infographic-icon--fingerprint',
+      check_circle: 'bezent-infographic-icon--accepted',
+      warning: 'bezent-infographic-icon--flagged',
+      cancel: 'bezent-infographic-icon--rejected',
+      error: 'bezent-infographic-icon--failed',
+    };
+
+    for (const [name, expectedClass] of Object.entries(graphicExpectations)) {
+      const html = renderToStaticMarkup(
+        <BezentIcon name={name as BezentIconName} variant="graphic" size={42} />,
+      );
+      expect(html).toContain('bezent-graphic-icon');
+      expect(html).toContain(expectedClass);
+      expect(html).toContain('<svg');
+    }
+  });
 });

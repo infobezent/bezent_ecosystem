@@ -18,3 +18,5 @@ export const ICON_DEFINITIONS: Record<string, IconDefinition> = {
 };
 
 export type BezentIconName = keyof typeof ICON_DEFINITIONS;
+
+export * from './graphics';

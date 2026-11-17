@@ -11,7 +11,7 @@ import type { JSX } from 'react';
  * docs/architecture/ICON-SYSTEM.md.
  */
 
-export type IconVariant = 'outline' | 'solid';
+export type IconVariant = 'outline' | 'solid' | 'graphic';
 
 /** Which BEZENT business application (or "global") an icon belongs to. */
 export type BezentProduct = 'hrms' | 'crm' | 'pm' | 'global';

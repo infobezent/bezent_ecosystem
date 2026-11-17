@@ -1,6 +1,7 @@
 import type { BezentIconProps, BezentIconSizeToken } from '../types';
 import { BEZENT_ICON_SIZES } from '../types';
 import type { BezentIconName } from '../definitions';
+import { GRAPHIC_ICON_MAP } from '../definitions/graphics';
 import { getMaterialSymbolGlyph } from '../materialSymbolsMap';
 import './icons.css';
 
@@ -46,6 +47,22 @@ export function BezentIcon({
     typeof size === 'number'
       ? size
       : ((BEZENT_ICON_SIZES as Record<string, number>)[size as BezentIconSizeToken] ?? 20);
+
+  if (variant === 'graphic') {
+    const graphicRenderer = GRAPHIC_ICON_MAP[name];
+    if (graphicRenderer) {
+      return (
+        <span
+          className={`bezent-graphic-icon bezent-graphic-sz-${pixelSize} ${className || ''}`.trim()}
+          title={title}
+          aria-label={ariaLabel}
+          aria-hidden={ariaHidden}
+        >
+          {graphicRenderer({ size: pixelSize })}
+        </span>
+      );
+    }
+  }
 
   const isSolid = variant === 'solid' || active === true;
   const isSelected = active ?? isSolid;

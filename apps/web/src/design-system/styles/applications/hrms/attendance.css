@@ -5122,3 +5122,234 @@ thead .bezent-attendance-col--sticky-right {
 .bezent-table--requests .bezent-table-col--assigned {
   min-width: 140px;
 }
+
+/* ── Punch Log Summary Cards: Size & Proportions Matching Workforce Overview ── */
+.bezent-punch-kpi-grid {
+  display: grid !important;
+  grid-template-columns: repeat(5, minmax(0, 1fr)) !important;
+  gap: 14px !important;
+  width: 100% !important;
+}
+
+@media (max-width: 1200px) {
+  .bezent-punch-kpi-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  }
+}
+
+@media (max-width: 768px) {
+  .bezent-punch-kpi-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .bezent-punch-kpi-grid {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+.bezent-kpi-card {
+  position: relative !important;
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: space-between !important;
+  min-height: 170px !important;
+  height: 170px !important;
+  padding: 18px 18px 16px 18px !important;
+  border-radius: 16px !important;
+  border: none !important;
+  outline: none !important;
+  box-sizing: border-box !important;
+  box-shadow:
+    0 1px 3px rgba(0, 0, 0, 0.04),
+    0 2px 6px rgba(0, 0, 0, 0.02) !important;
+  overflow: visible !important;
+  cursor: pointer;
+}
+
+.bezent-kpi-card:hover {
+  border: none !important;
+  outline: none !important;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08) !important;
+}
+
+.bezent-kpi-card:focus,
+.bezent-kpi-card:focus-visible,
+.bezent-kpi-card:active,
+.bezent-kpi-card.is-active {
+  border: none !important;
+  outline: none !important;
+  box-shadow: 0 4px 14px rgba(32, 45, 75, 0.08) !important;
+}
+
+.bezent-kpi-card__top {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  width: 100% !important;
+  gap: 10px !important;
+}
+
+.bezent-kpi-card__left {
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: center !important;
+  flex: 1 !important;
+  min-width: 0 !important;
+}
+
+.bezent-kpi-card .bezent-kpi-card__value {
+  font-size: 32px !important;
+  font-weight: 800 !important;
+  color: #1e293b !important;
+  line-height: 1 !important;
+  letter-spacing: -0.035em !important;
+  font-feature-settings: 'tnum' !important;
+  margin: 0 !important;
+}
+
+[data-theme='dark'] .bezent-kpi-card .bezent-kpi-card__value {
+  color: #f8fafc !important;
+}
+
+.bezent-kpi-card .bezent-kpi-card__title {
+  max-width: 100% !important;
+  width: 100% !important;
+  font-size: 13px !important;
+  font-weight: 600 !important;
+  color: #64748b !important;
+  line-height: 1.25 !important;
+  letter-spacing: -0.01em !important;
+  margin: 0 0 6px 0 !important;
+  white-space: normal !important;
+  overflow: visible !important;
+  text-overflow: unset !important;
+  word-break: normal !important;
+}
+
+[data-theme='dark'] .bezent-kpi-card .bezent-kpi-card__title {
+  color: #94a3b8 !important;
+}
+
+.bezent-kpi-card__top .bezent-kpi-card__graph {
+  position: static !important;
+  transform: none !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: flex-end !important;
+  flex-shrink: 0 !important;
+  width: 76px !important;
+  height: 44px !important;
+  align-self: center !important;
+  pointer-events: auto !important;
+  overflow: visible !important;
+}
+
+.bezent-kpi-card__top .bezent-kpi-graph-svg {
+  width: 76px !important;
+  height: 38px !important;
+  max-width: 100% !important;
+}
+
+.bezent-kpi-card__top .bezent-kpi-graph-svg--circular {
+  width: 46px !important;
+  height: 46px !important;
+}
+
+/* ── Punch Log Bottom Status Badges / Pills ── */
+.bezent-kpi-sub-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 3px 8.5px;
+  border-radius: 999px;
+  line-height: 1.2;
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+  width: fit-content;
+  align-self: flex-start;
+  margin-top: 6px;
+  transition: all 0.2s ease;
+  user-select: none;
+}
+
+.bezent-kpi-sub-pill-dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+/* Sub-pill Blue: Total Punches / Total Activity */
+.bezent-kpi-sub-pill--blue {
+  background: #eff6ff !important;
+  color: var(--blue-600, #2563eb) !important;
+  border: none !important;
+}
+.bezent-kpi-sub-pill--blue .bezent-kpi-sub-pill-dot {
+  background: #3b82f6 !important;
+}
+[data-theme='dark'] .bezent-kpi-sub-pill--blue {
+  background: rgba(59, 130, 246, 0.15) !important;
+  color: #93c5fd !important;
+}
+
+/* Sub-pill Green: Accepted / Successfully Processed */
+.bezent-kpi-sub-pill--green {
+  background: #ecfdf5 !important;
+  color: #059669 !important;
+  border: none !important;
+}
+.bezent-kpi-sub-pill--green .bezent-kpi-sub-pill-dot {
+  background: #10b981 !important;
+}
+[data-theme='dark'] .bezent-kpi-sub-pill--green {
+  background: rgba(16, 185, 129, 0.15) !important;
+  color: #6ee7b7 !important;
+}
+
+/* Sub-pill Amber: Flagged / Requires Review */
+.bezent-kpi-sub-pill--amber {
+  background: #fffbeb !important;
+  color: #d97706 !important;
+  border: none !important;
+}
+.bezent-kpi-sub-pill--amber .bezent-kpi-sub-pill-dot {
+  background: #f59e0b !important;
+}
+[data-theme='dark'] .bezent-kpi-sub-pill--amber {
+  background: rgba(245, 158, 11, 0.15) !important;
+  color: #fde68a !important;
+}
+
+/* Sub-pill Red: Rejected / Rejected Punches */
+.bezent-kpi-sub-pill--red {
+  background: #fef2f2 !important;
+  color: #dc2626 !important;
+  border: none !important;
+}
+.bezent-kpi-sub-pill--red .bezent-kpi-sub-pill-dot {
+  background: #ef4444 !important;
+}
+[data-theme='dark'] .bezent-kpi-sub-pill--red {
+  background: rgba(239, 68, 68, 0.15) !important;
+  color: #fca5a5 !important;
+}
+
+/* Sub-pill Purple: Failed to Process / Processing Errors */
+.bezent-kpi-sub-pill--purple {
+  background: #f5f3ff !important;
+  color: #7c3aed !important;
+  border: none !important;
+}
+.bezent-kpi-sub-pill--purple .bezent-kpi-sub-pill-dot {
+  background: #8b5cf6 !important;
+}
+[data-theme='dark'] .bezent-kpi-sub-pill--purple {
+  background: rgba(139, 92, 246, 0.15) !important;
+  color: #c4b5fd !important;
+}
+

@@ -1304,6 +1304,40 @@ export const GLOBAL_ICON_DEFINITIONS: Record<string, IconDefinition> = {
       <path d="M12 9v4M12 17h.01" />
     </g>
   )),
+  fingerprint: glyph('fingerprint', 'Fingerprint', (c, sw) => (
+    <g {...S(c, sw)}>
+      <path d="M12 11c0-1.66-1.34-3-3-3s-3 1.34-3 3c0 2.22 1.21 4.15 3 5.19" />
+      <path d="M12 7c-2.76 0-5 2.24-5 5 0 3.32 1.88 6.19 4.63 7.64" />
+      <path d="M12 3C7.58 3 4 6.58 4 11c0 4.41 2.55 8.24 6.27 10.08" />
+      <path d="M12 11c0-1.66 1.34-3 3-3s3 1.34 3 3c0 3.87-2.11 7.23-5.24 9" />
+      <path d="M15 11c0-1.1-.9-2-2-2s-2 .9-2 2" />
+    </g>
+  )),
+  checkCircle: glyph('checkCircle', 'Check circle', (c, sw) => (
+    <g {...S(c, sw)}>
+      <circle cx="12" cy="12" r="10" />
+      <path d="m9 12 2 2 4-4" />
+    </g>
+  )),
+  check_circle: glyph('check_circle', 'Check circle', (c, sw) => (
+    <g {...S(c, sw)}>
+      <circle cx="12" cy="12" r="10" />
+      <path d="m9 12 2 2 4-4" />
+    </g>
+  )),
+  cancel: glyph('cancel', 'Cancel', (c, sw) => (
+    <g {...S(c, sw)}>
+      <circle cx="12" cy="12" r="10" />
+      <path d="m15 9-6 6M9 9l6 6" />
+    </g>
+  )),
+  error: glyph('error', 'Error', (c, sw) => (
+    <g {...S(c, sw)}>
+      <circle cx="12" cy="12" r="10" />
+      <line x1="12" y1="8" x2="12" y2="12" />
+      <line x1="12" y1="16" x2="12.01" y2="16" />
+    </g>
+  )),
   pin: glyph('pin', 'Pin', (c, sw) => (
     <g {...S(c, sw)}>
       <path d="M12 17v5" />

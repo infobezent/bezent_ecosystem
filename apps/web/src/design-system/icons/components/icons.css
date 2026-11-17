@@ -319,3 +319,13 @@ button.is-active .bezent-duotone-icon,
   color: var(--nav-icon-default);
   --icon-fill-val: 0 !important;
 }
+
+/* ── Infographic / Graphical Icons (ADR-015 Extension) ── */
+.bezent-graphic-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  vertical-align: middle;
+  line-height: 0;
+}
