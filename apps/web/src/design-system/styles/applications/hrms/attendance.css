@@ -2804,6 +2804,26 @@
   width: 100%;
 }
 
+/* ── 3B. 3-Card Trio Grid (Insights, Shift Roster, Calendar) ── */
+.bezent-att-trio-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+  width: 100%;
+}
+
+@media (max-width: 1200px) {
+  .bezent-att-trio-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 768px) {
+  .bezent-att-trio-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
 /* ── 4. Attendance Trends Card & Chart ── */
 .bezent-att-trends-card {
   background: #ffffff !important;
@@ -4995,6 +5015,11 @@
 }
 
 /* ── 9. Attendance Calendar Card ── */
+.bezent-att-calendar-deck {
+  width: 100%;
+  display: flex;
+}
+
 .bezent-att-cal-card {
   background: #ffffff !important;
   border: 1px solid #e9eaf4 !important;
@@ -5006,6 +5031,8 @@
     0 1px 2px rgba(0, 0, 0, 0.02) !important;
   overflow: hidden;
   transition: border-color 0.15s ease;
+  width: 100%;
+  max-width: 680px;
 }
 
 [data-theme='dark'] .bezent-att-cal-card {
@@ -5021,6 +5048,7 @@
   align-items: center !important;
   justify-content: space-between !important;
   background: transparent !important;
+  gap: 12px;
 }
 
 [data-theme='dark'] .bezent-att-cal-header {
@@ -5181,7 +5209,8 @@
 .bezent-att-cal-grid {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
-  gap: 4px;
+  gap: 5px;
+  width: 100%;
 }
 
 .bezent-att-cal-weekday {
@@ -5191,7 +5220,7 @@
   letter-spacing: 0.05em;
   text-transform: uppercase;
   color: #94a3b8;
-  padding: 1px 0 3px;
+  padding: 2px 0 4px;
   user-select: none;
 }
 
@@ -5215,13 +5244,14 @@
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  padding: 3px 5px 3px;
+  padding: 4px 6px;
   cursor: pointer;
   position: relative;
   transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
   user-select: none;
   text-align: left;
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);
+  width: 100%;
 }
 
 .bezent-att-cal-day:hover {
@@ -5392,7 +5422,7 @@
 
 .bezent-att-cal-day-num {
   font-size: 11.5px;
-  font-weight: 650;
+  font-weight: 700;
   color: #334155;
   line-height: 1;
   font-variant-numeric: tabular-nums;
@@ -5504,11 +5534,12 @@
   background: #f8fafc;
   border: 1px solid #edf2f7;
   border-radius: 6px;
-  padding: 5px 10px;
+  padding: 5px 12px;
   display: flex;
   align-items: center;
   justify-content: space-between;
   transition: all 0.15s ease;
+  width: 100%;
 }
 
 [data-theme='dark'] .bezent-att-cal-selected-strip {
@@ -5523,7 +5554,7 @@
 }
 
 .bezent-att-cal-selected-date {
-  font-size: 13px;
+  font-size: 12.5px;
   font-weight: 700;
   color: #0f172a;
   letter-spacing: -0.01em;
@@ -5646,7 +5677,7 @@
 }
 
 .bezent-att-cal-graph-track {
-  width: 140px;
+  width: 130px;
   height: 6px;
   border-radius: 999px;
   overflow: hidden;
@@ -5659,7 +5690,7 @@
 }
 
 .bezent-att-cal-graph-bar-svg {
-  width: 140px;
+  width: 130px;
   height: 6px;
   display: block;
 }
@@ -5671,6 +5702,7 @@
   font-size: 11px;
   color: #64748b;
   padding-top: 2px;
+  width: 100%;
 }
 
 [data-theme='dark'] .bezent-att-cal-legend {
@@ -5709,7 +5741,7 @@
 }
 
 .bezent-att-cal-footer {
-  padding: 11px 20px;
+  padding: 10px 18px;
   border-top: 1px solid #f1f5f9;
   background: #fafbfc;
   display: flex;

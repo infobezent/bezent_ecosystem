@@ -501,8 +501,8 @@ export function AttendanceOverviewPage({
           />
         </div>
 
-        {/* ── Attendance Monthly Calendar Deck (Full Width) ── */}
-        <div className="bezent-att-calendar-full-width">
+        {/* ── Attendance Monthly Calendar Deck (Medium Card) ── */}
+        <div className="bezent-att-calendar-deck">
           <AttendanceCalendarCard overviewData={overviewData} loading={loading} />
         </div>
       </div>
