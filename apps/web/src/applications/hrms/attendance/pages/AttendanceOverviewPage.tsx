@@ -23,6 +23,7 @@ import { AttendanceDistributionCard } from '../components/AttendanceDistribution
 import { AttendanceNeedsAttentionCard } from '../components/AttendanceNeedsAttentionCard';
 import { AttendancePayrollReadinessCard } from '../components/AttendancePayrollReadinessCard';
 import { AttendanceInsightsCard } from '../components/AttendanceInsightsCard';
+import { AttendanceShiftRosterCard } from '../components/AttendanceShiftRosterCard';
 import { AttendanceCalendarCard } from '../components/AttendanceCalendarCard';
 
 export type DateRangePreset =
@@ -490,9 +491,18 @@ export function AttendanceOverviewPage({
           />
         </div>
 
-        {/* ── Attendance Intelligence & Calendar Deck: Insights (50%) + Calendar (50%) ── */}
+        {/* ── Attendance Intelligence & Roster Deck: Insights (50%) + Shift Roster (50%) ── */}
         <div className="bezent-att-intelligence-grid">
           <AttendanceInsightsCard overviewData={overviewData} loading={loading} />
+          <AttendanceShiftRosterCard
+            overviewData={overviewData}
+            shifts={shiftsList}
+            loading={loading}
+          />
+        </div>
+
+        {/* ── Attendance Monthly Calendar Deck (Full Width) ── */}
+        <div className="bezent-att-calendar-full-width">
           <AttendanceCalendarCard overviewData={overviewData} loading={loading} />
         </div>
       </div>
