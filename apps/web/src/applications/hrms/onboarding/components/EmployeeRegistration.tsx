@@ -172,6 +172,8 @@ export const REGISTRATION_SECTIONS: readonly RegistrationSection[] = [
 ];
 
 export interface EmployeeRegistrationProps {
+  /** Organization masters used to populate Department / Designation / Location. */
+  masters?: React.ComponentProps<typeof GeneralInformation>['masters'];
   isOpen?: boolean;
   onCancel: () => void;
   onSave?: (data: Record<string, unknown>) => void;
@@ -197,6 +199,7 @@ import { authorizedFetch } from '../../../../platform/auth';
 import { appConfig } from '../../../../app/config/env';
 
 export function EmployeeRegistration({
+  masters,
   isOpen = true,
   onCancel,
   onSave,
@@ -457,10 +460,9 @@ export function EmployeeRegistration({
         } as PassportPhotoState)
       : {
           file: null,
-          fileName: 'Passport_Photo.png',
-          previewUrl:
-            'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80',
-          status: 'Verified',
+          fileName: '',
+          previewUrl: '',
+          status: 'Pending',
         },
   );
 
@@ -615,9 +617,22 @@ export function EmployeeRegistration({
   };
 
   // Consolidated Data Object for Review Section
+  // Documents are edited in their own state; merge them so review and submit see the uploads.
+  const registrationData: RegistrationFormData = useMemo(
+    () => ({
+      ...formData,
+      documents: {
+        isExperiencedHire,
+        passportPhoto,
+        items: documentsList as unknown as RegistrationFormData['documents']['items'],
+      },
+    }),
+    [formData, documentsList, isExperiencedHire, passportPhoto],
+  );
+
   const reviewData: ReviewSectionData = useMemo(() => {
-    return toReviewSectionData(formData);
-  }, [formData]);
+    return toReviewSectionData(registrationData);
+  }, [registrationData]);
 
   // Employee Identity Context
   const employeeFullName = useMemo(() => {
@@ -1179,6 +1194,7 @@ export function EmployeeRegistration({
           <div key={activeSection} className="bezent-chapter-page-transition">
             {activeSection === 'general' ? (
               <GeneralInformation
+                masters={masters}
                 employeeId={employeeId}
                 data={formData.general}
                 mode={mode}
@@ -1227,7 +1243,7 @@ export function EmployeeRegistration({
                   if (isEditMode) {
                     void handleSaveEditClick();
                   } else if (onSubmit) {
-                    void onSubmit(formData);
+                    void onSubmit(registrationData);
                   } else if (onSave) {
                     onSave(reviewData as unknown as Record<string, unknown>);
                   }

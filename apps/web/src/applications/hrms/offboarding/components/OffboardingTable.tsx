@@ -242,6 +242,18 @@ export const OffboardingTable: React.FC<OffboardingTableProps> = ({
                               Complete Separation
                             </button>
                           )}
+                          {isServingNotice && (
+                            <button
+                              type="button"
+                              role="menuitem"
+                              className="bezent-table-action-menu__item"
+                              disabled
+                              title="Separation can be completed once the last working date arrives."
+                            >
+                              <BezentIcon name="calendar" size={16} />
+                              Completes on {formatDate(action.effectiveDate)}
+                            </button>
+                          )}
                           {isPending && (
                             <button
                               type="button"
@@ -500,6 +512,18 @@ export const OffboardingTable: React.FC<OffboardingTableProps> = ({
                           >
                             <BezentIcon name="checkCircle" size={16} />
                             Complete Separation
+                          </button>
+                        )}
+                        {isServingNotice && (
+                          <button
+                            type="button"
+                            role="menuitem"
+                            className="bezent-table-action-menu__item"
+                            disabled
+                            title="Separation can be completed once the last working date arrives."
+                          >
+                            <BezentIcon name="calendar" size={16} />
+                            Completes on {formatDate(action.effectiveDate)}
                           </button>
                         )}
 

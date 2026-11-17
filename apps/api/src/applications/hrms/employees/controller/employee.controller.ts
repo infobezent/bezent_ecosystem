@@ -40,7 +40,7 @@ export class EmployeeController {
         throw new AppError('Context not resolved', 400, 'CONTEXT_MISSING');
       }
 
-      const result = await this.service.getNextEmployeeNumber(
+      const result = await this.service.previewNextEmployeeNumber(
         companyContext.tenantId,
         companyContext.companyId,
       );
