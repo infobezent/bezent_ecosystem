@@ -5122,3 +5122,319 @@ thead .bezent-attendance-col--sticky-right {
 .bezent-table--requests .bezent-table-col--assigned {
   min-width: 140px;
 }
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   ATTENDANCE REPORTS REDESIGN (HUB V2)
+   ───────────────────────────────────────────────────────────────────────────── */
+
+.bezent-att-reports-container {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4, 16px);
+  width: 100%;
+}
+
+.bezent-att-reports-toolbar {
+  width: 100%;
+}
+
+.bezent-att-reports-search-box {
+  width: 100%;
+  min-width: 280px;
+  max-width: 480px;
+}
+
+.bezent-att-reports-count-pill {
+  display: inline-flex;
+  align-items: center;
+  font-size: var(--font-size-xs, 12px);
+  font-weight: var(--font-weight-semibold, 600);
+  color: var(--color-text-secondary, #475569);
+  background: var(--color-bg-secondary, #f1f5f9);
+  padding: 4px 10px;
+  border-radius: var(--radius-full, 9999px);
+  border: 1px solid var(--color-border-subtle, #e2e8f0);
+}
+
+[data-theme='dark'] .bezent-att-reports-count-pill {
+  background: var(--color-bg-tertiary, #1e293b);
+  color: var(--color-text-secondary, #94a3b8);
+  border-color: var(--color-border-default, #334155);
+}
+
+.bezent-att-category-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2, 8px);
+  align-items: center;
+}
+
+.bezent-att-category-chip {
+  appearance: none;
+  border: 1px solid var(--color-border-subtle, #e2e8f0);
+  background: var(--color-bg-surface, #ffffff);
+  color: var(--color-text-secondary, #475569);
+  font-size: var(--font-size-xs, 12px);
+  font-weight: var(--font-weight-medium, 500);
+  padding: 6px 14px;
+  border-radius: var(--radius-full, 9999px);
+  cursor: pointer;
+  transition: all 0.15s ease-in-out;
+  line-height: 1.25;
+}
+
+.bezent-att-category-chip:hover {
+  background: var(--color-bg-secondary, #f8fafc);
+  color: var(--color-text-primary, #0f172a);
+  border-color: var(--color-border-default, #cbd5e1);
+}
+
+.bezent-att-category-chip:focus-visible {
+  outline: 2px solid var(--color-focus-ring, #0284c7);
+  outline-offset: 2px;
+}
+
+.bezent-att-category-chip--active,
+.bezent-att-category-chip--active:hover {
+  background: var(--color-primary-base, #0284c7);
+  color: #ffffff;
+  border-color: var(--color-primary-base, #0284c7);
+  font-weight: var(--font-weight-semibold, 600);
+}
+
+[data-theme='dark'] .bezent-att-category-chip {
+  background: var(--color-bg-secondary, #1e293b);
+  color: var(--color-text-secondary, #94a3b8);
+  border-color: var(--color-border-default, #334155);
+}
+
+[data-theme='dark'] .bezent-att-category-chip:hover {
+  background: var(--color-bg-tertiary, #334155);
+  color: var(--color-text-primary, #f8fafc);
+  border-color: var(--color-border-strong, #475569);
+}
+
+[data-theme='dark'] .bezent-att-category-chip--active,
+[data-theme='dark'] .bezent-att-category-chip--active:hover {
+  background: var(--color-primary-base, #38bdf8);
+  color: #0f172a;
+  border-color: var(--color-primary-base, #38bdf8);
+}
+
+/* ── 4-column × 2-row Responsive Reports Grid ── */
+.bezent-att-reports-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--space-3, 12px);
+  width: 100%;
+}
+
+/* Tablet: 2 columns */
+@media (max-width: 1200px) {
+  .bezent-att-reports-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+/* Mobile: 1 column */
+@media (max-width: 640px) {
+  .bezent-att-reports-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ── Compact Report Card (Matching Records Folder Style) ── */
+.bezent-att-report-card {
+  position: relative;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  grid-template-rows: auto auto;
+  gap: 8px 12px;
+  align-items: center;
+  padding: 12px 14px;
+  text-align: left;
+  background: var(--bg-surface, #ffffff);
+  border: 0.8px solid #e9eaf4;
+  border-radius: var(--radius-card, 12px);
+  cursor: pointer;
+  font: inherit;
+  color: inherit;
+  min-height: 108px;
+  box-sizing: border-box;
+  transition:
+    background-color 0.15s ease,
+    border-color 0.15s ease,
+    box-shadow 0.15s ease;
+}
+
+.bezent-att-report-card:hover,
+.bezent-att-report-card:focus-visible {
+  background: var(--bg-hover, #c2e7ff);
+  border-color: var(--blue-interactive, #1a73e8);
+  outline: none;
+}
+
+[data-theme='dark'] .bezent-att-report-card {
+  background: var(--color-bg-surface, #0f172a);
+  border-color: var(--color-border-subtle, #1e293b);
+}
+
+[data-theme='dark'] .bezent-att-report-card:hover,
+[data-theme='dark'] .bezent-att-report-card:focus-visible {
+  background: var(--color-bg-tertiary, #1e293b);
+  border-color: var(--blue-interactive, #38bdf8);
+}
+
+.bezent-att-report-card__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius-md, 10px);
+  background: var(--bg-hover, #c2e7ff);
+  color: var(--blue-interactive, #1a73e8);
+  flex-shrink: 0;
+}
+
+[data-theme='dark'] .bezent-att-report-card__icon {
+  background: rgba(56, 189, 248, 0.12);
+  color: var(--color-primary-base, #38bdf8);
+}
+
+.bezent-att-report-card__text {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  gap: 1px;
+}
+
+.bezent-att-report-card__meta-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+
+.bezent-att-report-card__id {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--blue-interactive, #1a73e8);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+[data-theme='dark'] .bezent-att-report-card__id {
+  color: var(--color-primary-base, #38bdf8);
+}
+
+.bezent-att-report-card__dot {
+  font-size: 11px;
+  color: var(--text-secondary, #94a3b8);
+}
+
+.bezent-att-report-card__category {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--text-secondary, #64748b);
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.bezent-att-report-card__category-btn {
+  border: none;
+  background: transparent;
+  padding: 0;
+  font: inherit;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--text-secondary, #64748b);
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  cursor: pointer;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.bezent-att-report-card__category-btn:hover {
+  color: var(--blue-interactive, #1a73e8);
+  text-decoration: underline;
+}
+
+[data-theme='dark'] .bezent-att-report-card__category,
+[data-theme='dark'] .bezent-att-report-card__category-btn {
+  color: var(--color-text-secondary, #94a3b8);
+}
+
+.bezent-att-report-card__title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-primary, #041e49);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  margin: 0;
+  line-height: 1.3;
+}
+
+[data-theme='dark'] .bezent-att-report-card__title {
+  color: var(--color-text-primary, #f8fafc);
+}
+
+.bezent-att-report-card__subtitle {
+  font-size: 12px;
+  color: var(--text-secondary, #64748b);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  line-height: 1.3;
+}
+
+[data-theme='dark'] .bezent-att-report-card__subtitle {
+  color: var(--color-text-secondary, #94a3b8);
+}
+
+.bezent-att-report-card__bottom {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding-top: 6px;
+  border-top: 0.8px solid #f1f3f9;
+}
+
+[data-theme='dark'] .bezent-att-report-card__bottom {
+  border-top-color: var(--color-border-subtle, #1e293b);
+}
+
+.bezent-att-report-card__period {
+  font-size: 11px;
+  color: inherit;
+}
+
+.bezent-att-report-card__period strong {
+  font-weight: 600;
+}
+
+.bezent-att-report-card__action {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11.5px;
+  font-weight: 600;
+  color: var(--blue-interactive, #1a73e8);
+  transition: transform 0.15s ease;
+}
+
+.bezent-att-report-card:hover .bezent-att-report-card__action {
+  transform: translateX(2px);
+}
+
+[data-theme='dark'] .bezent-att-report-card__action {
+  color: var(--color-primary-base, #38bdf8);
+}

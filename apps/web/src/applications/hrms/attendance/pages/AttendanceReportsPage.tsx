@@ -27,6 +27,7 @@
  */
 
 import React, { useState, useEffect, useMemo, useRef } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import {
   Page,
   PageHeader,
@@ -53,11 +54,13 @@ import {
   fetchReportPreview,
   fetchReportAnalytics,
   downloadReportExport,
+  fetchReportCatalog,
 } from '../api/attendanceReportsApi';
 import type {
   ReportId,
   ReportPreviewResult,
   ReportAnalyticsResult,
+  ReportDefinition,
 } from '../types/attendanceReports.types';
 import {
   DonutChart,
@@ -65,6 +68,17 @@ import {
   StackedBarChart,
   LineChart,
 } from '../components/analytics/AttendanceReportCharts';
+import {
+  CANONICAL_REPORT_IDS,
+  REPORT_UI_CONFIGS,
+  REPORT_FALLBACK_COPY,
+  type ReportUiConfig,
+} from './reports/reportsConfig';
+import { ReportsHeader } from './reports/ReportsHeader';
+import { ReportsToolbar } from './reports/ReportsToolbar';
+import { CategoryChips } from './reports/CategoryChips';
+import { ReportCard } from './reports/ReportCard';
+import { ReportEmptyState } from './reports/ReportEmptyState';
 
 // ── 2. Report Templates Specification (Spec Section 2) ───────────────────────
 
@@ -215,11 +229,81 @@ function getErrorMessage(err: unknown, fallback: string): string {
 // ── Main Attendance Reports Page ─────────────────────────────────────────────
 
 export function AttendanceReportsPage() {
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+
   // Navigation: null = Landing view (Catalog); template = Active Report View
   const [activeReport, setActiveReport] = useState<CanonicalReportTemplate | null>(null);
 
   // ── 3. Landing View State (Spec Section 3) ─────────────────────────────────
   const [searchQuery, setSearchQuery] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState<string>('all');
+
+  // Dynamic Catalog State (defaults to 7 canonical reports with fallback copy)
+  const [catalogReports, setCatalogReports] = useState<ReportDefinition[]>(() => {
+    return CANONICAL_REPORT_IDS.map((id) => {
+      const fallback = REPORT_FALLBACK_COPY[id];
+      const template = CANONICAL_REPORTS.find((r) => r.id === id);
+      return {
+        id,
+        code: id,
+        name: fallback?.name ?? template?.name ?? id,
+        category: 'daily_operations',
+        categoryLabel: fallback?.tag ?? template?.category ?? 'General',
+        description: fallback?.description ?? template?.description ?? '',
+        authoritativeSource: 'attendance_daily_log',
+        columns: template?.columns ? (template.columns as any) : [],
+        allowedFilters: [],
+        defaultSorting: { column: 'date', direction: 'desc' },
+        requiredPermission: 'hrms.attendance.view',
+        sensitiveClassification: 'standard',
+        supportedExportFormats: ['csv', 'xlsx', 'pdf'],
+        isPermitted: true,
+      };
+    });
+  });
+
+  // Fetch report catalog on mount and filter to permitted canonical reports
+  useEffect(() => {
+    let mounted = true;
+    fetchReportCatalog()
+      .then((defs) => {
+        if (!mounted || !Array.isArray(defs)) return;
+        const filtered = defs.filter(
+          (d) =>
+            (CANONICAL_REPORT_IDS as readonly string[]).includes(d.id) && d.isPermitted !== false,
+        );
+        if (filtered.length > 0) {
+          setCatalogReports(filtered);
+        }
+      })
+      .catch(() => {
+        // Fallback remains active
+      });
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
+  // Sync active report from URL search parameter (e.g. ?report=R12)
+  useEffect(() => {
+    const reportParam = searchParams.get('report');
+    if (reportParam) {
+      const found = CANONICAL_REPORTS.find((r) => r.id === reportParam);
+      if (found) {
+        setActiveReport(found);
+      }
+    }
+  }, [searchParams]);
+
+  // Derived Category List from catalog definitions
+  const categories = useMemo(() => {
+    const set = new Set<string>();
+    catalogReports.forEach((r) => {
+      if (r.categoryLabel) set.add(r.categoryLabel);
+    });
+    return Array.from(set);
+  }, [catalogReports]);
 
   // ── 4. Report View Filter Bar State (Spec Section 4) ───────────────────────
   const now = new Date();
@@ -276,14 +360,21 @@ export function AttendanceReportsPage() {
     'Finance',
   ];
 
-  // ── Filter Catalog for Landing View ────────────────────────────────────────
+  // ── Filter Catalog for Landing View (Search & Category Chips) ───────────────
   const filteredCatalog = useMemo(() => {
-    if (!searchQuery.trim()) return CANONICAL_REPORTS;
     const q = searchQuery.toLowerCase().trim();
-    return CANONICAL_REPORTS.filter(
-      (r) => r.name.toLowerCase().includes(q) || r.description.toLowerCase().includes(q),
-    );
-  }, [searchQuery]);
+    return catalogReports.filter((r) => {
+      const matchesSearch =
+        !q ||
+        r.name.toLowerCase().includes(q) ||
+        r.categoryLabel.toLowerCase().includes(q) ||
+        r.description.toLowerCase().includes(q);
+      const matchesCategory =
+        selectedCategory === 'all' ||
+        r.categoryLabel.toLowerCase() === selectedCategory.toLowerCase();
+      return matchesSearch && matchesCategory;
+    });
+  }, [catalogReports, searchQuery, selectedCategory]);
 
   // Open Report Handler
   const handleOpenReport = (report: CanonicalReportTemplate) => {
@@ -294,6 +385,18 @@ export function AttendanceReportsPage() {
     setAnalyticsResult(null);
     setGenerationError(null);
     setValidationError(null);
+  };
+
+  // Open Report from Hub Card Handler
+  const handleOpenReportFromCard = (report: ReportDefinition, config: ReportUiConfig) => {
+    if (report.id === 'R12') {
+      const match = CANONICAL_REPORTS.find((r) => r.id === 'R12');
+      if (match) {
+        handleOpenReport(match);
+      }
+    } else {
+      navigate(config.targetRoute);
+    }
   };
 
   // Back to Catalog Handler
@@ -439,18 +542,14 @@ export function AttendanceReportsPage() {
   return (
     <Page maxWidth="default" gap="md">
       {/* ── 1. Page Header (Spec Section 1) ── */}
-      <PageHeader
-        eyebrow={
-          activeReport ? `Attendance › Reports › ${activeReport.name}` : 'Attendance › Reports'
-        }
-        title={activeReport ? activeReport.name : 'Reports'}
-        subtitle={
-          activeReport
-            ? activeReport.description
-            : 'Generate attendance reports and export them for payroll, audit and review.'
-        }
-        actions={
-          activeReport ? (
+      {!activeReport ? (
+        <ReportsHeader />
+      ) : (
+        <PageHeader
+          eyebrow={`Attendance › Reports › ${activeReport.name}`}
+          title={activeReport.name}
+          subtitle={activeReport.description}
+          actions={
             <Inline gap="sm" align="center">
               <Button variant="outline" size="md" onClick={handleBackToCatalog}>
                 <BezentIcon name="chevronLeft" size={16} />
@@ -505,9 +604,9 @@ export function AttendanceReportsPage() {
                 )}
               </div>
             </Inline>
-          ) : undefined
-        }
-      />
+          }
+        />
+      )}
 
       <Stack gap="md">
         {/* Banner Toast Notification */}
@@ -518,56 +617,57 @@ export function AttendanceReportsPage() {
         )}
 
         {/* ════════════════════════════════════════════════════════════════════
-            LANDING VIEW: AVAILABLE REPORTS CATALOG (Spec Section 3)
+            LANDING VIEW: AVAILABLE REPORTS HUB (Batch 1 Redesign)
             ════════════════════════════════════════════════════════════════════ */}
         {!activeReport ? (
-          <Stack gap="md">
-            {/* Search Toolbar */}
-            <div className="bezent-directory-toolbar">
-              <div className="bezent-directory-toolbar__search">
-                <SearchInput
-                  value={searchQuery}
-                  shape="rounded"
-                  aria-label="Search reports"
-                  placeholder="Search reports"
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  onClear={() => setSearchQuery('')}
-                />
+          <div className="bezent-att-reports-container">
+            {/* Reports Toolbar with integrated SearchInput & Results Count */}
+            <ReportsToolbar
+              searchQuery={searchQuery}
+              onSearchChange={setSearchQuery}
+              onClearSearch={() => setSearchQuery('')}
+              totalCount={catalogReports.length}
+              filteredCount={filteredCatalog.length}
+            />
+
+            {/* Category Chips Filter */}
+            <CategoryChips
+              categories={categories}
+              selectedCategory={selectedCategory}
+              onSelectCategory={setSelectedCategory}
+            />
+
+            {/* Semantic Section Heading for Screen Readers & Tests */}
+            <h2 className="bezent-section-title bezent-sr-only">Available Reports</h2>
+
+            {/* Plain Responsive Cards Grid or Honest Empty State */}
+            {filteredCatalog.length === 0 ? (
+              <ReportEmptyState
+                searchQuery={searchQuery}
+                selectedCategory={selectedCategory}
+                onClearFilters={() => {
+                  setSearchQuery('');
+                  setSelectedCategory('all');
+                }}
+              />
+            ) : (
+              <div className="bezent-att-reports-grid">
+                {filteredCatalog.map((report) => {
+                  const config = (REPORT_UI_CONFIGS as Record<string, ReportUiConfig>)[report.id];
+                  if (!config) return null;
+                  return (
+                    <ReportCard
+                      key={report.id}
+                      report={report}
+                      config={config}
+                      onOpen={handleOpenReportFromCard}
+                      onSelectCategory={(cat) => setSelectedCategory(cat)}
+                    />
+                  );
+                })}
               </div>
-              <span className="bezent-records-badge">
-                {filteredCatalog.length} Available Reports
-              </span>
-            </div>
-
-            {/* Section Title */}
-            <h2 className="bezent-section-title">Available Reports</h2>
-
-            {/* 7 Report Cards Grid */}
-            <Grid columns={2} gap="md">
-              {filteredCatalog.map((report) => (
-                <Card key={report.id} variant="default">
-                  <Stack gap="md">
-                    <Stack gap="xs">
-                      <Inline justify="between" align="center">
-                        <h3 className="bezent-card__title">{report.name}</h3>
-                        <Badge variant="neutral" size="sm">
-                          {report.category}
-                        </Badge>
-                      </Inline>
-                      <p className="bezent-card__desc">{report.description}</p>
-                    </Stack>
-
-                    <Inline justify="end">
-                      <Button variant="primary" size="sm" onClick={() => handleOpenReport(report)}>
-                        <span>Open Report</span>
-                        <BezentIcon name="chevronRight" size={14} />
-                      </Button>
-                    </Inline>
-                  </Stack>
-                </Card>
-              ))}
-            </Grid>
-          </Stack>
+            )}
+          </div>
         ) : (
           /* ════════════════════════════════════════════════════════════════════
              ACTIVE REPORT VIEW (Spec Section 4, 6, 7, 8)
