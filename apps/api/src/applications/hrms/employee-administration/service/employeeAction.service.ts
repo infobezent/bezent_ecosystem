@@ -1,5 +1,6 @@
 import { randomUUID } from 'node:crypto';
 import { EmployeeActionRepository } from '../repository/employeeAction.repository.js';
+import { workforceSettingsService } from '../../workforce/service/workforceSettings.service.js';
 import { EmployeeRepository } from '../../employees/repository/employee.repository.js';
 import { OrganizationRepository } from '../../../../platform/organization/repository/organization.repository.js';
 import type {
@@ -78,12 +79,21 @@ function change(
   return { field, from, fromLabel: from === null ? null : fromLabel, to, toLabel };
 }
 
+function daysBetween(from: string, to: string): number {
+  return Math.round((Date.parse(`${to}T00:00:00Z`) - Date.parse(`${from}T00:00:00Z`)) / 86_400_000);
+}
+
+function addDaysIso(date: string, days: number): string {
+  return new Date(Date.parse(`${date}T00:00:00Z`) + days * 86_400_000).toISOString().slice(0, 10);
+}
+
 export class EmployeeActionService {
   constructor(
     private readonly repo = new EmployeeActionRepository(),
     private readonly employeeRepo = new EmployeeRepository(),
     private readonly orgRepo = new OrganizationRepository(),
     private readonly today: () => string = todayIsoDate,
+    private readonly settings = workforceSettingsService,
   ) {}
 
   // ==========================================================================
@@ -95,7 +105,21 @@ export class EmployeeActionService {
     companyId: string,
     query: Record<string, unknown> = {},
   ): Promise<PaginatedEmployeeActionsResult> {
-    return this.repo.list(tenantId, companyId, validateListEmployeeActionsQuery(query));
+    const result = await this.repo.list(
+      tenantId,
+      companyId,
+      validateListEmployeeActionsQuery(query),
+    );
+    const separationIds = result.items
+      .filter((a) => a.actionType === 'resignation' || a.actionType === 'termination')
+      .map((a) => a.id);
+    const summaries = await this.repo.clearanceSummaries(tenantId, companyId, separationIds);
+    return {
+      ...result,
+      items: result.items.map((a) =>
+        summaries.has(a.id) ? { ...a, clearance: summaries.get(a.id)! } : a,
+      ),
+    };
   }
 
   async getActionDetail(
@@ -167,9 +191,75 @@ export class EmployeeActionService {
         tx,
         this.historyRecord(tenantId, companyId, id, 'created', null, 'pending', null, actor),
       );
+
+      // Offboarding starts with the request: build the clearance checklist from
+      // the Workforce Settings templates so departments can clear it during notice.
+      if (dto.actionType === 'resignation' || dto.actionType === 'termination') {
+        const templates = await this.settings.listClearanceTemplates(tenantId, companyId);
+        await this.repo.insertClearanceItems(
+          tx,
+          templates.map((template) => ({
+            id: `clr_${randomUUID()}`,
+            tenantId,
+            companyId,
+            employeeId: employee.id,
+            actionId: id,
+            department: template.department,
+            itemTitle: template.itemTitle,
+            description: template.description,
+            isMandatory: template.isMandatory,
+            displayOrder: template.displayOrder,
+          })),
+        );
+      }
     });
 
     return this.getActionDetail(tenantId, companyId, id);
+  }
+
+  async listClearance(tenantId: string, companyId: string, actionId: string) {
+    await this.requireAction(tenantId, companyId, actionId);
+    const items = await this.repo.listClearanceItems(tenantId, companyId, actionId);
+    return {
+      items,
+      total: items.length,
+      cleared: items.filter((item) => item.status !== 'pending').length,
+    };
+  }
+
+  async updateClearanceItem(
+    tenantId: string,
+    companyId: string,
+    actionId: string,
+    itemId: string,
+    input: unknown,
+    actor: string | null,
+  ) {
+    await this.requireAction(tenantId, companyId, actionId);
+    const body = (input ?? {}) as Record<string, unknown>;
+    const status = body.status;
+    if (status !== 'pending' && status !== 'cleared' && status !== 'waived') {
+      throw new BadRequestError('Status must be pending, cleared or waived', 'VALIDATION_ERROR');
+    }
+    const remarks =
+      typeof body.remarks === 'string' && body.remarks.trim()
+        ? body.remarks.trim().slice(0, 500)
+        : null;
+    const items = await this.repo.listClearanceItems(tenantId, companyId, actionId);
+    const item = items.find((candidate) => candidate.id === itemId);
+    if (!item) throw new NotFoundError(`Clearance item not found for ID: ${itemId}`);
+    if (status === 'waived' && item.isMandatory && !remarks) {
+      throw new BadRequestError(
+        'A reason is required to waive a mandatory clearance item',
+        'VALIDATION_ERROR',
+      );
+    }
+    await this.repo.updateClearanceItem(tenantId, companyId, actionId, itemId, {
+      status,
+      remarks,
+      clearedBy: actor,
+    });
+    return this.listClearance(tenantId, companyId, actionId);
   }
 
   async updateAction(
@@ -557,6 +647,27 @@ export class EmployeeActionService {
             'INVALID_PROBATION_DATE',
           );
         }
+        // Workforce Settings → Probation Policy limits
+        const probationPolicy = await this.settings.getProbationPolicy(tenantId, companyId);
+        const extensionDays = daysBetween(currentEnd, newEnd);
+        if (extensionDays > probationPolicy.maxExtensionDays) {
+          throw new BadRequestError(
+            `Probation can be extended by at most ${probationPolicy.maxExtensionDays} days per the probation policy`,
+            'PROBATION_EXTENSION_TOO_LONG',
+          );
+        }
+        const priorExtensions = await this.repo.countApplied(
+          tenantId,
+          companyId,
+          employee.id,
+          'extend_probation',
+        );
+        if (priorExtensions >= probationPolicy.maxExtensionsAllowed) {
+          throw new ConflictError(
+            `The probation policy allows at most ${probationPolicy.maxExtensionsAllowed} extension(s); this employee has used them`,
+            'PROBATION_EXTENSIONS_EXHAUSTED',
+          );
+        }
         changes.push(
           change(
             'probationEndDate',
@@ -604,6 +715,24 @@ export class EmployeeActionService {
             'Effective date cannot be before the last working date',
             'INVALID_EFFECTIVE_DATE',
           );
+        }
+        // Workforce Settings → Offboarding Policy: notice period (when buyout is not allowed)
+        if (actionType === 'resignation') {
+          const offboardingPolicy = await this.settings.getOffboardingPolicy(tenantId, companyId);
+          if (!offboardingPolicy.allowNoticeBuyout) {
+            const noticeDays =
+              employee.employmentStatus === 'probation'
+                ? offboardingPolicy.probationNoticeDays
+                : offboardingPolicy.confirmedNoticeDays;
+            const requestDate = values.requestDate ?? this.today();
+            const earliest = addDaysIso(requestDate, noticeDays);
+            if (lastWorkingDate < earliest) {
+              throw new BadRequestError(
+                `Notice period of ${noticeDays} days applies; the last working date must be on or after ${earliest}`,
+                'NOTICE_PERIOD_NOT_SERVED',
+              );
+            }
+          }
         }
         const separatedStatus: EmploymentStatus =
           actionType === 'resignation' ? 'resigned' : 'terminated';

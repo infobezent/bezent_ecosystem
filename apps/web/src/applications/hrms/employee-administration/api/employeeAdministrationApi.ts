@@ -77,6 +77,25 @@ export interface EmployeeActionListItem {
   version: number;
   createdAt: string;
   updatedAt: string;
+  /** Present on resignations and terminations: offboarding clearance progress. */
+  clearance?: { total: number; cleared: number };
+}
+
+export interface ClearanceItem {
+  id: string;
+  department: 'it' | 'admin' | 'finance' | 'hr';
+  itemTitle: string;
+  description: string | null;
+  isMandatory: boolean;
+  status: 'pending' | 'cleared' | 'waived';
+  remarks: string | null;
+  clearedAt: string | null;
+}
+
+export interface ClearanceChecklist {
+  items: ClearanceItem[];
+  total: number;
+  cleared: number;
 }
 
 export interface EmployeeActionHistoryItem {
@@ -248,6 +267,26 @@ export async function cancelEmployeeAction(
   const body = await request<{ data: EmployeeActionDetail }>(
     `/hrms/employee-actions/${encodeURIComponent(id)}/cancel`,
     { method: 'POST', body: JSON.stringify({ version, reason: reason || undefined }) },
+  );
+  return body.data;
+}
+
+export async function fetchClearance(actionId: string): Promise<ClearanceChecklist> {
+  const body = await request<{ data: ClearanceChecklist }>(
+    `/hrms/employee-actions/${encodeURIComponent(actionId)}/clearance`,
+  );
+  return body.data;
+}
+
+export async function updateClearanceItem(
+  actionId: string,
+  itemId: string,
+  status: ClearanceItem['status'],
+  remarks?: string,
+): Promise<ClearanceChecklist> {
+  const body = await request<{ data: ClearanceChecklist }>(
+    `/hrms/employee-actions/${encodeURIComponent(actionId)}/clearance/${encodeURIComponent(itemId)}`,
+    { method: 'PATCH', body: JSON.stringify({ status, remarks: remarks || undefined }) },
   );
   return body.data;
 }

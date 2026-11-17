@@ -18,7 +18,7 @@
   display: block;
   border-radius: 50%;
   border-style: solid;
-  border-color: var(--teal-100) var(--teal-100) var(--teal-100) var(--teal-600);
+  border-color: #d2e3fc #d2e3fc #d2e3fc #1a73e8;
   animation: bezent-spin 0.75s linear infinite;
 }
 
@@ -68,6 +68,6 @@
 
 /* Dark mode — brighter ring */
 [data-theme='dark'] .bezent-spinner__ring {
-  border-color: rgba(45, 212, 191, 0.22) rgba(45, 212, 191, 0.22) rgba(45, 212, 191, 0.22)
-    var(--teal-400);
+  border-color: rgba(102, 157, 246, 0.22) rgba(102, 157, 246, 0.22) rgba(102, 157, 246, 0.22)
+    #669df6;
 }

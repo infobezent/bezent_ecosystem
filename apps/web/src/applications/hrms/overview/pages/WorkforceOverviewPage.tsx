@@ -35,6 +35,10 @@ import type { RegularizationItem } from '../../attendance/types/attendance.types
 import { fetchDocuments, type EmployeeDocument } from '../../documents/api/documentsApi';
 import type { EmployeeActionListItem } from '../../employee-administration/api/employeeAdministrationApi';
 import {
+  PROMOTION_ACTION_TYPES,
+  TRANSFER_ACTION_TYPES,
+} from '../../employee-administration/model/actionCatalog';
+import {
   fetchOrganizationMasters,
   type OrganizationMasters,
 } from '../../api/organizationMastersApi';
@@ -496,9 +500,23 @@ export function WorkforceOverviewPage({
       // return every record at current data volumes. `pagination.totalItems` and
       // `statusCounts` below are exact aggregates regardless of this cap; only the
       // per-actionType breakdown computed from `.data` is bounded by it.
-      fetchEmployeeActions({ category: 'transfer', pageSize: 100, ...eventScope }),
-      fetchEmployeeActions({ category: 'job_changes', pageSize: 100, ...eventScope }),
+      // Same action-type sets as the Transfers and Promotions pages, so the KPI
+      // numbers match what those pages list.
+      fetchEmployeeActions({ actionTypes: TRANSFER_ACTION_TYPES, pageSize: 100, ...eventScope }),
+      fetchEmployeeActions({ actionTypes: PROMOTION_ACTION_TYPES, pageSize: 100, ...eventScope }),
       fetchEmployeeActions({ category: 'separation', pageSize: 100, ...eventScope }),
+      fetchEmployeeActions({
+        status: 'pending',
+        actionTypes: TRANSFER_ACTION_TYPES,
+        pageSize: 1,
+        ...scope,
+      }),
+      fetchEmployeeActions({
+        status: 'pending',
+        actionTypes: PROMOTION_ACTION_TYPES,
+        pageSize: 1,
+        ...scope,
+      }),
     ]).then((results) => {
       if (!active) return;
 
@@ -516,6 +534,8 @@ export function WorkforceOverviewPage({
         transferActionsRes,
         promotionActionsRes,
         separationActionsRes,
+        pendingTransfersRes,
+        pendingPromotionsRes,
       ] = results;
 
       const totalEmployees =
@@ -644,7 +664,10 @@ export function WorkforceOverviewPage({
           pendingActionsRes.status === 'fulfilled' ? pendingActionsRes.value.counts : null;
         setTransfersBreakdown({
           total: transferActionsRes.value.pagination.totalItems,
-          pendingApproval: pendingByCategory?.transfer ?? 0,
+          pendingApproval:
+            pendingTransfersRes.status === 'fulfilled'
+              ? pendingTransfersRes.value.pagination.totalItems
+              : (pendingByCategory?.transfer ?? 0),
           // The backend's 'transfer' category tracks only location transfers — there
           // is no branch/department/designation transfer actionType to break down by.
           transferTypes: [],
@@ -687,7 +710,10 @@ export function WorkforceOverviewPage({
 
         setPromotionsBreakdown({
           total: pagination.totalItems,
-          pendingApproval: pendingByCategory?.job_changes ?? 0,
+          pendingApproval:
+            pendingPromotionsRes.status === 'fulfilled'
+              ? pendingPromotionsRes.value.pagination.totalItems
+              : 0,
           progression: roleProgression,
           promotionTypes: [
             {
