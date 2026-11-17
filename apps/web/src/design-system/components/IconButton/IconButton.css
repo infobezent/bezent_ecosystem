@@ -57,10 +57,10 @@
   width: 36px;
   height: 36px;
   border-radius: 10px;
-  background: var(--teal-50);
-  color: var(--teal-700);
-  border: 1px solid var(--teal-200);
-  box-shadow: 0 2px 6px rgba(20, 184, 166, 0.1);
+  background: var(--pastel-blue, #eff6ff);
+  color: var(--blue-600, #2563eb);
+  border: 1px solid #bfdbfe;
+  box-shadow: 0 2px 6px rgba(37, 99, 235, 0.08);
   transition:
     background-color 0.16s ease,
     border-color 0.16s ease,
@@ -69,18 +69,18 @@
 }
 
 .bezent-icon-btn--solid:hover:not(:disabled) {
-  background: var(--teal-100);
-  border-color: var(--teal-300);
-  box-shadow: 0 4px 10px rgba(20, 184, 166, 0.18);
+  background: #dbeafe;
+  border-color: #93c5fd;
+  box-shadow: 0 4px 10px rgba(37, 99, 235, 0.14);
   transform: translateY(-1px) scale(1.04);
 }
 
 .bezent-icon-btn--solid:active:not(:disabled) {
-  background: var(--teal-200);
+  background: #bfdbfe;
   transform: scale(0.96);
 }
 
 .bezent-icon-btn:focus-visible {
-  outline: 2px solid var(--teal-500);
+  outline: 2px solid var(--border-focus, var(--blue-interactive, #1a73e8));
   outline-offset: 2px;
 }
