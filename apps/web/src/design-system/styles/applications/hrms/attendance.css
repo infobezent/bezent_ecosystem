@@ -323,7 +323,9 @@
   border-color: rgba(52, 168, 83, 0.35);
 }
 
-[data-theme='dark'] .bezent-attendance-calendar__tile--present .bezent-attendance-calendar__tile-status {
+[data-theme='dark']
+  .bezent-attendance-calendar__tile--present
+  .bezent-attendance-calendar__tile-status {
   color: #81c995;
 }
 
@@ -333,7 +335,9 @@
   border-color: rgba(240, 120, 101, 0.35);
 }
 
-[data-theme='dark'] .bezent-attendance-calendar__tile--late .bezent-attendance-calendar__tile-status {
+[data-theme='dark']
+  .bezent-attendance-calendar__tile--late
+  .bezent-attendance-calendar__tile-status {
   color: #f07865;
 }
 
@@ -343,7 +347,9 @@
   border-color: rgba(249, 115, 22, 0.35);
 }
 
-[data-theme='dark'] .bezent-attendance-calendar__tile--half-day .bezent-attendance-calendar__tile-status {
+[data-theme='dark']
+  .bezent-attendance-calendar__tile--half-day
+  .bezent-attendance-calendar__tile-status {
   color: #fdba74;
 }
 
@@ -353,7 +359,9 @@
   border-color: rgba(234, 67, 53, 0.35);
 }
 
-[data-theme='dark'] .bezent-attendance-calendar__tile--absent .bezent-attendance-calendar__tile-status {
+[data-theme='dark']
+  .bezent-attendance-calendar__tile--absent
+  .bezent-attendance-calendar__tile-status {
   color: #f28b82;
 }
 
@@ -363,7 +371,9 @@
   border-color: rgba(234, 88, 12, 0.4);
 }
 
-[data-theme='dark'] .bezent-attendance-calendar__tile--missing-punch .bezent-attendance-calendar__tile-status {
+[data-theme='dark']
+  .bezent-attendance-calendar__tile--missing-punch
+  .bezent-attendance-calendar__tile-status {
   color: #fb923c;
 }
 
@@ -373,7 +383,9 @@
   border-color: rgba(168, 85, 247, 0.35);
 }
 
-[data-theme='dark'] .bezent-attendance-calendar__tile--leave .bezent-attendance-calendar__tile-status {
+[data-theme='dark']
+  .bezent-attendance-calendar__tile--leave
+  .bezent-attendance-calendar__tile-status {
   color: #d8b4fe;
 }
 
@@ -383,7 +395,9 @@
   border-color: rgba(66, 133, 244, 0.35);
 }
 
-[data-theme='dark'] .bezent-attendance-calendar__tile--holiday .bezent-attendance-calendar__tile-status {
+[data-theme='dark']
+  .bezent-attendance-calendar__tile--holiday
+  .bezent-attendance-calendar__tile-status {
   color: #8ab4f8;
 }
 
@@ -393,9 +407,15 @@
   border-color: rgba(255, 255, 255, 0.08);
 }
 
-[data-theme='dark'] .bezent-attendance-calendar__tile--weekly-off .bezent-attendance-calendar__tile-date,
-[data-theme='dark'] .bezent-attendance-calendar__tile--weekly-off .bezent-attendance-calendar__tile-status,
-[data-theme='dark'] .bezent-attendance-calendar__tile--weekly-off .bezent-attendance-calendar__tile-sub {
+[data-theme='dark']
+  .bezent-attendance-calendar__tile--weekly-off
+  .bezent-attendance-calendar__tile-date,
+[data-theme='dark']
+  .bezent-attendance-calendar__tile--weekly-off
+  .bezent-attendance-calendar__tile-status,
+[data-theme='dark']
+  .bezent-attendance-calendar__tile--weekly-off
+  .bezent-attendance-calendar__tile-sub {
   color: #9aa0a6;
 }
 
@@ -405,7 +425,9 @@
   border-color: rgba(148, 163, 184, 0.28);
 }
 
-[data-theme='dark'] .bezent-attendance-calendar__tile--pending .bezent-attendance-calendar__tile-status {
+[data-theme='dark']
+  .bezent-attendance-calendar__tile--pending
+  .bezent-attendance-calendar__tile-status {
   color: #94a3b8;
 }
 
@@ -415,8 +437,12 @@
   border-color: rgba(255, 255, 255, 0.08);
 }
 
-[data-theme='dark'] .bezent-attendance-calendar__tile--unclassified .bezent-attendance-calendar__tile-status,
-[data-theme='dark'] .bezent-attendance-calendar__tile--unclassified .bezent-attendance-calendar__tile-sub {
+[data-theme='dark']
+  .bezent-attendance-calendar__tile--unclassified
+  .bezent-attendance-calendar__tile-status,
+[data-theme='dark']
+  .bezent-attendance-calendar__tile--unclassified
+  .bezent-attendance-calendar__tile-sub {
   color: #9aa0a6;
 }
 
@@ -1804,7 +1830,6 @@
 }
 
 @keyframes bezent-sync-pulse {
-
   0%,
   100% {
     opacity: 1;
@@ -1873,7 +1898,9 @@
   min-height: 170px;
   box-sizing: border-box;
   box-shadow: none;
-  transition: filter 0.18s ease, opacity 0.18s ease;
+  transition:
+    filter 0.18s ease,
+    opacity 0.18s ease;
   cursor: pointer;
   overflow: hidden;
   user-select: none;
@@ -1900,10 +1927,12 @@
 
 /* ── Colored Pastel Variants for KPI Cards (Flat, borderless, one shade darker from graph color) ── */
 .bezent-att-kpi-card--blue {
-  background: linear-gradient(180deg,
-      rgba(219, 234, 254, 0.95) 0%,
-      rgba(235, 244, 255, 0.88) 50%,
-      rgba(246, 250, 255, 0.96) 100%);
+  background: linear-gradient(
+    180deg,
+    rgba(219, 234, 254, 0.95) 0%,
+    rgba(235, 244, 255, 0.88) 50%,
+    rgba(246, 250, 255, 0.96) 100%
+  );
   border: none;
 }
 
@@ -1913,10 +1942,12 @@
 }
 
 .bezent-att-kpi-card--green {
-  background: linear-gradient(180deg,
-      rgba(220, 252, 231, 0.95) 0%,
-      rgba(238, 252, 243, 0.88) 50%,
-      rgba(247, 254, 250, 0.96) 100%);
+  background: linear-gradient(
+    180deg,
+    rgba(220, 252, 231, 0.95) 0%,
+    rgba(238, 252, 243, 0.88) 50%,
+    rgba(247, 254, 250, 0.96) 100%
+  );
   border: none;
 }
 
@@ -1926,10 +1957,12 @@
 }
 
 .bezent-att-kpi-card--rose {
-  background: linear-gradient(180deg,
-      rgba(254, 226, 226, 0.95) 0%,
-      rgba(255, 241, 242, 0.88) 50%,
-      rgba(255, 250, 251, 0.96) 100%);
+  background: linear-gradient(
+    180deg,
+    rgba(254, 226, 226, 0.95) 0%,
+    rgba(255, 241, 242, 0.88) 50%,
+    rgba(255, 250, 251, 0.96) 100%
+  );
   border: none;
 }
 
@@ -1939,10 +1972,12 @@
 }
 
 .bezent-att-kpi-card--amber {
-  background: linear-gradient(180deg,
-      rgba(254, 243, 199, 0.95) 0%,
-      rgba(255, 249, 235, 0.88) 50%,
-      rgba(255, 253, 245, 0.96) 100%);
+  background: linear-gradient(
+    180deg,
+    rgba(254, 243, 199, 0.95) 0%,
+    rgba(255, 249, 235, 0.88) 50%,
+    rgba(255, 253, 245, 0.96) 100%
+  );
   border: none;
 }
 
@@ -1952,10 +1987,12 @@
 }
 
 .bezent-att-kpi-card--purple {
-  background: linear-gradient(180deg,
-      rgba(237, 233, 254, 0.95) 0%,
-      rgba(246, 243, 255, 0.88) 50%,
-      rgba(252, 250, 255, 0.96) 100%);
+  background: linear-gradient(
+    180deg,
+    rgba(237, 233, 254, 0.95) 0%,
+    rgba(246, 243, 255, 0.88) 50%,
+    rgba(252, 250, 255, 0.96) 100%
+  );
   border: none;
 }
 
@@ -2566,7 +2603,8 @@
 }
 
 @keyframes bezentPulseBeacon {
-  0%, 100% {
+  0%,
+  100% {
     transform: scale(1);
     opacity: 0.35;
   }
@@ -4498,7 +4536,9 @@
   color: #b91c1c;
 }
 
-[data-theme='dark'] .bezent-att-readiness-stat-tile.is-blocked.has-blockers .bezent-att-readiness-stat-label {
+[data-theme='dark']
+  .bezent-att-readiness-stat-tile.is-blocked.has-blockers
+  .bezent-att-readiness-stat-label {
   color: #f87171;
 }
 
@@ -4506,7 +4546,9 @@
   color: #991b1b;
 }
 
-[data-theme='dark'] .bezent-att-readiness-stat-tile.is-blocked.has-blockers .bezent-att-readiness-stat-value {
+[data-theme='dark']
+  .bezent-att-readiness-stat-tile.is-blocked.has-blockers
+  .bezent-att-readiness-stat-value {
   color: #fca5a5;
 }
 
@@ -4514,7 +4556,9 @@
   color: #dc2626;
 }
 
-[data-theme='dark'] .bezent-att-readiness-stat-tile.is-blocked.has-blockers .bezent-att-readiness-stat-sub {
+[data-theme='dark']
+  .bezent-att-readiness-stat-tile.is-blocked.has-blockers
+  .bezent-att-readiness-stat-sub {
   color: #fecaca;
 }
 
@@ -7099,9 +7143,18 @@ thead .bezent-attendance-col--sticky-right {
   box-shadow: -4px 0 8px -2px rgba(0, 0, 0, 0.4);
 }
 
-[data-theme='dark'] .bezent-table.is-hoverable .bezent-table__row:hover .bezent-attendance-col--sticky-checkbox,
-[data-theme='dark'] .bezent-table.is-hoverable .bezent-table__row:hover .bezent-attendance-col--sticky-employee,
-[data-theme='dark'] .bezent-table.is-hoverable .bezent-table__row:hover .bezent-attendance-col--sticky-right {
+[data-theme='dark']
+  .bezent-table.is-hoverable
+  .bezent-table__row:hover
+  .bezent-attendance-col--sticky-checkbox,
+[data-theme='dark']
+  .bezent-table.is-hoverable
+  .bezent-table__row:hover
+  .bezent-attendance-col--sticky-employee,
+[data-theme='dark']
+  .bezent-table.is-hoverable
+  .bezent-table__row:hover
+  .bezent-attendance-col--sticky-right {
   background-color: var(--bg-card-hover, #243044);
 }
 
