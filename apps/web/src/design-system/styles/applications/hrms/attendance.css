@@ -2434,6 +2434,33 @@
   filter: drop-shadow(0 2px 6px rgba(37, 99, 235, 0.45));
 }
 
+.bezent-att-sparkline-bar-group {
+  cursor: pointer;
+  transition: filter 0.16s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.bezent-att-sparkline-bar-group:hover,
+.bezent-att-sparkline-bar-group.is-active {
+  filter: drop-shadow(0 2px 6px rgba(37, 99, 235, 0.45));
+}
+
+.bezent-att-sparkline-segment {
+  transition: opacity 0.16s ease;
+}
+
+.bezent-att-sparkline-tip-sub {
+  fill: #94a3b8;
+  font-size: 4.2px;
+  font-weight: 600;
+  font-family: inherit;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.01em;
+}
+
+[data-theme='dark'] .bezent-att-sparkline-tip-sub {
+  fill: #cbd5e1;
+}
+
 /* 2. Sharp Geometric Trendline (Absent) */
 .bezent-att-sparkline-sharp {
   fill: none;

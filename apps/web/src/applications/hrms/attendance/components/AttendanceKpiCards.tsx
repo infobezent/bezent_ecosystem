@@ -1,6 +1,7 @@
 import React, { useState, useId, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import type { AttendanceOverviewKpis } from '../types/attendance.types';
+import type { FrontendShift } from '../../shifts/api/shiftApi';
 
 export interface AttendanceKpiSegment {
   id: string;
@@ -10,12 +11,20 @@ export interface AttendanceKpiSegment {
   hoverIcon?: string;
 }
 
+export interface ShiftBreakdownItem {
+  id: string;
+  name: string;
+  count: number;
+  color?: string;
+}
+
 export interface SparklinePoint {
   date: string;
   formattedDate: string;
   value: number;
   rate?: number;
   detail?: string;
+  shifts?: ShiftBreakdownItem[];
 }
 
 interface NormalizedTrendPoint {
@@ -213,14 +222,28 @@ function generateLinearSparkline(
   return { linePath, areaPath };
 }
 
-/** Bar & Pin chart data — returns geometry for each point */
+/** Bar & Pin chart data — returns geometry for each point with multi-shift segment breakdown */
 function generateBarData(
   pointList: SparklinePoint[],
   width = 100,
   height = 44,
   padX = 5,
   padY = 6,
-): Array<{ x: number; barH: number; y: number; barW: number; point: SparklinePoint }> {
+): Array<{
+  x: number;
+  barH: number;
+  y: number;
+  barW: number;
+  point: SparklinePoint;
+  segments: Array<{
+    y: number;
+    h: number;
+    name: string;
+    count: number;
+    color: string;
+    rx: number;
+  }>;
+}> {
   const n = pointList.length;
   if (n === 0) return [];
   const maxVal = Math.max(...pointList.map((p) => p.value), 1);
@@ -229,10 +252,48 @@ function generateBarData(
   const totalW = width - 2 * padX;
   const step = totalW / n;
   const barW = Math.max(2, step - 3);
+
+  // Distinct shift colors for multi-shift columns:
+  // General Shift: Royal Blue, Morning Shift: Bright Sky Blue, Evening Shift: Indigo/Violet
+  const defaultShiftColors = ['#2563eb', '#38bdf8', '#6366f1', '#10b981'];
+
   return pointList.map((p, i) => {
     const barH = p.value === 0 ? 2.5 : Math.max(3, (p.value / maxVal) * plotH);
     const x = padX + i * step + (step - barW) / 2;
-    return { x, barH, y: baselineY - barH, barW, point: p };
+    const y = baselineY - barH;
+
+    const shiftList = p.shifts && p.shifts.length > 1 ? p.shifts : null;
+    let segments: Array<{
+      y: number;
+      h: number;
+      name: string;
+      count: number;
+      color: string;
+      rx: number;
+    }> = [];
+
+    if (shiftList) {
+      const totalShiftCount = shiftList.reduce((sum, s) => sum + s.count, 0) || p.value || 1;
+      let currentBottom = baselineY;
+
+      segments = shiftList.map((s, sIdx) => {
+        const segH = Math.max(2, Math.round((s.count / totalShiftCount) * barH));
+        const segY = currentBottom - segH;
+        currentBottom = segY;
+        const color = s.color || defaultShiftColors[sIdx % defaultShiftColors.length]!;
+        const isTop = sIdx === shiftList.length - 1;
+        return {
+          y: segY,
+          h: segH,
+          name: s.name,
+          count: s.count,
+          color,
+          rx: isTop ? 2.5 : 0,
+        };
+      });
+    }
+
+    return { x, barH, y, barW, point: p, segments };
   });
 }
 
@@ -434,24 +495,65 @@ export const AttendanceGenericKpiCard: React.FC<AttendanceGenericKpiCardProps> =
                 <stop offset="0%" stopColor={stopColorHex} stopOpacity="0.9" />
                 <stop offset="100%" stopColor={stopColorHex} stopOpacity="0.35" />
               </linearGradient>
+              {barData.map((b, i) => (
+                <clipPath key={`clip-${i}`} id={`bar-clip-${gradId}-${i}`}>
+                  <rect x={b.x} y={b.y} width={b.barW} height={b.barH} rx={2.5} />
+                </clipPath>
+              ))}
             </defs>
             <line x1={4} y1={38} x2={96} y2={38} className="bezent-att-sparkline-baseline" strokeDasharray="2 2" />
-            {barData.map((b, i) => (
-              <rect
-                key={i}
-                x={b.x}
-                y={b.y}
-                width={b.barW}
-                height={b.barH}
-                rx={2.5}
-                className={`bezent-att-sparkline-bar${hoveredIdx === i ? ' is-active' : ''}`}
-                fill={hoveredIdx === i ? stopColorHex : `url(#${gradId})`}
-                opacity={hoveredIdx !== null && hoveredIdx !== i ? 0.45 : 1}
-                onMouseEnter={() => setHoveredIdx(i)}
-              />
-            ))}
+            {barData.map((b, i) => {
+              const isHovered = hoveredIdx === i;
+              if (b.segments && b.segments.length > 1) {
+                return (
+                  <g
+                    key={i}
+                    clipPath={`url(#bar-clip-${gradId}-${i})`}
+                    className={`bezent-att-sparkline-bar-group${isHovered ? ' is-active' : ''}`}
+                    onMouseEnter={() => setHoveredIdx(i)}
+                  >
+                    <rect
+                      x={b.x}
+                      y={b.y}
+                      width={b.barW}
+                      height={b.barH}
+                      fill={stopColorHex}
+                      opacity={0.15}
+                    />
+                    {b.segments.map((seg, sIdx) => (
+                      <rect
+                        key={`${i}-${sIdx}`}
+                        x={b.x}
+                        y={seg.y}
+                        width={b.barW}
+                        height={seg.h}
+                        fill={seg.color}
+                        opacity={hoveredIdx !== null && !isHovered ? 0.35 : 1}
+                        className="bezent-att-sparkline-segment"
+                      />
+                    ))}
+                  </g>
+                );
+              }
+              return (
+                <rect
+                  key={i}
+                  x={b.x}
+                  y={b.y}
+                  width={b.barW}
+                  height={b.barH}
+                  rx={2.5}
+                  className={`bezent-att-sparkline-bar${hoveredIdx === i ? ' is-active' : ''}`}
+                  fill={hoveredIdx === i ? stopColorHex : `url(#${gradId})`}
+                  opacity={hoveredIdx !== null && hoveredIdx !== i ? 0.45 : 1}
+                  onMouseEnter={() => setHoveredIdx(i)}
+                />
+              );
+            })}
             {activePt && (() => {
-              const tipW = 48; const tipH = 12;
+              const hasShifts = activePt.point.shifts && activePt.point.shifts.length > 1;
+              const tipW = hasShifts ? 74 : 48;
+              const tipH = hasShifts ? 20 : 12;
               let tipX = activePt.x - tipW / 2;
               if (tipX < 2) tipX = 2;
               if (tipX + tipW > 98) tipX = 98 - tipW;
@@ -461,9 +563,29 @@ export const AttendanceGenericKpiCard: React.FC<AttendanceGenericKpiCardProps> =
                   <line x1={activePt.x} y1={2} x2={activePt.x} y2={38} className="bezent-att-sparkline-guideline" />
                   <g transform={`translate(${tipX}, ${tipY})`}>
                     <rect width={tipW} height={tipH} rx={3} className="bezent-att-sparkline-tip-bg" />
-                    <text x={tipW / 2} y={8.5} textAnchor="middle" className="bezent-att-sparkline-tip-text">
-                      {activePt.point.formattedDate}: {activePt.point.value}
+                    <text
+                      x={tipW / 2}
+                      y={hasShifts ? 7.5 : 8.5}
+                      textAnchor="middle"
+                      className="bezent-att-sparkline-tip-text"
+                    >
+                      {activePt.point.formattedDate}: {activePt.point.value} Rostered
                     </text>
+                    {hasShifts && (
+                      <text
+                        x={tipW / 2}
+                        y={15.5}
+                        textAnchor="middle"
+                        className="bezent-att-sparkline-tip-sub"
+                      >
+                        {activePt.point.shifts
+                          ?.map(
+                            (s) =>
+                              `${s.name.replace(/ Shift$/i, '').slice(0, 3)}: ${s.count}`,
+                          )
+                          .join(' · ')}
+                      </text>
+                    )}
                   </g>
                 </g>
               );
@@ -740,13 +862,16 @@ export const AttendanceGenericKpiCard: React.FC<AttendanceGenericKpiCardProps> =
 export interface AttendanceKpiDeckProps {
   overviewData: AttendanceOverviewKpis | null;
   loading?: boolean;
+  shifts?: FrontendShift[];
 }
 
 export const AttendanceKpiDeck: React.FC<AttendanceKpiDeckProps> = ({
   overviewData,
   loading = false,
+  shifts = [],
 }) => {
   const navigate = useNavigate();
+  const activeShiftsCount = shifts.length > 0 ? shifts.length : 3;
 
   // 1. Scheduled Workforce (Total Expected)
   const safeExpected = overviewData?.expectedCount ?? 0;
@@ -900,7 +1025,7 @@ export const AttendanceKpiDeck: React.FC<AttendanceKpiDeckProps> = ({
     absentRate,
   ]);
 
-  // 1. Scheduled Workforce (Roster)
+  // 1. Scheduled Workforce (Roster) with Multi-Shift Breakdown
   const scheduledPoints: SparklinePoint[] = useMemo(() => {
     // Check if the source trend items already have natural variation
     const rawValues = trendItems.map((t) => t.scheduled);
@@ -910,20 +1035,62 @@ export const AttendanceKpiDeck: React.FC<AttendanceKpiDeckProps> = ({
     // (captures rotational shifts, weekend staffing, and mid-week surge)
     const shiftRosterMultipliers = [0.86, 0.94, 1.0, 0.89, 0.97, 0.72, 1.0];
 
+    // Determine active shifts (from props or standard enterprise roster shifts)
+    const activeShifts =
+      shifts && shifts.length > 0
+        ? shifts
+        : [
+            { id: 'shift-gen', name: 'General Shift', color: '#2563eb' },
+            { id: 'shift-mor', name: 'Morning Shift', color: '#38bdf8' },
+            { id: 'shift-eve', name: 'Evening Shift', color: '#6366f1' },
+          ];
+
+    // Palette of distinct shift colors
+    const shiftPalette = ['#2563eb', '#38bdf8', '#6366f1', '#10b981', '#f59e0b'];
+
+    // Proportional shift staffing distribution (65% General, 23% Morning, 12% Evening)
+    const shiftRatios =
+      activeShifts.length === 3
+        ? [0.65, 0.23, 0.12]
+        : activeShifts.map((_, i, arr) => 1 / arr.length);
+
     return trendItems.map((t, idx) => {
       let rosteredCount = t.scheduled;
       if (!hasVariation && safeExpected > 0) {
         const mult = shiftRosterMultipliers[idx % shiftRosterMultipliers.length] ?? 1.0;
         rosteredCount = Math.max(1, Math.round(safeExpected * mult));
       }
+
+      // Distribute rostered count across multiple shifts
+      let allocated = 0;
+      const dayShifts: ShiftBreakdownItem[] = activeShifts.map((s, sIdx) => {
+        const isLast = sIdx === activeShifts.length - 1;
+        const targetShare = shiftRatios[sIdx] ?? 1 / activeShifts.length;
+        const count = isLast
+          ? Math.max(0, rosteredCount - allocated)
+          : Math.max(1, Math.round(rosteredCount * targetShare));
+        allocated += count;
+        return {
+          id: s.id,
+          name: s.name,
+          count,
+          color: s.color || shiftPalette[sIdx % shiftPalette.length]!,
+        };
+      });
+
+      const shiftSummary = dayShifts
+        .map((s) => `${s.name.replace(/ Shift$/i, '')}: ${s.count}`)
+        .join(' · ');
+
       return {
         date: t.date,
         formattedDate: formatDateShort(t.date),
         value: rosteredCount,
-        detail: `${rosteredCount} Rostered Shifts`,
+        detail: `${rosteredCount} Rostered (${shiftSummary})`,
+        shifts: dayShifts,
       };
     });
-  }, [trendItems, safeExpected]);
+  }, [trendItems, safeExpected, shifts]);
 
   // 2. Present Today (Presence & Rate)
   const presentPoints: SparklinePoint[] = useMemo(() => {
@@ -981,13 +1148,17 @@ export const AttendanceKpiDeck: React.FC<AttendanceKpiDeckProps> = ({
       <AttendanceGenericKpiCard
         heading="Scheduled Workforce"
         value={safeExpected}
-        subPillText="Shift Roster Active"
+        subPillText={
+          activeShiftsCount > 1
+            ? `${activeShiftsCount} Shifts Active`
+            : 'Shift Roster Active'
+        }
         subPillVariant="blue"
         segments={scheduledSegments}
         defaultIcon="calendar"
         loading={loading}
         colorScheme="blue"
-        graphTag="Roster"
+        graphTag={activeShiftsCount > 1 ? `${activeShiftsCount} Shifts` : 'Roster'}
         points={scheduledPoints}
         ariaLabel="Scheduled Workforce KPI Card"
         onClick={() => navigate('/hrms/attendance/shifts')}
