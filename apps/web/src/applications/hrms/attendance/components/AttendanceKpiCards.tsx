@@ -191,64 +191,26 @@ function generateSparkline(
   };
 }
 
-/** Step (staircase) path — horizontal then vertical segments with gradient area */
-function generateStepPath(
-  pointList: SparklinePoint[],
-  width = 100,
-  height = 44,
-  padX = 5,
-  padY = 6,
-): {
-  stepPath: string;
-  stepAreaPath: string;
-  pts: Array<{ x: number; y: number; point: SparklinePoint }>;
-  endX: number;
-  endY: number;
-} {
-  const n = pointList.length;
-  if (n === 0) return { stepPath: '', stepAreaPath: '', pts: [], endX: width - padX, endY: height / 2 };
-  const values = pointList.map((p) => p.value);
-  const minVal = Math.min(...values);
-  const maxVal = Math.max(...values);
-  const allZero = maxVal === 0 && minVal === 0;
-  const allEqual = maxVal === minVal && !allZero;
-  const baselineY = height - padY;
-
-  let pts: Array<{ x: number; y: number; point: SparklinePoint }>;
-
-  if (allZero) {
-    pts = pointList.map((p, i) => ({
-      x: padX + (i / Math.max(1, n - 1)) * (width - 2 * padX),
-      y: baselineY,
-      point: p,
-    }));
-  } else if (allEqual) {
-    const midY = Math.round(height * 0.45);
-    pts = pointList.map((p, i) => ({
-      x: padX + (i / Math.max(1, n - 1)) * (width - 2 * padX),
-      y: midY,
-      point: p,
-    }));
-  } else {
-    const effectiveMin = Math.min(0, minVal);
-    const effectiveMax = Math.max(maxVal, 1);
-    const range = effectiveMax - effectiveMin || 1;
-    pts = pointList.map((p, i) => {
-      const x = padX + (i / Math.max(1, n - 1)) * (width - 2 * padX);
-      const normalized = (p.value - effectiveMin) / range;
-      const y = baselineY - normalized * (baselineY - padY);
-      return { x, y: Math.max(padY, Math.min(baselineY, y)), point: p };
-    });
+/** Linear / Sharp geometric polyline & area path */
+function generateLinearSparkline(
+  pts: Array<{ x: number; y: number; point: SparklinePoint }>,
+  baselineY: number,
+): { linePath: string; areaPath: string } {
+  const n = pts.length;
+  if (n === 0) return { linePath: '', areaPath: '' };
+  if (n === 1) {
+    return {
+      linePath: `M 4 ${pts[0]!.y.toFixed(1)} L 96 ${pts[0]!.y.toFixed(1)}`,
+      areaPath: `M 4 ${pts[0]!.y.toFixed(1)} L 96 ${pts[0]!.y.toFixed(1)} L 96 ${baselineY} L 4 ${baselineY} Z`,
+    };
   }
-
-  let path = `M ${pts[0]!.x.toFixed(1)} ${pts[0]!.y.toFixed(1)}`;
-  for (let i = 1; i < n; i++) {
-    path += ` H ${pts[i]!.x.toFixed(1)} V ${pts[i]!.y.toFixed(1)}`;
-  }
+  const linePath = pts
+    .map((p, i) => `${i === 0 ? 'M' : 'L'} ${p.x.toFixed(1)} ${p.y.toFixed(1)}`)
+    .join(' ');
+  const first = pts[0]!;
   const last = pts[n - 1]!;
-  const area = `${path} L ${last.x.toFixed(1)} ${baselineY} L ${pts[0]!.x.toFixed(1)} ${baselineY} Z`;
-
-  return { stepPath: path, stepAreaPath: area, pts, endX: last.x, endY: last.y };
+  const areaPath = `${linePath} L ${last.x.toFixed(1)} ${baselineY} L ${first.x.toFixed(1)} ${baselineY} Z`;
+  return { linePath, areaPath };
 }
 
 /** Bar & Pin chart data — returns geometry for each point */
@@ -342,6 +304,11 @@ export const AttendanceGenericKpiCard: React.FC<AttendanceGenericKpiCardProps> =
     [effectivePoints],
   );
 
+  const { linePath: sharpLinePath, areaPath: sharpAreaPath } = useMemo(
+    () => generateLinearSparkline(pts, 38),
+    [pts],
+  );
+
   const barData = useMemo(
     () =>
       graphType === 'bar' || graphType === 'microbar' || graphType === 'pin' || graphType === 'lollipop'
@@ -350,27 +317,17 @@ export const AttendanceGenericKpiCard: React.FC<AttendanceGenericKpiCardProps> =
     [graphType, effectivePoints],
   );
 
-  const { stepPath, stepAreaPath, pts: stepPts } = useMemo(
-    () =>
-      graphType === 'step'
-        ? generateStepPath(effectivePoints, 100, 44)
-        : { stepPath: '', stepAreaPath: '', pts: [], endX: 95, endY: 38 },
-    [graphType, effectivePoints],
-  );
-
   // Resolve the active point source depending on graph type
   const activePts: Array<{ x: number; y: number; point: SparklinePoint }> =
-    graphType === 'step'
-      ? stepPts
-      : graphType === 'square'
-        ? effectivePoints.map((p, i) => ({
-            x: 6 + i * (88 / Math.max(1, effectivePoints.length - 1)),
-            y: 22,
-            point: p,
-          }))
-        : graphType === 'bar' || graphType === 'microbar' || graphType === 'pin' || graphType === 'lollipop'
-          ? barData.map((b) => ({ x: b.x + b.barW / 2, y: b.y, point: b.point }))
-          : pts;
+    graphType === 'square'
+      ? effectivePoints.map((p, i) => ({
+          x: 6 + i * (88 / Math.max(1, effectivePoints.length - 1)),
+          y: 22,
+          point: p,
+        }))
+      : graphType === 'bar' || graphType === 'microbar' || graphType === 'pin' || graphType === 'lollipop'
+        ? barData.map((b) => ({ x: b.x + b.barW / 2, y: b.y, point: b.point }))
+        : pts;
 
   const activePt = hoveredIdx !== null && activePts[hoveredIdx] ? activePts[hoveredIdx] : null;
 
@@ -512,8 +469,8 @@ export const AttendanceGenericKpiCard: React.FC<AttendanceGenericKpiCardProps> =
               );
             })()}
           </svg>
-        ) : graphType === 'step' ? (
-          /* ── Graph 3: Crisp Stepped Horizon Area (Absent - Rose) ── */
+        ) : graphType === 'sharp' || graphType === 'dotted' || graphType === 'step' ? (
+          /* ── Graph 3: Sharp Geometric Trendline with Soft Gradient Fill (Absent - Rose) ── */
           <svg
             className="bezent-att-kpi-sparkline-svg"
             viewBox="0 0 100 44"
@@ -522,30 +479,62 @@ export const AttendanceGenericKpiCard: React.FC<AttendanceGenericKpiCardProps> =
           >
             <defs>
               <linearGradient id={gradId} x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor={stopColorHex} stopOpacity="0.32" />
+                <stop offset="0%" stopColor={stopColorHex} stopOpacity="0.25" />
+                <stop offset="85%" stopColor={stopColorHex} stopOpacity="0.02" />
                 <stop offset="100%" stopColor={stopColorHex} stopOpacity="0.0" />
               </linearGradient>
             </defs>
             <line x1={4} y1={38} x2={96} y2={38} className="bezent-att-sparkline-baseline" strokeDasharray="2 2" />
-            {stepAreaPath && (
-              <path d={stepAreaPath} fill={`url(#${gradId})`} pointerEvents="none" />
+            {sharpAreaPath && (
+              <path d={sharpAreaPath} fill={`url(#${gradId})`} pointerEvents="none" />
             )}
-            {stepPath && (
+            {sharpLinePath && (
               <path
-                d={stepPath}
-                className="bezent-att-sparkline-step"
+                d={sharpLinePath}
+                className="bezent-att-sparkline-sharp"
                 pointerEvents="none"
               />
             )}
+            {/* Interactive scrub columns */}
+            {pts.map((pt, i) => {
+              const colW = pts.length > 1 ? 88 / (pts.length - 1) : 88;
+              return (
+                <rect
+                  key={i}
+                  x={pt.x - colW / 2}
+                  y={2}
+                  width={colW}
+                  height={36}
+                  fill="transparent"
+                  onMouseEnter={() => setHoveredIdx(i)}
+                />
+              );
+            })}
             {activePt && (() => {
-              const tipW = 48; const tipH = 12;
+              const tipW = 48;
+              const tipH = 12;
               let tipX = activePt.x - tipW / 2;
               if (tipX < 2) tipX = 2;
               if (tipX + tipW > 98) tipX = 98 - tipW;
               const tipY = Math.max(1, activePt.y - tipH - 4);
               return (
                 <g pointerEvents="none">
-                  <line x1={activePt.x} y1={2} x2={activePt.x} y2={38} className="bezent-att-sparkline-guideline" />
+                  <line
+                    x1={activePt.x}
+                    y1={2}
+                    x2={activePt.x}
+                    y2={38}
+                    className="bezent-att-sparkline-guideline"
+                  />
+                  <circle
+                    cx={activePt.x}
+                    cy={activePt.y}
+                    r={3}
+                    fill={stopColorHex}
+                    stroke="#ffffff"
+                    strokeWidth="1.5"
+                    className="bezent-att-sparkline-dot is-active"
+                  />
                   <g transform={`translate(${tipX}, ${tipY})`}>
                     <rect width={tipW} height={tipH} rx={3} className="bezent-att-sparkline-tip-bg" />
                     <text x={tipW / 2} y={8.5} textAnchor="middle" className="bezent-att-sparkline-tip-text">
@@ -1021,7 +1010,7 @@ export const AttendanceKpiDeck: React.FC<AttendanceKpiDeckProps> = ({
         points={absentPoints}
         ariaLabel="Absent KPI Card"
         onClick={() => navigate('/hrms/attendance/daily-log?status=absent')}
-        graphType="step"
+        graphType="sharp"
       />
 
       {/* Card 4: On Approved Leave */}

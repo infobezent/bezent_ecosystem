@@ -2434,7 +2434,33 @@
   filter: drop-shadow(0 2px 6px rgba(37, 99, 235, 0.45));
 }
 
-/* 2. Step Chart (Absent) */
+/* 2. Sharp Geometric Trendline (Absent) */
+.bezent-att-sparkline-sharp {
+  fill: none;
+  stroke: #f43f5e;
+  stroke-width: 2.2;
+  stroke-linecap: round;
+  stroke-linejoin: miter;
+  stroke-miterlimit: 4;
+  filter: drop-shadow(0 2px 4px rgba(244, 63, 94, 0.28));
+  transition: all 0.2s ease;
+}
+
+[data-theme='dark'] .bezent-att-sparkline-sharp {
+  stroke: #fb7185;
+}
+
+/* 2B. Dotted Trail Chart (Fallback) */
+.bezent-att-sparkline-dotted {
+  transition: all 0.2s ease;
+  filter: drop-shadow(0 2px 4px rgba(244, 63, 94, 0.25));
+}
+
+[data-theme='dark'] .bezent-att-sparkline-dotted {
+  filter: drop-shadow(0 2px 4px rgba(251, 113, 133, 0.3));
+}
+
+/* 2B. Step Chart (Fallback) */
 .bezent-att-sparkline-step {
   fill: none;
   stroke: #f43f5e;
