@@ -60,9 +60,7 @@ export const AttendanceNeedsAttentionCard: React.FC<AttendanceNeedsAttentionCard
           </div>
           <div>
             <CardTitle className="bezent-att-action-title">Needs Attention</CardTitle>
-            <p className="bezent-att-action-subtitle">
-              Pending approvals &amp; exceptions queue
-            </p>
+            <p className="bezent-att-action-subtitle">Pending approvals &amp; exceptions queue</p>
           </div>
         </div>
 

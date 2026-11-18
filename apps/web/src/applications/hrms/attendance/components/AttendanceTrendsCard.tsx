@@ -159,12 +159,7 @@ export const AttendanceTrendsCard: React.FC<AttendanceTrendsCardProps> = ({
 
     const topLimit = Math.max(Math.ceil(cleanTop), 20);
     const step = topLimit / 4;
-    const ticks = [
-      Math.round(step),
-      Math.round(step * 2),
-      Math.round(step * 3),
-      topLimit,
-    ];
+    const ticks = [Math.round(step), Math.round(step * 2), Math.round(step * 3), topLimit];
 
     const n = rawItems.length;
     const colStep = n > 1 ? plotW / (n - 1) : plotW;
@@ -430,22 +425,13 @@ export const AttendanceTrendsCard: React.FC<AttendanceTrendsCardProps> = ({
 
               {/* Sharp Polyline Tracks */}
               {showAbsent && paths.absentLine && (
-                <path
-                  d={paths.absentLine}
-                  className="bezent-att-line bezent-att-line--absent"
-                />
+                <path d={paths.absentLine} className="bezent-att-line bezent-att-line--absent" />
               )}
               {showPresent && paths.presentLine && (
-                <path
-                  d={paths.presentLine}
-                  className="bezent-att-line bezent-att-line--present"
-                />
+                <path d={paths.presentLine} className="bezent-att-line bezent-att-line--present" />
               )}
               {showLate && paths.lateLine && (
-                <path
-                  d={paths.lateLine}
-                  className="bezent-att-line bezent-att-line--late"
-                />
+                <path d={paths.lateLine} className="bezent-att-line bezent-att-line--late" />
               )}
 
               {/* Active Hover Data Point Indicators (Scrub only, no resting markers) */}
@@ -514,103 +500,89 @@ export const AttendanceTrendsCard: React.FC<AttendanceTrendsCardProps> = ({
               })}
 
               {/* Interactive Floating Tooltip */}
-              {activeCol && (() => {
-                const tooltipW = 195;
-                const tooltipH = 106;
-                let tipX = activeCol.cx + 14;
-                if (tipX + tooltipW > chartW - padRight) {
-                  tipX = activeCol.cx - tooltipW - 14;
-                }
-                const tipY = Math.max(
-                  padTop,
-                  Math.min(baselineY - tooltipH - 4, Math.min(activeCol.pY, activeCol.aY) - 30),
-                );
+              {activeCol &&
+                (() => {
+                  const tooltipW = 195;
+                  const tooltipH = 106;
+                  let tipX = activeCol.cx + 14;
+                  if (tipX + tooltipW > chartW - padRight) {
+                    tipX = activeCol.cx - tooltipW - 14;
+                  }
+                  const tipY = Math.max(
+                    padTop,
+                    Math.min(baselineY - tooltipH - 4, Math.min(activeCol.pY, activeCol.aY) - 30),
+                  );
 
-                return (
-                  <g
-                    transform={`translate(${tipX}, ${tipY})`}
-                    filter="url(#att-trend-shadow)"
-                    pointerEvents="none"
-                  >
-                    <rect
-                      width={tooltipW}
-                      height={tooltipH}
-                      rx={8}
-                      className="bezent-att-tooltip-bg"
-                    />
-                    <text x={14} y={20} className="bezent-att-tooltip-title">
-                      {formatDateFull(activeCol.date)}
-                    </text>
-                    <line
-                      x1={14}
-                      y1={28}
-                      x2={tooltipW - 14}
-                      y2={28}
-                      className="bezent-att-tooltip-line"
-                    />
-
-                    {/* Present Row */}
-                    <circle
-                      cx={20}
-                      cy={45}
-                      r={3.5}
-                      className="bezent-att-tooltip-dot--present"
-                    />
-                    <text x={30} y={48} className="bezent-att-tooltip-label">
-                      Present:
-                    </text>
-                    <text
-                      x={tooltipW - 14}
-                      y={48}
-                      textAnchor="end"
-                      className="bezent-att-tooltip-val--present"
+                  return (
+                    <g
+                      transform={`translate(${tipX}, ${tipY})`}
+                      filter="url(#att-trend-shadow)"
+                      pointerEvents="none"
                     >
-                      {activeCol.present.toLocaleString()}{' '}
-                      {activeCol.attendanceRate !== undefined
-                        ? `(${Math.round(activeCol.attendanceRate)}%)`
-                        : ''}
-                    </text>
+                      <rect
+                        width={tooltipW}
+                        height={tooltipH}
+                        rx={8}
+                        className="bezent-att-tooltip-bg"
+                      />
+                      <text x={14} y={20} className="bezent-att-tooltip-title">
+                        {formatDateFull(activeCol.date)}
+                      </text>
+                      <line
+                        x1={14}
+                        y1={28}
+                        x2={tooltipW - 14}
+                        y2={28}
+                        className="bezent-att-tooltip-line"
+                      />
 
-                    {/* Absent Row */}
-                    <circle
-                      cx={20}
-                      cy={67}
-                      r={3.5}
-                      className="bezent-att-tooltip-dot--absent"
-                    />
-                    <text x={30} y={70} className="bezent-att-tooltip-label">
-                      Absent:
-                    </text>
-                    <text
-                      x={tooltipW - 14}
-                      y={70}
-                      textAnchor="end"
-                      className="bezent-att-tooltip-val--absent"
-                    >
-                      {activeCol.absent.toLocaleString()}
-                    </text>
+                      {/* Present Row */}
+                      <circle cx={20} cy={45} r={3.5} className="bezent-att-tooltip-dot--present" />
+                      <text x={30} y={48} className="bezent-att-tooltip-label">
+                        Present:
+                      </text>
+                      <text
+                        x={tooltipW - 14}
+                        y={48}
+                        textAnchor="end"
+                        className="bezent-att-tooltip-val--present"
+                      >
+                        {activeCol.present.toLocaleString()}{' '}
+                        {activeCol.attendanceRate !== undefined
+                          ? `(${Math.round(activeCol.attendanceRate)}%)`
+                          : ''}
+                      </text>
 
-                    {/* Late Arrival Row */}
-                    <circle
-                      cx={20}
-                      cy={89}
-                      r={3.5}
-                      className="bezent-att-tooltip-dot--late"
-                    />
-                    <text x={30} y={92} className="bezent-att-tooltip-label">
-                      Late Arrival:
-                    </text>
-                    <text
-                      x={tooltipW - 14}
-                      y={92}
-                      textAnchor="end"
-                      className="bezent-att-tooltip-val--late"
-                    >
-                      {activeCol.late.toLocaleString()}
-                    </text>
-                  </g>
-                );
-              })()}
+                      {/* Absent Row */}
+                      <circle cx={20} cy={67} r={3.5} className="bezent-att-tooltip-dot--absent" />
+                      <text x={30} y={70} className="bezent-att-tooltip-label">
+                        Absent:
+                      </text>
+                      <text
+                        x={tooltipW - 14}
+                        y={70}
+                        textAnchor="end"
+                        className="bezent-att-tooltip-val--absent"
+                      >
+                        {activeCol.absent.toLocaleString()}
+                      </text>
+
+                      {/* Late Arrival Row */}
+                      <circle cx={20} cy={89} r={3.5} className="bezent-att-tooltip-dot--late" />
+                      <text x={30} y={92} className="bezent-att-tooltip-label">
+                        Late Arrival:
+                      </text>
+                      <text
+                        x={tooltipW - 14}
+                        y={92}
+                        textAnchor="end"
+                        className="bezent-att-tooltip-val--late"
+                      >
+                        {activeCol.late.toLocaleString()}
+                      </text>
+                    </g>
+                  );
+                })()}
             </svg>
           </div>
         )}

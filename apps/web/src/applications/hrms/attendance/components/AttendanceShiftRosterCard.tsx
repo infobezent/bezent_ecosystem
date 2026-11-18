@@ -114,9 +114,7 @@ export const AttendanceShiftRosterCard: React.FC<AttendanceShiftRosterCardProps>
         </div>
 
         <div className="bezent-att-insights-header-badge">
-          <span className="bezent-att-insights-pill">
-            {displayShifts.length} Active Shifts
-          </span>
+          <span className="bezent-att-insights-pill">{displayShifts.length} Active Shifts</span>
         </div>
       </CardHeader>
 

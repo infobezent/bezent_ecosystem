@@ -466,11 +466,7 @@ export function AttendanceOverviewPage({
         )}
 
         {/* ── Attendance Overview KPI Deck (5 Cards) ── */}
-        <AttendanceKpiDeck
-          overviewData={overviewData}
-          shifts={shiftsList}
-          loading={loading}
-        />
+        <AttendanceKpiDeck overviewData={overviewData} shifts={shiftsList} loading={loading} />
 
         {/* ── Attendance Intelligence Deck: Trends (50%) + Distribution (50%) ── */}
         <div className="bezent-att-intelligence-grid">

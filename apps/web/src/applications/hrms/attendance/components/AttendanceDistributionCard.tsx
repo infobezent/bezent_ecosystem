@@ -100,9 +100,7 @@ export const AttendanceDistributionCard: React.FC<AttendanceDistributionCardProp
             </div>
             <div>
               <CardTitle className="bezent-att-trends-title">Attendance Distribution</CardTitle>
-              <span className="bezent-att-trends-subtitle">
-                Presence &amp; leave by department
-              </span>
+              <span className="bezent-att-trends-subtitle">Presence &amp; leave by department</span>
             </div>
           </div>
         </div>
