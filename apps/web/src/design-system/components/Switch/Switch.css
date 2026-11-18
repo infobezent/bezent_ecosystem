@@ -52,8 +52,8 @@
 
 /* ── Checked State ── */
 .bezent-switch-input:checked + .bezent-switch-track {
-  background: #1a73e8;
-  border-color: #1a73e8;
+  background: var(--action-blue, #3978f6);
+  border-color: var(--action-blue, #3978f6);
 }
 
 .bezent-switch-input:checked + .bezent-switch-track .bezent-switch-thumb {
@@ -62,9 +62,9 @@
 
 /* ── Focus Visible ── */
 .bezent-switch-input:focus-visible + .bezent-switch-track {
-  outline: 2px solid #1a73e8;
+  outline: 2px solid var(--action-blue, #3978f6);
   outline-offset: 2px;
-  box-shadow: 0 0 0 3px rgba(26, 115, 232, 0.16);
+  box-shadow: 0 0 0 3px rgba(57, 120, 246, 0.16);
 }
 
 /* ── Compact Size ── */

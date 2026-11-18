@@ -252,7 +252,32 @@ export function RecordsPage({
   return (
     <Page maxWidth="full" gap="md" className="bezent-page">
       {/* 1. Page Header */}
-      <PageHeader eyebrow="HRMS · Workforce" title={title} subtitle={subtitle} />
+      <PageHeader
+        eyebrow="HRMS · Workforce"
+        title={title}
+        subtitle={subtitle}
+        actions={
+          <Inline gap="sm" align="center">
+            <Button
+              variant="outline"
+              size="md"
+              leftIcon={<BezentIcon name="download" size={16} />}
+              onClick={handleExport}
+              disabled={listState.documents.length === 0}
+            >
+              Export
+            </Button>
+            <Button
+              variant="primary"
+              size="md"
+              leftIcon={<BezentIcon name="plus" size={16} />}
+              onClick={() => setIsUploadModalOpen(true)}
+            >
+              Upload Record
+            </Button>
+          </Inline>
+        }
+      />
 
       {/* 3. Search & Filter Toolbar matching Employee Directory */}
       <Toolbar
