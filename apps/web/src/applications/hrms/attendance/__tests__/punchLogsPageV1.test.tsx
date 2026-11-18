@@ -92,18 +92,23 @@ describe('BEZENT HRMS — Punch Logs V1.0 Frontend Page', () => {
     expect(html).toContain('Filters');
   });
 
-  it('renders five KPI summary cards with correct headers', () => {
+  it('renders five category summary cards functioning as primary navigation controls', () => {
     const html = renderToStaticMarkup(
       <MemoryRouter>
         <PunchLogsPage />
       </MemoryRouter>,
     );
 
-    expect(html).toContain('Total Punches');
-    expect(html).toContain('Accepted');
-    expect(html).toContain('Flagged');
-    expect(html).toContain('Rejected');
-    expect(html).toContain('Failed to Process');
+    expect(html).toContain('All Punches');
+    expect(html).toContain('First In');
+    expect(html).toContain('Last Out');
+    expect(html).toContain('Late Punch');
+    expect(html).toContain('Exceptions');
+    expect(html).not.toContain('aria-label="Punch logs view mode"');
+    expect(html).not.toContain('<span class="bezent-kpi-card__title">Total Punches</span>');
+    expect(html).not.toContain('<span class="bezent-kpi-card__title">Accepted</span>');
+    expect(html).not.toContain('<span class="bezent-kpi-card__title">Flagged</span>');
+    expect(html).not.toContain('<span class="bezent-kpi-card__title">Failed to Process</span>');
   });
 
   describe('Sample Dataset Population & Integrity', () => {

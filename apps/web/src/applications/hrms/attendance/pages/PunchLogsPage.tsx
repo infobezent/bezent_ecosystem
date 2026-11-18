@@ -31,10 +31,10 @@ import { BezentIcon } from '../../../../design-system/icons';
 import {
   computePunchTrendBuckets,
   TotalPunchesLineChart,
-  AcceptedCircularProgress,
-  FlaggedMiniBarChart,
-  RejectedMiniBarChart,
-  FailedToProcessLineChart,
+  FirstInLineChart,
+  LastOutLineChart,
+  LatePunchMiniBarChart,
+  ExceptionsMiniBarChart,
 } from '../components/PunchLogMiniGraphs';
 import { AttendanceSectionTabs } from '../components/AttendanceSectionTabs';
 import { AttendanceImportModal } from '../components/import';
@@ -481,88 +481,6 @@ export function PunchLogsPage() {
     loadData();
   }, [loadData]);
 
-  // ── Derived Filtered Records ──────────────────────────────────────────────
-  const filteredItems = useMemo(() => {
-    let list = [...rawPunches];
-
-    // 1. Date Range Filtering (respecting Event Time vs Workday)
-    list = list.filter((p) => {
-      if (dateInterpretation === 'event_timestamp') {
-        const eventDate = p.punchTime ? p.punchTime.slice(0, 10) : '';
-        if (dateFrom && eventDate < dateFrom) return false;
-        if (dateTo && eventDate > dateTo) return false;
-        return true;
-      } else {
-        const workday = p.workday || (p.punchTime ? p.punchTime.slice(0, 10) : '');
-        if (dateFrom && workday < dateFrom) return false;
-        if (dateTo && workday > dateTo) return false;
-        return true;
-      }
-    });
-
-    // 2. Search by employee name or employee code / rawIdentifier
-    if (debouncedSearch) {
-      const q = debouncedSearch.toLowerCase();
-      list = list.filter((p) => {
-        const name = (p.employeeName || '').toLowerCase();
-        const code = (p.employeeCode || '').toLowerCase();
-        const raw = (p.rawIdentifier || '').toLowerCase();
-        return name.includes(q) || code.includes(q) || raw.includes(q);
-      });
-    }
-
-    // 3. Primary View Mode Selection
-    if (viewMode === 'first_in') {
-      list = filterFirstInPunches(list);
-    } else if (viewMode === 'last_out') {
-      list = filterLastOutPunches(list);
-    } else if (viewMode === 'late_punch') {
-      list = filterLatePunches(list);
-    } else if (viewMode === 'exceptions') {
-      list = filterExceptionPunches(list);
-    }
-
-    // 4. Advanced Filter: Source
-    if (sourceFilter !== 'all') {
-      list = list.filter((p) => {
-        const s = (p.source || '').toLowerCase().trim();
-        return s === sourceFilter.toLowerCase().trim();
-      });
-    }
-
-    // 5. Advanced Filter: Device
-    if (deviceFilter !== 'all') {
-      list = list.filter((p) => {
-        const dev = extractTerminalDeviceName(p);
-        return dev === deviceFilter;
-      });
-    }
-
-    // 6. Advanced Filter: Result (from KPI card click or Filter panel)
-    if (resultFilter !== 'all') {
-      list = list.filter((p) => {
-        const badge = getPunchResultBadge(p);
-        if (resultFilter === 'accepted') return badge.label === 'Accepted';
-        if (resultFilter === 'flagged') return badge.label === 'Flagged';
-        if (resultFilter === 'rejected') return badge.label === 'Rejected';
-        if (resultFilter === 'failed') return badge.label === 'Failed';
-        return true;
-      });
-    }
-
-    return list;
-  }, [
-    rawPunches,
-    dateInterpretation,
-    dateFrom,
-    dateTo,
-    debouncedSearch,
-    viewMode,
-    sourceFilter,
-    deviceFilter,
-    resultFilter,
-  ]);
-
   // ── Punches in Active Date Scope (Basis for KPI Counters and Trend Graphs) ──
   const inDateRangePunches = useMemo(() => {
     return rawPunches.filter((p) => {
@@ -580,44 +498,88 @@ export function PunchLogsPage() {
     });
   }, [rawPunches, dateInterpretation, dateFrom, dateTo]);
 
-  // ── Exact KPI Counters Calculation (Requirement 4: Total = Accepted + Flagged + Rejected + Failed) ──
-  const counters: PunchLogSummaryCounters = useMemo(() => {
-    if (isUsingRealData && backendCounters) {
-      return backendCounters;
+  // ── Scoped Punches (Date Range + Search + Advanced Filters) ────────────────
+  const scopedBasePunches = useMemo(() => {
+    let list = inDateRangePunches;
+
+    // Search by employee name or employee code / rawIdentifier
+    if (debouncedSearch) {
+      const q = debouncedSearch.toLowerCase();
+      list = list.filter((p) => {
+        const name = (p.employeeName || '').toLowerCase();
+        const code = (p.employeeCode || '').toLowerCase();
+        const raw = (p.rawIdentifier || '').toLowerCase();
+        return name.includes(q) || code.includes(q) || raw.includes(q);
+      });
     }
 
-    const valid = inDateRangePunches.filter((p) => getPunchResultBadge(p).label === 'Accepted').length;
-    const needsReview = inDateRangePunches.filter((p) => getPunchResultBadge(p).label === 'Flagged').length;
-    const duplicates = inDateRangePunches.filter((p) => getPunchResultBadge(p).label === 'Rejected').length;
-    const processingFailed = inDateRangePunches.filter((p) => getPunchResultBadge(p).label === 'Failed').length;
+    // Advanced Filter: Source
+    if (sourceFilter !== 'all') {
+      list = list.filter((p) => {
+        const s = (p.source || '').toLowerCase().trim();
+        return s === sourceFilter.toLowerCase().trim();
+      });
+    }
 
+    // Advanced Filter: Device
+    if (deviceFilter !== 'all') {
+      list = list.filter((p) => {
+        const dev = extractTerminalDeviceName(p);
+        return dev === deviceFilter;
+      });
+    }
+
+    // Advanced Filter: Result
+    if (resultFilter !== 'all') {
+      list = list.filter((p) => {
+        const badge = getPunchResultBadge(p);
+        if (resultFilter === 'accepted') return badge.label === 'Accepted';
+        if (resultFilter === 'flagged') return badge.label === 'Flagged';
+        if (resultFilter === 'rejected') return badge.label === 'Rejected';
+        if (resultFilter === 'failed') return badge.label === 'Failed';
+        return true;
+      });
+    }
+
+    return list;
+  }, [
+    inDateRangePunches,
+    debouncedSearch,
+    sourceFilter,
+    deviceFilter,
+    resultFilter,
+  ]);
+
+  // ── 5 Category Punches (All Punches, First In, Last Out, Late Punch, Exceptions) ──
+  const categoryPunches = useMemo(() => {
     return {
-      total: valid + needsReview + duplicates + processingFailed,
-      valid,
-      needsReview,
-      duplicates,
-      unmatched: 0,
-      processingFailed,
+      all: scopedBasePunches,
+      firstIn: filterFirstInPunches(scopedBasePunches),
+      lastOut: filterLastOutPunches(scopedBasePunches),
+      latePunch: filterLatePunches(scopedBasePunches),
+      exceptions: filterExceptionPunches(scopedBasePunches),
     };
-  }, [isUsingRealData, backendCounters, inDateRangePunches]);
+  }, [scopedBasePunches]);
 
-  // ── Actual Attendance Records Trends for Mini Graphs ─────────────────────
-  const punchTrends = useMemo(() => {
-    const totalTrend = computePunchTrendBuckets(inDateRangePunches);
-    const flaggedPunches = inDateRangePunches.filter((p) => getPunchResultBadge(p).label === 'Flagged');
-    const flaggedTrend = computePunchTrendBuckets(flaggedPunches);
-    const rejectedPunches = inDateRangePunches.filter((p) => getPunchResultBadge(p).label === 'Rejected');
-    const rejectedTrend = computePunchTrendBuckets(rejectedPunches);
-    const failedPunches = inDateRangePunches.filter((p) => getPunchResultBadge(p).label === 'Failed');
-    const failedTrend = computePunchTrendBuckets(failedPunches);
+  // ── Derived Active Table Records from Selected Category Card ──────────────
+  const filteredItems = useMemo(() => {
+    if (viewMode === 'first_in') return categoryPunches.firstIn;
+    if (viewMode === 'last_out') return categoryPunches.lastOut;
+    if (viewMode === 'late_punch') return categoryPunches.latePunch;
+    if (viewMode === 'exceptions') return categoryPunches.exceptions;
+    return categoryPunches.all;
+  }, [viewMode, categoryPunches]);
 
+  // ── Actual Attendance Records Trends for the 5 Category Mini Graphs ───────
+  const categoryTrends = useMemo(() => {
     return {
-      total: totalTrend,
-      flagged: flaggedTrend,
-      rejected: rejectedTrend,
-      failed: failedTrend,
+      all: computePunchTrendBuckets(categoryPunches.all),
+      firstIn: computePunchTrendBuckets(categoryPunches.firstIn),
+      lastOut: computePunchTrendBuckets(categoryPunches.lastOut),
+      latePunch: computePunchTrendBuckets(categoryPunches.latePunch),
+      exceptions: computePunchTrendBuckets(categoryPunches.exceptions),
     };
-  }, [inDateRangePunches]);
+  }, [categoryPunches]);
 
   // ── Total Records and Pagination ──────────────────────────────────────────
   const totalCount = filteredItems.length;
@@ -900,35 +862,37 @@ export function PunchLogsPage() {
           </Alert>
         )}
 
-        {/* ── 2. Summary KPI Cards (Requirement 4: Total = Accepted + Flagged + Rejected + Failed) ── */}
+        {/* ── 2. Five Interactive Category Summary Cards (Primary Category Navigation) ── */}
         <Grid columns={5} className="bezent-punch-kpi-grid">
-          {/* Card 1: Total Punches */}
+          {/* Card 1: All Punches */}
           <div
-            className={`bezent-kpi-card bezent-kpi-card--blue ${resultFilter === 'all' && viewMode === 'all' ? 'is-active' : ''}`}
+            className={`bezent-kpi-card bezent-kpi-card--blue ${viewMode === 'all' ? 'is-active' : ''}`}
             onClick={() => {
-              setResultFilter('all');
               setViewMode('all');
               setPage(1);
             }}
             onKeyDown={(e) => {
               if (e.key === 'Enter' || e.key === ' ') {
                 e.preventDefault();
-                setResultFilter('all');
                 setViewMode('all');
                 setPage(1);
               }
             }}
-            title="Total raw punches captured in selected date range"
+            title="All Punches: Display all recorded punch entries."
             role="button"
             tabIndex={0}
+            aria-pressed={viewMode === 'all'}
           >
             <div className="bezent-kpi-card__top">
               <div className="bezent-kpi-card__left">
-                <span className="bezent-kpi-card__title">Total Punches</span>
-                <span className="bezent-kpi-card__value">{counters.total}</span>
+                <span className="bezent-kpi-card__title">All Punches</span>
+                <span className="bezent-kpi-card__value">{categoryPunches.all.length}</span>
               </div>
               <div className="bezent-kpi-card__graph">
-                <TotalPunchesLineChart data={punchTrends.total} total={counters.total} />
+                <TotalPunchesLineChart
+                  data={categoryTrends.all}
+                  total={categoryPunches.all.length}
+                />
               </div>
             </div>
             <div className="bezent-kpi-sub-pill bezent-kpi-sub-pill--blue">
@@ -937,143 +901,151 @@ export function PunchLogsPage() {
             </div>
           </div>
 
-          {/* Card 2: Accepted */}
+          {/* Card 2: First In */}
           <div
-            className={`bezent-kpi-card bezent-kpi-card--green ${resultFilter === 'accepted' ? 'is-active' : ''}`}
+            className={`bezent-kpi-card bezent-kpi-card--green ${viewMode === 'first_in' ? 'is-active' : ''}`}
             onClick={() => {
-              setResultFilter((curr) => (curr === 'accepted' ? 'all' : 'accepted'));
+              setViewMode('first_in');
               setPage(1);
             }}
             onKeyDown={(e) => {
               if (e.key === 'Enter' || e.key === ' ') {
                 e.preventDefault();
-                setResultFilter((curr) => (curr === 'accepted' ? 'all' : 'accepted'));
+                setViewMode('first_in');
                 setPage(1);
               }
             }}
-            title="Punches counted in the day's attendance"
+            title="First In: Earliest IN punch per employee per workday."
             role="button"
             tabIndex={0}
+            aria-pressed={viewMode === 'first_in'}
           >
             <div className="bezent-kpi-card__top">
               <div className="bezent-kpi-card__left">
-                <span className="bezent-kpi-card__title">Accepted</span>
-                <span className="bezent-kpi-card__value">{counters.valid}</span>
+                <span className="bezent-kpi-card__title">First In</span>
+                <span className="bezent-kpi-card__value">{categoryPunches.firstIn.length}</span>
               </div>
               <div className="bezent-kpi-card__graph">
-                <AcceptedCircularProgress valid={counters.valid} total={counters.total} />
+                <FirstInLineChart
+                  data={categoryTrends.firstIn}
+                  total={categoryPunches.firstIn.length}
+                />
               </div>
             </div>
             <div className="bezent-kpi-sub-pill bezent-kpi-sub-pill--green">
               <span className="bezent-kpi-sub-pill-dot" />
-              Successfully Processed
+              First Inbound
             </div>
           </div>
 
-          {/* Card 3: Flagged */}
+          {/* Card 3: Last Out */}
           <div
-            className={`bezent-kpi-card bezent-kpi-card--amber ${resultFilter === 'flagged' ? 'is-active' : ''}`}
+            className={`bezent-kpi-card bezent-kpi-card--purple ${viewMode === 'last_out' ? 'is-active' : ''}`}
             onClick={() => {
-              setResultFilter((curr) => (curr === 'flagged' ? 'all' : 'flagged'));
+              setViewMode('last_out');
               setPage(1);
             }}
             onKeyDown={(e) => {
               if (e.key === 'Enter' || e.key === ' ') {
                 e.preventDefault();
-                setResultFilter((curr) => (curr === 'flagged' ? 'all' : 'flagged'));
+                setViewMode('last_out');
                 setPage(1);
               }
             }}
-            title="Needs review before it is counted"
+            title="Last Out: Latest OUT punch per employee per workday."
             role="button"
             tabIndex={0}
+            aria-pressed={viewMode === 'last_out'}
           >
             <div className="bezent-kpi-card__top">
               <div className="bezent-kpi-card__left">
-                <span className="bezent-kpi-card__title">Flagged</span>
-                <span className="bezent-kpi-card__value">
-                  {counters.needsReview + counters.unmatched}
-                </span>
+                <span className="bezent-kpi-card__title">Last Out</span>
+                <span className="bezent-kpi-card__value">{categoryPunches.lastOut.length}</span>
               </div>
               <div className="bezent-kpi-card__graph">
-                <FlaggedMiniBarChart
-                  data={punchTrends.flagged}
-                  total={counters.needsReview + counters.unmatched}
-                />
-              </div>
-            </div>
-            <div className="bezent-kpi-sub-pill bezent-kpi-sub-pill--amber">
-              <span className="bezent-kpi-sub-pill-dot" />
-              Requires Review
-            </div>
-          </div>
-
-          {/* Card 4: Rejected */}
-          <div
-            className={`bezent-kpi-card bezent-kpi-card--red ${resultFilter === 'rejected' ? 'is-active' : ''}`}
-            onClick={() => {
-              setResultFilter((curr) => (curr === 'rejected' ? 'all' : 'rejected'));
-              setPage(1);
-            }}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter' || e.key === ' ') {
-                e.preventDefault();
-                setResultFilter((curr) => (curr === 'rejected' ? 'all' : 'rejected'));
-                setPage(1);
-              }
-            }}
-            title="Not counted in attendance"
-            role="button"
-            tabIndex={0}
-          >
-            <div className="bezent-kpi-card__top">
-              <div className="bezent-kpi-card__left">
-                <span className="bezent-kpi-card__title">Rejected</span>
-                <span className="bezent-kpi-card__value">{counters.duplicates}</span>
-              </div>
-              <div className="bezent-kpi-card__graph">
-                <RejectedMiniBarChart data={punchTrends.rejected} total={counters.duplicates} />
-              </div>
-            </div>
-            <div className="bezent-kpi-sub-pill bezent-kpi-sub-pill--red">
-              <span className="bezent-kpi-sub-pill-dot" />
-              Rejected Punches
-            </div>
-          </div>
-
-          {/* Card 5: Failed to Process */}
-          <div
-            className={`bezent-kpi-card bezent-kpi-card--purple ${resultFilter === 'failed' ? 'is-active' : ''}`}
-            onClick={() => {
-              setResultFilter((curr) => (curr === 'failed' ? 'all' : 'failed'));
-              setPage(1);
-            }}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter' || e.key === ' ') {
-                e.preventDefault();
-                setResultFilter((curr) => (curr === 'failed' ? 'all' : 'failed'));
-                setPage(1);
-              }
-            }}
-            title="Could not be processed. Retry or investigate."
-            role="button"
-            tabIndex={0}
-          >
-            <div className="bezent-kpi-card__top">
-              <div className="bezent-kpi-card__left">
-                <span className="bezent-kpi-card__title">Failed to Process</span>
-                <span className="bezent-kpi-card__value">{counters.processingFailed}</span>
-              </div>
-              <div className="bezent-kpi-card__graph">
-                <FailedToProcessLineChart
-                  data={punchTrends.failed}
-                  total={counters.processingFailed}
+                <LastOutLineChart
+                  data={categoryTrends.lastOut}
+                  total={categoryPunches.lastOut.length}
                 />
               </div>
             </div>
             <div className="bezent-kpi-sub-pill bezent-kpi-sub-pill--purple">
               <span className="bezent-kpi-sub-pill-dot" />
-              Processing Errors
+              Last Outbound
+            </div>
+          </div>
+
+          {/* Card 4: Late Punch */}
+          <div
+            className={`bezent-kpi-card bezent-kpi-card--amber ${viewMode === 'late_punch' ? 'is-active' : ''}`}
+            onClick={() => {
+              setViewMode('late_punch');
+              setPage(1);
+            }}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                setViewMode('late_punch');
+                setPage(1);
+              }
+            }}
+            title="Late Punch: Display late punch records."
+            role="button"
+            tabIndex={0}
+            aria-pressed={viewMode === 'late_punch'}
+          >
+            <div className="bezent-kpi-card__top">
+              <div className="bezent-kpi-card__left">
+                <span className="bezent-kpi-card__title">Late Punch</span>
+                <span className="bezent-kpi-card__value">{categoryPunches.latePunch.length}</span>
+              </div>
+              <div className="bezent-kpi-card__graph">
+                <LatePunchMiniBarChart
+                  data={categoryTrends.latePunch}
+                  total={categoryPunches.latePunch.length}
+                />
+              </div>
+            </div>
+            <div className="bezent-kpi-sub-pill bezent-kpi-sub-pill--amber">
+              <span className="bezent-kpi-sub-pill-dot" />
+              Late Arrivals
+            </div>
+          </div>
+
+          {/* Card 5: Exceptions */}
+          <div
+            className={`bezent-kpi-card bezent-kpi-card--red ${viewMode === 'exceptions' ? 'is-active' : ''}`}
+            onClick={() => {
+              setViewMode('exceptions');
+              setPage(1);
+            }}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                setViewMode('exceptions');
+                setPage(1);
+              }
+            }}
+            title="Exceptions: Flagged, Rejected, and Failed to Process records."
+            role="button"
+            tabIndex={0}
+            aria-pressed={viewMode === 'exceptions'}
+          >
+            <div className="bezent-kpi-card__top">
+              <div className="bezent-kpi-card__left">
+                <span className="bezent-kpi-card__title">Exceptions</span>
+                <span className="bezent-kpi-card__value">{categoryPunches.exceptions.length}</span>
+              </div>
+              <div className="bezent-kpi-card__graph">
+                <ExceptionsMiniBarChart
+                  data={categoryTrends.exceptions}
+                  total={categoryPunches.exceptions.length}
+                />
+              </div>
+            </div>
+            <div className="bezent-kpi-sub-pill bezent-kpi-sub-pill--red">
+              <span className="bezent-kpi-sub-pill-dot" />
+              Requires Review
             </div>
           </div>
         </Grid>
@@ -1090,65 +1062,6 @@ export function PunchLogsPage() {
                 onChange={(e) => setSearch(e.target.value)}
                 onClear={() => setSearch('')}
               />
-            </div>
-
-            {/* Primary View Selector: All Punches | First In | Last Out | Late Punch | Exceptions */}
-            <div className="bezent-segmented-toggle" role="group" aria-label="Punch logs view mode">
-              <button
-                type="button"
-                className={`bezent-segmented-toggle__btn ${viewMode === 'all' ? 'is-active' : ''}`}
-                onClick={() => {
-                  setViewMode('all');
-                  setPage(1);
-                }}
-                title="All Punches: Display all recorded punch entries."
-              >
-                All Punches
-              </button>
-              <button
-                type="button"
-                className={`bezent-segmented-toggle__btn ${viewMode === 'first_in' ? 'is-active' : ''}`}
-                onClick={() => {
-                  setViewMode('first_in');
-                  setPage(1);
-                }}
-                title="First In: Earliest IN punch per employee per workday."
-              >
-                First In
-              </button>
-              <button
-                type="button"
-                className={`bezent-segmented-toggle__btn ${viewMode === 'last_out' ? 'is-active' : ''}`}
-                onClick={() => {
-                  setViewMode('last_out');
-                  setPage(1);
-                }}
-                title="Last Out: Latest OUT punch per employee per workday."
-              >
-                Last Out
-              </button>
-              <button
-                type="button"
-                className={`bezent-segmented-toggle__btn ${viewMode === 'late_punch' ? 'is-active' : ''}`}
-                onClick={() => {
-                  setViewMode('late_punch');
-                  setPage(1);
-                }}
-                title="Late Punch: Display late punch records."
-              >
-                Late Punch
-              </button>
-              <button
-                type="button"
-                className={`bezent-segmented-toggle__btn ${viewMode === 'exceptions' ? 'is-active' : ''}`}
-                onClick={() => {
-                  setViewMode('exceptions');
-                  setPage(1);
-                }}
-                title="Exceptions: Flagged, Rejected, and Failed to Process records."
-              >
-                Exceptions
-              </button>
             </div>
 
             {/* Advanced Filters Button & Popover */}

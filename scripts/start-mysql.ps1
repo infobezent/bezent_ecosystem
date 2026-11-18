@@ -1,6 +1,6 @@
 # Checks if MySQL Server 8.4 is already listening on port 3306; if not, starts it with bezent_dev_data.
 $port = 3306
-$dataDir = "C:\ProgramData\MySQL\bezent_dev_data"
+$dataDir = if (Test-Path "C:\ProgramData\MySQL\MySQL Server 8.4\data") { "C:\ProgramData\MySQL\MySQL Server 8.4\data" } else { "C:\ProgramData\MySQL\bezent_dev_data" }
 $mysqld = "C:\Program Files\MySQL\MySQL Server 8.4\bin\mysqld.exe"
 
 $conn = Test-NetConnection -ComputerName 127.0.0.1 -Port $port -WarningAction SilentlyContinue

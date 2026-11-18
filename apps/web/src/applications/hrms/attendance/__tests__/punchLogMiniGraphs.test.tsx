@@ -132,37 +132,48 @@ describe('BEZENT HRMS Attendance — Punch Log Summary Cards & Workable Mini Gra
   });
 
   describe('PunchLogsPage Summary Cards Integration & Integrity', () => {
-    it('renders all five summary cards with clean borderless styling and mini data graphs', () => {
+    it('renders all five category summary cards with clean borderless styling and mini data graphs', () => {
       const html = renderToStaticMarkup(
         <MemoryRouter>
           <PunchLogsPage />
         </MemoryRouter>,
       );
 
-      // Verify card titles
-      expect(html).toContain('Total Punches');
-      expect(html).toContain('Accepted');
-      expect(html).toContain('Flagged');
-      expect(html).toContain('Rejected');
-      expect(html).toContain('Failed to Process');
+      // Verify new category card titles
+      expect(html).toContain('All Punches');
+      expect(html).toContain('First In');
+      expect(html).toContain('Last Out');
+      expect(html).toContain('Late Punch');
+      expect(html).toContain('Exceptions');
 
-      // Verify all 5 mini graphs are present
+      // Verify all 5 category mini graphs are present
       expect(html).toContain('Punch activity trend');
-      expect(html).toContain('Accepted:');
-      expect(html).toContain('Flagged punch trends');
-      expect(html).toContain('Rejected punch trends');
-      expect(html).toContain('Processing failures');
+      expect(html).toContain('First In arrival trend');
+      expect(html).toContain('Last Out departure trend');
+      expect(html).toContain('Late punch trends');
+      expect(html).toContain('Exception trends');
 
       // Verify all 5 bottom status badges are present
       expect(html).toContain('Total Activity');
-      expect(html).toContain('Successfully Processed');
+      expect(html).toContain('First Inbound');
+      expect(html).toContain('Last Outbound');
+      expect(html).toContain('Late Arrivals');
       expect(html).toContain('Requires Review');
-      expect(html).toContain('Rejected Punches');
-      expect(html).toContain('Processing Errors');
       expect(html).toContain('bezent-kpi-sub-pill');
       expect(html).toContain('bezent-kpi-sub-pill-dot');
 
-      // Verify that the old graphics/icons are completely removed
+      // Verify that the separate category view mode toggle bar is completely removed
+      expect(html).not.toContain('aria-label="Punch logs view mode"');
+
+      // Verify that the old card categories and badges are completely removed
+      expect(html).not.toContain('<span class="bezent-kpi-card__title">Total Punches</span>');
+      expect(html).not.toContain('<span class="bezent-kpi-card__title">Accepted</span>');
+      expect(html).not.toContain('<span class="bezent-kpi-card__title">Flagged</span>');
+      expect(html).not.toContain('<span class="bezent-kpi-card__title">Failed to Process</span>');
+      expect(html).not.toContain('Successfully Processed');
+      expect(html).not.toContain('Processing Errors');
+
+      // Verify that old graphics/icons are completely removed
       expect(html).not.toContain('bezent-kpi-card__illustration');
       expect(html).not.toContain('FingerprintGraphic');
       expect(html).not.toContain('AcceptedGraphic');
