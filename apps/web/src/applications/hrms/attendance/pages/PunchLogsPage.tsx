@@ -32,10 +32,14 @@ import {
   computePunchTrendBuckets,
   AllPunchesLineChart,
   TotalPunchesLineChart,
+  FirstInBarChart,
   FirstInLineChart,
+  LastOutAreaChart,
   LastOutLineChart,
+  LatePunchHistogram,
   LatePunchLineChart,
   LatePunchMiniBarChart,
+  ExceptionsDonutChart,
   ExceptionsLineChart,
   ExceptionsMiniBarChart,
 } from '../components/PunchLogMiniGraphs';
@@ -892,7 +896,7 @@ export function PunchLogsPage() {
                 <span className="bezent-kpi-card__value">{categoryPunches.all.length}</span>
               </div>
               <div className="bezent-kpi-card__graph">
-                <TotalPunchesLineChart
+                <AllPunchesLineChart
                   data={categoryTrends.all}
                   total={categoryPunches.all.length}
                 />
@@ -929,7 +933,7 @@ export function PunchLogsPage() {
                 <span className="bezent-kpi-card__value">{categoryPunches.firstIn.length}</span>
               </div>
               <div className="bezent-kpi-card__graph">
-                <FirstInLineChart
+                <FirstInBarChart
                   data={categoryTrends.firstIn}
                   total={categoryPunches.firstIn.length}
                 />
@@ -966,7 +970,7 @@ export function PunchLogsPage() {
                 <span className="bezent-kpi-card__value">{categoryPunches.lastOut.length}</span>
               </div>
               <div className="bezent-kpi-card__graph">
-                <LastOutLineChart
+                <LastOutAreaChart
                   data={categoryTrends.lastOut}
                   total={categoryPunches.lastOut.length}
                 />
@@ -1003,7 +1007,8 @@ export function PunchLogsPage() {
                 <span className="bezent-kpi-card__value">{categoryPunches.latePunch.length}</span>
               </div>
               <div className="bezent-kpi-card__graph">
-                <LatePunchLineChart
+                <LatePunchHistogram
+                  punches={categoryPunches.latePunch}
                   data={categoryTrends.latePunch}
                   total={categoryPunches.latePunch.length}
                 />
@@ -1040,7 +1045,8 @@ export function PunchLogsPage() {
                 <span className="bezent-kpi-card__value">{categoryPunches.exceptions.length}</span>
               </div>
               <div className="bezent-kpi-card__graph">
-                <ExceptionsLineChart
+                <ExceptionsDonutChart
+                  punches={categoryPunches.exceptions}
                   data={categoryTrends.exceptions}
                   total={categoryPunches.exceptions.length}
                 />

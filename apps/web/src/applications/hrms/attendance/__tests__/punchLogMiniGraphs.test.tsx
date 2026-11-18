@@ -7,9 +7,13 @@ import {
   extractPunchHour,
   AllPunchesLineChart,
   TotalPunchesLineChart,
+  FirstInBarChart,
   FirstInLineChart,
+  LastOutAreaChart,
   LastOutLineChart,
+  LatePunchHistogram,
   LatePunchLineChart,
+  ExceptionsDonutChart,
   ExceptionsLineChart,
   AcceptedCircularProgress,
   FlaggedMiniBarChart,
@@ -64,14 +68,13 @@ describe('BEZENT HRMS Attendance — Punch Log Summary Cards & Workable Mini Gra
       { label: 'Evening Checkout (18:00+)', shortLabel: '18+', count: 8 },
     ];
 
-    it('renders Total Punches mini line chart with smooth wave curve, area gradient, and beacon', () => {
+    it('renders Total Punches mini line chart with connected line, nodes, and tooltips', () => {
       const html = renderToStaticMarkup(<TotalPunchesLineChart data={mockData} total={23} />);
 
       expect(html).toContain('bezent-kpi-graph-svg');
       expect(html).toContain('Punch activity trend: 23 total punches');
       expect(html).toContain('stroke="#2563eb"');
-      expect(html).toContain('bezent-kpi-graph-beacon');
-      expect(html).toContain('total-punches-area-grad');
+      expect(html).toContain('bezent-kpi-chart-node');
     });
 
     it('renders Accepted green circular progress gauge with percentage and tooltip', () => {
@@ -135,7 +138,7 @@ describe('BEZENT HRMS Attendance — Punch Log Summary Cards & Workable Mini Gra
       expect(html).toContain('Incident Window:');
     });
 
-    it('renders all five interactive category line graphs with correct color palette, wrapper, and tooltips', () => {
+    it('renders all five distinct interactive graph types with their unique visual structures and tooltips', () => {
       const sampleData = [
         { label: 'Morning Rush (08:00–10:00)', shortLabel: '08:00–10:00', count: 12 },
         { label: 'Mid-Morning (10:00–12:00)', shortLabel: '10:00–12:00', count: 4 },
@@ -144,55 +147,51 @@ describe('BEZENT HRMS Attendance — Punch Log Summary Cards & Workable Mini Gra
         { label: 'Evening Checkout (18:00+)', shortLabel: '18:00+', count: 10 },
       ];
 
-      // 1. All Punches - Blue #2563eb
+      // 1. All Punches - Line Graph (Blue #2563eb)
       const allPunchesHtml = renderToStaticMarkup(
         <AllPunchesLineChart data={sampleData} total={34} />,
       );
       expect(allPunchesHtml).toContain('stroke="#2563eb"');
       expect(allPunchesHtml).toContain('bezent-kpi-graph-wrapper');
       expect(allPunchesHtml).toContain('bezent-kpi-graph-tooltip');
-      expect(allPunchesHtml).toContain('bezent-kpi-graph-point');
       expect(allPunchesHtml).toContain('bezent-kpi-chart-node');
 
-      // 2. First In - Green #10b981
+      // 2. First In - Bar Graph (Green #10b981)
       const firstInHtml = renderToStaticMarkup(
-        <FirstInLineChart data={sampleData} total={12} />,
+        <FirstInBarChart data={sampleData} total={12} />,
       );
-      expect(firstInHtml).toContain('stroke="#10b981"');
+      expect(firstInHtml).toContain('fill="#10b981"');
+      expect(firstInHtml).toContain('bezent-kpi-chart-bar');
       expect(firstInHtml).toContain('bezent-kpi-graph-wrapper');
       expect(firstInHtml).toContain('bezent-kpi-graph-tooltip');
-      expect(firstInHtml).toContain('bezent-kpi-graph-point');
-      expect(firstInHtml).toContain('bezent-kpi-chart-node');
 
-      // 3. Last Out - Violet #8b5cf6
+      // 3. Last Out - Area Graph (Violet #8b5cf6)
       const lastOutHtml = renderToStaticMarkup(
-        <LastOutLineChart data={sampleData} total={10} />,
+        <LastOutAreaChart data={sampleData} total={10} />,
       );
       expect(lastOutHtml).toContain('stroke="#8b5cf6"');
+      expect(lastOutHtml).toContain('url(#last-out-rich-grad)');
       expect(lastOutHtml).toContain('bezent-kpi-graph-wrapper');
       expect(lastOutHtml).toContain('bezent-kpi-graph-tooltip');
-      expect(lastOutHtml).toContain('bezent-kpi-graph-point');
-      expect(lastOutHtml).toContain('bezent-kpi-chart-node');
 
-      // 4. Late Punch - Orange #f59e0b
+      // 4. Late Punch - Histogram (Orange #f59e0b)
       const latePunchHtml = renderToStaticMarkup(
-        <LatePunchLineChart data={sampleData} total={5} />,
+        <LatePunchHistogram data={sampleData} total={5} />,
       );
-      expect(latePunchHtml).toContain('stroke="#f59e0b"');
+      expect(latePunchHtml).toContain('fill="#f59e0b"');
+      expect(latePunchHtml).toContain('bezent-kpi-chart-histogram-bin');
       expect(latePunchHtml).toContain('bezent-kpi-graph-wrapper');
-      expect(latePunchHtml).toContain('bezent-kpi-graph-tooltip');
-      expect(latePunchHtml).toContain('bezent-kpi-graph-point');
-      expect(latePunchHtml).toContain('bezent-kpi-chart-node');
+      expect(latePunchHtml).toContain('bezent-kpi-graph-tooltip--hist');
 
-      // 5. Exceptions - Red #ef4444
+      // 5. Exceptions - Donut Chart (Red #ef4444)
       const exceptionsHtml = renderToStaticMarkup(
-        <ExceptionsLineChart data={sampleData} total={2} />,
+        <ExceptionsDonutChart data={sampleData} total={2} />,
       );
+      expect(exceptionsHtml).toContain('bezent-kpi-graph-svg--donut');
+      expect(exceptionsHtml).toContain('bezent-kpi-chart-donut-segment');
       expect(exceptionsHtml).toContain('stroke="#ef4444"');
       expect(exceptionsHtml).toContain('bezent-kpi-graph-wrapper');
-      expect(exceptionsHtml).toContain('bezent-kpi-graph-tooltip');
-      expect(exceptionsHtml).toContain('bezent-kpi-graph-point');
-      expect(exceptionsHtml).toContain('bezent-kpi-chart-node');
+      expect(exceptionsHtml).toContain('bezent-kpi-graph-tooltip--donut');
     });
   });
 

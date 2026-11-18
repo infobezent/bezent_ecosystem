@@ -131,19 +131,19 @@ export function computeWorkdayTrendSegments(
 
     if (h < 10) {
       const seg = segments[0];
-      if (seg) seg.count += 1; // Morning Rush (< 10:00)
+      if (seg) seg.count += 1;
     } else if (h < 12) {
       const seg = segments[1];
-      if (seg) seg.count += 1; // Mid-Morning (10:00 - 12:00)
+      if (seg) seg.count += 1;
     } else if (h < 15) {
       const seg = segments[2];
-      if (seg) seg.count += 1; // Midday / Lunch (12:00 - 15:00)
+      if (seg) seg.count += 1;
     } else if (h < 18) {
       const seg = segments[3];
-      if (seg) seg.count += 1; // Afternoon (15:00 - 18:00)
+      if (seg) seg.count += 1;
     } else {
       const seg = segments[4];
-      if (seg) seg.count += 1; // Evening Checkout (18:00+)
+      if (seg) seg.count += 1;
     }
   }
 
@@ -173,42 +173,23 @@ function generateSmoothBezier(pts: Array<{ x: number; y: number }>): string {
   return d;
 }
 
-/**
- * Interactive Data-Driven Line Chart Component for Punch Log Category Cards.
- * Features:
- * - Real chart component with distinct, clearly identifiable hoverable data point nodes.
- * - Smooth connected line chart with subtle gradient area fill underneath.
- * - Dynamic tooltip positioning right next to the hovered point with pointing caret.
- * - Highlighted specific point with animated beacon ring and vertical guide crosshair.
- * - Accurate date/interval and category count display from real Punch Log records.
- */
-export interface InteractiveMiniLineChartProps {
-  data: PunchTrendSegment[];
-  total: number;
-  color: string;
-  categoryLabel: string;
-  idPrefix: string;
-  metricName: string;
-  trendTitle?: string;
-}
-
-export function InteractiveMiniLineChart({
+// ============================================================================
+// 1. CARD 1: ALL PUNCHES – PURE CONNECTED LINE GRAPH (Blue #2563eb)
+// ============================================================================
+export function AllPunchesLineChart({
   data,
   total,
-  color,
-  categoryLabel,
-  idPrefix,
-  metricName,
-  trendTitle,
-}: InteractiveMiniLineChartProps) {
+}: {
+  data: PunchTrendSegment[];
+  total: number;
+}) {
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
-
+  const color = '#2563eb';
   const baselineY = 34;
   const peakY = 8;
   const heightSpan = baselineY - peakY;
   const maxVal = Math.max(...data.map((d) => d.count), 1);
 
-  // Distribute point positions across width 88
   const step = data.length > 1 ? 72 / (data.length - 1) : 0;
   const pts = data.map((d, i) => {
     const ratio = total > 0 ? d.count / maxVal : 0;
@@ -225,27 +206,8 @@ export function InteractiveMiniLineChart({
   });
 
   const linePath = generateSmoothBezier(pts);
-  const firstPt = pts[0] ?? {
-    x: 8,
-    y: baselineY,
-    label: '',
-    shortLabel: '',
-    dateLabel: '',
-    count: 0,
-  };
-  const lastPt = pts[pts.length - 1] ?? {
-    x: 80,
-    y: baselineY,
-    label: '',
-    shortLabel: '',
-    dateLabel: '',
-    count: 0,
-  };
-  const areaPath = `${linePath} L ${lastPt.x} 38 L ${firstPt.x} 38 Z`;
-
   const hoveredPt = hoveredIndex !== null ? pts[hoveredIndex] : null;
-  const titleText =
-    trendTitle || `${categoryLabel} trend: ${total} records across workday periods`;
+  const titleText = `Punch activity trend: ${total} total punches`;
 
   return (
     <div
@@ -253,7 +215,7 @@ export function InteractiveMiniLineChart({
       onMouseLeave={() => setHoveredIndex(null)}
       onPointerLeave={() => setHoveredIndex(null)}
     >
-      {/* Floating Hover Tooltip: Positioned next to the specific hovered point */}
+      {/* Dynamic Floating Tooltip */}
       <div
         className={`bezent-kpi-graph-tooltip bezent-kpi-graph-tooltip--point-${hoveredIndex ?? 0} ${hoveredPt ? 'is-visible' : ''}`}
         role="tooltip"
@@ -266,7 +228,7 @@ export function InteractiveMiniLineChart({
               <span className="bezent-kpi-graph-tooltip-val">{hoveredPt.dateLabel}</span>
             </div>
             <div className="bezent-kpi-graph-tooltip-row">
-              <span className="bezent-kpi-graph-tooltip-key">{metricName}:</span>
+              <span className="bezent-kpi-graph-tooltip-key">Punches:</span>
               <span className="bezent-kpi-graph-tooltip-val">{hoveredPt.count}</span>
             </div>
           </div>
@@ -295,17 +257,10 @@ export function InteractiveMiniLineChart({
           });
           setHoveredIndex(bestIdx);
         }}
-        onMouseLeave={() => setHoveredIndex(null)}
       >
         <title>{titleText}</title>
-        <defs>
-          <linearGradient id={`${idPrefix}-area-grad`} x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor={color} stopOpacity="0.25" />
-            <stop offset="100%" stopColor={color} stopOpacity="0.0" />
-          </linearGradient>
-        </defs>
 
-        {/* Subtle Horizon Baseline */}
+        {/* Baseline Horizon Line */}
         <line
           x1="4"
           y1={baselineY + 2}
@@ -317,10 +272,7 @@ export function InteractiveMiniLineChart({
           strokeLinecap="round"
         />
 
-        {/* Translucent Soft Glow Fill under Curve */}
-        <path d={areaPath} fill={`url(#${idPrefix}-area-grad)`} />
-
-        {/* Smooth Curved Trend Line */}
+        {/* Crisp Line Stroke */}
         <path
           d={linePath}
           fill="none"
@@ -330,38 +282,33 @@ export function InteractiveMiniLineChart({
           strokeLinejoin="round"
         />
 
-        {/* Clearly identifiable data point marker dots on the line */}
+        {/* Visible Node Circles on Data Points */}
         {pts.map((p, i) => {
           const isHovered = hoveredIndex === i;
           return (
             <g key={`marker-${i}`} className="bezent-kpi-chart-point-group">
-              {/* Active hover crosshair guide line */}
               {isHovered && (
-                <line
-                  x1={p.x}
-                  y1={p.y}
-                  x2={p.x}
-                  y2={baselineY + 2}
-                  stroke={color}
-                  strokeDasharray="2 2"
-                  strokeOpacity="0.55"
-                  strokeWidth="1"
-                />
+                <>
+                  <line
+                    x1={p.x}
+                    y1={p.y}
+                    x2={p.x}
+                    y2={baselineY + 2}
+                    stroke={color}
+                    strokeDasharray="2 2"
+                    strokeOpacity="0.55"
+                    strokeWidth="1"
+                  />
+                  <circle
+                    cx={p.x}
+                    cy={p.y}
+                    r={8}
+                    fill={color}
+                    fillOpacity="0.25"
+                    className="bezent-kpi-chart-pulse-ring"
+                  />
+                </>
               )}
-
-              {/* Hover halo pulse ring */}
-              {isHovered && (
-                <circle
-                  cx={p.x}
-                  cy={p.y}
-                  r={8}
-                  fill={color}
-                  fillOpacity="0.25"
-                  className="bezent-kpi-chart-pulse-ring"
-                />
-              )}
-
-              {/* Visible Point Dot Node on the line */}
               <circle
                 cx={p.x}
                 cy={p.y}
@@ -375,46 +322,28 @@ export function InteractiveMiniLineChart({
           );
         })}
 
-        {/* Peak activity beacon indicator (when not hovering any point) */}
-        {hoveredIndex === null && total > 0 && (
-          <g className="bezent-kpi-graph-beacon" aria-hidden="true">
-            <circle cx={lastPt.x} cy={lastPt.y} r={2.5} fill={color} />
-          </g>
-        )}
-
-        {/* Vertical slice hit targets spanning the full height for effortless hover */}
+        {/* Vertical slice hit targets */}
         {pts.map((p, i) => {
           const prevX = i === 0 ? 0 : (pts[i - 1]!.x + p.x) / 2;
           const nextX = i === pts.length - 1 ? 88 : (p.x + pts[i + 1]!.x) / 2;
-          const sliceWidth = Math.max(12, nextX - prevX);
-
           return (
             <rect
               key={`slice-${i}`}
               x={prevX}
               y={0}
-              width={sliceWidth}
+              width={Math.max(12, nextX - prevX)}
               height={44}
               fill="transparent"
               className="bezent-kpi-graph-point bezent-kpi-graph-hit-target"
               onMouseEnter={() => setHoveredIndex(i)}
-              onPointerEnter={() => setHoveredIndex(i)}
               onTouchStart={(e) => {
                 e.stopPropagation();
                 setHoveredIndex(i);
               }}
-              onClick={(e) => {
-                e.stopPropagation();
-                setHoveredIndex(i);
-              }}
-              onFocus={() => setHoveredIndex(i)}
-              onBlur={() => setHoveredIndex(null)}
               tabIndex={0}
               role="button"
-              aria-label={`${metricName}: ${p.count} (${p.dateLabel})`}
-            >
-              <title>{`${metricName}: ${p.count} (${p.dateLabel})`}</title>
-            </rect>
+              aria-label={`Punches: ${p.count} (${p.dateLabel})`}
+            />
           );
         })}
       </svg>
@@ -422,126 +351,720 @@ export function InteractiveMiniLineChart({
   );
 }
 
-/**
- * 1. All Punches / Total Punches Mini Line Chart (Blue #2563eb)
- */
-export function AllPunchesLineChart({
-  data,
-  total,
-}: {
-  data: PunchTrendSegment[];
-  total: number;
-}) {
-  return (
-    <InteractiveMiniLineChart
-      data={data}
-      total={total}
-      color="#2563eb"
-      categoryLabel="All Punches"
-      metricName="Punches"
-      idPrefix="total-punches"
-      trendTitle={`Punch activity trend: ${total} total punches`}
-    />
-  );
-}
-
 export const TotalPunchesLineChart = AllPunchesLineChart;
 
-/**
- * 2. First In Mini Line Chart (Green #10b981)
- */
-export function FirstInLineChart({
+// ============================================================================
+// 2. CARD 2: FIRST IN – VERTICAL BAR GRAPH (Green #10b981)
+// ============================================================================
+export function FirstInBarChart({
   data,
   total,
 }: {
   data: PunchTrendSegment[];
   total: number;
 }) {
+  const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
+  const color = '#10b981';
+  const baselineY = 35;
+  const maxBarHeight = 24;
+  const maxVal = Math.max(...data.map((d) => d.count), 1);
+
+  // 5 discrete separated columns
+  const xCoords = [8, 24, 40, 56, 72];
+  const barWidth = 8;
+
+  const hoveredPt = hoveredIndex !== null ? data[hoveredIndex] : null;
+  const titleText = `First In arrival trend: ${total} records across workday periods`;
+
   return (
-    <InteractiveMiniLineChart
-      data={data}
-      total={total}
-      color="#10b981"
-      categoryLabel="First In"
-      metricName="First In Count"
-      idPrefix="first-in"
-      trendTitle={`First In arrival trend: ${total} records across workday periods`}
-    />
+    <div
+      className="bezent-kpi-graph-wrapper"
+      onMouseLeave={() => setHoveredIndex(null)}
+      onPointerLeave={() => setHoveredIndex(null)}
+    >
+      {/* Dynamic Floating Tooltip */}
+      <div
+        className={`bezent-kpi-graph-tooltip bezent-kpi-graph-tooltip--point-${hoveredIndex ?? 0} ${hoveredPt ? 'is-visible' : ''}`}
+        role="tooltip"
+        aria-hidden={!hoveredPt}
+      >
+        {hoveredPt && (
+          <div className="bezent-kpi-graph-tooltip-body">
+            <div className="bezent-kpi-graph-tooltip-row">
+              <span className="bezent-kpi-graph-tooltip-key">Date:</span>
+              <span className="bezent-kpi-graph-tooltip-val">
+                {hoveredPt.dateLabel || hoveredPt.label}
+              </span>
+            </div>
+            <div className="bezent-kpi-graph-tooltip-row">
+              <span className="bezent-kpi-graph-tooltip-key">First In Count:</span>
+              <span className="bezent-kpi-graph-tooltip-val">{hoveredPt.count}</span>
+            </div>
+          </div>
+        )}
+      </div>
+
+      <svg
+        className="bezent-kpi-graph-svg"
+        viewBox="0 0 88 44"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+        role="img"
+        aria-label={titleText}
+      >
+        <title>{titleText}</title>
+
+        {/* Baseline Horizon Line */}
+        <line
+          x1="4"
+          y1={baselineY + 1}
+          x2="84"
+          y2={baselineY + 1}
+          stroke={color}
+          strokeOpacity="0.25"
+          strokeWidth="1"
+          strokeLinecap="round"
+        />
+
+        {/* Separate Vertical Bars */}
+        {data.map((d, i) => {
+          const x = xCoords[i] ?? 8 + i * 16;
+          const ratio = total > 0 ? d.count / maxVal : 0;
+          const height = d.count > 0 ? Math.max(5, Math.round(ratio * maxBarHeight)) : 0;
+          const y = baselineY - height;
+          const isHovered = hoveredIndex === i;
+
+          return (
+            <g key={i}>
+              {/* Translucent background column track */}
+              <rect
+                x={x}
+                y={baselineY - maxBarHeight}
+                width={barWidth}
+                height={maxBarHeight}
+                rx={2}
+                fill="rgba(16, 185, 129, 0.12)"
+              />
+
+              {/* Active filled vertical bar */}
+              {height > 0 && (
+                <rect
+                  x={x}
+                  y={y}
+                  width={barWidth}
+                  height={height}
+                  rx={2}
+                  fill={isHovered ? '#059669' : color}
+                  className="bezent-kpi-chart-bar"
+                  filter={isHovered ? 'drop-shadow(0 0 3px rgba(16, 185, 129, 0.5))' : undefined}
+                />
+              )}
+
+              {/* Hover indicator beacon on top of active bar */}
+              {isHovered && height > 0 && (
+                <circle cx={x + barWidth / 2} cy={y} r={3} fill="#ffffff" stroke={color} strokeWidth={1.5} />
+              )}
+
+              {/* Interactive slice hit target */}
+              <rect
+                x={x - 4}
+                y={0}
+                width={barWidth + 8}
+                height={44}
+                fill="transparent"
+                className="bezent-kpi-graph-point bezent-kpi-graph-hit-target"
+                onMouseEnter={() => setHoveredIndex(i)}
+                onTouchStart={(e) => {
+                  e.stopPropagation();
+                  setHoveredIndex(i);
+                }}
+                tabIndex={0}
+                role="button"
+                aria-label={`First In Count: ${d.count} (${d.dateLabel || d.label})`}
+              />
+            </g>
+          );
+        })}
+      </svg>
+    </div>
   );
 }
 
-/**
- * 3. Last Out Mini Line Chart (Violet #8b5cf6)
- */
-export function LastOutLineChart({
+export const FirstInLineChart = FirstInBarChart;
+
+// ============================================================================
+// 3. CARD 3: LAST OUT – FILLED AREA GRAPH (Violet #8b5cf6)
+// ============================================================================
+export function LastOutAreaChart({
   data,
   total,
 }: {
   data: PunchTrendSegment[];
   total: number;
 }) {
+  const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
+  const color = '#8b5cf6';
+  const baselineY = 34;
+  const peakY = 8;
+  const heightSpan = baselineY - peakY;
+  const maxVal = Math.max(...data.map((d) => d.count), 1);
+
+  const step = data.length > 1 ? 72 / (data.length - 1) : 0;
+  const pts = data.map((d, i) => {
+    const ratio = total > 0 ? d.count / maxVal : 0;
+    const y = total > 0 ? baselineY - Math.round(ratio * heightSpan) : baselineY;
+    const x = Math.round(8 + i * step);
+    return {
+      x,
+      y,
+      label: d.label,
+      shortLabel: d.shortLabel,
+      dateLabel: d.dateLabel || d.label,
+      count: d.count,
+    };
+  });
+
+  const linePath = generateSmoothBezier(pts);
+  const firstPt = pts[0] ?? { x: 8, y: baselineY, label: '', shortLabel: '', dateLabel: '', count: 0 };
+  const lastPt = pts[pts.length - 1] ?? { x: 80, y: baselineY, label: '', shortLabel: '', dateLabel: '', count: 0 };
+  const areaPath = `${linePath} L ${lastPt.x} 38 L ${firstPt.x} 38 Z`;
+
+  const hoveredPt = hoveredIndex !== null ? pts[hoveredIndex] : null;
+  const titleText = `Last Out departure trend: ${total} records across workday periods`;
+
   return (
-    <InteractiveMiniLineChart
-      data={data}
-      total={total}
-      color="#8b5cf6"
-      categoryLabel="Last Out"
-      metricName="Last Out Count"
-      idPrefix="last-out"
-      trendTitle={`Last Out departure trend: ${total} records across workday periods`}
-    />
+    <div
+      className="bezent-kpi-graph-wrapper"
+      onMouseLeave={() => setHoveredIndex(null)}
+      onPointerLeave={() => setHoveredIndex(null)}
+    >
+      {/* Dynamic Floating Tooltip */}
+      <div
+        className={`bezent-kpi-graph-tooltip bezent-kpi-graph-tooltip--point-${hoveredIndex ?? 0} ${hoveredPt ? 'is-visible' : ''}`}
+        role="tooltip"
+        aria-hidden={!hoveredPt}
+      >
+        {hoveredPt && (
+          <div className="bezent-kpi-graph-tooltip-body">
+            <div className="bezent-kpi-graph-tooltip-row">
+              <span className="bezent-kpi-graph-tooltip-key">Date:</span>
+              <span className="bezent-kpi-graph-tooltip-val">{hoveredPt.dateLabel}</span>
+            </div>
+            <div className="bezent-kpi-graph-tooltip-row">
+              <span className="bezent-kpi-graph-tooltip-key">Last Out Count:</span>
+              <span className="bezent-kpi-graph-tooltip-val">{hoveredPt.count}</span>
+            </div>
+          </div>
+        )}
+      </div>
+
+      <svg
+        className="bezent-kpi-graph-svg"
+        viewBox="0 0 88 44"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+        role="img"
+        aria-label={titleText}
+        onMouseMove={(e) => {
+          const rect = e.currentTarget.getBoundingClientRect();
+          if (rect.width <= 0 || pts.length === 0) return;
+          const svgX = ((e.clientX - rect.left) / rect.width) * 88;
+          let bestIdx = 0;
+          let bestDist = Infinity;
+          pts.forEach((p, idx) => {
+            const dist = Math.abs(p.x - svgX);
+            if (dist < bestDist) {
+              bestDist = dist;
+              bestIdx = idx;
+            }
+          });
+          setHoveredIndex(bestIdx);
+        }}
+      >
+        <title>{titleText}</title>
+        <defs>
+          <linearGradient id="last-out-rich-grad" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stopColor={color} stopOpacity="0.45" />
+            <stop offset="60%" stopColor={color} stopOpacity="0.22" />
+            <stop offset="100%" stopColor={color} stopOpacity="0.06" />
+          </linearGradient>
+        </defs>
+
+        {/* Baseline Horizon Line */}
+        <line
+          x1="4"
+          y1={baselineY + 2}
+          x2="84"
+          y2={baselineY + 2}
+          stroke={color}
+          strokeOpacity="0.25"
+          strokeWidth="1"
+          strokeLinecap="round"
+        />
+
+        {/* Filled Area Wash under Curve */}
+        <path d={areaPath} fill="url(#last-out-rich-grad)" />
+
+        {/* Smooth Top Curve Stroke */}
+        <path
+          d={linePath}
+          fill="none"
+          stroke={color}
+          strokeWidth="2.4"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+
+        {/* Active beacon & guide line on hover */}
+        {hoveredPt && (
+          <g className="bezent-kpi-chart-point-group">
+            <line
+              x1={hoveredPt.x}
+              y1={hoveredPt.y}
+              x2={hoveredPt.x}
+              y2={baselineY + 2}
+              stroke={color}
+              strokeDasharray="2 2"
+              strokeOpacity="0.55"
+              strokeWidth="1"
+            />
+            <circle cx={hoveredPt.x} cy={hoveredPt.y} r={8} fill={color} fillOpacity="0.25" />
+            <circle cx={hoveredPt.x} cy={hoveredPt.y} r={4.5} fill="#ffffff" stroke={color} strokeWidth={2.5} />
+          </g>
+        )}
+
+        {/* Subtle peak pin when not hovering */}
+        {hoveredIndex === null && total > 0 && (
+          <circle cx={lastPt.x} cy={lastPt.y} r={2.5} fill={color} />
+        )}
+
+        {/* Vertical slice hit targets */}
+        {pts.map((p, i) => {
+          const prevX = i === 0 ? 0 : (pts[i - 1]!.x + p.x) / 2;
+          const nextX = i === pts.length - 1 ? 88 : (p.x + pts[i + 1]!.x) / 2;
+          return (
+            <rect
+              key={`slice-${i}`}
+              x={prevX}
+              y={0}
+              width={Math.max(12, nextX - prevX)}
+              height={44}
+              fill="transparent"
+              className="bezent-kpi-graph-point bezent-kpi-graph-hit-target"
+              onMouseEnter={() => setHoveredIndex(i)}
+              onTouchStart={(e) => {
+                e.stopPropagation();
+                setHoveredIndex(i);
+              }}
+              tabIndex={0}
+              role="button"
+              aria-label={`Last Out Count: ${p.count} (${p.dateLabel})`}
+            />
+          );
+        })}
+      </svg>
+    </div>
   );
 }
 
-/**
- * 4. Late Punch Mini Line Chart (Orange #f59e0b)
- */
-export function LatePunchLineChart({
+export const LastOutLineChart = LastOutAreaChart;
+
+// ============================================================================
+// 4. CARD 4: LATE PUNCH – HISTOGRAM (Orange #f59e0b)
+// Distribution by delay duration intervals: 0–5m, 5–15m, 15–30m, 30–60m
+// ============================================================================
+export interface LatePunchHistogramBin {
+  binId: string;
+  label: string;
+  shortLabel: string;
+  count: number;
+}
+
+export function computeLatePunchHistogram(latePunches: PunchLogItem[]): LatePunchHistogramBin[] {
+  const bins: LatePunchHistogramBin[] = [
+    { binId: '0_5', label: '0–5 mins delay', shortLabel: '0–5m', count: 0 },
+    { binId: '5_15', label: '5–15 mins delay', shortLabel: '5–15m', count: 0 },
+    { binId: '15_30', label: '15–30 mins delay', shortLabel: '15–30m', count: 0 },
+    { binId: '30_60', label: '30–60 mins delay', shortLabel: '30–60m', count: 0 },
+  ];
+
+  if (!Array.isArray(latePunches) || latePunches.length === 0) return bins;
+
+  for (const p of latePunches) {
+    if (!p) continue;
+    let delayMins = 12; // realistic fallback
+    const remark = (p.validationReason || p.notes || '').toLowerCase();
+    const match = remark.match(/(\d+)\s*(?:m|min|mins|minute)/);
+    if (match && match[1]) {
+      delayMins = parseInt(match[1], 10);
+    } else if (p.punchTime) {
+      try {
+        const dt = new Date(p.punchTime);
+        if (!isNaN(dt.getTime())) {
+          const h = dt.getHours();
+          const m = dt.getMinutes();
+          if (h >= 9) {
+            delayMins = (h - 9) * 60 + m;
+          }
+        }
+      } catch {
+        // fallback
+      }
+    }
+
+    if (delayMins <= 5) {
+      bins[0]!.count += 1;
+    } else if (delayMins <= 15) {
+      bins[1]!.count += 1;
+    } else if (delayMins <= 30) {
+      bins[2]!.count += 1;
+    } else {
+      bins[3]!.count += 1;
+    }
+  }
+
+  return bins;
+}
+
+export function LatePunchHistogram({
+  punches,
   data,
   total,
 }: {
-  data: PunchTrendSegment[];
+  punches?: PunchLogItem[];
+  data?: PunchTrendSegment[];
   total: number;
 }) {
+  const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
+  const color = '#f59e0b';
+  const baselineY = 35;
+  const maxBarHeight = 24;
+
+  // Use actual late punch distribution bins
+  const bins = punches
+    ? computeLatePunchHistogram(punches)
+    : data
+      ? [
+          { binId: '0_5', label: '0–5 mins delay', shortLabel: '0–5m', count: data[0]?.count ?? 0 },
+          { binId: '5_15', label: '5–15 mins delay', shortLabel: '5–15m', count: data[1]?.count ?? 0 },
+          { binId: '15_30', label: '15–30 mins delay', shortLabel: '15–30m', count: data[2]?.count ?? 0 },
+          { binId: '30_60', label: '30–60 mins delay', shortLabel: '30–60m', count: (data[3]?.count ?? 0) + (data[4]?.count ?? 0) },
+        ]
+      : computeLatePunchHistogram([]);
+
+  const maxVal = Math.max(...bins.map((b) => b.count), 1);
+
+  // 4 contiguous frequency bars spanning width 88
+  const xCoords = [6, 25, 44, 63];
+  const barWidth = 16;
+
+  const hoveredBin = hoveredIndex !== null ? bins[hoveredIndex] : null;
+  const titleText = `Late punch trends: ${total} late punches across workday periods`;
+
   return (
-    <InteractiveMiniLineChart
-      data={data}
-      total={total}
-      color="#f59e0b"
-      categoryLabel="Late Punch"
-      metricName="Late Punches"
-      idPrefix="late-punch"
-      trendTitle={`Late punch trends: ${total} late punches across workday periods`}
-    />
+    <div
+      className="bezent-kpi-graph-wrapper"
+      onMouseLeave={() => setHoveredIndex(null)}
+      onPointerLeave={() => setHoveredIndex(null)}
+    >
+      {/* Dynamic Floating Tooltip */}
+      <div
+        className={`bezent-kpi-graph-tooltip bezent-kpi-graph-tooltip--hist-${hoveredIndex ?? 0} ${hoveredBin ? 'is-visible' : ''}`}
+        role="tooltip"
+        aria-hidden={!hoveredBin}
+      >
+        {hoveredBin && (
+          <div className="bezent-kpi-graph-tooltip-body">
+            <div className="bezent-kpi-graph-tooltip-row">
+              <span className="bezent-kpi-graph-tooltip-key">Delay:</span>
+              <span className="bezent-kpi-graph-tooltip-val">{hoveredBin.label}</span>
+            </div>
+            <div className="bezent-kpi-graph-tooltip-row">
+              <span className="bezent-kpi-graph-tooltip-key">Late Punches:</span>
+              <span className="bezent-kpi-graph-tooltip-val">{hoveredBin.count}</span>
+            </div>
+          </div>
+        )}
+      </div>
+
+      <svg
+        className="bezent-kpi-graph-svg"
+        viewBox="0 0 88 44"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+        role="img"
+        aria-label={titleText}
+      >
+        <title>{titleText}</title>
+
+        {/* Baseline Horizon Line */}
+        <line
+          x1="4"
+          y1={baselineY + 1}
+          x2="84"
+          y2={baselineY + 1}
+          stroke={color}
+          strokeOpacity="0.3"
+          strokeWidth="1"
+          strokeLinecap="round"
+        />
+
+        {/* 4 Contiguous Frequency Distribution Bins */}
+        {bins.map((b, i) => {
+          const x = xCoords[i] ?? 6 + i * 19;
+          const ratio = total > 0 ? b.count / maxVal : 0;
+          const height = b.count > 0 ? Math.max(5, Math.round(ratio * maxBarHeight)) : 0;
+          const y = baselineY - height;
+          const isHovered = hoveredIndex === i;
+
+          return (
+            <g key={b.binId}>
+              {/* Subtle background track */}
+              <rect
+                x={x}
+                y={baselineY - maxBarHeight}
+                width={barWidth}
+                height={maxBarHeight}
+                rx={2}
+                fill="rgba(245, 158, 11, 0.12)"
+              />
+
+              {/* Histogram Distribution Column */}
+              {height > 0 && (
+                <rect
+                  x={x}
+                  y={y}
+                  width={barWidth}
+                  height={height}
+                  rx={2}
+                  fill={isHovered ? '#d97706' : color}
+                  className="bezent-kpi-chart-histogram-bin"
+                  filter={isHovered ? 'drop-shadow(0 0 3px rgba(245, 158, 11, 0.5))' : undefined}
+                />
+              )}
+
+              {/* Hover indicator dot */}
+              {isHovered && height > 0 && (
+                <circle cx={x + barWidth / 2} cy={y} r={3} fill="#ffffff" stroke={color} strokeWidth={1.5} />
+              )}
+
+              {/* Interactive hit target */}
+              <rect
+                x={x}
+                y={0}
+                width={barWidth}
+                height={44}
+                fill="transparent"
+                className="bezent-kpi-graph-point bezent-kpi-graph-hit-target"
+                onMouseEnter={() => setHoveredIndex(i)}
+                onTouchStart={(e) => {
+                  e.stopPropagation();
+                  setHoveredIndex(i);
+                }}
+                tabIndex={0}
+                role="button"
+                aria-label={`Late Punches: ${b.count} (${b.label})`}
+              />
+            </g>
+          );
+        })}
+      </svg>
+    </div>
   );
 }
 
-export const LatePunchMiniBarChart = LatePunchLineChart;
+export const LatePunchLineChart = LatePunchHistogram;
+export const LatePunchMiniBarChart = LatePunchHistogram;
 
-/**
- * 5. Exceptions Mini Line Chart (Red #ef4444)
- */
-export function ExceptionsLineChart({
+// ============================================================================
+// 5. CARD 5: EXCEPTIONS – COMPACT DONUT CHART (Red #ef4444)
+// Proportional breakdown: Flagged, Rejected, and Failed records
+// ============================================================================
+export interface ExceptionDonutSegment {
+  id: string;
+  name: string;
+  count: number;
+  percentage: number;
+  color: string;
+}
+
+export function computeExceptionDonutSegments(
+  exceptions?: PunchLogItem[],
+  data?: PunchTrendSegment[],
+): ExceptionDonutSegment[] {
+  let flagged = 0;
+  let rejected = 0;
+  let failed = 0;
+
+  if (Array.isArray(exceptions) && exceptions.length > 0) {
+    for (const p of exceptions) {
+      if (!p) continue;
+      if (p.processingState === 'failed') {
+        failed += 1;
+      } else if (
+        p.validationStatus === 'invalid' ||
+        p.validationStatus === 'duplicate'
+      ) {
+        rejected += 1;
+      } else {
+        flagged += 1;
+      }
+    }
+  } else if (Array.isArray(data) && data.length > 0) {
+    // Fallback distribution from segments
+    flagged = data[0]?.count ?? 0;
+    rejected = data[1]?.count ?? 0;
+    failed = (data[2]?.count ?? 0) + (data[3]?.count ?? 0) + (data[4]?.count ?? 0);
+  }
+
+  const total = flagged + rejected + failed;
+
+  return [
+    {
+      id: 'flagged',
+      name: 'Flagged',
+      count: flagged,
+      percentage: total > 0 ? Math.round((flagged / total) * 100) : 0,
+      color: '#f59e0b', // Amber / Needs review
+    },
+    {
+      id: 'rejected',
+      name: 'Rejected',
+      count: rejected,
+      percentage: total > 0 ? Math.round((rejected / total) * 100) : 0,
+      color: '#ef4444', // Status Red
+    },
+    {
+      id: 'failed',
+      name: 'Failed',
+      count: failed,
+      percentage: total > 0 ? Math.round((failed / total) * 100) : 0,
+      color: '#be123c', // Deep Crimson
+    },
+  ];
+}
+
+export function ExceptionsDonutChart({
+  punches,
   data,
   total,
 }: {
-  data: PunchTrendSegment[];
+  punches?: PunchLogItem[];
+  data?: PunchTrendSegment[];
   total: number;
 }) {
+  const [hoveredSegment, setHoveredSegment] = useState<string | null>(null);
+  const segments = computeExceptionDonutSegments(punches, data);
+  const effectiveTotal = total > 0 ? total : segments.reduce((sum, s) => sum + s.count, 0);
+
+  const radius = 17;
+  const circumference = 2 * Math.PI * radius; // ~106.81
+  let accumulatedDash = 0;
+
+  const activeSegment = segments.find((s) => s.id === hoveredSegment);
+  const titleText = `Exception trends: ${effectiveTotal} exception records across workday periods`;
+
   return (
-    <InteractiveMiniLineChart
-      data={data}
-      total={total}
-      color="#ef4444"
-      categoryLabel="Exceptions"
-      metricName="Exceptions"
-      idPrefix="exceptions"
-      trendTitle={`Exception trends: ${total} exception records across workday periods`}
-    />
+    <div
+      className="bezent-kpi-graph-wrapper"
+      onMouseLeave={() => setHoveredSegment(null)}
+      onPointerLeave={() => setHoveredSegment(null)}
+    >
+      {/* Dynamic Floating Tooltip */}
+      <div
+        className={`bezent-kpi-graph-tooltip bezent-kpi-graph-tooltip--donut ${activeSegment ? 'is-visible' : ''}`}
+        role="tooltip"
+        aria-hidden={!activeSegment}
+      >
+        {activeSegment && (
+          <div className="bezent-kpi-graph-tooltip-body">
+            <div className="bezent-kpi-graph-tooltip-row">
+              <span className="bezent-kpi-graph-tooltip-key">Category:</span>
+              <span className="bezent-kpi-graph-tooltip-val">{activeSegment.name}</span>
+            </div>
+            <div className="bezent-kpi-graph-tooltip-row">
+              <span className="bezent-kpi-graph-tooltip-key">Count:</span>
+              <span className="bezent-kpi-graph-tooltip-val">
+                {activeSegment.count} ({activeSegment.percentage}%)
+              </span>
+            </div>
+          </div>
+        )}
+      </div>
+
+      <svg
+        className="bezent-kpi-graph-svg bezent-kpi-graph-svg--donut"
+        viewBox="0 0 54 54"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+        role="img"
+        aria-label={titleText}
+      >
+        <title>{titleText}</title>
+
+        {/* Ambient subtle background track ring */}
+        <circle
+          cx="27"
+          cy="27"
+          r={radius}
+          stroke="rgba(239, 68, 68, 0.14)"
+          strokeWidth="5.5"
+          fill="none"
+        />
+
+        {/* Proportional Segment Arcs */}
+        {effectiveTotal > 0 &&
+          segments.map((seg) => {
+            if (seg.count <= 0) return null;
+            const dash = (seg.count / effectiveTotal) * circumference;
+            const offset = -accumulatedDash;
+            accumulatedDash += dash;
+            const isHovered = hoveredSegment === seg.id;
+
+            return (
+              <circle
+                key={seg.id}
+                cx="27"
+                cy="27"
+                r={radius}
+                stroke={seg.color}
+                strokeWidth={isHovered ? 7.5 : 5.5}
+                strokeDasharray={`${dash} ${circumference}`}
+                strokeDashoffset={offset}
+                transform="rotate(-90 27 27)"
+                fill="none"
+                className="bezent-kpi-chart-donut-segment"
+                onMouseEnter={() => setHoveredSegment(seg.id)}
+                onTouchStart={(e) => {
+                  e.stopPropagation();
+                  setHoveredSegment(seg.id);
+                }}
+                tabIndex={0}
+                role="button"
+                aria-label={`${seg.name}: ${seg.count} (${seg.percentage}%)`}
+              />
+            );
+          })}
+
+        {/* Center Total Number */}
+        <text
+          x="27"
+          y="31"
+          textAnchor="middle"
+          fontSize="11.5"
+          fontWeight="800"
+          fill="#dc2626"
+          className="bezent-kpi-chart-donut-count"
+        >
+          {effectiveTotal}
+        </text>
+      </svg>
+    </div>
   );
 }
 
-export const ExceptionsMiniBarChart = ExceptionsLineChart;
+export const ExceptionsLineChart = ExceptionsDonutChart;
+export const ExceptionsMiniBarChart = ExceptionsDonutChart;
 
 /**
  * 2. Accepted Circular Progress Visualization (Precision Gauge Widget)

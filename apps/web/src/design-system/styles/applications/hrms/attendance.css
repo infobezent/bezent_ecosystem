@@ -5438,6 +5438,76 @@ thead .bezent-attendance-col--sticky-right {
   height: 46px !important;
 }
 
+/* ── Discrete Bar & Histogram Charts ── */
+.bezent-kpi-chart-bar,
+.bezent-kpi-chart-histogram-bin {
+  cursor: pointer;
+  transition: fill 0.15s ease, filter 0.15s ease;
+}
+
+/* ── Histogram Tooltip Offsets (bins 0-3) ── */
+.bezent-kpi-graph-tooltip--hist-0 {
+  left: 16%;
+  transform: translate(-20%, -115%);
+}
+.bezent-kpi-graph-tooltip--hist-0::after {
+  left: 25%;
+}
+
+.bezent-kpi-graph-tooltip--hist-1 {
+  left: 38%;
+  transform: translate(-38%, -115%);
+}
+.bezent-kpi-graph-tooltip--hist-1::after {
+  left: 40%;
+}
+
+.bezent-kpi-graph-tooltip--hist-2 {
+  left: 62%;
+  transform: translate(-62%, -115%);
+}
+.bezent-kpi-graph-tooltip--hist-2::after {
+  left: 60%;
+}
+
+.bezent-kpi-graph-tooltip--hist-3 {
+  left: 84%;
+  transform: translate(-80%, -115%);
+}
+.bezent-kpi-graph-tooltip--hist-3::after {
+  left: 75%;
+}
+
+/* ── Donut Chart for Exceptions ── */
+.bezent-kpi-card__top .bezent-kpi-graph-svg--donut {
+  width: 48px !important;
+  height: 48px !important;
+  margin-right: 4px;
+}
+
+.bezent-kpi-chart-donut-segment {
+  cursor: pointer;
+  transition: stroke-width 0.16s ease, filter 0.16s ease;
+}
+
+.bezent-kpi-chart-donut-segment:hover {
+  filter: drop-shadow(0 0 3px rgba(239, 68, 68, 0.45));
+}
+
+.bezent-kpi-chart-donut-count {
+  font-weight: 800;
+  font-feature-settings: 'tnum';
+}
+
+.bezent-kpi-graph-tooltip--donut {
+  left: 50%;
+  transform: translate(-50%, -115%);
+}
+
+.bezent-kpi-graph-tooltip--donut::after {
+  left: 50%;
+}
+
 /* ── Punch Log Bottom Status Badges / Pills ── */
 .bezent-kpi-sub-pill {
   display: inline-flex;
