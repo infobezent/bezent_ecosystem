@@ -152,6 +152,7 @@ describe('BEZENT HRMS Attendance — Punch Log Summary Cards & Workable Mini Gra
       expect(allPunchesHtml).toContain('bezent-kpi-graph-wrapper');
       expect(allPunchesHtml).toContain('bezent-kpi-graph-tooltip');
       expect(allPunchesHtml).toContain('bezent-kpi-graph-point');
+      expect(allPunchesHtml).toContain('bezent-kpi-chart-node');
 
       // 2. First In - Green #10b981
       const firstInHtml = renderToStaticMarkup(
@@ -161,6 +162,7 @@ describe('BEZENT HRMS Attendance — Punch Log Summary Cards & Workable Mini Gra
       expect(firstInHtml).toContain('bezent-kpi-graph-wrapper');
       expect(firstInHtml).toContain('bezent-kpi-graph-tooltip');
       expect(firstInHtml).toContain('bezent-kpi-graph-point');
+      expect(firstInHtml).toContain('bezent-kpi-chart-node');
 
       // 3. Last Out - Violet #8b5cf6
       const lastOutHtml = renderToStaticMarkup(
@@ -170,6 +172,7 @@ describe('BEZENT HRMS Attendance — Punch Log Summary Cards & Workable Mini Gra
       expect(lastOutHtml).toContain('bezent-kpi-graph-wrapper');
       expect(lastOutHtml).toContain('bezent-kpi-graph-tooltip');
       expect(lastOutHtml).toContain('bezent-kpi-graph-point');
+      expect(lastOutHtml).toContain('bezent-kpi-chart-node');
 
       // 4. Late Punch - Orange #f59e0b
       const latePunchHtml = renderToStaticMarkup(
@@ -179,6 +182,7 @@ describe('BEZENT HRMS Attendance — Punch Log Summary Cards & Workable Mini Gra
       expect(latePunchHtml).toContain('bezent-kpi-graph-wrapper');
       expect(latePunchHtml).toContain('bezent-kpi-graph-tooltip');
       expect(latePunchHtml).toContain('bezent-kpi-graph-point');
+      expect(latePunchHtml).toContain('bezent-kpi-chart-node');
 
       // 5. Exceptions - Red #ef4444
       const exceptionsHtml = renderToStaticMarkup(
@@ -188,6 +192,7 @@ describe('BEZENT HRMS Attendance — Punch Log Summary Cards & Workable Mini Gra
       expect(exceptionsHtml).toContain('bezent-kpi-graph-wrapper');
       expect(exceptionsHtml).toContain('bezent-kpi-graph-tooltip');
       expect(exceptionsHtml).toContain('bezent-kpi-graph-point');
+      expect(exceptionsHtml).toContain('bezent-kpi-chart-node');
     });
   });
 

@@ -4,6 +4,7 @@ import type { PunchLogItem } from '../types/attendance.types';
 export interface PunchTrendSegment {
   label: string;
   shortLabel: string;
+  dateLabel?: string;
   count: number;
 }
 
@@ -14,6 +15,39 @@ export const WORKDAY_SEGMENTS = [
   { label: 'Afternoon (15:00–18:00)', shortLabel: '15:00–18:00' },
   { label: 'Evening Checkout (18:00+)', shortLabel: '18:00+' },
 ];
+
+export function formatDisplayDate(dateStr?: string): string {
+  if (!dateStr) return '18 Nov 2026';
+  try {
+    const parts = dateStr.slice(0, 10).split('-');
+    if (parts.length === 3) {
+      const y = parseInt(parts[0]!, 10);
+      const m = parseInt(parts[1]!, 10);
+      const d = parseInt(parts[2]!, 10);
+      if (!isNaN(y) && !isNaN(m) && !isNaN(d)) {
+        const months = [
+          'Jan',
+          'Feb',
+          'Mar',
+          'Apr',
+          'May',
+          'Jun',
+          'Jul',
+          'Aug',
+          'Sep',
+          'Oct',
+          'Nov',
+          'Dec',
+        ];
+        const mon = months[m - 1] || 'Nov';
+        return `${d} ${mon} ${y}`;
+      }
+    }
+  } catch {
+    // fallback
+  }
+  return dateStr;
+}
 
 export function extractPunchHour(punch: PunchLogItem): number {
   if (!punch) return 9;
@@ -36,12 +70,56 @@ export function extractPunchHour(punch: PunchLogItem): number {
 }
 
 /**
- * Maps a list of punches to 5 standard workday segments based on actual timestamps.
+ * Maps a list of punches to standard trend series (workday time-segments or date series)
+ * based on actual timestamps and selected date range.
  */
-export function computeWorkdayTrendSegments(punches: PunchLogItem[]): PunchTrendSegment[] {
+export function computeWorkdayTrendSegments(
+  punches: PunchLogItem[],
+  dateFrom?: string,
+  dateTo?: string,
+): PunchTrendSegment[] {
+  // If multi-day range selected (e.g. Nov 14 to Nov 18)
+  if (dateFrom && dateTo && dateFrom !== dateTo) {
+    try {
+      const start = new Date(dateFrom);
+      const end = new Date(dateTo);
+      const daySpan = Math.round((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)) + 1;
+      if (daySpan >= 2 && daySpan <= 14) {
+        const dates: string[] = [];
+        for (let i = 0; i < Math.min(daySpan, 7); i++) {
+          const d = new Date(start);
+          d.setDate(d.getDate() + i);
+          dates.push(d.toISOString().slice(0, 10));
+        }
+        return dates.map((dStr) => {
+          const formatted = formatDisplayDate(dStr);
+          const count = (punches || []).filter((p) => {
+            if (!p) return false;
+            const pDate = p.workday || (p.punchTime ? p.punchTime.slice(0, 10) : '');
+            return pDate === dStr;
+          }).length;
+          return {
+            label: formatted,
+            shortLabel: dStr.slice(5),
+            dateLabel: formatted,
+            count,
+          };
+        });
+      }
+    } catch {
+      // Fallback to standard workday segments
+    }
+  }
+
+  // Single-day distribution across 5 standard workday segments
+  const workdayDate = formatDisplayDate(
+    dateFrom || punches?.[0]?.workday || punches?.[0]?.punchTime || '2026-11-18',
+  );
+
   const segments: PunchTrendSegment[] = WORKDAY_SEGMENTS.map((s) => ({
     label: s.label,
     shortLabel: s.shortLabel,
+    dateLabel: `${workdayDate} (${s.shortLabel})`,
     count: 0,
   }));
 
@@ -96,13 +174,13 @@ function generateSmoothBezier(pts: Array<{ x: number; y: number }>): string {
 }
 
 /**
- * Interactive Mini Line Chart Component for Punch Log Category Cards.
+ * Interactive Data-Driven Line Chart Component for Punch Log Category Cards.
  * Features:
- * - Smooth curved cubic bezier line graph with subtle gradient area fill.
- * - Upper-right position with compact dimensions matching Workforce Overview cards.
- * - Interactive hover & touch tap data points with dark navy floating tooltip.
- * - Circular indicator beacon highlighting the hovered point.
- * - Independent operation per card.
+ * - Real chart component with distinct, clearly identifiable hoverable data point nodes.
+ * - Smooth connected line chart with subtle gradient area fill underneath.
+ * - Dynamic tooltip positioning right next to the hovered point with pointing caret.
+ * - Highlighted specific point with animated beacon ring and vertical guide crosshair.
+ * - Accurate date/interval and category count display from real Punch Log records.
  */
 export interface InteractiveMiniLineChartProps {
   data: PunchTrendSegment[];
@@ -110,6 +188,7 @@ export interface InteractiveMiniLineChartProps {
   color: string;
   categoryLabel: string;
   idPrefix: string;
+  metricName: string;
   trendTitle?: string;
 }
 
@@ -119,45 +198,50 @@ export function InteractiveMiniLineChart({
   color,
   categoryLabel,
   idPrefix,
+  metricName,
   trendTitle,
 }: InteractiveMiniLineChartProps) {
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
 
-  const baselineY = 32;
+  const baselineY = 34;
   const peakY = 8;
   const heightSpan = baselineY - peakY;
   const maxVal = Math.max(...data.map((d) => d.count), 1);
 
-  // 5 point positions across width 88
-  const xCoords = [8, 26, 44, 62, 80];
+  // Distribute point positions across width 88
+  const step = data.length > 1 ? 72 / (data.length - 1) : 0;
   const pts = data.map((d, i) => {
     const ratio = total > 0 ? d.count / maxVal : 0;
     const y = total > 0 ? baselineY - Math.round(ratio * heightSpan) : baselineY;
-    const x = xCoords[i] ?? (8 + i * 18);
+    const x = Math.round(8 + i * step);
     return {
       x,
       y,
       label: d.label,
       shortLabel: d.shortLabel,
+      dateLabel: d.dateLabel || d.label,
       count: d.count,
     };
   });
 
   const linePath = generateSmoothBezier(pts);
-  const firstPt = pts[0] ?? { x: 8, y: baselineY, label: '', shortLabel: '', count: 0 };
-  const lastPt = pts[pts.length - 1] ?? { x: 80, y: baselineY, label: '', shortLabel: '', count: 0 };
-  const areaPath = `${linePath} L ${lastPt.x} 36 L ${firstPt.x} 36 Z`;
-
-  // Find peak point for accent beacon when not hovering
-  let peakIdx = 0;
-  let maxCount = -1;
-  pts.forEach((p, idx) => {
-    if (p.count > maxCount) {
-      maxCount = p.count;
-      peakIdx = idx;
-    }
-  });
-  const peakPt = pts[peakIdx] ?? firstPt;
+  const firstPt = pts[0] ?? {
+    x: 8,
+    y: baselineY,
+    label: '',
+    shortLabel: '',
+    dateLabel: '',
+    count: 0,
+  };
+  const lastPt = pts[pts.length - 1] ?? {
+    x: 80,
+    y: baselineY,
+    label: '',
+    shortLabel: '',
+    dateLabel: '',
+    count: 0,
+  };
+  const areaPath = `${linePath} L ${lastPt.x} 38 L ${firstPt.x} 38 Z`;
 
   const hoveredPt = hoveredIndex !== null ? pts[hoveredIndex] : null;
   const titleText =
@@ -169,27 +253,54 @@ export function InteractiveMiniLineChart({
       onMouseLeave={() => setHoveredIndex(null)}
       onPointerLeave={() => setHoveredIndex(null)}
     >
-      {/* Floating Hover Tooltip: Dark navy pill (#1e293b), white text, rounded corners */}
+      {/* Floating Hover Tooltip: Positioned next to the specific hovered point */}
       <div
-        className={`bezent-kpi-graph-tooltip ${hoveredPt ? 'is-visible' : ''}`}
+        className={`bezent-kpi-graph-tooltip bezent-kpi-graph-tooltip--point-${hoveredIndex ?? 0} ${hoveredPt ? 'is-visible' : ''}`}
         role="tooltip"
         aria-hidden={!hoveredPt}
       >
-        {hoveredPt ? `${categoryLabel}: ${hoveredPt.count} (${hoveredPt.shortLabel})` : ''}
+        {hoveredPt && (
+          <div className="bezent-kpi-graph-tooltip-body">
+            <div className="bezent-kpi-graph-tooltip-row">
+              <span className="bezent-kpi-graph-tooltip-key">Date:</span>
+              <span className="bezent-kpi-graph-tooltip-val">{hoveredPt.dateLabel}</span>
+            </div>
+            <div className="bezent-kpi-graph-tooltip-row">
+              <span className="bezent-kpi-graph-tooltip-key">{metricName}:</span>
+              <span className="bezent-kpi-graph-tooltip-val">{hoveredPt.count}</span>
+            </div>
+          </div>
+        )}
       </div>
 
       <svg
         className="bezent-kpi-graph-svg"
-        viewBox="0 0 88 40"
+        viewBox="0 0 88 44"
         fill="none"
         xmlns="http://www.w3.org/2000/svg"
         role="img"
         aria-label={titleText}
+        onMouseMove={(e) => {
+          const rect = e.currentTarget.getBoundingClientRect();
+          if (rect.width <= 0 || pts.length === 0) return;
+          const svgX = ((e.clientX - rect.left) / rect.width) * 88;
+          let bestIdx = 0;
+          let bestDist = Infinity;
+          pts.forEach((p, idx) => {
+            const dist = Math.abs(p.x - svgX);
+            if (dist < bestDist) {
+              bestDist = dist;
+              bestIdx = idx;
+            }
+          });
+          setHoveredIndex(bestIdx);
+        }}
+        onMouseLeave={() => setHoveredIndex(null)}
       >
         <title>{titleText}</title>
         <defs>
           <linearGradient id={`${idPrefix}-area-grad`} x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor={color} stopOpacity="0.22" />
+            <stop offset="0%" stopColor={color} stopOpacity="0.25" />
             <stop offset="100%" stopColor={color} stopOpacity="0.0" />
           </linearGradient>
         </defs>
@@ -201,7 +312,7 @@ export function InteractiveMiniLineChart({
           x2="84"
           y2={baselineY + 2}
           stroke={color}
-          strokeOpacity="0.18"
+          strokeOpacity="0.2"
           strokeWidth="1"
           strokeLinecap="round"
         />
@@ -209,7 +320,7 @@ export function InteractiveMiniLineChart({
         {/* Translucent Soft Glow Fill under Curve */}
         <path d={areaPath} fill={`url(#${idPrefix}-area-grad)`} />
 
-        {/* Smooth Curved Line Stroke */}
+        {/* Smooth Curved Trend Line */}
         <path
           d={linePath}
           fill="none"
@@ -219,60 +330,93 @@ export function InteractiveMiniLineChart({
           strokeLinejoin="round"
         />
 
-        {/* Quiet dot indicators on line points */}
-        {pts.map((p, i) => (
-          <circle
-            key={`dot-${i}`}
-            cx={p.x}
-            cy={p.y}
-            r={2}
-            fill={color}
-            opacity={hoveredIndex === i ? 0 : 0.6}
-            aria-hidden="true"
-          />
-        ))}
+        {/* Clearly identifiable data point marker dots on the line */}
+        {pts.map((p, i) => {
+          const isHovered = hoveredIndex === i;
+          return (
+            <g key={`marker-${i}`} className="bezent-kpi-chart-point-group">
+              {/* Active hover crosshair guide line */}
+              {isHovered && (
+                <line
+                  x1={p.x}
+                  y1={p.y}
+                  x2={p.x}
+                  y2={baselineY + 2}
+                  stroke={color}
+                  strokeDasharray="2 2"
+                  strokeOpacity="0.55"
+                  strokeWidth="1"
+                />
+              )}
 
-        {/* Beacon on hovered point / peak activity */}
-        {hoveredPt ? (
-          <g className="bezent-kpi-graph-beacon" aria-hidden="true">
-            <circle cx={hoveredPt.x} cy={hoveredPt.y} r={6} fill={color} fillOpacity="0.25" />
-            <circle cx={hoveredPt.x} cy={hoveredPt.y} r={3} fill="#ffffff" stroke={color} strokeWidth="2" />
-          </g>
-        ) : total > 0 && peakPt.count > 0 ? (
-          <g className="bezent-kpi-graph-beacon" aria-hidden="true">
-            <circle cx={peakPt.x} cy={peakPt.y} r={4.5} fill={color} fillOpacity="0.2" />
-            <circle cx={peakPt.x} cy={peakPt.y} r={2.2} fill={color} />
-          </g>
-        ) : null}
+              {/* Hover halo pulse ring */}
+              {isHovered && (
+                <circle
+                  cx={p.x}
+                  cy={p.y}
+                  r={8}
+                  fill={color}
+                  fillOpacity="0.25"
+                  className="bezent-kpi-chart-pulse-ring"
+                />
+              )}
 
-        {/* Interactive hit targets for desktop hover & touch tap */}
-        {pts.map((p, i) => (
-          <circle
-            key={`hit-${i}`}
-            cx={p.x}
-            cy={p.y}
-            r={10}
-            fill="transparent"
-            className="bezent-kpi-graph-point"
-            onMouseEnter={() => setHoveredIndex(i)}
-            onPointerEnter={() => setHoveredIndex(i)}
-            onTouchStart={(e) => {
-              e.stopPropagation();
-              setHoveredIndex(i);
-            }}
-            onClick={(e) => {
-              e.stopPropagation();
-              setHoveredIndex(i);
-            }}
-            onFocus={() => setHoveredIndex(i)}
-            onBlur={() => setHoveredIndex(null)}
-            tabIndex={0}
-            role="button"
-            aria-label={`${categoryLabel}: ${p.count} (${p.shortLabel})`}
-          >
-            <title>{`${categoryLabel}: ${p.count} (${p.shortLabel})`}</title>
-          </circle>
-        ))}
+              {/* Visible Point Dot Node on the line */}
+              <circle
+                cx={p.x}
+                cy={p.y}
+                r={isHovered ? 4.5 : 3.2}
+                fill="#ffffff"
+                stroke={color}
+                strokeWidth={isHovered ? 2.5 : 2}
+                className={`bezent-kpi-chart-node ${isHovered ? 'is-active' : ''}`}
+              />
+            </g>
+          );
+        })}
+
+        {/* Peak activity beacon indicator (when not hovering any point) */}
+        {hoveredIndex === null && total > 0 && (
+          <g className="bezent-kpi-graph-beacon" aria-hidden="true">
+            <circle cx={lastPt.x} cy={lastPt.y} r={2.5} fill={color} />
+          </g>
+        )}
+
+        {/* Vertical slice hit targets spanning the full height for effortless hover */}
+        {pts.map((p, i) => {
+          const prevX = i === 0 ? 0 : (pts[i - 1]!.x + p.x) / 2;
+          const nextX = i === pts.length - 1 ? 88 : (p.x + pts[i + 1]!.x) / 2;
+          const sliceWidth = Math.max(12, nextX - prevX);
+
+          return (
+            <rect
+              key={`slice-${i}`}
+              x={prevX}
+              y={0}
+              width={sliceWidth}
+              height={44}
+              fill="transparent"
+              className="bezent-kpi-graph-point bezent-kpi-graph-hit-target"
+              onMouseEnter={() => setHoveredIndex(i)}
+              onPointerEnter={() => setHoveredIndex(i)}
+              onTouchStart={(e) => {
+                e.stopPropagation();
+                setHoveredIndex(i);
+              }}
+              onClick={(e) => {
+                e.stopPropagation();
+                setHoveredIndex(i);
+              }}
+              onFocus={() => setHoveredIndex(i)}
+              onBlur={() => setHoveredIndex(null)}
+              tabIndex={0}
+              role="button"
+              aria-label={`${metricName}: ${p.count} (${p.dateLabel})`}
+            >
+              <title>{`${metricName}: ${p.count} (${p.dateLabel})`}</title>
+            </rect>
+          );
+        })}
       </svg>
     </div>
   );
@@ -294,6 +438,7 @@ export function AllPunchesLineChart({
       total={total}
       color="#2563eb"
       categoryLabel="All Punches"
+      metricName="Punches"
       idPrefix="total-punches"
       trendTitle={`Punch activity trend: ${total} total punches`}
     />
@@ -318,6 +463,7 @@ export function FirstInLineChart({
       total={total}
       color="#10b981"
       categoryLabel="First In"
+      metricName="First In Count"
       idPrefix="first-in"
       trendTitle={`First In arrival trend: ${total} records across workday periods`}
     />
@@ -340,6 +486,7 @@ export function LastOutLineChart({
       total={total}
       color="#8b5cf6"
       categoryLabel="Last Out"
+      metricName="Last Out Count"
       idPrefix="last-out"
       trendTitle={`Last Out departure trend: ${total} records across workday periods`}
     />
@@ -362,6 +509,7 @@ export function LatePunchLineChart({
       total={total}
       color="#f59e0b"
       categoryLabel="Late Punch"
+      metricName="Late Punches"
       idPrefix="late-punch"
       trendTitle={`Late punch trends: ${total} late punches across workday periods`}
     />
@@ -386,6 +534,7 @@ export function ExceptionsLineChart({
       total={total}
       color="#ef4444"
       categoryLabel="Exceptions"
+      metricName="Exceptions"
       idPrefix="exceptions"
       trendTitle={`Exception trends: ${total} exception records across workday periods`}
     />

@@ -5258,7 +5258,7 @@ thead .bezent-attendance-col--sticky-right {
   align-items: center !important;
   justify-content: flex-end !important;
   flex-shrink: 0 !important;
-  width: 76px !important;
+  width: 88px !important;
   height: 44px !important;
   align-self: center !important;
   pointer-events: auto !important;
@@ -5275,49 +5275,163 @@ thead .bezent-attendance-col--sticky-right {
   overflow: visible;
 }
 
-/* Floating Hover Tooltip: Dark navy pill, white text, smooth transition */
+.bezent-kpi-card__top .bezent-kpi-graph-svg {
+  width: 88px !important;
+  height: 44px !important;
+  max-width: 100% !important;
+  overflow: visible !important;
+}
+
+/* ── Identifiable Data Point Nodes on the Chart Line ── */
+.bezent-kpi-chart-node {
+  cursor: pointer;
+  transition: r 0.16s ease, stroke-width 0.16s ease;
+}
+
+.bezent-kpi-chart-pulse-ring {
+  pointer-events: none;
+  animation: bezent-kpi-pulse 2s cubic-bezier(0.16, 1, 0.3, 1) infinite;
+}
+
+@keyframes bezent-kpi-pulse {
+  0% {
+    r: 6.5px;
+    opacity: 0.35;
+  }
+  50% {
+    r: 8.5px;
+    opacity: 0.15;
+  }
+  100% {
+    r: 6.5px;
+    opacity: 0.35;
+  }
+}
+
+.bezent-kpi-graph-point,
+.bezent-kpi-graph-hit-target {
+  cursor: pointer;
+  outline: none;
+}
+
+/* ── Dynamic Floating Tooltip Positioning near Hovered Data Point ── */
 .bezent-kpi-graph-tooltip {
   position: absolute;
-  top: -8px;
-  right: 0;
+  top: -4px;
   transform: translateY(-100%);
-  font-size: 10.5px;
-  font-weight: 700;
+  font-size: 11px;
   color: #ffffff;
   background: #1e293b;
-  border-radius: 6px;
-  padding: 3px 8px;
+  border-radius: 8px;
+  padding: 5px 9px;
   white-space: nowrap;
   pointer-events: none;
   opacity: 0;
-  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.25);
+  box-shadow: 0 4px 14px rgba(15, 23, 42, 0.32);
   transition:
-    opacity 0.18s cubic-bezier(0.16, 1, 0.3, 1),
+    opacity 0.16s cubic-bezier(0.16, 1, 0.3, 1),
+    left 0.18s cubic-bezier(0.16, 1, 0.3, 1),
     transform 0.18s cubic-bezier(0.16, 1, 0.3, 1);
   z-index: 60;
+  line-height: 1.25;
+}
+
+/* Downward caret pointing at the hovered data point node */
+.bezent-kpi-graph-tooltip::after {
+  content: '';
+  position: absolute;
+  bottom: -4px;
+  border-width: 4px 4px 0 4px;
+  border-style: solid;
+  border-color: #1e293b transparent transparent transparent;
+}
+
+/* Point positions across width 88px (xCoords: [8, 26, 44, 62, 80]) */
+.bezent-kpi-graph-tooltip--point-0 {
+  left: 9%;
+  transform: translate(-15%, -115%);
+}
+.bezent-kpi-graph-tooltip--point-0::after {
+  left: 20%;
+}
+
+.bezent-kpi-graph-tooltip--point-1 {
+  left: 30%;
+  transform: translate(-35%, -115%);
+}
+.bezent-kpi-graph-tooltip--point-1::after {
+  left: 35%;
+}
+
+.bezent-kpi-graph-tooltip--point-2 {
+  left: 50%;
+  transform: translate(-50%, -115%);
+}
+.bezent-kpi-graph-tooltip--point-2::after {
+  left: 50%;
+}
+
+.bezent-kpi-graph-tooltip--point-3 {
+  left: 70%;
+  transform: translate(-65%, -115%);
+}
+.bezent-kpi-graph-tooltip--point-3::after {
+  left: 65%;
+}
+
+.bezent-kpi-graph-tooltip--point-4 {
+  left: 91%;
+  transform: translate(-85%, -115%);
+}
+.bezent-kpi-graph-tooltip--point-4::after {
+  left: 80%;
 }
 
 .bezent-kpi-graph-tooltip.is-visible {
   opacity: 1;
-  transform: translateY(-115%);
 }
 
 [data-theme='dark'] .bezent-kpi-graph-tooltip {
   background: #0f172a;
   border: 1px solid #334155;
   color: #f8fafc;
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.5);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.6);
+}
+[data-theme='dark'] .bezent-kpi-graph-tooltip::after {
+  border-color: #0f172a transparent transparent transparent;
 }
 
-.bezent-kpi-graph-point {
-  cursor: pointer;
-  outline: none;
+.bezent-kpi-graph-tooltip-body {
+  display: flex;
+  flex-direction: column;
+  gap: 2.5px;
 }
 
-.bezent-kpi-card__top .bezent-kpi-graph-svg {
-  width: 76px !important;
-  height: 38px !important;
-  max-width: 100% !important;
+.bezent-kpi-graph-tooltip-row {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11px;
+  line-height: 1.25;
+}
+
+.bezent-kpi-graph-tooltip-key {
+  font-weight: 500;
+  color: #94a3b8;
+}
+
+[data-theme='dark'] .bezent-kpi-graph-tooltip-key {
+  color: #cbd5e1;
+}
+
+.bezent-kpi-graph-tooltip-val {
+  font-weight: 700;
+  color: #ffffff;
+}
+
+[data-theme='dark'] .bezent-kpi-graph-tooltip-val {
+  color: #f8fafc;
+}
 }
 
 .bezent-kpi-card__top .bezent-kpi-graph-svg--circular {

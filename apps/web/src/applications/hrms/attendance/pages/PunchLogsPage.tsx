@@ -576,13 +576,13 @@ export function PunchLogsPage() {
   // ── Actual Attendance Records Trends for the 5 Category Mini Graphs ───────
   const categoryTrends = useMemo(() => {
     return {
-      all: computePunchTrendBuckets(categoryPunches.all),
-      firstIn: computePunchTrendBuckets(categoryPunches.firstIn),
-      lastOut: computePunchTrendBuckets(categoryPunches.lastOut),
-      latePunch: computePunchTrendBuckets(categoryPunches.latePunch),
-      exceptions: computePunchTrendBuckets(categoryPunches.exceptions),
+      all: computePunchTrendBuckets(categoryPunches.all, dateFrom, dateTo),
+      firstIn: computePunchTrendBuckets(categoryPunches.firstIn, dateFrom, dateTo),
+      lastOut: computePunchTrendBuckets(categoryPunches.lastOut, dateFrom, dateTo),
+      latePunch: computePunchTrendBuckets(categoryPunches.latePunch, dateFrom, dateTo),
+      exceptions: computePunchTrendBuckets(categoryPunches.exceptions, dateFrom, dateTo),
     };
-  }, [categoryPunches]);
+  }, [categoryPunches, dateFrom, dateTo]);
 
   // ── Total Records and Pagination ──────────────────────────────────────────
   const totalCount = filteredItems.length;
