@@ -102,6 +102,36 @@ function formatDateShort(dateStr: string): string {
   }
 }
 
+function formatShiftShortName(name: string): string {
+  const clean = name.replace(/ Shift$/i, '').trim();
+  const lower = clean.toLowerCase();
+  if (lower === 'general') return 'Gen';
+  if (lower === 'morning') return 'Morn';
+  if (lower === 'evening') return 'Eve';
+  if (lower === 'night' || lower === 'overnight') return 'Night';
+  return clean.length > 5 ? clean.slice(0, 4) : clean;
+}
+
+/**
+ * Luminous, high-contrast shift palette optimized for dark backgrounds and stacked bars:
+ * General (Bright Cornflower Blue), Morning (Sky Cyan), Evening (Vibrant Violet), Night (Mint Emerald), Amber
+ */
+export const ATTENDANCE_SHIFT_PALETTE = ['#60a5fa', '#38bdf8', '#a78bfa', '#34d399', '#fbbf24'];
+
+export function getVibrantShiftColor(color: string | undefined, index: number): string {
+  if (
+    !color ||
+    color === '#2563eb' ||
+    color === '#1d4ed8' ||
+    color === '#1e3a8a' ||
+    color === '#1e40af' ||
+    color === '#172554'
+  ) {
+    return ATTENDANCE_SHIFT_PALETTE[index % ATTENDANCE_SHIFT_PALETTE.length]!;
+  }
+  return color;
+}
+
 /**
  * Generates an interactive smooth Catmull-Rom to Cubic Bézier SVG sparkline line & area path.
  * Handles all-zero, constant non-zero, and fluctuating series gracefully.
@@ -255,10 +285,6 @@ function generateBarData(
   const step = totalW / n;
   const barW = Math.max(2, step - 3);
 
-  // Distinct shift colors for multi-shift columns:
-  // General Shift: Royal Blue, Morning Shift: Bright Sky Blue, Evening Shift: Indigo/Violet
-  const defaultShiftColors = ['#2563eb', '#38bdf8', '#6366f1', '#10b981'];
-
   return pointList.map((p, i) => {
     const barH = p.value === 0 ? 2.5 : Math.max(3, (p.value / maxVal) * plotH);
     const x = padX + i * step + (step - barW) / 2;
@@ -282,7 +308,7 @@ function generateBarData(
         const segH = Math.max(2, Math.round((s.count / totalShiftCount) * barH));
         const segY = currentBottom - segH;
         currentBottom = segY;
-        const color = s.color || defaultShiftColors[sIdx % defaultShiftColors.length]!;
+        const color = getVibrantShiftColor(s.color, sIdx);
         const isTop = sIdx === shiftList.length - 1;
         return {
           y: segY,
@@ -418,8 +444,9 @@ export const AttendanceGenericKpiCard: React.FC<AttendanceGenericKpiCardProps> =
           onClick();
         }
       }}
+      onMouseLeave={() => setHoveredIdx(null)}
     >
-      {/* Left Column: Heading, Value (with live scrub on hover), Subtitle Pill */}
+      {/* Left Column: Heading, Value (with live scrub on hover), Subtitle Pill or Live Shifts */}
       <div className="bezent-att-kpi-left">
         <div className="bezent-att-kpi-heading">{heading}</div>
         <div className="bezent-att-kpi-value">
@@ -431,7 +458,41 @@ export const AttendanceGenericKpiCard: React.FC<AttendanceGenericKpiCardProps> =
             displayValue
           )}
         </div>
-        {displayPillText && (
+        {activePt && activePt.point.shifts && activePt.point.shifts.length > 1 ? (
+          <div className={`bezent-att-kpi-live-shifts bezent-att-kpi-live-shifts--${variantKey}`}>
+            <div className="bezent-att-kpi-live-header">
+              <span className="bezent-att-kpi-live-date">{activePt.point.formattedDate}</span>
+              <span className="bezent-att-kpi-live-sep">·</span>
+              <span className="bezent-att-kpi-live-total">{activePt.point.value} Rostered</span>
+            </div>
+            <div className="bezent-att-kpi-live-grid">
+              {activePt.point.shifts.map((s, idx) => (
+                <span key={s.id || idx} className="bezent-att-kpi-live-chip">
+                  <svg
+                    width="6"
+                    height="6"
+                    viewBox="0 0 6 6"
+                    aria-hidden="true"
+                    className="bezent-att-live-pip"
+                  >
+                    <circle
+                      cx="3"
+                      cy="3"
+                      r="2.8"
+                      fill={getVibrantShiftColor(s.color, idx)}
+                      stroke="#ffffff"
+                      strokeWidth="0.6"
+                    />
+                  </svg>
+                  <span className="bezent-att-kpi-live-chip-name">
+                    {formatShiftShortName(s.name)}:
+                  </span>
+                  <span className="bezent-att-kpi-live-chip-num">{s.count}</span>
+                </span>
+              ))}
+            </div>
+          </div>
+        ) : displayPillText ? (
           <div
             className={`bezent-att-kpi-sub bezent-att-kpi-sub--${variantKey} ${
               activePt ? 'is-scrubbing' : ''
@@ -444,7 +505,7 @@ export const AttendanceGenericKpiCard: React.FC<AttendanceGenericKpiCardProps> =
               <span>{displayPillText}</span>
             )}
           </div>
-        )}
+        ) : null}
       </div>
 
       {/* Right Column: Inset Graph Panel with Interactive Scrubbing */}
@@ -473,7 +534,6 @@ export const AttendanceGenericKpiCard: React.FC<AttendanceGenericKpiCardProps> =
             navigate(`/hrms/attendance/daily-log?date=${activePt.point.date}`);
           }
         }}
-        title="Hover along curve to inspect daily numbers · Click point to open daily log"
       >
         <div className="bezent-att-kpi-right-top">
           <span className={`bezent-att-kpi-graph-tag ${activePt ? 'is-scrubbing' : ''}`}>
@@ -563,57 +623,16 @@ export const AttendanceGenericKpiCard: React.FC<AttendanceGenericKpiCardProps> =
                 />
               );
             })}
-            {activePt &&
-              (() => {
-                const hasShifts = activePt.point.shifts && activePt.point.shifts.length > 1;
-                const tipW = hasShifts ? 74 : 48;
-                const tipH = hasShifts ? 20 : 12;
-                let tipX = activePt.x - tipW / 2;
-                if (tipX < 2) tipX = 2;
-                if (tipX + tipW > 98) tipX = 98 - tipW;
-                const tipY = Math.max(1, activePt.y - tipH - 4);
-                return (
-                  <g pointerEvents="none">
-                    <line
-                      x1={activePt.x}
-                      y1={2}
-                      x2={activePt.x}
-                      y2={38}
-                      className="bezent-att-sparkline-guideline"
-                    />
-                    <g transform={`translate(${tipX}, ${tipY})`}>
-                      <rect
-                        width={tipW}
-                        height={tipH}
-                        rx={3}
-                        className="bezent-att-sparkline-tip-bg"
-                      />
-                      <text
-                        x={tipW / 2}
-                        y={hasShifts ? 7.5 : 8.5}
-                        textAnchor="middle"
-                        className="bezent-att-sparkline-tip-text"
-                      >
-                        {activePt.point.formattedDate}: {activePt.point.value} Rostered
-                      </text>
-                      {hasShifts && (
-                        <text
-                          x={tipW / 2}
-                          y={15.5}
-                          textAnchor="middle"
-                          className="bezent-att-sparkline-tip-sub"
-                        >
-                          {activePt.point.shifts
-                            ?.map(
-                              (s) => `${s.name.replace(/ Shift$/i, '').slice(0, 3)}: ${s.count}`,
-                            )
-                            .join(' · ')}
-                        </text>
-                      )}
-                    </g>
-                  </g>
-                );
-              })()}
+            {activePt && (
+              <line
+                x1={activePt.x}
+                y1={2}
+                x2={activePt.x}
+                y2={38}
+                className="bezent-att-sparkline-guideline"
+                pointerEvents="none"
+              />
+            )}
           </svg>
         ) : graphType === 'sharp' || graphType === 'dotted' || graphType === 'step' ? (
           /* ── Graph 3: Sharp Geometric Trendline with Soft Gradient Fill (Absent - Rose) ── */
@@ -659,51 +678,26 @@ export const AttendanceGenericKpiCard: React.FC<AttendanceGenericKpiCardProps> =
                 />
               );
             })}
-            {activePt &&
-              (() => {
-                const tipW = 48;
-                const tipH = 12;
-                let tipX = activePt.x - tipW / 2;
-                if (tipX < 2) tipX = 2;
-                if (tipX + tipW > 98) tipX = 98 - tipW;
-                const tipY = Math.max(1, activePt.y - tipH - 4);
-                return (
-                  <g pointerEvents="none">
-                    <line
-                      x1={activePt.x}
-                      y1={2}
-                      x2={activePt.x}
-                      y2={38}
-                      className="bezent-att-sparkline-guideline"
-                    />
-                    <circle
-                      cx={activePt.x}
-                      cy={activePt.y}
-                      r={3}
-                      fill={stopColorHex}
-                      stroke="#ffffff"
-                      strokeWidth="1.5"
-                      className="bezent-att-sparkline-dot is-active"
-                    />
-                    <g transform={`translate(${tipX}, ${tipY})`}>
-                      <rect
-                        width={tipW}
-                        height={tipH}
-                        rx={3}
-                        className="bezent-att-sparkline-tip-bg"
-                      />
-                      <text
-                        x={tipW / 2}
-                        y={8.5}
-                        textAnchor="middle"
-                        className="bezent-att-sparkline-tip-text"
-                      >
-                        {activePt.point.formattedDate}: {activePt.point.value}
-                      </text>
-                    </g>
-                  </g>
-                );
-              })()}
+            {activePt && (
+              <g pointerEvents="none">
+                <line
+                  x1={activePt.x}
+                  y1={2}
+                  x2={activePt.x}
+                  y2={38}
+                  className="bezent-att-sparkline-guideline"
+                />
+                <circle
+                  cx={activePt.x}
+                  cy={activePt.y}
+                  r={3}
+                  fill={stopColorHex}
+                  stroke="#ffffff"
+                  strokeWidth="1.5"
+                  className="bezent-att-sparkline-dot is-active"
+                />
+              </g>
+            )}
           </svg>
         ) : graphType === 'square' || graphType === 'microbar' || graphType === 'pin' ? (
           /* ── Graph 4: 7-Day Square Date Tiles (On Approved Leave - Amber) ── */
@@ -752,42 +746,16 @@ export const AttendanceGenericKpiCard: React.FC<AttendanceGenericKpiCardProps> =
                 />
               );
             })}
-            {activePt &&
-              (() => {
-                const tipW = 48;
-                const tipH = 12;
-                let tipX = activePt.x - tipW / 2;
-                if (tipX < 2) tipX = 2;
-                if (tipX + tipW > 98) tipX = 98 - tipW;
-                const tipY = Math.max(1, activePt.y - tipH - 4);
-                return (
-                  <g pointerEvents="none">
-                    <line
-                      x1={activePt.x}
-                      y1={2}
-                      x2={activePt.x}
-                      y2={38}
-                      className="bezent-att-sparkline-guideline"
-                    />
-                    <g transform={`translate(${tipX}, ${tipY})`}>
-                      <rect
-                        width={tipW}
-                        height={tipH}
-                        rx={3}
-                        className="bezent-att-sparkline-tip-bg"
-                      />
-                      <text
-                        x={tipW / 2}
-                        y={8.5}
-                        textAnchor="middle"
-                        className="bezent-att-sparkline-tip-text"
-                      >
-                        {activePt.point.formattedDate}: {activePt.point.value}
-                      </text>
-                    </g>
-                  </g>
-                );
-              })()}
+            {activePt && (
+              <line
+                x1={activePt.x}
+                y1={2}
+                x2={activePt.x}
+                y2={38}
+                className="bezent-att-sparkline-guideline"
+                pointerEvents="none"
+              />
+            )}
           </svg>
         ) : graphType === 'telemetry' ? (
           /* ── Graph 5: Geometric Polyline with Threshold (Exceptions & Queue - Purple) ── */
@@ -839,42 +807,26 @@ export const AttendanceGenericKpiCard: React.FC<AttendanceGenericKpiCardProps> =
                 pointerEvents="none"
               />
             )}
-            {activePt &&
-              (() => {
-                const tipW = 48;
-                const tipH = 12;
-                let tipX = activePt.x - tipW / 2;
-                if (tipX < 2) tipX = 2;
-                if (tipX + tipW > 98) tipX = 98 - tipW;
-                const tipY = Math.max(1, activePt.y - tipH - 4);
-                return (
-                  <g pointerEvents="none">
-                    <line
-                      x1={activePt.x}
-                      y1={2}
-                      x2={activePt.x}
-                      y2={38}
-                      className="bezent-att-sparkline-guideline"
-                    />
-                    <g transform={`translate(${tipX}, ${tipY})`}>
-                      <rect
-                        width={tipW}
-                        height={tipH}
-                        rx={3}
-                        className="bezent-att-sparkline-tip-bg"
-                      />
-                      <text
-                        x={tipW / 2}
-                        y={8.5}
-                        textAnchor="middle"
-                        className="bezent-att-sparkline-tip-text"
-                      >
-                        {activePt.point.formattedDate}: {activePt.point.value}
-                      </text>
-                    </g>
-                  </g>
-                );
-              })()}
+            {activePt && (
+              <g pointerEvents="none">
+                <line
+                  x1={activePt.x}
+                  y1={2}
+                  x2={activePt.x}
+                  y2={38}
+                  className="bezent-att-sparkline-guideline"
+                />
+                <circle
+                  cx={activePt.x}
+                  cy={activePt.y}
+                  r={3}
+                  fill={stopColorHex}
+                  stroke="#ffffff"
+                  strokeWidth="1.5"
+                  className="bezent-att-sparkline-dot is-active"
+                />
+              </g>
+            )}
           </svg>
         ) : (
           /* ── Graph 2: Smooth Fluid Spline Wave Area (Present Today - Green / Default) ── */
@@ -910,43 +862,26 @@ export const AttendanceGenericKpiCard: React.FC<AttendanceGenericKpiCardProps> =
               />
             )}
 
-            {activePt &&
-              (() => {
-                const tipW = 48;
-                const tipH = 12;
-                let tipX = activePt.x - tipW / 2;
-                if (tipX < 2) tipX = 2;
-                if (tipX + tipW > 98) tipX = 98 - tipW;
-                const tipY = Math.max(1, activePt.y - tipH - 4);
-
-                return (
-                  <g pointerEvents="none">
-                    <line
-                      x1={activePt.x}
-                      y1={2}
-                      x2={activePt.x}
-                      y2={38}
-                      className="bezent-att-sparkline-guideline"
-                    />
-                    <g transform={`translate(${tipX}, ${tipY})`}>
-                      <rect
-                        width={tipW}
-                        height={tipH}
-                        rx={3}
-                        className="bezent-att-sparkline-tip-bg"
-                      />
-                      <text
-                        x={tipW / 2}
-                        y={8.5}
-                        textAnchor="middle"
-                        className="bezent-att-sparkline-tip-text"
-                      >
-                        {activePt.point.formattedDate}: {activePt.point.value}
-                      </text>
-                    </g>
-                  </g>
-                );
-              })()}
+            {activePt && (
+              <g pointerEvents="none">
+                <line
+                  x1={activePt.x}
+                  y1={2}
+                  x2={activePt.x}
+                  y2={38}
+                  className="bezent-att-sparkline-guideline"
+                />
+                <circle
+                  cx={activePt.x}
+                  cy={activePt.y}
+                  r={3}
+                  fill={stopColorHex}
+                  stroke="#ffffff"
+                  strokeWidth="1.5"
+                  className="bezent-att-sparkline-dot is-active"
+                />
+              </g>
+            )}
           </svg>
         )}
       </div>
@@ -1135,15 +1070,16 @@ export const AttendanceKpiDeck: React.FC<AttendanceKpiDeckProps> = ({
     // Determine active shifts (from props or standard enterprise roster shifts)
     const activeShifts =
       shifts && shifts.length > 0
-        ? shifts
+        ? shifts.map((s, idx) => ({
+            ...s,
+            color: getVibrantShiftColor(s.color, idx),
+          }))
         : [
-            { id: 'shift-gen', name: 'General Shift', color: '#2563eb' },
-            { id: 'shift-mor', name: 'Morning Shift', color: '#38bdf8' },
-            { id: 'shift-eve', name: 'Evening Shift', color: '#6366f1' },
+            { id: 'shift-gen', name: 'General Shift', color: ATTENDANCE_SHIFT_PALETTE[0] },
+            { id: 'shift-mor', name: 'Morning Shift', color: ATTENDANCE_SHIFT_PALETTE[1] },
+            { id: 'shift-eve', name: 'Evening Shift', color: ATTENDANCE_SHIFT_PALETTE[2] },
+            { id: 'shift-night', name: 'Night Shift', color: ATTENDANCE_SHIFT_PALETTE[3] },
           ];
-
-    // Palette of distinct shift colors
-    const shiftPalette = ['#2563eb', '#38bdf8', '#6366f1', '#10b981', '#f59e0b'];
 
     // Proportional shift staffing distribution (65% General, 23% Morning, 12% Evening)
     const shiftRatios =
@@ -1171,12 +1107,12 @@ export const AttendanceKpiDeck: React.FC<AttendanceKpiDeckProps> = ({
           id: s.id,
           name: s.name,
           count,
-          color: s.color || shiftPalette[sIdx % shiftPalette.length]!,
+          color: getVibrantShiftColor(s.color, sIdx),
         };
       });
 
       const shiftSummary = dayShifts
-        .map((s) => `${s.name.replace(/ Shift$/i, '')}: ${s.count}`)
+        .map((s) => `${formatShiftShortName(s.name)}: ${s.count}`)
         .join(' · ');
 
       return {

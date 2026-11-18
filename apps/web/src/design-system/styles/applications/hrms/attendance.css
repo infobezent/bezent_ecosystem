@@ -2438,24 +2438,93 @@
   stroke: #64748b;
 }
 
-.bezent-att-sparkline-tip-bg {
-  fill: #0f172a;
-  stroke: rgba(255, 255, 255, 0.15);
-  stroke-width: 0.6;
+/* ── In-Card Live Shift Breakdown on Hover (No Popups) ── */
+.bezent-att-kpi-live-shifts {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding: 4px 8px 5px 8px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.9);
+  border: 1px solid rgba(59, 130, 246, 0.25);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  animation: bezent-fade-in 0.1s ease-out;
 }
 
-[data-theme='dark'] .bezent-att-sparkline-tip-bg {
-  fill: #020617;
-  stroke: #475569;
+[data-theme='dark'] .bezent-att-kpi-live-shifts {
+  background: rgba(15, 23, 42, 0.85);
+  border-color: rgba(59, 130, 246, 0.35);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
 }
 
-.bezent-att-sparkline-tip-text {
-  fill: #f8fafc;
-  font-size: 6px;
+.bezent-att-kpi-live-header {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  line-height: 1.2;
+}
+
+.bezent-att-kpi-live-date {
   font-weight: 700;
-  font-family: inherit;
+  color: #1e293b;
+}
+
+[data-theme='dark'] .bezent-att-kpi-live-date {
+  color: #f1f5f9;
+}
+
+.bezent-att-kpi-live-sep {
+  color: #94a3b8;
+  font-weight: 600;
+}
+
+.bezent-att-kpi-live-total {
+  font-weight: 800;
+  color: #2563eb;
   font-variant-numeric: tabular-nums;
-  letter-spacing: -0.01em;
+}
+
+[data-theme='dark'] .bezent-att-kpi-live-total {
+  color: #60a5fa;
+}
+
+.bezent-att-kpi-live-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 2px 6px;
+}
+
+.bezent-att-kpi-live-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 10px;
+  line-height: 1.2;
+  white-space: nowrap;
+}
+
+.bezent-att-live-pip {
+  flex-shrink: 0;
+}
+
+.bezent-att-kpi-live-chip-name {
+  color: #475569;
+  font-weight: 600;
+}
+
+[data-theme='dark'] .bezent-att-kpi-live-chip-name {
+  color: #cbd5e1;
+}
+
+.bezent-att-kpi-live-chip-num {
+  color: #0f172a;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+}
+
+[data-theme='dark'] .bezent-att-kpi-live-chip-num {
+  color: #ffffff;
 }
 
 /* ── Specialized KPI Graph Primitives ── */
@@ -2608,6 +2677,7 @@
     transform: scale(1);
     opacity: 0.35;
   }
+
   50% {
     transform: scale(1.35);
     opacity: 0.15;
@@ -7336,15 +7406,19 @@ thead .bezent-attendance-col--sticky-right {
 .bezent-table--requests .bezent-table-col--employee {
   min-width: 180px;
 }
+
 .bezent-table--requests .bezent-table-col--workday {
   min-width: 110px;
 }
+
 .bezent-table--requests .bezent-table-col--change {
   min-width: 190px;
 }
+
 .bezent-table--requests .bezent-table-col--submitted {
   min-width: 125px;
 }
+
 .bezent-table--requests .bezent-table-col--assigned {
   min-width: 140px;
 }
