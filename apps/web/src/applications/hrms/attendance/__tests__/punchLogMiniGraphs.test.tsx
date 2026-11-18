@@ -5,7 +5,12 @@ import { PunchLogsPage } from '../pages/PunchLogsPage';
 import {
   computeWorkdayTrendSegments,
   extractPunchHour,
+  AllPunchesLineChart,
   TotalPunchesLineChart,
+  FirstInLineChart,
+  LastOutLineChart,
+  LatePunchLineChart,
+  ExceptionsLineChart,
   AcceptedCircularProgress,
   FlaggedMiniBarChart,
   RejectedMiniBarChart,
@@ -128,6 +133,61 @@ describe('BEZENT HRMS Attendance — Punch Log Summary Cards & Workable Mini Gra
       expect(html).toContain('stroke="#8b5cf6"');
       expect(html).toContain('bezent-kpi-graph-beacon');
       expect(html).toContain('Incident Window:');
+    });
+
+    it('renders all five interactive category line graphs with correct color palette, wrapper, and tooltips', () => {
+      const sampleData = [
+        { label: 'Morning Rush (08:00–10:00)', shortLabel: '08:00–10:00', count: 12 },
+        { label: 'Mid-Morning (10:00–12:00)', shortLabel: '10:00–12:00', count: 4 },
+        { label: 'Midday / Lunch (12:00–15:00)', shortLabel: '12:00–15:00', count: 3 },
+        { label: 'Afternoon (15:00–18:00)', shortLabel: '15:00–18:00', count: 5 },
+        { label: 'Evening Checkout (18:00+)', shortLabel: '18:00+', count: 10 },
+      ];
+
+      // 1. All Punches - Blue #2563eb
+      const allPunchesHtml = renderToStaticMarkup(
+        <AllPunchesLineChart data={sampleData} total={34} />,
+      );
+      expect(allPunchesHtml).toContain('stroke="#2563eb"');
+      expect(allPunchesHtml).toContain('bezent-kpi-graph-wrapper');
+      expect(allPunchesHtml).toContain('bezent-kpi-graph-tooltip');
+      expect(allPunchesHtml).toContain('bezent-kpi-graph-point');
+
+      // 2. First In - Green #10b981
+      const firstInHtml = renderToStaticMarkup(
+        <FirstInLineChart data={sampleData} total={12} />,
+      );
+      expect(firstInHtml).toContain('stroke="#10b981"');
+      expect(firstInHtml).toContain('bezent-kpi-graph-wrapper');
+      expect(firstInHtml).toContain('bezent-kpi-graph-tooltip');
+      expect(firstInHtml).toContain('bezent-kpi-graph-point');
+
+      // 3. Last Out - Violet #8b5cf6
+      const lastOutHtml = renderToStaticMarkup(
+        <LastOutLineChart data={sampleData} total={10} />,
+      );
+      expect(lastOutHtml).toContain('stroke="#8b5cf6"');
+      expect(lastOutHtml).toContain('bezent-kpi-graph-wrapper');
+      expect(lastOutHtml).toContain('bezent-kpi-graph-tooltip');
+      expect(lastOutHtml).toContain('bezent-kpi-graph-point');
+
+      // 4. Late Punch - Orange #f59e0b
+      const latePunchHtml = renderToStaticMarkup(
+        <LatePunchLineChart data={sampleData} total={5} />,
+      );
+      expect(latePunchHtml).toContain('stroke="#f59e0b"');
+      expect(latePunchHtml).toContain('bezent-kpi-graph-wrapper');
+      expect(latePunchHtml).toContain('bezent-kpi-graph-tooltip');
+      expect(latePunchHtml).toContain('bezent-kpi-graph-point');
+
+      // 5. Exceptions - Red #ef4444
+      const exceptionsHtml = renderToStaticMarkup(
+        <ExceptionsLineChart data={sampleData} total={2} />,
+      );
+      expect(exceptionsHtml).toContain('stroke="#ef4444"');
+      expect(exceptionsHtml).toContain('bezent-kpi-graph-wrapper');
+      expect(exceptionsHtml).toContain('bezent-kpi-graph-tooltip');
+      expect(exceptionsHtml).toContain('bezent-kpi-graph-point');
     });
   });
 

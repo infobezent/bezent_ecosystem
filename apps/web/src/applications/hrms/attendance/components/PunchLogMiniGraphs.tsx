@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import type { PunchLogItem } from '../types/attendance.types';
 
 export interface PunchTrendSegment {
@@ -7,11 +8,11 @@ export interface PunchTrendSegment {
 }
 
 export const WORKDAY_SEGMENTS = [
-  { label: 'Morning Rush (08:00–10:00)', shortLabel: '08–10' },
-  { label: 'Mid-Morning (10:00–12:00)', shortLabel: '10–12' },
-  { label: 'Midday / Lunch (12:00–15:00)', shortLabel: '12–15' },
-  { label: 'Afternoon (15:00–18:00)', shortLabel: '15–18' },
-  { label: 'Evening Checkout (18:00+)', shortLabel: '18+' },
+  { label: 'Morning Rush (08:00–10:00)', shortLabel: '08:00–10:00' },
+  { label: 'Mid-Morning (10:00–12:00)', shortLabel: '10:00–12:00' },
+  { label: 'Midday / Lunch (12:00–15:00)', shortLabel: '12:00–15:00' },
+  { label: 'Afternoon (15:00–18:00)', shortLabel: '15:00–18:00' },
+  { label: 'Evening Checkout (18:00+)', shortLabel: '18:00+' },
 ];
 
 export function extractPunchHour(punch: PunchLogItem): number {
@@ -95,37 +96,59 @@ function generateSmoothBezier(pts: Array<{ x: number; y: number }>): string {
 }
 
 /**
- * 1. Total / All Punches Mini Line Chart (Workable Activity Trend Sparkline)
- * Features a smooth diurnal wave curve reflecting real workday entry & exit peaks.
+ * Interactive Mini Line Chart Component for Punch Log Category Cards.
+ * Features:
+ * - Smooth curved cubic bezier line graph with subtle gradient area fill.
+ * - Upper-right position with compact dimensions matching Workforce Overview cards.
+ * - Interactive hover & touch tap data points with dark navy floating tooltip.
+ * - Circular indicator beacon highlighting the hovered point.
+ * - Independent operation per card.
  */
-export function TotalPunchesLineChart({
-  data,
-  total,
-}: {
+export interface InteractiveMiniLineChartProps {
   data: PunchTrendSegment[];
   total: number;
-}) {
-  const color = '#2563eb';
+  color: string;
+  categoryLabel: string;
+  idPrefix: string;
+  trendTitle?: string;
+}
+
+export function InteractiveMiniLineChart({
+  data,
+  total,
+  color,
+  categoryLabel,
+  idPrefix,
+  trendTitle,
+}: InteractiveMiniLineChartProps) {
+  const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
+
   const baselineY = 32;
   const peakY = 8;
   const heightSpan = baselineY - peakY;
   const maxVal = Math.max(...data.map((d) => d.count), 1);
 
   // 5 point positions across width 88
-  const xCoords = [6, 25, 44, 63, 82];
+  const xCoords = [8, 26, 44, 62, 80];
   const pts = data.map((d, i) => {
     const ratio = total > 0 ? d.count / maxVal : 0;
     const y = total > 0 ? baselineY - Math.round(ratio * heightSpan) : baselineY;
-    const x = xCoords[i] ?? (6 + i * 19);
-    return { x, y, label: d.label, count: d.count };
+    const x = xCoords[i] ?? (8 + i * 18);
+    return {
+      x,
+      y,
+      label: d.label,
+      shortLabel: d.shortLabel,
+      count: d.count,
+    };
   });
 
   const linePath = generateSmoothBezier(pts);
-  const firstPt = pts[0] ?? { x: 6, y: baselineY, label: '', count: 0 };
-  const lastPt = pts[pts.length - 1] ?? { x: 82, y: baselineY, label: '', count: 0 };
+  const firstPt = pts[0] ?? { x: 8, y: baselineY, label: '', shortLabel: '', count: 0 };
+  const lastPt = pts[pts.length - 1] ?? { x: 80, y: baselineY, label: '', shortLabel: '', count: 0 };
   const areaPath = `${linePath} L ${lastPt.x} 36 L ${firstPt.x} 36 Z`;
 
-  // Find peak point for accent beacon
+  // Find peak point for accent beacon when not hovering
   let peakIdx = 0;
   let maxCount = -1;
   pts.forEach((p, idx) => {
@@ -136,79 +159,151 @@ export function TotalPunchesLineChart({
   });
   const peakPt = pts[peakIdx] ?? firstPt;
 
+  const hoveredPt = hoveredIndex !== null ? pts[hoveredIndex] : null;
+  const titleText =
+    trendTitle || `${categoryLabel} trend: ${total} records across workday periods`;
+
   return (
-    <svg
-      className="bezent-kpi-graph-svg"
-      viewBox="0 0 88 40"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-      role="img"
-      aria-label={`Punch activity trend: ${total} total punches`}
+    <div
+      className="bezent-kpi-graph-wrapper"
+      onMouseLeave={() => setHoveredIndex(null)}
+      onPointerLeave={() => setHoveredIndex(null)}
     >
-      <title>{`Punch activity trend: ${total} total punches across 5 workday segments`}</title>
-      <defs>
-        <linearGradient id="total-punches-area-grad" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor={color} stopOpacity="0.22" />
-          <stop offset="100%" stopColor={color} stopOpacity="0.0" />
-        </linearGradient>
-      </defs>
+      {/* Floating Hover Tooltip: Dark navy pill (#1e293b), white text, rounded corners */}
+      <div
+        className={`bezent-kpi-graph-tooltip ${hoveredPt ? 'is-visible' : ''}`}
+        role="tooltip"
+        aria-hidden={!hoveredPt}
+      >
+        {hoveredPt ? `${categoryLabel}: ${hoveredPt.count} (${hoveredPt.shortLabel})` : ''}
+      </div>
 
-      {/* Subtle Horizon Baseline */}
-      <line
-        x1="4"
-        y1={baselineY + 2}
-        x2="84"
-        y2={baselineY + 2}
-        stroke={color}
-        strokeOpacity="0.18"
-        strokeWidth="1"
-        strokeLinecap="round"
-      />
-
-      {/* Translucent Soft Glow Fill under Curve */}
-      <path d={areaPath} fill="url(#total-punches-area-grad)" />
-
-      {/* Crisp Semantic Wave Stroke */}
-      <path
-        d={linePath}
+      <svg
+        className="bezent-kpi-graph-svg"
+        viewBox="0 0 88 40"
         fill="none"
-        stroke={color}
-        strokeWidth="2.2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
+        xmlns="http://www.w3.org/2000/svg"
+        role="img"
+        aria-label={titleText}
+      >
+        <title>{titleText}</title>
+        <defs>
+          <linearGradient id={`${idPrefix}-area-grad`} x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stopColor={color} stopOpacity="0.22" />
+            <stop offset="100%" stopColor={color} stopOpacity="0.0" />
+          </linearGradient>
+        </defs>
 
-      {/* Peak Activity Accent Pin */}
-      {total > 0 && (
-        <g className="bezent-kpi-graph-beacon" aria-hidden="true">
-          <circle cx={peakPt.x} cy={peakPt.y} r={5} fill={color} fillOpacity="0.2" />
-          <circle cx={peakPt.x} cy={peakPt.y} r={2.5} fill={color} />
-          <title>{`Peak Activity: ${peakPt.label} (${peakPt.count} punches)`}</title>
-        </g>
-      )}
+        {/* Subtle Horizon Baseline */}
+        <line
+          x1="4"
+          y1={baselineY + 2}
+          x2="84"
+          y2={baselineY + 2}
+          stroke={color}
+          strokeOpacity="0.18"
+          strokeWidth="1"
+          strokeLinecap="round"
+        />
 
-      {/* Interactive hover targets along segments */}
-      {pts.map((p, i) => (
-        <circle
-          key={i}
-          cx={p.x}
-          cy={p.y}
-          r="4"
-          fill="transparent"
-          className="bezent-kpi-graph-point"
-        >
-          <title>{`${p.label}: ${p.count} punch${p.count === 1 ? '' : 'es'}`}</title>
-        </circle>
-      ))}
-    </svg>
+        {/* Translucent Soft Glow Fill under Curve */}
+        <path d={areaPath} fill={`url(#${idPrefix}-area-grad)`} />
+
+        {/* Smooth Curved Line Stroke */}
+        <path
+          d={linePath}
+          fill="none"
+          stroke={color}
+          strokeWidth="2.2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+
+        {/* Quiet dot indicators on line points */}
+        {pts.map((p, i) => (
+          <circle
+            key={`dot-${i}`}
+            cx={p.x}
+            cy={p.y}
+            r={2}
+            fill={color}
+            opacity={hoveredIndex === i ? 0 : 0.6}
+            aria-hidden="true"
+          />
+        ))}
+
+        {/* Beacon on hovered point / peak activity */}
+        {hoveredPt ? (
+          <g className="bezent-kpi-graph-beacon" aria-hidden="true">
+            <circle cx={hoveredPt.x} cy={hoveredPt.y} r={6} fill={color} fillOpacity="0.25" />
+            <circle cx={hoveredPt.x} cy={hoveredPt.y} r={3} fill="#ffffff" stroke={color} strokeWidth="2" />
+          </g>
+        ) : total > 0 && peakPt.count > 0 ? (
+          <g className="bezent-kpi-graph-beacon" aria-hidden="true">
+            <circle cx={peakPt.x} cy={peakPt.y} r={4.5} fill={color} fillOpacity="0.2" />
+            <circle cx={peakPt.x} cy={peakPt.y} r={2.2} fill={color} />
+          </g>
+        ) : null}
+
+        {/* Interactive hit targets for desktop hover & touch tap */}
+        {pts.map((p, i) => (
+          <circle
+            key={`hit-${i}`}
+            cx={p.x}
+            cy={p.y}
+            r={10}
+            fill="transparent"
+            className="bezent-kpi-graph-point"
+            onMouseEnter={() => setHoveredIndex(i)}
+            onPointerEnter={() => setHoveredIndex(i)}
+            onTouchStart={(e) => {
+              e.stopPropagation();
+              setHoveredIndex(i);
+            }}
+            onClick={(e) => {
+              e.stopPropagation();
+              setHoveredIndex(i);
+            }}
+            onFocus={() => setHoveredIndex(i)}
+            onBlur={() => setHoveredIndex(null)}
+            tabIndex={0}
+            role="button"
+            aria-label={`${categoryLabel}: ${p.count} (${p.shortLabel})`}
+          >
+            <title>{`${categoryLabel}: ${p.count} (${p.shortLabel})`}</title>
+          </circle>
+        ))}
+      </svg>
+    </div>
   );
 }
 
-export const AllPunchesLineChart = TotalPunchesLineChart;
+/**
+ * 1. All Punches / Total Punches Mini Line Chart (Blue #2563eb)
+ */
+export function AllPunchesLineChart({
+  data,
+  total,
+}: {
+  data: PunchTrendSegment[];
+  total: number;
+}) {
+  return (
+    <InteractiveMiniLineChart
+      data={data}
+      total={total}
+      color="#2563eb"
+      categoryLabel="All Punches"
+      idPrefix="total-punches"
+      trendTitle={`Punch activity trend: ${total} total punches`}
+    />
+  );
+}
+
+export const TotalPunchesLineChart = AllPunchesLineChart;
 
 /**
- * 2. First In Mini Line Chart (Morning Arrival Wave Curve)
- * Features an emerald arrival curve illustrating earliest check-ins across workday segments.
+ * 2. First In Mini Line Chart (Green #10b981)
  */
 export function FirstInLineChart({
   data,
@@ -217,101 +312,20 @@ export function FirstInLineChart({
   data: PunchTrendSegment[];
   total: number;
 }) {
-  const color = '#10b981';
-  const baselineY = 32;
-  const peakY = 8;
-  const heightSpan = baselineY - peakY;
-  const maxVal = Math.max(...data.map((d) => d.count), 1);
-
-  const xCoords = [6, 25, 44, 63, 82];
-  const pts = data.map((d, i) => {
-    const ratio = total > 0 ? d.count / maxVal : 0;
-    const y = total > 0 ? baselineY - Math.round(ratio * heightSpan) : baselineY;
-    const x = xCoords[i] ?? (6 + i * 19);
-    return { x, y, label: d.label, count: d.count };
-  });
-
-  const linePath = generateSmoothBezier(pts);
-  const firstPt = pts[0] ?? { x: 6, y: baselineY, label: '', count: 0 };
-  const lastPt = pts[pts.length - 1] ?? { x: 82, y: baselineY, label: '', count: 0 };
-  const areaPath = `${linePath} L ${lastPt.x} 36 L ${firstPt.x} 36 Z`;
-
-  let peakIdx = 0;
-  let maxCount = -1;
-  pts.forEach((p, idx) => {
-    if (p.count > maxCount) {
-      maxCount = p.count;
-      peakIdx = idx;
-    }
-  });
-  const peakPt = pts[peakIdx] ?? firstPt;
-
   return (
-    <svg
-      className="bezent-kpi-graph-svg"
-      viewBox="0 0 88 40"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-      role="img"
-      aria-label={`First In arrivals: ${total} total`}
-    >
-      <title>{`First In arrival trend: ${total} records across workday periods`}</title>
-      <defs>
-        <linearGradient id="first-in-area-grad" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor={color} stopOpacity="0.22" />
-          <stop offset="100%" stopColor={color} stopOpacity="0.0" />
-        </linearGradient>
-      </defs>
-
-      <line
-        x1="4"
-        y1={baselineY + 2}
-        x2="84"
-        y2={baselineY + 2}
-        stroke={color}
-        strokeOpacity="0.2"
-        strokeWidth="1"
-        strokeLinecap="round"
-      />
-
-      <path d={areaPath} fill="url(#first-in-area-grad)" />
-
-      <path
-        d={linePath}
-        fill="none"
-        stroke={color}
-        strokeWidth="2.2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-
-      {total > 0 && (
-        <g className="bezent-kpi-graph-beacon" aria-hidden="true">
-          <circle cx={peakPt.x} cy={peakPt.y} r={5} fill={color} fillOpacity="0.2" />
-          <circle cx={peakPt.x} cy={peakPt.y} r={2.5} fill={color} />
-          <title>{`Peak Check-In: ${peakPt.label} (${peakPt.count} arrivals)`}</title>
-        </g>
-      )}
-
-      {pts.map((p, i) => (
-        <circle
-          key={i}
-          cx={p.x}
-          cy={p.y}
-          r="4"
-          fill="transparent"
-          className="bezent-kpi-graph-point"
-        >
-          <title>{`${p.label}: ${p.count} arrival${p.count === 1 ? '' : 's'}`}</title>
-        </circle>
-      ))}
-    </svg>
+    <InteractiveMiniLineChart
+      data={data}
+      total={total}
+      color="#10b981"
+      categoryLabel="First In"
+      idPrefix="first-in"
+      trendTitle={`First In arrival trend: ${total} records across workday periods`}
+    />
   );
 }
 
 /**
- * 3. Last Out Mini Line Chart (Evening Departure Wave Curve)
- * Features a purple departure curve illustrating latest check-outs across workday segments.
+ * 3. Last Out Mini Line Chart (Violet #8b5cf6)
  */
 export function LastOutLineChart({
   data,
@@ -320,249 +334,65 @@ export function LastOutLineChart({
   data: PunchTrendSegment[];
   total: number;
 }) {
-  const color = '#8b5cf6';
-  const baselineY = 32;
-  const peakY = 8;
-  const heightSpan = baselineY - peakY;
-  const maxVal = Math.max(...data.map((d) => d.count), 1);
-
-  const xCoords = [6, 25, 44, 63, 82];
-  const pts = data.map((d, i) => {
-    const ratio = total > 0 ? d.count / maxVal : 0;
-    const y = total > 0 ? baselineY - Math.round(ratio * heightSpan) : baselineY;
-    const x = xCoords[i] ?? (6 + i * 19);
-    return { x, y, label: d.label, count: d.count };
-  });
-
-  const linePath = generateSmoothBezier(pts);
-  const firstPt = pts[0] ?? { x: 6, y: baselineY, label: '', count: 0 };
-  const lastPt = pts[pts.length - 1] ?? { x: 82, y: baselineY, label: '', count: 0 };
-  const areaPath = `${linePath} L ${lastPt.x} 36 L ${firstPt.x} 36 Z`;
-
-  let peakIdx = 0;
-  let maxCount = -1;
-  pts.forEach((p, idx) => {
-    if (p.count > maxCount) {
-      maxCount = p.count;
-      peakIdx = idx;
-    }
-  });
-  const peakPt = pts[peakIdx] ?? firstPt;
-
   return (
-    <svg
-      className="bezent-kpi-graph-svg"
-      viewBox="0 0 88 40"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-      role="img"
-      aria-label={`Last Out departures: ${total} total`}
-    >
-      <title>{`Last Out departure trend: ${total} records across workday periods`}</title>
-      <defs>
-        <linearGradient id="last-out-area-grad" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor={color} stopOpacity="0.22" />
-          <stop offset="100%" stopColor={color} stopOpacity="0.0" />
-        </linearGradient>
-      </defs>
-
-      <line
-        x1="4"
-        y1={baselineY + 2}
-        x2="84"
-        y2={baselineY + 2}
-        stroke={color}
-        strokeOpacity="0.2"
-        strokeWidth="1"
-        strokeLinecap="round"
-      />
-
-      <path d={areaPath} fill="url(#last-out-area-grad)" />
-
-      <path
-        d={linePath}
-        fill="none"
-        stroke={color}
-        strokeWidth="2.2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-
-      {total > 0 && (
-        <g className="bezent-kpi-graph-beacon" aria-hidden="true">
-          <circle cx={peakPt.x} cy={peakPt.y} r={5} fill={color} fillOpacity="0.2" />
-          <circle cx={peakPt.x} cy={peakPt.y} r={2.5} fill={color} />
-          <title>{`Peak Check-Out: ${peakPt.label} (${peakPt.count} departures)`}</title>
-        </g>
-      )}
-
-      {pts.map((p, i) => (
-        <circle
-          key={i}
-          cx={p.x}
-          cy={p.y}
-          r="4"
-          fill="transparent"
-          className="bezent-kpi-graph-point"
-        >
-          <title>{`${p.label}: ${p.count} departure${p.count === 1 ? '' : 's'}`}</title>
-        </circle>
-      ))}
-    </svg>
+    <InteractiveMiniLineChart
+      data={data}
+      total={total}
+      color="#8b5cf6"
+      categoryLabel="Last Out"
+      idPrefix="last-out"
+      trendTitle={`Last Out departure trend: ${total} records across workday periods`}
+    />
   );
 }
 
 /**
- * 4. Late Punch Mini Bar Chart
- * Features amber structured column bars across workday periods.
+ * 4. Late Punch Mini Line Chart (Orange #f59e0b)
  */
-export function LatePunchMiniBarChart({
+export function LatePunchLineChart({
   data,
   total,
 }: {
   data: PunchTrendSegment[];
   total: number;
 }) {
-  const color = '#f59e0b';
-  const baselineY = 32;
-  const maxBarHeight = 22;
-  const maxVal = Math.max(...data.map((d) => d.count), 1);
-  const xCoords = [10, 25, 40, 55, 70];
-  const barWidth = 8;
-
   return (
-    <svg
-      className="bezent-kpi-graph-svg"
-      viewBox="0 0 88 40"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-      role="img"
-      aria-label={`Late punch trends: ${total} total`}
-    >
-      <title>{`Late punch trends: ${total} late punches across workday periods`}</title>
-
-      <line
-        x1="6"
-        y1={baselineY + 2}
-        x2="82"
-        y2={baselineY + 2}
-        stroke={color}
-        strokeOpacity="0.25"
-        strokeWidth="1"
-        strokeLinecap="round"
-      />
-
-      {data.map((d, i) => {
-        const x = xCoords[i];
-        const ratio = total > 0 ? d.count / maxVal : 0;
-        const height = d.count > 0 ? Math.max(5, Math.round(ratio * maxBarHeight)) : 0;
-        const y = baselineY - height;
-
-        return (
-          <g key={i}>
-            <rect
-              x={x}
-              y={baselineY - maxBarHeight}
-              width={barWidth}
-              height={maxBarHeight}
-              rx={2}
-              fill="rgba(245, 158, 11, 0.15)"
-            />
-            {height > 0 && (
-              <rect
-                x={x}
-                y={y}
-                width={barWidth}
-                height={height}
-                rx={2}
-                fill={color}
-                className="bezent-kpi-graph-bar"
-              >
-                <title>{`${d.label}: ${d.count} late`}</title>
-              </rect>
-            )}
-          </g>
-        );
-      })}
-    </svg>
+    <InteractiveMiniLineChart
+      data={data}
+      total={total}
+      color="#f59e0b"
+      categoryLabel="Late Punch"
+      idPrefix="late-punch"
+      trendTitle={`Late punch trends: ${total} late punches across workday periods`}
+    />
   );
 }
 
+export const LatePunchMiniBarChart = LatePunchLineChart;
+
 /**
- * 5. Exceptions Mini Bar Chart
- * Features red structured column bars for flagged, rejected, and failed records.
+ * 5. Exceptions Mini Line Chart (Red #ef4444)
  */
-export function ExceptionsMiniBarChart({
+export function ExceptionsLineChart({
   data,
   total,
 }: {
   data: PunchTrendSegment[];
   total: number;
 }) {
-  const color = '#ef4444';
-  const baselineY = 32;
-  const maxBarHeight = 22;
-  const maxVal = Math.max(...data.map((d) => d.count), 1);
-  const xCoords = [10, 25, 40, 55, 70];
-  const barWidth = 8;
-
   return (
-    <svg
-      className="bezent-kpi-graph-svg"
-      viewBox="0 0 88 40"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-      role="img"
-      aria-label={`Exception trends: ${total} total`}
-    >
-      <title>{`Exception trends: ${total} exception records across workday periods`}</title>
-
-      <line
-        x1="6"
-        y1={baselineY + 2}
-        x2="82"
-        y2={baselineY + 2}
-        stroke={color}
-        strokeOpacity="0.25"
-        strokeWidth="1"
-        strokeLinecap="round"
-      />
-
-      {data.map((d, i) => {
-        const x = xCoords[i];
-        const ratio = total > 0 ? d.count / maxVal : 0;
-        const height = d.count > 0 ? Math.max(5, Math.round(ratio * maxBarHeight)) : 0;
-        const y = baselineY - height;
-
-        return (
-          <g key={i}>
-            <rect
-              x={x}
-              y={baselineY - maxBarHeight}
-              width={barWidth}
-              height={maxBarHeight}
-              rx={2}
-              fill="rgba(239, 68, 68, 0.15)"
-            />
-            {height > 0 && (
-              <rect
-                x={x}
-                y={y}
-                width={barWidth}
-                height={height}
-                rx={2}
-                fill={color}
-                className="bezent-kpi-graph-bar"
-              >
-                <title>{`${d.label}: ${d.count} exceptions`}</title>
-              </rect>
-            )}
-          </g>
-        );
-      })}
-    </svg>
+    <InteractiveMiniLineChart
+      data={data}
+      total={total}
+      color="#ef4444"
+      categoryLabel="Exceptions"
+      idPrefix="exceptions"
+      trendTitle={`Exception trends: ${total} exception records across workday periods`}
+    />
   );
 }
+
+export const ExceptionsMiniBarChart = ExceptionsLineChart;
 
 /**
  * 2. Accepted Circular Progress Visualization (Precision Gauge Widget)

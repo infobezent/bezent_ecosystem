@@ -30,10 +30,13 @@ import {
 import { BezentIcon } from '../../../../design-system/icons';
 import {
   computePunchTrendBuckets,
+  AllPunchesLineChart,
   TotalPunchesLineChart,
   FirstInLineChart,
   LastOutLineChart,
+  LatePunchLineChart,
   LatePunchMiniBarChart,
+  ExceptionsLineChart,
   ExceptionsMiniBarChart,
 } from '../components/PunchLogMiniGraphs';
 import { AttendanceSectionTabs } from '../components/AttendanceSectionTabs';
@@ -1000,7 +1003,7 @@ export function PunchLogsPage() {
                 <span className="bezent-kpi-card__value">{categoryPunches.latePunch.length}</span>
               </div>
               <div className="bezent-kpi-card__graph">
-                <LatePunchMiniBarChart
+                <LatePunchLineChart
                   data={categoryTrends.latePunch}
                   total={categoryPunches.latePunch.length}
                 />
@@ -1037,7 +1040,7 @@ export function PunchLogsPage() {
                 <span className="bezent-kpi-card__value">{categoryPunches.exceptions.length}</span>
               </div>
               <div className="bezent-kpi-card__graph">
-                <ExceptionsMiniBarChart
+                <ExceptionsLineChart
                   data={categoryTrends.exceptions}
                   total={categoryPunches.exceptions.length}
                 />

@@ -5252,7 +5252,7 @@ thead .bezent-attendance-col--sticky-right {
 }
 
 .bezent-kpi-card__top .bezent-kpi-card__graph {
-  position: static !important;
+  position: relative !important;
   transform: none !important;
   display: flex !important;
   align-items: center !important;
@@ -5263,6 +5263,55 @@ thead .bezent-attendance-col--sticky-right {
   align-self: center !important;
   pointer-events: auto !important;
   overflow: visible !important;
+}
+
+.bezent-kpi-graph-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+/* Floating Hover Tooltip: Dark navy pill, white text, smooth transition */
+.bezent-kpi-graph-tooltip {
+  position: absolute;
+  top: -8px;
+  right: 0;
+  transform: translateY(-100%);
+  font-size: 10.5px;
+  font-weight: 700;
+  color: #ffffff;
+  background: #1e293b;
+  border-radius: 6px;
+  padding: 3px 8px;
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.25);
+  transition:
+    opacity 0.18s cubic-bezier(0.16, 1, 0.3, 1),
+    transform 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+  z-index: 60;
+}
+
+.bezent-kpi-graph-tooltip.is-visible {
+  opacity: 1;
+  transform: translateY(-115%);
+}
+
+[data-theme='dark'] .bezent-kpi-graph-tooltip {
+  background: #0f172a;
+  border: 1px solid #334155;
+  color: #f8fafc;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.5);
+}
+
+.bezent-kpi-graph-point {
+  cursor: pointer;
+  outline: none;
 }
 
 .bezent-kpi-card__top .bezent-kpi-graph-svg {
