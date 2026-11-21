@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { renderToStaticMarkup } from 'react-dom/server';
-import { WorkforceSettingsSection } from '../WorkforceSettingsSection';
+import { WorkforceSettingsSection, WORKFORCE_PRIMARY_TABS } from '../WorkforceSettingsSection';
 import { GeneralNumberingTab } from '../tabs/GeneralNumberingTab';
 import { FormsOnboardingTab } from '../tabs/FormsOnboardingTab';
 import { ProbationConfirmationTab } from '../tabs/ProbationConfirmationTab';
@@ -135,6 +135,14 @@ describe('Workforce Settings Canonical 7 Tabs UI', () => {
   it('WorkforceSettingsSection renders loading state initially', () => {
     const html = renderToStaticMarkup(<WorkforceSettingsSection />);
     expect(html).toContain('Loading Workforce Settings...');
+  });
+
+  it('WorkforceSettingsSection defines clean text-only primary tabs without icons', () => {
+    expect(WORKFORCE_PRIMARY_TABS).toEqual([
+      { id: 'setup', label: 'Setup & Hierarchy' },
+      { id: 'forms-onboarding', label: 'Forms & Onboarding' },
+      { id: 'lifecycle', label: 'Employee Lifecycle' },
+    ]);
   });
 
   it('Tab 1: GeneralNumberingTab renders auto-numbering live preview and employment types', () => {

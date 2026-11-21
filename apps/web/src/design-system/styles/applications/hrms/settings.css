@@ -11888,3 +11888,27 @@
 [data-theme='dark'] .bezent-lifecycle-metric-value {
   color: #f1f5f9;
 }
+
+/* ── Workforce Settings Header Navigation (Inline Back & Clean Text-Only Tabs) ── */
+.bezent-workforce-settings-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  border-bottom: 1px solid var(--border-default, #dde3ea);
+  width: 100%;
+}
+
+.bezent-workforce-settings-header .bezent-btn {
+  margin-bottom: 4px;
+  flex-shrink: 0;
+}
+
+.bezent-workforce-settings-header .bezent-tabs--underline {
+  border-bottom: none;
+  margin-bottom: -1px;
+  flex: 1;
+}
+
+[data-theme='dark'] .bezent-workforce-settings-header {
+  border-bottom-color: #334155;
+}

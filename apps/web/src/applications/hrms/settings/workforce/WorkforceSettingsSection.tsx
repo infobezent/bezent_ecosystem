@@ -4,10 +4,8 @@ import {
   Button,
   Card,
   LoadingState,
-  PageHeader,
   Stack,
   Tabs,
-  Toolbar,
 } from '../../../../design-system/components';
 import { BezentIcon } from '../../../../design-system/icons';
 import type { WorkforceSettingsBundle, WorkforceTabId } from './types/workforceSettings.types';
@@ -29,39 +27,32 @@ export const WORKFORCE_PRIMARY_TABS = [
   {
     id: 'setup' as WorkforceGroupId,
     label: 'Setup & Hierarchy',
-    icon: <BezentIcon name="organization" size={16} />,
   },
   {
     id: 'forms-onboarding' as WorkforceGroupId,
     label: 'Forms & Onboarding',
-    icon: <BezentIcon name="onboarding" size={16} />,
   },
   {
     id: 'lifecycle' as WorkforceGroupId,
     label: 'Employee Lifecycle',
-    icon: <BezentIcon name="refresh" size={16} />,
   },
 ] as const;
 
 export const WORKFORCE_SETTINGS_TABS: {
   id: WorkforceTabId;
   label: string;
-  icon: React.ReactNode;
 }[] = [
   {
     id: 'setup',
     label: 'Setup & Hierarchy',
-    icon: <BezentIcon name="organization" size={16} />,
   },
   {
     id: 'forms-onboarding',
     label: 'Forms & Onboarding',
-    icon: <BezentIcon name="onboarding" size={16} />,
   },
   {
     id: 'lifecycle',
     label: 'Employee Lifecycle',
-    icon: <BezentIcon name="refresh" size={16} />,
   },
 ];
 
@@ -146,30 +137,27 @@ export function WorkforceSettingsSection({
 
   return (
     <Stack gap="md">
-      <Toolbar
-        left={
-          onBack ? (
-            <Button variant="secondary" type="button" onClick={onBack}>
-              <BezentIcon name="chevronLeft" size={16} />
-              Back to Settings
-            </Button>
-          ) : undefined
-        }
-      />
+      <div className="bezent-workforce-settings-header">
+        {onBack && (
+          <Button variant="secondary" type="button" onClick={onBack}>
+            <BezentIcon name="chevronLeft" size={16} />
+            Back
+          </Button>
+        )}
+
+        {/* 3 Primary Tabs — Zero Sub-tabs & Clean Text-Only */}
+        <Tabs
+          items={WORKFORCE_PRIMARY_TABS.map((t) => ({
+            id: t.id,
+            label: t.label,
+          }))}
+          activeId={activeGroup}
+          onChange={handleGroupChange}
+          variant="underline"
+        />
+      </div>
 
       <h1 className="bezent-sr-only">Workforce Settings</h1>
-
-      {/* 3 Primary Tabs — Zero Sub-tabs */}
-      <Tabs
-        items={WORKFORCE_PRIMARY_TABS.map((t) => ({
-          id: t.id,
-          label: t.label,
-          icon: t.icon,
-        }))}
-        activeId={activeGroup}
-        onChange={handleGroupChange}
-        variant="underline"
-      />
 
       {/* Category 1: Setup & Hierarchy (Smart 2-Column Command Center) */}
       {activeGroup === 'setup' && (
