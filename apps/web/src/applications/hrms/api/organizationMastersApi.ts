@@ -121,6 +121,70 @@ export async function fetchHrmsWorkLocations(
   return body.data;
 }
 
+/**
+ * Fetch active job levels (seniority level, e.g. "L1 - Entry Level") using the
+ * authorized HRMS workforce read API. Distinct from Grade — see `fetchGrades`.
+ */
+export async function fetchJobLevels(): Promise<MasterOption[]> {
+  const query = new URLSearchParams({ status: 'active', lookupOnly: 'true' });
+  const res = await authorizedFetch(
+    `${appConfig.apiBaseUrl}/hrms/workforce/job-levels?${query.toString()}`,
+  );
+
+  let body: {
+    data?: { id: string; name: string; code: string }[];
+    error?: { message?: string };
+  } | null = null;
+  try {
+    body = await res.json();
+  } catch {
+    body = null;
+  }
+
+  if (!res.ok || !body?.data) {
+    if (res.status === 403) {
+      throw new Error(
+        body?.error?.message ??
+          'Access denied: You do not have permission to view job levels in HRMS (403 Forbidden).',
+      );
+    }
+    throw new Error(body?.error?.message ?? `Failed to fetch job levels: ${res.status}`);
+  }
+  return body.data.map((item) => ({ id: item.id, name: item.name, code: item.code }));
+}
+
+/**
+ * Fetch active grades (pay grade, e.g. "G1") using the authorized HRMS
+ * workforce read API. Distinct from Job Level — see `fetchJobLevels`.
+ */
+export async function fetchGrades(): Promise<MasterOption[]> {
+  const query = new URLSearchParams({ status: 'active', lookupOnly: 'true' });
+  const res = await authorizedFetch(
+    `${appConfig.apiBaseUrl}/hrms/workforce/grades?${query.toString()}`,
+  );
+
+  let body: {
+    data?: { id: string; name: string; code: string }[];
+    error?: { message?: string };
+  } | null = null;
+  try {
+    body = await res.json();
+  } catch {
+    body = null;
+  }
+
+  if (!res.ok || !body?.data) {
+    if (res.status === 403) {
+      throw new Error(
+        body?.error?.message ??
+          'Access denied: You do not have permission to view grades in HRMS (403 Forbidden).',
+      );
+    }
+    throw new Error(body?.error?.message ?? `Failed to fetch grades: ${res.status}`);
+  }
+  return body.data.map((item) => ({ id: item.id, name: item.name, code: item.code }));
+}
+
 // Aliases for compatibility
 export const fetchDepartments = fetchHrmsDepartments;
 export const fetchWorkLocations = fetchHrmsWorkLocations;

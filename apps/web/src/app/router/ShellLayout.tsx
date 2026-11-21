@@ -301,6 +301,7 @@ export function ShellLayout() {
       <TopProgressBar active={isNavigating} />
       <AppShell
         workspaceVariant={resolvedWorkspaceVariant}
+        isSettingsActive={activeId === 'settings' || pathname.includes('/settings')}
         topNavSearch={
           <GlobalSearch
             provider={DEV_SEARCH_PROVIDER}

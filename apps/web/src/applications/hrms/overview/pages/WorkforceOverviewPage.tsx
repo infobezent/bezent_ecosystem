@@ -1126,7 +1126,7 @@ export function WorkforceOverviewPage({
           };
         },
       );
-      deptCapItems.sort((a, b) => b.gap - a.gap || b.current - a.current);
+      deptCapItems.sort((a, b) => b.current - a.current || a.name.localeCompare(b.name));
       setDeptCapacities(deptCapItems);
 
       // ── 05. Employee Lifecycle (5 Stages) ──

@@ -1214,6 +1214,40 @@ export type FormCustomField = typeof formCustomFields.$inferSelect;
 export type NewFormCustomField = typeof formCustomFields.$inferInsert;
 
 /**
+ * A company-owned, fully custom form (e.g. "Contractor Intake"), distinct from
+ * BEZENT's system forms (Employee Registration, Candidate Intake). Only its
+ * identity lives here — its sections and fields live entirely in
+ * `form_customizations.metadata.customSections` and `form_custom_fields`,
+ * the same place a system form's own additions already live, keyed by this
+ * row's `form_key`.
+ * Hard delete only (nothing references it beyond those two, formKey-keyed
+ * tables, which are cleaned up alongside it).
+ */
+export const customForms = mysqlTable(
+  'custom_forms',
+  {
+    id: varchar('id', { length: 64 }).primaryKey(),
+    tenantId: varchar('tenant_id', { length: 64 }).notNull(),
+    companyId: varchar('company_id', { length: 64 })
+      .notNull()
+      .references(() => companies.id),
+    formKey: varchar('form_key', { length: 100 }).notNull(),
+    name: varchar('name', { length: 100 }).notNull(),
+    description: varchar('description', { length: 500 }),
+    status: mysqlEnum('status', ['active', 'archived']).default('active').notNull(),
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+    updatedAt: timestamp('updated_at').defaultNow().onUpdateNow().notNull(),
+  },
+  (table) => [
+    uniqueIndex('idx_custom_forms_key').on(table.tenantId, table.companyId, table.formKey),
+    index('idx_custom_forms_company').on(table.tenantId, table.companyId, table.status),
+  ],
+);
+
+export type CustomForm = typeof customForms.$inferSelect;
+export type NewCustomForm = typeof customForms.$inferInsert;
+
+/**
  * Platform: Tenant Details (Extension of canonical Tenants table)
  * Stores extended profile information: code, contact email, contact phone.
  */

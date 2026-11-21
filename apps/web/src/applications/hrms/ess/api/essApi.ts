@@ -403,7 +403,13 @@ export interface EssDocument {
 export interface EssRequest {
   id: string;
   requestType:
-    'profile_change' | 'attendance_regularization' | 'document_request' | 'general_service';
+    | 'profile_change'
+    | 'attendance_regularization'
+    | 'on_duty'
+    | 'overtime'
+    | 'comp_off'
+    | 'document_request'
+    | 'general_service';
   subject: string;
   details: Record<string, unknown>;
   status: 'pending' | 'approved' | 'rejected' | 'cancelled';

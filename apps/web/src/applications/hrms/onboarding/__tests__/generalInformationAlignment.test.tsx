@@ -13,7 +13,7 @@ import {
   defaultRegistrationConfiguration,
   resolvedFormOf,
 } from './registrationConfigFixture';
-import { FormCanvas } from '../../settings/administration/forms/FormCanvas';
+import { BuilderFormCanvas } from '../../settings/forms/builder/BuilderFormCanvas';
 import {
   INITIAL_REGISTRATION_DATA,
   toReviewSectionData,
@@ -287,22 +287,39 @@ describe('Chapter 02 (General) Form Editor ↔ Runtime Alignment', () => {
     expect(payload.employmentType).toBe('full_time');
   });
 
-  it('honestly represents General chapter on FormCanvas matching resolved canonical definitions', () => {
+  // Note: the admin FormEditorPage/FormCanvas builder (and its subgroup
+  // headings driven by KNOWN_SECTION_GROUPS) has been retired in favor of a
+  // single unified builder (BuilderFormCanvas under settings/forms/builder),
+  // which renders a section's fields flat rather than grouped into
+  // subsections. This test carries forward the guarantee that matters for
+  // runtime trust — Employee ID renders honestly as a protected,
+  // system-assigned field, with no fake editable input.
+  it('honestly represents Employee ID on BuilderFormCanvas matching resolved canonical definitions', () => {
     const resolved = resolvedFormOf(defaultRegistrationConfiguration);
     const html = renderToStaticMarkup(
-      <FormCanvas
+      <BuilderFormCanvas
+        formTitle="Employee Registration"
+        formDescription="Employee registration and intake form configuration."
         sections={resolved.sections}
-        activeSectionKey="general"
+        selectedSectionKey="general"
         selectedFieldKey={null}
+        onSelectSection={vi.fn()}
         onSelectField={vi.fn()}
+        onReorderSections={vi.fn()}
+        onDeleteSection={vi.fn()}
+        onReorderFields={vi.fn()}
+        onMoveFieldToSection={vi.fn()}
+        onRenameGroup={vi.fn()}
+        onOpenManageSections={vi.fn()}
+        onDuplicateField={vi.fn()}
         onDeleteField={vi.fn()}
+        onOpenAddField={vi.fn()}
+        onOpenAddSection={vi.fn()}
       />,
     );
 
-    expect(html).toContain('GENERAL INFORMATION');
-    expect(html).toContain('EMPLOYMENT DETAILS');
-    expect(html).toContain('ADDITIONAL INFORMATION');
     expect(html).toContain('Employee ID');
     expect(html).toContain('System Assigned');
+    expect(html).not.toContain('Auto-number');
   });
 });

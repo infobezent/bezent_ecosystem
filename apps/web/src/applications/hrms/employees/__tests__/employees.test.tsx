@@ -32,6 +32,7 @@ import {
 } from '../api/employeesApi';
 import { EmploymentHistory } from '../components/EmploymentHistory';
 import { PROFILE_TABS, type ProfileTabId } from '../components/EmployeeProfileView';
+import { PersonalSection } from '../components/ProfileSections';
 import type { EmployeeActionListItem } from '../../employee-administration/api/employeeAdministrationApi';
 import { EMPLOYEES_PATH, employeeProfilePath, employeeEditPath } from '../model/employeeModel';
 import { profileToRegistrationData } from '../model/employeeRegistrationAdapter';
@@ -330,9 +331,9 @@ describe('Employees Directory page', () => {
 
   it('renders candidate-style status filter tabs and view mode toggle', () => {
     const html = renderDirectory();
-    expect(html).toContain('All Employees');
+    expect(html).toContain('All');
     expect(html).toContain('Probation');
-    expect(html).toContain('Pending Activation');
+    expect(html).toContain('Pending');
     expect(html).toContain('Separated');
     expect(html).toContain('bezent-view-toggle');
     expect(html).toContain('bezent-filter-tabs');
@@ -743,9 +744,9 @@ describe('Employee Profile', () => {
     expect(html).toContain('Meera Mehta');
     expect(html).toContain('Nominees');
     expect(html).toContain('100%');
-    // Blank fields are omitted, not shown as empty rows
-    expect(html).not.toContain('Middle Name');
-    expect(html).not.toContain('Home Phone');
+    // Field parity: blank fields are rendered with standard placeholder, ensuring view/edit parity
+    expect(html).toContain('Middle Name');
+    expect(html).toContain('Home Phone');
   });
 
   it('shows emergency contacts, masked bank account, skills and working hours', () => {
@@ -790,7 +791,14 @@ describe('Employee Profile', () => {
       onOpenEmployee,
       history: null,
     });
-    clickableWithText(view, 'Employees').onClick();
+    const [backBtn] = findElements(
+      view,
+      (candidate) =>
+        (candidate.props as { 'aria-label'?: string })?.['aria-label'] === 'Back to Employees' ||
+        (candidate.props as { label?: string })?.label === 'Back to Employees',
+    );
+    expect(backBtn).toBeDefined();
+    (backBtn!.props as { onClick: () => void }).onClick();
     expect(onBack).toHaveBeenCalled();
 
     // Section components are hook-free: render the Overview element's tree directly.
@@ -1062,35 +1070,27 @@ describe('Standalone Edit Employee Workspace & Adapter', () => {
     );
   });
 
-  it('renders Edit Profile button in header when canEdit is true and invokes onEditProfile', () => {
-    const onEditProfile = vi.fn();
-    const view = EmployeeProfileView({
-      profile: {
-        employee: kavya,
-        personal: null,
-        familyMembers: [],
-        nominees: [],
-        emergencyContacts: [],
-        bankAccount: null,
-        skills: [],
-        workSchedule: null,
-      },
-      activeTab: 'personal',
-      onTabChange: noop,
-      onBack: noop,
-      onOpenEmployee: noop,
-      canEdit: true,
-      onEditProfile,
-      history: null,
-    });
+  it('renders in-place edit action on sections when canEdit is true', () => {
+    const html = renderToStaticMarkup(
+      <PersonalSection
+        profile={{
+          employee: kavya,
+          personal: null,
+          familyMembers: [],
+          nominees: [],
+          emergencyContacts: [],
+          bankAccount: null,
+          skills: [],
+          workSchedule: null,
+        }}
+        canEdit={true}
+      />,
+    );
 
-    const editBtn = clickableWithText(view, 'Edit Profile');
-    expect(editBtn).toBeDefined();
-    editBtn.onClick();
-    expect(onEditProfile).toHaveBeenCalledTimes(1);
+    expect(html).toContain('Edit Personal Details');
   });
 
-  it('does not render Edit Profile button when canEdit is false', () => {
+  it('does not render Edit Profile button in header', () => {
     const html = renderToStaticMarkup(
       <EmployeeProfileView
         profile={{

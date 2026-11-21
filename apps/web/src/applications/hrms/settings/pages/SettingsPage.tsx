@@ -1,21 +1,16 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useLocation, useInRouterContext } from 'react-router-dom';
 import {
+  Avatar,
   Button,
-  Card,
-  CardIcon,
-  CardTitle,
-  CardDescription,
-  Grid,
+  Inline,
   Page,
   PageHeader,
-  Badge,
-  Toolbar,
-  Inline,
   Stack,
+  Toolbar,
 } from '../../../../design-system/components';
-import { BezentIcon } from '../../../../design-system/icons';
-import { useAuth } from '../../../../platform/auth';
+import { BezentIcon, type BezentIconName } from '../../../../design-system/icons';
+import { resolveProfileIdentity, useAuth } from '../../../../platform/auth';
 import { SETTINGS_MODULE_CARDS, type SettingsModuleId } from '../types/settingsCenter';
 import { DashboardSettingsSection } from '../general';
 import { WorkforceSettingsSection } from '../workforce/WorkforceSettingsSection';
@@ -24,16 +19,32 @@ import { AttendanceSettingsSection } from '../attendance';
 import { TimesheetsSettingsSection } from '../timesheets';
 import { PerformanceSettingsSection } from '../performance';
 import { MilestonesSettingsSection } from '../milestones/MilestonesSettingsSection';
+import { TemplatesSettingsSection } from '../templates';
+import bezentMark from '../../../../assets/bezent-mark.png';
 
 export interface SettingsPageInnerProps {
   initialModule?: SettingsModuleId;
 }
 
 export function SettingsPageInner({ initialModule = 'overview' }: SettingsPageInnerProps) {
-  const { activeCompany } = useAuth();
+  const { access, activeCompany } = useAuth();
   const [activeModule, setActiveModule] = useState<SettingsModuleId>(initialModule);
+  const [searchQuery, setSearchQuery] = useState('');
+
+  const { userName, userRole, userInitials } = useMemo(
+    () => resolveProfileIdentity(access, activeCompany),
+    [access, activeCompany],
+  );
 
   const selectedModuleInfo = SETTINGS_MODULE_CARDS.find((m) => m.id === activeModule);
+
+  const filteredModules = useMemo(() => {
+    const q = searchQuery.trim().toLowerCase();
+    if (!q) return SETTINGS_MODULE_CARDS;
+    return SETTINGS_MODULE_CARDS.filter(
+      (m) => m.name.toLowerCase().includes(q) || m.description.toLowerCase().includes(q),
+    );
+  }, [searchQuery]);
 
   return (
     <Page maxWidth="default">
@@ -43,44 +54,88 @@ export function SettingsPageInner({ initialModule = 'overview' }: SettingsPageIn
           <PageHeader
             title="Settings"
             subtitle="Configure and manage settings across the BEZENT portal."
-            actions={
-              <Badge variant="info">
-                <Inline gap="xs" align="center">
-                  <BezentIcon name="hrSettings" size={14} />
-                  <span>{activeCompany?.companyName ?? 'No company selected'}</span>
-                </Inline>
-              </Badge>
-            }
           />
 
-          {/* View 1: Overview Grid of 8 Enterprise Cards */}
-          <Grid columns={3} gap="lg">
-            {SETTINGS_MODULE_CARDS.map((mod) => (
-              <Card
+          {/* Zoho-style Organization & License Usage Banner */}
+          <div className="bezent-settings-zoho-banner">
+            <div className="bezent-settings-zoho-banner__company">
+              <div className="bezent-settings-zoho-banner__logo" aria-hidden="true">
+                <img
+                  src={bezentMark}
+                  alt="Company Logo"
+                  className="bezent-settings-zoho-banner__logo-img"
+                />
+              </div>
+              <div className="bezent-settings-zoho-banner__company-info">
+                <h3 className="bezent-settings-zoho-banner__company-name">
+                  {activeCompany?.companyName ?? 'BEZENT Demo Pvt Ltd'}
+                </h3>
+              </div>
+            </div>
+
+            <div className="bezent-settings-zoho-banner__user">
+              <Avatar initials={userInitials} size="md" color="blue" />
+              <div className="bezent-settings-zoho-banner__user-info">
+                <div className="bezent-settings-zoho-banner__user-name">{userName}</div>
+                <div className="bezent-settings-zoho-banner__user-role">
+                  {userRole || 'Super Administrator'}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Zoho-style Services Section Header with Search */}
+          <div className="bezent-settings-zoho-services-header">
+            <h2 className="bezent-settings-zoho-services-title">Services</h2>
+            <div className="bezent-settings-zoho-search-box">
+              <BezentIcon name="search" size={16} />
+              <input
+                type="text"
+                placeholder="Search services..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="bezent-settings-zoho-search-input"
+                aria-label="Search settings services"
+              />
+              {searchQuery && (
+                <button
+                  type="button"
+                  onClick={() => setSearchQuery('')}
+                  className="bezent-settings-zoho-search-clear"
+                  aria-label="Clear search"
+                >
+                  <BezentIcon name="close" size={14} />
+                </button>
+              )}
+            </div>
+          </div>
+
+          {/* Zoho-style Services Tiles Grid */}
+          <div className="bezent-settings-zoho-grid">
+            {filteredModules.map((mod) => (
+              <div
                 key={mod.id}
-                variant="interactive"
-                padding="md"
+                className={`bezent-settings-zoho-tile bezent-settings-zoho-tile--${mod.id}`}
                 onClick={() => setActiveModule(mod.id)}
                 role="button"
                 tabIndex={0}
-                onKeyDown={(e) => e.key === 'Enter' && setActiveModule(mod.id)}
+                onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && setActiveModule(mod.id)}
+                aria-label={`${mod.name} Settings`}
+                title={mod.description}
               >
-                <div className="bezent-toolbar">
-                  <Inline gap="md" align="center">
-                    <CardIcon>
-                      <BezentIcon name={mod.icon} size={24} />
-                    </CardIcon>
-                    <div>
-                      <CardTitle>{mod.name}</CardTitle>
-                      <CardDescription>{mod.description}</CardDescription>
-                    </div>
-                  </Inline>
-                  <BezentIcon name="chevronRight" size={18} />
+                <div
+                  className={`bezent-settings-zoho-tile__icon bezent-settings-zoho-tile__icon--${mod.id}`}
+                >
+                  <BezentIcon name={mod.icon as BezentIconName} size={24} />
                 </div>
-              </Card>
+                <div className="bezent-settings-zoho-tile__name">{mod.name}</div>
+                <span className="bezent-sr-only">{mod.description}</span>
+              </div>
             ))}
-          </Grid>
+          </div>
         </Stack>
+      ) : activeModule === 'templates' ? (
+        <TemplatesSettingsSection onBack={() => setActiveModule('overview')} />
       ) : activeModule === 'workforce' ||
         activeModule === 'onboarding' ||
         activeModule === 'employees' ||
@@ -131,9 +186,13 @@ function RoutedSettingsPage() {
     searchParams.get('module') === 'hr-settings' ||
     searchParams.get('tab') === 'onboarding' ||
     searchParams.has('sub');
+  const isTemplatesSettings = searchParams.get('module') === 'templates';
   const requestedModule = SETTINGS_MODULE_CARDS.find((m) => m.id === searchParams.get('module'));
-  const initialModule: SettingsModuleId =
-    isWorkflowSettings || isWorkforceSettings ? 'workforce' : (requestedModule?.id ?? 'overview');
+  const initialModule: SettingsModuleId = isTemplatesSettings
+    ? 'templates'
+    : isWorkflowSettings || isWorkforceSettings
+      ? 'workforce'
+      : (requestedModule?.id ?? 'overview');
   return <SettingsPageInner initialModule={initialModule} />;
 }
 

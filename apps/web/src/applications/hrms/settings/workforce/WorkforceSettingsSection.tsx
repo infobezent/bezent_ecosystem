@@ -4,18 +4,14 @@ import {
   Button,
   Card,
   LoadingState,
-  PageHeader,
   Stack,
   Tabs,
-  Toolbar,
 } from '../../../../design-system/components';
 import { BezentIcon } from '../../../../design-system/icons';
 import type { WorkforceSettingsBundle, WorkforceTabId } from './types/workforceSettings.types';
 import { fetchWorkforceSettingsBundle } from './api/workforceSettingsApi';
 import { GeneralNumberingTab } from './tabs/GeneralNumberingTab';
-import { OrganizationHierarchyTab } from './tabs/OrganizationHierarchyTab';
-import { RegistrationFormsTab } from './tabs/RegistrationFormsTab';
-import { OnboardingWorkflowsTab } from './tabs/OnboardingWorkflowsTab';
+import { FormsOnboardingTab } from './tabs/FormsOnboardingTab';
 import { ProbationConfirmationTab } from './tabs/ProbationConfirmationTab';
 import { TransfersLifecycleTab } from './tabs/TransfersLifecycleTab';
 import { OffboardingClearanceTab } from './tabs/OffboardingClearanceTab';
@@ -25,65 +21,62 @@ export interface WorkforceSettingsSectionProps {
   initialTab?: WorkforceTabId;
 }
 
+export type WorkforceGroupId = 'setup' | 'forms-onboarding' | 'lifecycle';
+
+export const WORKFORCE_PRIMARY_TABS = [
+  {
+    id: 'setup' as WorkforceGroupId,
+    label: 'Setup & Hierarchy',
+  },
+  {
+    id: 'forms-onboarding' as WorkforceGroupId,
+    label: 'Forms & Onboarding',
+  },
+  {
+    id: 'lifecycle' as WorkforceGroupId,
+    label: 'Employee Lifecycle',
+  },
+] as const;
+
 export const WORKFORCE_SETTINGS_TABS: {
   id: WorkforceTabId;
   label: string;
-  icon: React.ReactNode;
 }[] = [
   {
-    id: 'general',
-    label: 'General & Auto-Numbering',
-    icon: <BezentIcon name="settings" size={16} />,
+    id: 'setup',
+    label: 'Setup & Hierarchy',
   },
   {
-    id: 'organization',
-    label: 'Organization & Hierarchy',
-    icon: <BezentIcon name="organization" size={16} />,
-  },
-  {
-    id: 'registration-forms',
-    label: 'Registration & Forms',
-    icon: <BezentIcon name="document" size={16} />,
-  },
-  {
-    id: 'onboarding-workflows',
-    label: 'Onboarding Workflows',
-    icon: <BezentIcon name="onboarding" size={16} />,
-  },
-  {
-    id: 'probation',
-    label: 'Probation & Confirmation',
-    icon: <BezentIcon name="checkCircle" size={16} />,
+    id: 'forms-onboarding',
+    label: 'Forms & Onboarding',
   },
   {
     id: 'lifecycle',
-    label: 'Transfers & Lifecycle',
-    icon: <BezentIcon name="refresh" size={16} />,
-  },
-  {
-    id: 'offboarding',
-    label: 'Offboarding & Clearance',
-    icon: <BezentIcon name="users" size={16} />,
+    label: 'Employee Lifecycle',
   },
 ];
 
-const VALID_WORKFORCE_TABS = new Set<string>([
-  'general',
-  'organization',
-  'registration-forms',
-  'onboarding-workflows',
-  'probation',
-  'lifecycle',
-  'offboarding',
-]);
-
-function readWorkforceTabFromUrl(): WorkforceTabId | null {
-  if (typeof window === 'undefined') return null;
-  const tab = new URLSearchParams(window.location.search).get('tab');
-  return tab && VALID_WORKFORCE_TABS.has(tab) ? (tab as WorkforceTabId) : null;
+function normalizeGroupId(tab: string | null): WorkforceGroupId {
+  if (!tab) return 'setup';
+  if (tab === 'setup' || tab === 'general' || tab === 'organization') return 'setup';
+  if (
+    tab === 'forms-onboarding' ||
+    tab === 'registration-forms' ||
+    tab === 'onboarding-workflows'
+  ) {
+    return 'forms-onboarding';
+  }
+  if (tab === 'lifecycle' || tab === 'probation' || tab === 'offboarding') return 'lifecycle';
+  return 'setup';
 }
 
-function writeWorkforceTabToUrl(tab: WorkforceTabId) {
+function readWorkforceTabFromUrl(): WorkforceGroupId | null {
+  if (typeof window === 'undefined') return null;
+  const tab = new URLSearchParams(window.location.search).get('tab');
+  return tab ? normalizeGroupId(tab) : null;
+}
+
+function writeWorkforceTabToUrl(tab: WorkforceGroupId) {
   if (typeof window === 'undefined') return;
   const url = new URL(window.location.href);
   url.searchParams.set('tab', tab);
@@ -92,10 +85,10 @@ function writeWorkforceTabToUrl(tab: WorkforceTabId) {
 
 export function WorkforceSettingsSection({
   onBack,
-  initialTab = 'general',
+  initialTab = 'setup',
 }: WorkforceSettingsSectionProps) {
-  const [activeTab, setActiveTab] = useState<WorkforceTabId>(
-    () => readWorkforceTabFromUrl() ?? initialTab,
+  const [activeGroup, setActiveGroup] = useState<WorkforceGroupId>(
+    () => readWorkforceTabFromUrl() ?? normalizeGroupId(initialTab),
   );
 
   const [bundle, setBundle] = useState<WorkforceSettingsBundle | null>(null);
@@ -119,10 +112,10 @@ export function WorkforceSettingsSection({
     loadData();
   }, [loadData]);
 
-  const handleTabChange = (newTab: string) => {
-    const tabId = newTab as WorkforceTabId;
-    setActiveTab(tabId);
-    writeWorkforceTabToUrl(tabId);
+  const handleGroupChange = (newGroupId: string) => {
+    const groupId = normalizeGroupId(newGroupId);
+    setActiveGroup(groupId);
+    writeWorkforceTabToUrl(groupId);
   };
 
   if (loading) {
@@ -143,36 +136,31 @@ export function WorkforceSettingsSection({
   }
 
   return (
-    <Stack gap="lg">
-      <Toolbar
-        left={
-          onBack ? (
-            <Button variant="secondary" type="button" onClick={onBack}>
-              <BezentIcon name="chevronLeft" size={16} />
-              Back to Settings
-            </Button>
-          ) : undefined
-        }
-      />
+    <Stack gap="md">
+      <div className="bezent-workforce-settings-header">
+        {onBack && (
+          <Button variant="secondary" type="button" onClick={onBack}>
+            <BezentIcon name="chevronLeft" size={16} />
+            Back
+          </Button>
+        )}
 
-      <PageHeader
-        title="Workforce Settings"
-        subtitle="Configure workforce auto-numbering, hierarchy masters, dynamic forms, onboarding workflows, probation policies, transfer governance, and offboarding clearances."
-      />
+        {/* 3 Primary Tabs — Zero Sub-tabs & Clean Text-Only */}
+        <Tabs
+          items={WORKFORCE_PRIMARY_TABS.map((t) => ({
+            id: t.id,
+            label: t.label,
+          }))}
+          activeId={activeGroup}
+          onChange={handleGroupChange}
+          variant="underline"
+        />
+      </div>
 
-      <Tabs
-        items={WORKFORCE_SETTINGS_TABS.map((t) => ({
-          id: t.id,
-          label: t.label,
-          icon: t.icon,
-        }))}
-        activeId={activeTab}
-        onChange={handleTabChange}
-        variant="underline"
-      />
+      <h1 className="bezent-sr-only">Workforce Settings</h1>
 
-      {/* Tab 1: General & Auto-Numbering */}
-      {activeTab === 'general' && (
+      {/* Category 1: Setup & Hierarchy (Smart 2-Column Command Center) */}
+      {activeGroup === 'setup' && (
         <GeneralNumberingTab
           initialSettings={bundle.general}
           initialEmploymentTypes={bundle.employmentTypes}
@@ -180,32 +168,20 @@ export function WorkforceSettingsSection({
         />
       )}
 
-      {/* Tab 2: Organization & Hierarchy */}
-      {activeTab === 'organization' && <OrganizationHierarchyTab />}
+      {/* Category 2: Forms & Onboarding (Smart 2-Column Command Center) */}
+      {activeGroup === 'forms-onboarding' && <FormsOnboardingTab />}
 
-      {/* Tab 3: Registration & Custom Forms */}
-      {activeTab === 'registration-forms' && <RegistrationFormsTab />}
-
-      {/* Tab 4: Onboarding Workflows */}
-      {activeTab === 'onboarding-workflows' && <OnboardingWorkflowsTab />}
-
-      {/* Tab 5: Probation & Confirmation */}
-      {activeTab === 'probation' && (
-        <ProbationConfirmationTab initialPolicy={bundle.probation} onReload={loadData} />
-      )}
-
-      {/* Tab 6: Transfers & Lifecycle */}
-      {activeTab === 'lifecycle' && (
-        <TransfersLifecycleTab initialPolicy={bundle.lifecycle} onReload={loadData} />
-      )}
-
-      {/* Tab 7: Offboarding & Clearance */}
-      {activeTab === 'offboarding' && (
-        <OffboardingClearanceTab
-          initialPolicy={bundle.offboarding}
-          initialClearanceTemplates={bundle.clearanceTemplates}
-          onReload={loadData}
-        />
+      {/* Category 3: Employee Lifecycle (Command Center Cards Feed - Option B) */}
+      {activeGroup === 'lifecycle' && (
+        <div className="bezent-lifecycle-feed">
+          <ProbationConfirmationTab initialPolicy={bundle.probation} onReload={loadData} />
+          <TransfersLifecycleTab initialPolicy={bundle.lifecycle} onReload={loadData} />
+          <OffboardingClearanceTab
+            initialPolicy={bundle.offboarding}
+            initialClearanceTemplates={bundle.clearanceTemplates}
+            onReload={loadData}
+          />
+        </div>
       )}
     </Stack>
   );

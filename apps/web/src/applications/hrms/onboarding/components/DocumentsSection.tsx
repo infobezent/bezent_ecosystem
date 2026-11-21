@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useMemo, useRef, useState } from 'react';
 import {
   FormSection,
   FormGrid,
@@ -14,6 +14,8 @@ import {
   Inline,
 } from '../../../../design-system';
 import { BezentIcon } from '../../../../design-system/icons';
+import { RegistrationField, useRegistrationConfig } from '../registration/registrationConfig';
+import type { RegistrationFieldConfig } from '../../settings/api/registrationSettingsApi';
 
 export interface DocumentItemState {
   id: string;
@@ -47,269 +49,54 @@ export function formatFileSize(bytes: number): string {
 
 const MAX_FILE_SIZE_BYTES = 10 * 1024 * 1024; // 10 MB limit
 
-export const INITIAL_DOCUMENTS: DocumentItemState[] = [
-  // A. IDENTITY & GOVERNMENT
-  {
-    id: 'doc-aadhaar',
-    category: 'Identity & Government Documents',
-    name: 'Aadhaar Card',
-    isRequired: true,
-    docNumber: '',
-    file: null,
-    fileName: '',
-    fileSizeFormatted: '',
-    status: 'Pending',
-    remarks: '',
-  },
-  {
-    id: 'doc-pan',
-    category: 'Identity & Government Documents',
-    name: 'PAN Card',
-    isRequired: true,
-    docNumber: '',
-    file: null,
-    fileName: '',
-    fileSizeFormatted: '',
-    status: 'Pending',
-    remarks: '',
-  },
-  {
-    id: 'doc-passport',
-    category: 'Identity & Government Documents',
-    name: 'Passport',
-    isRequired: false,
-    docNumber: '',
-    file: null,
-    fileName: '',
-    fileSizeFormatted: '',
-    status: 'Pending',
-    remarks: '',
-  },
-  {
-    id: 'doc-voter',
-    category: 'Identity & Government Documents',
-    name: 'Voter ID',
-    isRequired: false,
-    docNumber: '',
-    file: null,
-    fileName: '',
-    fileSizeFormatted: '',
-    status: 'Not Required',
-    remarks: '',
-  },
+/**
+ * Each checklist item is a Form Engine field (`documents.<key>`); category
+ * grouping is a wizard-only concept the catalog doesn't model.
+ */
+const DOCUMENT_CATEGORY_BY_KEY: Record<string, string> = {
+  'documents.aadhaarFile': 'Identity & Government Documents',
+  'documents.panFile': 'Identity & Government Documents',
+  'documents.passportFile': 'Identity & Government Documents',
+  'documents.voterIdFile': 'Identity & Government Documents',
+  'documents.drivingLicenseFile': 'Address Proof Documents',
+  'documents.class10File': 'Educational Records',
+  'documents.class12File': 'Educational Records',
+  'documents.degreeFile': 'Educational Records',
+  'documents.semesterMarksheetsFile': 'Educational Records',
+  'documents.postGraduationFile': 'Educational Records',
+  'documents.certificationsFile': 'Educational Records',
+  'documents.previousAppointmentLetterFile': 'Professional History',
+  'documents.experienceCertificateFile': 'Professional History',
+  'documents.relievingLetterFile': 'Professional History',
+  'documents.salarySlipsFile': 'Professional History',
+  'documents.form16File': 'Professional History',
+  'documents.resignationLetterFile': 'Professional History',
+  'documents.noDuesCertificateFile': 'Professional History',
+  'documents.panDocumentScanFile': 'Financial & Tax Documents',
+  'documents.cancelledCheque': 'Financial & Tax Documents',
+  'documents.uanDetailsFile': 'Financial & Tax Documents',
+};
 
-  // B. ADDRESS PROOF
-  {
-    id: 'doc-dl',
-    category: 'Address Proof Documents',
-    name: 'Driving License',
-    isRequired: false,
-    docNumber: '',
-    file: null,
-    fileName: '',
-    fileSizeFormatted: '',
-    status: 'Pending',
-    remarks: '',
-  },
-
-  // C. EDUCATIONAL RECORDS
-  {
-    id: 'doc-class10',
-    category: 'Educational Records',
-    name: 'Class 10 Marksheet / Certificate',
-    isRequired: true,
-    docNumber: '',
-    file: null,
-    fileName: '',
-    fileSizeFormatted: '',
-    status: 'Pending',
-    remarks: '',
-  },
-  {
-    id: 'doc-class12',
-    category: 'Educational Records',
-    name: 'Class 12 Marksheet / Certificate',
-    isRequired: true,
-    docNumber: '',
-    file: null,
-    fileName: '',
-    fileSizeFormatted: '',
-    status: 'Pending',
-    remarks: '',
-  },
-  {
-    id: 'doc-grad',
-    category: 'Educational Records',
-    name: 'Graduation Degree / Certificate (B.Tech)',
-    isRequired: true,
-    docNumber: '',
-    file: null,
-    fileName: '',
-    fileSizeFormatted: '',
-    status: 'Pending',
-    remarks: '',
-  },
-  {
-    id: 'doc-semesters',
-    category: 'Educational Records',
-    name: 'Semester Mark Sheets',
-    isRequired: true,
-    docNumber: '',
-    file: null,
-    fileName: '',
-    fileSizeFormatted: '',
-    status: 'Pending',
-    remarks: '',
-  },
-  {
-    id: 'doc-postgrad',
-    category: 'Educational Records',
-    name: 'Post-Graduation Certificate',
-    isRequired: false,
-    docNumber: '',
-    file: null,
-    fileName: '',
-    fileSizeFormatted: '',
-    status: 'Not Required',
-    remarks: '',
-  },
-  {
-    id: 'doc-certifications',
-    category: 'Educational Records',
-    name: 'Professional / Technical Certifications',
-    isRequired: false,
-    docNumber: '',
-    file: null,
-    fileName: '',
-    fileSizeFormatted: '',
-    status: 'Pending',
-    remarks: '',
-  },
-
-  // D. PROFESSIONAL HISTORY (Experienced Only)
-  {
-    id: 'doc-prev-appt',
-    category: 'Professional History',
-    name: 'Previous Appointment Letter',
-    isRequired: true,
-    docNumber: '',
-    file: null,
-    fileName: '',
-    fileSizeFormatted: '',
-    status: 'Pending',
-    remarks: '',
-  },
-  {
-    id: 'doc-exp-cert',
-    category: 'Professional History',
-    name: 'Experience Certificate',
-    isRequired: true,
-    docNumber: '',
-    file: null,
-    fileName: '',
-    fileSizeFormatted: '',
-    status: 'Pending',
-    remarks: '',
-  },
-  {
-    id: 'doc-relieving',
-    category: 'Professional History',
-    name: 'Relieving Letter',
-    isRequired: true,
-    docNumber: '',
-    file: null,
-    fileName: '',
-    fileSizeFormatted: '',
-    status: 'Pending',
-    remarks: '',
-  },
-  {
-    id: 'doc-slips',
-    category: 'Professional History',
-    name: 'Salary Slips (Last 3 Months)',
-    isRequired: true,
-    docNumber: '',
-    file: null,
-    fileName: '',
-    fileSizeFormatted: '',
-    status: 'Pending',
-    remarks: '',
-  },
-  {
-    id: 'doc-form16',
-    category: 'Professional History',
-    name: 'Form 16 / Tax Statement',
-    isRequired: true,
-    docNumber: '',
-    file: null,
-    fileName: '',
-    fileSizeFormatted: '',
-    status: 'Pending',
-    remarks: '',
-  },
-  {
-    id: 'doc-resignation',
-    category: 'Professional History',
-    name: 'Resignation / Exit Acceptance',
-    isRequired: true,
-    docNumber: '',
-    file: null,
-    fileName: '',
-    fileSizeFormatted: '',
-    status: 'Pending',
-    remarks: '',
-  },
-  {
-    id: 'doc-nodues',
-    category: 'Professional History',
-    name: 'No-Dues Certificate',
-    isRequired: false,
-    docNumber: '',
-    file: null,
-    fileName: '',
-    fileSizeFormatted: '',
-    status: 'Pending',
-    remarks: '',
-  },
-
-  // E. FINANCIAL & TAX DOCUMENTS
-  {
-    id: 'doc-pan-doc',
-    category: 'Financial & Tax Documents',
-    name: 'PAN Document Scan',
-    isRequired: true,
-    docNumber: '',
-    file: null,
-    fileName: '',
-    fileSizeFormatted: '',
-    status: 'Pending',
-    remarks: '',
-  },
-  {
-    id: 'doc-bank-proof',
-    category: 'Financial & Tax Documents',
-    name: 'Bank Account Proof (Cancelled Cheque / Passbook)',
-    isRequired: true,
-    docNumber: '',
-    file: null,
-    fileName: '',
-    fileSizeFormatted: '',
-    status: 'Pending',
-    remarks: '',
-  },
-  {
-    id: 'doc-uan',
-    category: 'Financial & Tax Documents',
-    name: 'UAN / PF Details Document',
-    isRequired: false,
-    docNumber: '',
-    file: null,
-    fileName: '',
-    fileSizeFormatted: '',
-    status: 'Pending',
-    remarks: '',
-  },
-];
+/** Builds the checklist from the resolved form's `documents` fields (company-customizable). */
+export function buildDocumentItemsFromConfig(
+  fields: readonly RegistrationFieldConfig[],
+): DocumentItemState[] {
+  return fields
+    .filter((f) => f.section === 'documents' && f.enabled && DOCUMENT_CATEGORY_BY_KEY[f.key])
+    .sort((a, b) => (a.order ?? 0) - (b.order ?? 0))
+    .map((f) => ({
+      id: f.key,
+      category: DOCUMENT_CATEGORY_BY_KEY[f.key]!,
+      name: f.label,
+      isRequired: f.required,
+      docNumber: '',
+      file: null,
+      fileName: '',
+      fileSizeFormatted: '',
+      status: 'Pending' as const,
+      remarks: '',
+    }));
+}
 
 export interface DocumentsSectionProps {
   documents?: DocumentItemState[];
@@ -328,7 +115,15 @@ export function DocumentsSection({
   onClassificationChange,
   onPassportPhotoChange,
 }: DocumentsSectionProps) {
-  const [internalDocs, setInternalDocs] = useState<DocumentItemState[]>(INITIAL_DOCUMENTS);
+  const config = useRegistrationConfig();
+  const defaultDocuments = useMemo(
+    () => buildDocumentItemsFromConfig(config.fields),
+    [config.fields],
+  );
+  const aadhaarNumberField = config.field('documents.aadhaarNumber');
+  const panNumberField = config.field('documents.panNumber');
+
+  const [internalDocs, setInternalDocs] = useState<DocumentItemState[]>(defaultDocuments);
   const [internalExperienced, setInternalExperienced] = useState(true);
   const [internalPhoto, setInternalPhoto] = useState<PassportPhotoState>({
     file: null,
@@ -630,16 +425,41 @@ export function DocumentsSection({
                       </Inline>
 
                       <FormGrid columns={2} layout="horizontal" labelWidth="md">
-                        {/* Document Number */}
-                        <FormField label="Document Number">
-                          <Input
-                            type="text"
+                        {/* Document Number — Aadhaar/PAN have their own catalog-governed number field */}
+                        {doc.id === 'documents.aadhaarFile' && aadhaarNumberField?.enabled ? (
+                          <RegistrationField
+                            fieldKey="documents.aadhaarNumber"
                             value={doc.docNumber}
-                            onChange={(e) =>
-                              handleUpdateDocField(doc.id, 'docNumber', e.target.value)
-                            }
-                          />
-                        </FormField>
+                          >
+                            <Input
+                              type="text"
+                              value={doc.docNumber}
+                              onChange={(e) =>
+                                handleUpdateDocField(doc.id, 'docNumber', e.target.value)
+                              }
+                            />
+                          </RegistrationField>
+                        ) : doc.id === 'documents.panFile' && panNumberField?.enabled ? (
+                          <RegistrationField fieldKey="documents.panNumber" value={doc.docNumber}>
+                            <Input
+                              type="text"
+                              value={doc.docNumber}
+                              onChange={(e) =>
+                                handleUpdateDocField(doc.id, 'docNumber', e.target.value)
+                              }
+                            />
+                          </RegistrationField>
+                        ) : (
+                          <FormField label="Document Number">
+                            <Input
+                              type="text"
+                              value={doc.docNumber}
+                              onChange={(e) =>
+                                handleUpdateDocField(doc.id, 'docNumber', e.target.value)
+                              }
+                            />
+                          </FormField>
+                        )}
 
                         {/* File Upload Control */}
                         <FormField

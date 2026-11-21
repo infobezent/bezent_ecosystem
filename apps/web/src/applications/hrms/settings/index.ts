@@ -24,3 +24,4 @@ export { WorkLocationsPage } from './pages/WorkLocationsPage';
 export { JobLevelsGradesPage } from './pages/JobLevelsGradesPage';
 export { DashboardSettingsSection } from './general';
 export { WorkforceSettingsSection } from './workforce';
+export { TemplatesSettingsSection } from './templates';

@@ -31,7 +31,7 @@ import { OnlineAccessSection } from './OnlineAccessSection';
 import { WorkingHoursSection } from './WorkingHoursSection';
 import {
   DocumentsSection,
-  INITIAL_DOCUMENTS,
+  buildDocumentItemsFromConfig,
   DocumentItemState,
   PassportPhotoState,
 } from './DocumentsSection';
@@ -70,27 +70,27 @@ export interface RegistrationChapterMeta {
 
 export const REGISTRATION_CHAPTERS: readonly RegistrationChapterMeta[] = [
   {
-    id: 'personal',
+    id: 'general',
     stepNumber: '01',
+    label: 'General',
+    title: 'GENERAL INFORMATION',
+    description: 'Core identity, organizational placement, and employment classification details',
+    kicker: 'CHAPTER // 01',
+  },
+  {
+    id: 'personal',
+    stepNumber: '02',
     label: 'Personal Information',
     title: 'PERSONAL INFORMATION',
     description:
       'Legal identity, demographics, contact details, permanent residence, and family profile',
-    kicker: 'CHAPTER // 01',
-  },
-  {
-    id: 'general',
-    stepNumber: '02',
-    label: 'General',
-    title: 'GENERAL INFORMATION',
-    description: 'Core identity, organizational placement, and employment classification details',
     kicker: 'CHAPTER // 02',
   },
   {
     id: 'onboarding',
     stepNumber: '03',
-    label: 'Administration',
-    title: 'ADMINISTRATION & WORKFLOW',
+    label: 'Onboarding',
+    title: 'ONBOARDING & WORKFLOW',
     description: 'Pre-boarding setup, compliance checklist items, and hardware/asset provisioning',
     kicker: 'CHAPTER // 03',
   },
@@ -159,9 +159,9 @@ export const REGISTRATION_CHAPTERS: readonly RegistrationChapterMeta[] = [
 ];
 
 export const REGISTRATION_SECTIONS: readonly RegistrationSection[] = [
-  { id: 'personal', label: 'Personal Information' },
   { id: 'general', label: 'General' },
-  { id: 'onboarding', label: 'Administration' },
+  { id: 'personal', label: 'Personal Information' },
+  { id: 'onboarding', label: 'Onboarding' },
   { id: 'skills', label: 'Skills' },
   { id: 'emergency', label: 'Emergency Contact' },
   { id: 'accounts', label: 'Accounts' },
@@ -230,44 +230,41 @@ export function EmployeeRegistration({
 
   const allSections: Array<{ id: string; label: string; description?: string | null }> =
     useMemo(() => {
-      const configMap = new Map<
-        string,
-        { label: string; description?: string | null; visible?: boolean }
-      >();
+      // The Form Engine's resolved section order (as reordered in the builder) is
+      // authoritative — iterate it directly instead of the fixed canonical array,
+      // which previously locked tab order regardless of any builder reordering.
       if (registrationConfig?.sections && registrationConfig.sections.length > 0) {
-        for (const s of registrationConfig.sections) {
-          configMap.set(s.id, { label: s.label, description: s.description, visible: s.visible });
-        }
-      } else if (customCtx?.sections && customCtx.sections.length > 0) {
+        const canonicalLabels = new Map(REGISTRATION_SECTIONS.map((cs) => [cs.id, cs.label]));
+        const ordered = registrationConfig.sections
+          .filter((s) => s.visible !== false)
+          .map((s) => ({
+            id: s.id,
+            label: s.label || canonicalLabels.get(s.id) || s.id,
+            description: s.description,
+          }));
+        return ordered.length > 0 ? ordered : [...REGISTRATION_SECTIONS];
+      }
+
+      if (customCtx?.sections && customCtx.sections.length > 0) {
+        const configMap = new Map<
+          string,
+          { label: string; description?: string | null; visible?: boolean }
+        >();
         for (const s of customCtx.sections) {
           configMap.set(s.id, { label: s.title, description: null, visible: !s.hidden });
         }
-      }
 
-      const ordered: Array<{ id: string; label: string; description?: string | null }> = [];
-      for (const cs of REGISTRATION_SECTIONS) {
-        const conf = configMap.get(cs.id);
-        if (conf?.visible !== false) {
-          ordered.push({
-            id: cs.id,
-            label: conf?.label || cs.label,
-            description: conf?.description,
-          });
-        }
-      }
-
-      // Append any custom sections not in canonical list
-      if (registrationConfig?.sections) {
-        for (const s of registrationConfig.sections) {
-          if (!REGISTRATION_SECTIONS.some((cs) => cs.id === s.id) && s.visible !== false) {
+        const ordered: Array<{ id: string; label: string; description?: string | null }> = [];
+        for (const cs of REGISTRATION_SECTIONS) {
+          const conf = configMap.get(cs.id);
+          if (conf?.visible !== false) {
             ordered.push({
-              id: s.id,
-              label: s.label,
-              description: s.description,
+              id: cs.id,
+              label: conf?.label || cs.label,
+              description: conf?.description,
             });
           }
         }
-      } else if (customCtx?.sections) {
         for (const s of customCtx.sections) {
           if (!REGISTRATION_SECTIONS.some((cs) => cs.id === s.id) && !s.hidden) {
             ordered.push({
@@ -277,9 +274,10 @@ export function EmployeeRegistration({
             });
           }
         }
+        return ordered.length > 0 ? ordered : [...REGISTRATION_SECTIONS];
       }
 
-      return ordered.length > 0 ? ordered : [...REGISTRATION_SECTIONS];
+      return [...REGISTRATION_SECTIONS];
     }, [registrationConfig, customCtx]);
 
   const [searchParams, setSearchParams] = useSearchParams();
@@ -444,7 +442,7 @@ export function EmployeeRegistration({
   const [documentsList, setDocumentsList] = useState<DocumentItemState[]>(
     initialDraft?.reviewData?.documents?.items
       ? (initialDraft.reviewData.documents.items as unknown as DocumentItemState[])
-      : INITIAL_DOCUMENTS,
+      : buildDocumentItemsFromConfig(registrationConfig.fields),
   );
   const [isExperiencedHire, setIsExperiencedHire] = useState(
     initialDraft?.reviewData?.documents?.isExperiencedHire !== undefined
@@ -1213,7 +1211,11 @@ export function EmployeeRegistration({
             ) : activeSection === 'emergency' ? (
               <EmergencyContactSection value={formData.emergency} onChange={updateEmergency} />
             ) : activeSection === 'accounts' ? (
-              <AccountsSection value={formData.accounts} onChange={updateAccounts} />
+              <AccountsSection
+                value={formData.accounts}
+                onChange={updateAccounts}
+                grades={masters?.grades}
+              />
             ) : activeSection === 'online_access' ? (
               <OnlineAccessSection value={formData.onlineAccess} onChange={updateOnlineAccess} />
             ) : activeSection === 'working_hours' ? (

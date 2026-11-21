@@ -32,7 +32,6 @@ import {
   countActiveRecordsFilters,
 } from '../components/RecordsFilterPanel';
 import { NewRecordModal } from '../components/NewRecordModal';
-import { DEMO_RECORDS } from '../model/demoRecords';
 
 const FOLDER_FETCH_PAGE_SIZE = 100;
 const FOLDER_FETCH_MAX_PAGES = 20;
@@ -44,43 +43,6 @@ type RecordsListState = {
   counts: Record<DocumentView, number> | null;
   error: string | null;
 };
-
-/** Sample records shown when the API has nothing, filtered the same way the API would. */
-function buildDemoState(search: string, filters: RecordsFilterState): RecordsListState {
-  let docs = [...DEMO_RECORDS];
-  if (filters.category) docs = docs.filter((d) => d.category === filters.category);
-  const q = search.trim().toLowerCase();
-  if (q) {
-    docs = docs.filter(
-      (d) =>
-        d.documentName.toLowerCase().includes(q) ||
-        d.employeeName.toLowerCase().includes(q) ||
-        d.employeeNumber.toLowerCase().includes(q) ||
-        (d.documentNumber ? d.documentNumber.toLowerCase().includes(q) : false),
-    );
-  }
-  if (filters.status) docs = docs.filter((d) => d.status === filters.status);
-  if (filters.departmentId) docs = docs.filter((d) => d.departmentId === filters.departmentId);
-  return {
-    status: 'ready',
-    documents: docs,
-    pagination: {
-      page: 1,
-      pageSize: FOLDER_FETCH_PAGE_SIZE,
-      totalItems: docs.length,
-      totalPages: 1,
-    },
-    counts: {
-      all: DEMO_RECORDS.length,
-      pending_review: DEMO_RECORDS.filter(
-        (d) => d.status === 'under_review' || d.status === 'pending',
-      ).length,
-      expiring: DEMO_RECORDS.filter((d) => d.expiryState === 'expiring').length,
-      expired: DEMO_RECORDS.filter((d) => d.expiryState === 'expired').length,
-    },
-    error: null,
-  };
-}
 
 function getTodayIsoDate(): string {
   const now = new Date();
@@ -176,21 +138,23 @@ export function RecordsPage({
       load()
         .then((res) => {
           if (!active) return;
-          if (res.data.length > 0) {
-            setListState({
-              status: 'ready',
-              documents: res.data,
-              pagination: res.pagination,
-              counts: res.counts,
-              error: null,
-            });
-          } else {
-            setListState(buildDemoState(search, filters));
-          }
+          setListState({
+            status: 'ready',
+            documents: res.data || [],
+            pagination: res.pagination || null,
+            counts: res.counts || null,
+            error: null,
+          });
         })
-        .catch(() => {
+        .catch((err) => {
           if (!active) return;
-          setListState(buildDemoState(search, filters));
+          setListState({
+            status: 'error',
+            documents: [],
+            pagination: null,
+            counts: null,
+            error: err instanceof Error ? err.message : 'Failed to load employee records',
+          });
         });
     }, 200);
 
@@ -202,7 +166,8 @@ export function RecordsPage({
 
   // Export to CSV
   const handleExport = useCallback(() => {
-    const docs = listState.documents.length > 0 ? listState.documents : DEMO_RECORDS;
+    const docs = listState.documents;
+    if (docs.length === 0) return;
     const headers = [
       'Record Name',
       'Employee Name',

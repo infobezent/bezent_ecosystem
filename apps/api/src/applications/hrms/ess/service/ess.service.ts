@@ -1628,10 +1628,15 @@ export class EssService {
   }
 
   async getRequestsWorkspace(ctx: EmployeeContext) {
-    const [generalRequests, regularizations] = await Promise.all([
-      this.repo.getRequests(ctx.tenantId, ctx.companyId, ctx.id),
-      this.repo.getAttendanceRegularizations(ctx.tenantId, ctx.companyId, ctx.id),
-    ]);
+    const [generalRequests, regularizations, onDutyList, overtimeList, compOffList] =
+      await Promise.all([
+        this.repo.getRequests(ctx.tenantId, ctx.companyId, ctx.id),
+        this.repo.getAttendanceRegularizations(ctx.tenantId, ctx.companyId, ctx.id),
+        this.repo.getAttendanceOnDutyRequests(ctx.tenantId, ctx.companyId, ctx.id),
+        this.repo.getAttendanceOvertimeRequests(ctx.tenantId, ctx.companyId, ctx.id),
+        this.repo.getAttendanceCompOffRequests(ctx.tenantId, ctx.companyId, ctx.id),
+      ]);
+
     const mappedRegs = regularizations.map((r) => ({
       id: r.id,
       tenantId: r.tenantId,
@@ -1654,7 +1659,98 @@ export class EssService {
       createdAt: r.submittedAt,
       updatedAt: r.updatedAt,
     }));
-    return { requests: [...generalRequests, ...mappedRegs] };
+
+    const mappedOd = onDutyList.map((od) => {
+      const isPending = od.status === 'submitted' || od.status === 'under_review';
+      return {
+        id: od.id,
+        tenantId: od.tenantId,
+        companyId: od.companyId,
+        employeeId: od.employeeId,
+        requestType: 'on_duty',
+        subject: `On-Duty: ${od.odTypeName} (${od.startDate}${od.startDate !== od.endDate ? ` to ${od.endDate}` : ''})`,
+        status: (isPending ? 'pending' : od.status) as
+          'pending' | 'approved' | 'rejected' | 'cancelled',
+        reviewerNotes: od.decisionReason ?? null,
+        details: {
+          requestNumber: od.requestNumber,
+          startDate: od.startDate,
+          endDate: od.endDate,
+          durationType: od.durationType,
+          odTypeName: od.odTypeName,
+          reason: od.reason,
+          decisionRemarks: od.decisionReason,
+        },
+        createdAt: od.submittedAt,
+        updatedAt: od.reviewedAt ?? od.submittedAt,
+      };
+    });
+
+    const mappedOt = overtimeList.map((ot) => {
+      const isPending =
+        ot.status === 'pending_approval' ||
+        ot.status === 'submitted' ||
+        (ot.status as string) === 'under_review';
+      return {
+        id: ot.id,
+        tenantId: ot.tenantId,
+        companyId: ot.companyId,
+        employeeId: ot.employeeId,
+        requestType: 'overtime',
+        subject: `Overtime Request for ${ot.workDate} (${ot.requestNumber})`,
+        status: (isPending ? 'pending' : ot.status) as
+          'pending' | 'approved' | 'rejected' | 'cancelled',
+        reviewerNotes: ot.reviewNotes ?? null,
+        details: {
+          requestNumber: ot.requestNumber,
+          workDate: ot.workDate,
+          claimedOtMinutes: ot.eligibleOtMinutes || ot.extraWorkedMinutes,
+          approvedOtMinutes: ot.approvedOtMinutes,
+          reason: ot.reason,
+          decisionRemarks: ot.reviewNotes,
+        },
+        createdAt: ot.createdAt,
+        updatedAt: ot.reviewedAt ?? ot.createdAt,
+      };
+    });
+
+    const mappedCo = compOffList.map((co) => {
+      const isPending =
+        co.status === 'pending_approval' ||
+        co.status === 'submitted' ||
+        (co.status as string) === 'under_review';
+      return {
+        id: co.id,
+        tenantId: co.tenantId,
+        companyId: co.companyId,
+        employeeId: co.employeeId,
+        requestType: 'comp_off',
+        subject: `Comp-Off Request for ${co.workDate} (${co.requestNumber})`,
+        status: (isPending ? 'pending' : co.status) as
+          'pending' | 'approved' | 'rejected' | 'cancelled',
+        reviewerNotes: co.reviewNotes ?? null,
+        details: {
+          requestNumber: co.requestNumber,
+          workDate: co.workDate,
+          requestedCreditDays: co.requestedCreditDays,
+          approvedCreditDays: co.approvedCreditDays,
+          reason: co.reason,
+          decisionRemarks: co.reviewNotes,
+        },
+        createdAt: co.createdAt,
+        updatedAt: co.reviewedAt ?? co.createdAt,
+      };
+    });
+
+    const allRequests = [...generalRequests, ...mappedRegs, ...mappedOd, ...mappedOt, ...mappedCo];
+
+    allRequests.sort((a, b) => {
+      const dateA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+      const dateB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+      return dateB - dateA;
+    });
+
+    return { requests: allRequests };
   }
 
   async createServiceRequest(
@@ -1691,6 +1787,16 @@ export class EssService {
   }
 
   async cancelRequest(ctx: EmployeeContext, requestId: string) {
+    if (requestId.startsWith('reg_')) {
+      await attendanceRegularizationService.cancelRequest(
+        ctx.tenantId,
+        ctx.companyId,
+        requestId,
+        'Cancelled by employee via ESS',
+        ctx.id,
+      );
+      return { id: requestId, status: 'cancelled' };
+    }
     const cancelled = await this.repo.cancelRequest(requestId, ctx.id);
     return cancelled;
   }

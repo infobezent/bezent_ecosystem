@@ -7,6 +7,7 @@ import {
   CountryFlag,
   EmptyState,
   Grid,
+  IconButton,
   Inline,
   LoadingState,
   Stack,
@@ -212,53 +213,19 @@ export function EmployeeDirectoryTable({
                         </span>
                       </Stack>
                     </Inline>
-                    <div className="bezent-table-action-menu">
-                      <button
-                        type="button"
-                        className={`bezent-table-action-btn ${isMenuOpen ? 'is-active' : ''}`}
+                    <div className="bezent-table-row-actions">
+                      <IconButton
+                        label="View Profile"
+                        variant="ghost"
+                        tooltipDirection="left"
                         onClick={(e) => {
                           e.stopPropagation();
-                          toggleMenu(employee.id);
+                          onOpenEmployee(employee.id);
                         }}
-                        title="Actions"
-                        aria-label={`Actions for ${employee.fullName}`}
+                        aria-label={`View profile of ${employee.fullName}`}
                       >
-                        <BezentIcon name="more" size={16} />
-                      </button>
-                      {isMenuOpen && (
-                        <div
-                          className="bezent-table-action-menu__dropdown"
-                          role="menu"
-                          onClick={(e) => e.stopPropagation()}
-                        >
-                          <button
-                            type="button"
-                            role="menuitem"
-                            className="bezent-table-action-menu__item"
-                            onClick={() => {
-                              toggleMenu(employee.id);
-                              onOpenEmployee(employee.id);
-                            }}
-                          >
-                            <BezentIcon name="employees" size={16} />
-                            View Profile
-                          </button>
-                          {onEditEmployee && (
-                            <button
-                              type="button"
-                              role="menuitem"
-                              className="bezent-table-action-menu__item"
-                              onClick={() => {
-                                toggleMenu(employee.id);
-                                onEditEmployee(employee.id);
-                              }}
-                            >
-                              <BezentIcon name="edit" size={16} />
-                              Edit Details
-                            </button>
-                          )}
-                        </div>
-                      )}
+                        <BezentIcon name="eye" size={16} />
+                      </IconButton>
                     </div>
                   </Inline>
 
@@ -377,55 +344,19 @@ export function EmployeeDirectoryTable({
 
               {/* Actions */}
               <TableCell className="bezent-table-col--actions">
-                <div className="bezent-table-action-menu">
-                  <button
-                    type="button"
-                    className={`bezent-table-action-btn ${isMenuOpen ? 'is-active' : ''}`}
-                    aria-label={`Actions for ${employee.fullName}`}
-                    aria-expanded={isMenuOpen}
+                <div className="bezent-table-row-actions">
+                  <IconButton
+                    label="View Profile"
+                    variant="ghost"
+                    tooltipDirection="left"
                     onClick={(e) => {
                       e.stopPropagation();
-                      toggleMenu(employee.id);
+                      onOpenEmployee(employee.id);
                     }}
+                    aria-label={`View profile of ${employee.fullName}`}
                   >
-                    <BezentIcon name="more" size={18} />
-                  </button>
-
-                  {isMenuOpen && (
-                    <div
-                      className={`bezent-table-action-menu__dropdown ${isNearBottom ? 'bezent-table-action-menu__dropdown--upwards' : ''}`}
-                      role="menu"
-                      aria-label={`Actions for ${employee.fullName}`}
-                      onClick={(e) => e.stopPropagation()}
-                    >
-                      <button
-                        type="button"
-                        role="menuitem"
-                        className="bezent-table-action-menu__item"
-                        onClick={() => {
-                          toggleMenu(employee.id);
-                          onOpenEmployee(employee.id);
-                        }}
-                      >
-                        <BezentIcon name="employees" size={16} />
-                        View Profile
-                      </button>
-                      {onEditEmployee && (
-                        <button
-                          type="button"
-                          role="menuitem"
-                          className="bezent-table-action-menu__item"
-                          onClick={() => {
-                            toggleMenu(employee.id);
-                            onEditEmployee(employee.id);
-                          }}
-                        >
-                          <BezentIcon name="edit" size={16} />
-                          Edit Details
-                        </button>
-                      )}
-                    </div>
-                  )}
+                    <BezentIcon name="eye" size={16} />
+                  </IconButton>
                 </div>
               </TableCell>
             </TableRow>

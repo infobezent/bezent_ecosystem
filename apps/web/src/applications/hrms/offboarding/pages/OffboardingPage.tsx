@@ -38,7 +38,6 @@ import {
   countActiveOffboardingFilters,
 } from '../components/OffboardingFilterPanel';
 import { OffboardingTable } from '../components/OffboardingTable';
-import { DEMO_OFFBOARDING } from '../model/demoOffboarding';
 
 const PAGE_SIZE_OPTIONS = [10, 25, 50, 100] as const;
 type PageSizeOption = (typeof PAGE_SIZE_OPTIONS)[number];
@@ -178,96 +177,22 @@ export function OffboardingPage({
       })
         .then((res) => {
           if (!active) return;
-          if (res.data.length > 0) {
-            setListState({
-              status: 'ready',
-              items: res.data,
-              pagination: res.pagination,
-              statusCounts: res.statusCounts ?? null,
-              error: null,
-            });
-          } else {
-            // Fallback to rich demo offboarding records
-            let filteredDemo = [...DEMO_OFFBOARDING];
-            if (activeStatusTab !== 'all') {
-              if (activeStatusTab === 'notice') {
-                filteredDemo = filteredDemo.filter(
-                  (item) => item.status === 'pending' && item.effectiveDate > today,
-                );
-              } else {
-                filteredDemo = filteredDemo.filter((item) => item.status === activeStatusTab);
-              }
-            }
-            if (search.trim()) {
-              const q = search.toLowerCase();
-              filteredDemo = filteredDemo.filter(
-                (item) =>
-                  item.employeeName.toLowerCase().includes(q) ||
-                  item.employeeNumber.toLowerCase().includes(q) ||
-                  item.reason.toLowerCase().includes(q),
-              );
-            }
-            if (appliedFilters.actionType) {
-              filteredDemo = filteredDemo.filter(
-                (item) => item.actionType === appliedFilters.actionType,
-              );
-            }
-
-            setListState({
-              status: 'ready',
-              items: filteredDemo,
-              pagination: {
-                page: 1,
-                pageSize,
-                totalItems: filteredDemo.length,
-                totalPages: Math.ceil(filteredDemo.length / pageSize) || 1,
-              },
-              statusCounts: {
-                all: DEMO_OFFBOARDING.length,
-                pending: DEMO_OFFBOARDING.filter((o) => o.status === 'pending').length,
-                upcoming: DEMO_OFFBOARDING.filter(
-                  (o) => o.status === 'pending' && o.effectiveDate > today,
-                ).length,
-                applied: DEMO_OFFBOARDING.filter((o) => o.status === 'applied').length,
-                cancelled: DEMO_OFFBOARDING.filter((o) => o.status === 'cancelled').length,
-              },
-              error: null,
-            });
-          }
-        })
-        .catch(() => {
-          if (!active) return;
-          let filteredDemo = [...DEMO_OFFBOARDING];
-          if (activeStatusTab !== 'all') {
-            filteredDemo = filteredDemo.filter((item) => item.status === activeStatusTab);
-          }
-          if (search.trim()) {
-            const q = search.toLowerCase();
-            filteredDemo = filteredDemo.filter(
-              (item) =>
-                item.employeeName.toLowerCase().includes(q) ||
-                item.employeeNumber.toLowerCase().includes(q),
-            );
-          }
           setListState({
             status: 'ready',
-            items: filteredDemo,
-            pagination: {
-              page: 1,
-              pageSize,
-              totalItems: filteredDemo.length,
-              totalPages: Math.ceil(filteredDemo.length / pageSize) || 1,
-            },
-            statusCounts: {
-              all: DEMO_OFFBOARDING.length,
-              pending: DEMO_OFFBOARDING.filter((o) => o.status === 'pending').length,
-              upcoming: DEMO_OFFBOARDING.filter(
-                (o) => o.status === 'pending' && o.effectiveDate > today,
-              ).length,
-              applied: DEMO_OFFBOARDING.filter((o) => o.status === 'applied').length,
-              cancelled: DEMO_OFFBOARDING.filter((o) => o.status === 'cancelled').length,
-            },
+            items: res.data || [],
+            pagination: res.pagination || null,
+            statusCounts: res.statusCounts ?? null,
             error: null,
+          });
+        })
+        .catch((err) => {
+          if (!active) return;
+          setListState({
+            status: 'error',
+            items: [],
+            pagination: null,
+            statusCounts: null,
+            error: err instanceof Error ? err.message : 'Failed to load offboarding records',
           });
         });
     }, 200);
@@ -334,7 +259,11 @@ export function OffboardingPage({
   const handleExportCsv = async () => {
     setExporting(true);
     try {
-      const records = listState.items.length > 0 ? listState.items : DEMO_OFFBOARDING;
+      const records = listState.items;
+      if (records.length === 0) {
+        setExporting(false);
+        return;
+      }
       const headers = [
         'Employee ID',
         'Employee Name',
@@ -380,7 +309,7 @@ export function OffboardingPage({
   const statusTabs = [
     {
       id: 'all',
-      label: 'All Offboarding',
+      label: 'All',
       count: listState.statusCounts?.all ?? listState.items.length,
     },
     { id: 'pending', label: 'Pending', count: listState.statusCounts?.pending },
@@ -392,7 +321,10 @@ export function OffboardingPage({
   return (
     <Page maxWidth="full" className="bezent-page" gap="md">
       {/* 1. Page Header */}
-      <PageHeader title={title} eyebrow="HRMS · Workforce" subtitle={subtitle} />
+      <PageHeader title={title} />
+      <span className="sr-only" hidden>
+        {subtitle}
+      </span>
 
       {/* Success banner */}
       {successMessage && (
@@ -423,23 +355,25 @@ export function OffboardingPage({
               />
             </div>
 
-            {/* Filter Toggle Button */}
+            {/* Filter Toggle Button (Icon-only) */}
             <div className="bezent-filter-anchor">
-              <Button
-                variant={appliedCount > 0 || isFilterPanelOpen ? 'secondary' : 'outline'}
-                size="md"
-                shape="rounded"
-                className={appliedCount > 0 ? 'bezent-btn--filters-active' : ''}
-                leftIcon={<BezentIcon name="filter" size={16} />}
+              <IconButton
+                label={appliedCount > 0 ? `Filters (${appliedCount} active)` : 'Filters'}
+                variant={appliedCount > 0 || isFilterPanelOpen ? 'solid' : 'ghost'}
+                active={isFilterPanelOpen || appliedCount > 0}
+                tooltipDirection="down"
                 onClick={() => setIsFilterPanelOpen((prev) => !prev)}
                 aria-expanded={isFilterPanelOpen}
-                aria-label="Filters"
+                aria-label={appliedCount > 0 ? `Filters (${appliedCount} active)` : 'Filters'}
+                className={appliedCount > 0 ? 'bezent-btn--filters-active' : ''}
               >
-                <span>Filters</span>
+                <BezentIcon name="filter" size={16} />
                 {appliedCount > 0 && (
-                  <span className="bezent-btn__filter-count">{appliedCount}</span>
+                  <span className="bezent-btn__filter-count bezent-btn__filter-count--icon-btn">
+                    {appliedCount}
+                  </span>
                 )}
-              </Button>
+              </IconButton>
 
               <OffboardingFilterPanel
                 isOpen={isFilterPanelOpen}
@@ -453,17 +387,17 @@ export function OffboardingPage({
               />
             </div>
 
-            {/* Reset Button */}
-            <Button
-              variant="outline"
-              size="md"
-              shape="rounded"
-              leftIcon={<BezentIcon name="reset" size={16} />}
+            {/* Reset Button (Icon-only) */}
+            <IconButton
+              label="Reset filters"
+              variant="ghost"
+              tooltipDirection="down"
               onClick={handleResetFilters}
               disabled={!hasActiveFilters}
+              aria-label="Reset filters"
             >
-              Reset
-            </Button>
+              <BezentIcon name="reset" size={16} />
+            </IconButton>
 
             {/* View Mode Toggle: List vs Grid */}
             <div
@@ -510,7 +444,7 @@ export function OffboardingPage({
                 >
                   <span>{tab.label}</span>
                   {tab.count !== undefined && (
-                    <span className="bezent-filter-tab__count">{tab.count}</span>
+                    <span className="bezent-filter-tab-count">{tab.count}</span>
                   )}
                 </button>
               ))}

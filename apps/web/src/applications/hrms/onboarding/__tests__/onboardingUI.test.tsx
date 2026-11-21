@@ -161,7 +161,7 @@ describe('HRMS Onboarding UI Components & Pages', () => {
     // 10 JourneyNav Steps remain completely frozen and intact
     expect(html).toContain('General');
     expect(html).toContain('Personal Information');
-    expect(html).toContain('Administration');
+    expect(html).toContain('Onboarding');
     expect(html).toContain('Skills');
     expect(html).toContain('Emergency Contact');
     expect(html).toContain('Accounts');

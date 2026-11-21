@@ -336,4 +336,42 @@ export class FormOverridesRepository {
       }
     });
   }
+
+  async updateMetadata(
+    tenantId: string,
+    companyId: string,
+    formKey: string,
+    metadata: FormCustomizationMetadata,
+  ): Promise<void> {
+    const db = getDb();
+    const [existing] = await db
+      .select()
+      .from(formCustomizations)
+      .where(
+        and(
+          eq(formCustomizations.tenantId, tenantId),
+          eq(formCustomizations.companyId, companyId),
+          eq(formCustomizations.formKey, formKey),
+        ),
+      );
+
+    if (existing) {
+      await db
+        .update(formCustomizations)
+        .set({
+          metadata: metadata as Record<string, unknown>,
+          version: existing.version + 1,
+        })
+        .where(eq(formCustomizations.id, existing.id));
+    } else {
+      await db.insert(formCustomizations).values({
+        id: `fc_${randomUUID()}`,
+        tenantId,
+        companyId,
+        formKey,
+        version: 1,
+        metadata: metadata as Record<string, unknown>,
+      });
+    }
+  }
 }

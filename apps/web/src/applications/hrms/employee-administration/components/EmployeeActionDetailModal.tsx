@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from 'react';
 import {
   Actions,
   Alert,
+  Badge,
   Button,
   FormField,
   LoadingState,
@@ -15,7 +16,7 @@ import {
   fetchEmployeeAction,
   type EmployeeActionDetail as EmployeeActionDetailData,
 } from '../api/employeeAdministrationApi';
-import { actionTypeLabel } from '../model/actionCatalog';
+import { ACTION_STATUS_LABELS, actionStatusVariant, actionTypeLabel } from '../model/actionCatalog';
 import { EmployeeActionDetail } from './EmployeeActionDetail';
 import { ClearanceChecklist } from './ClearanceChecklist';
 
@@ -151,11 +152,16 @@ export function EmployeeActionDetailModal({
     <Modal
       isOpen={actionId !== null}
       onClose={onClose}
-      size="xl"
-      title={
-        action
-          ? `${actionTypeLabel(action.actionType)} · ${action.employeeName}`
-          : 'Employee Action'
+      variant="drawer"
+      size="drawer"
+      className="bezent-wf-action-drawer"
+      title={action ? actionTypeLabel(action.actionType) : 'Employee Action'}
+      headerActions={
+        action ? (
+          <Badge variant={actionStatusVariant(action.status)} size="sm">
+            {ACTION_STATUS_LABELS[action.status]}
+          </Badge>
+        ) : undefined
       }
       footer={action ? footer : undefined}
     >

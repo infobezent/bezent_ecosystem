@@ -6,10 +6,8 @@ import {
   Card,
   CardHeader,
   CardTitle,
-  CardDescription,
   FormGrid,
   FormSection,
-  Grid,
   Inline,
   Input,
   Modal,
@@ -35,17 +33,23 @@ import {
   createEmploymentType,
   deleteEmploymentType,
 } from '../api/workforceSettingsApi';
+import { DesignationsSection } from '../../administration/employee-configuration/DesignationsSection';
+import { JobLevelsGradesSection } from '../../administration/employee-configuration/JobLevelsGradesSection';
+
+export type CatalogTabId = 'types' | 'designations' | 'job-levels';
 
 export interface GeneralNumberingTabProps {
   initialSettings: WorkforceGeneralSettings;
   initialEmploymentTypes: WorkforceEmploymentType[];
   onReload: () => void;
+  initialCatalog?: CatalogTabId;
 }
 
 export function GeneralNumberingTab({
   initialSettings,
   initialEmploymentTypes,
   onReload,
+  initialCatalog = 'types',
 }: GeneralNumberingTabProps) {
   // General settings form state
   const [generationMode, setGenerationMode] = useState<'automatic' | 'manual'>(
@@ -68,6 +72,9 @@ export function GeneralNumberingTab({
     type: 'success' | 'error';
     text: string;
   } | null>(null);
+
+  // Active Master Catalog state for the right column
+  const [activeCatalog, setActiveCatalog] = useState<CatalogTabId>(initialCatalog);
 
   // Employment types modal state
   const [showAddTypeModal, setShowAddTypeModal] = useState(false);
@@ -150,214 +157,317 @@ export function GeneralNumberingTab({
   };
 
   return (
-    <Stack gap="lg">
-      {statusMessage && (
-        <Alert variant={statusMessage.type === 'success' ? 'success' : 'error'}>
-          {statusMessage.text}
-        </Alert>
-      )}
+    <div className="bezent-settings-2col-layout">
+      {/* ── LEFT COLUMN: Auto-Numbering Engine & ID Visualizer ───────────── */}
+      <Stack gap="md" className="bezent-settings-col-left">
+        {statusMessage && (
+          <Alert variant={statusMessage.type === 'success' ? 'success' : 'error'}>
+            {statusMessage.text}
+          </Alert>
+        )}
 
-      {/* Auto-Numbering Engine Card */}
-      <Card variant="default" padding="lg">
-        <Stack gap="md">
-          <CardHeader>
-            <div>
+        <Card variant="default" padding="md" className="bezent-settings-equal-card">
+          <Stack gap="sm" className="bezent-settings-card-content">
+            <CardHeader>
               <CardTitle>Employee Auto-Numbering Engine</CardTitle>
-              <CardDescription>
-                Configure how unique employee identification numbers are formatted and sequenced.
-              </CardDescription>
+            </CardHeader>
+
+            {/* Live ID Visualizer Badge Compact */}
+            <div className="bezent-settings-live-badge-compact">
+              <div className="bezent-settings-live-badge-compact__left">
+                <div className="bezent-settings-live-badge-compact__avatar">KR</div>
+                <div>
+                  <div className="bezent-settings-live-badge-compact__name">Kaviarasu Rao</div>
+                  <div className="bezent-settings-live-badge-compact__sub">Live Preview</div>
+                </div>
+              </div>
+              <div className="bezent-settings-live-badge-compact__id">
+                <span className="bezent-settings-live-badge-mockup__dot" aria-hidden="true" />
+                <span className="bezent-sr-only">Next ID Preview: </span>
+                {livePreviewId}
+              </div>
             </div>
-            <Badge variant="info">
-              Next ID Preview: <strong>{livePreviewId}</strong>
-            </Badge>
+
+            <FormSection title="Numbering Rules">
+              <FormGrid columns={3}>
+                <Select
+                  label="Generation Mode"
+                  value={generationMode}
+                  onChange={(e) => setGenerationMode(e.target.value as 'automatic' | 'manual')}
+                  options={[
+                    {
+                      label: 'Automatic (System sequence)',
+                      triggerLabel: 'Automatic',
+                      description: 'System-generated sequential employee ID numbers',
+                      value: 'automatic',
+                    },
+                    {
+                      label: 'Manual (User assigned)',
+                      triggerLabel: 'Manual',
+                      description: 'HR enters ID numbers manually upon registration',
+                      value: 'manual',
+                    },
+                  ]}
+                />
+                <Input
+                  label="ID Prefix"
+                  value={idPrefix}
+                  onChange={(e) => setIdPrefix(e.target.value)}
+                  placeholder="e.g. EMP-, BEZ-"
+                />
+                <Input
+                  label="ID Suffix (Optional)"
+                  value={idSuffix}
+                  onChange={(e) => setIdSuffix(e.target.value)}
+                  placeholder="e.g. -HQ, /2026"
+                />
+                <Input
+                  label="Sequence Length"
+                  type="number"
+                  min={3}
+                  max={10}
+                  value={sequenceLength}
+                  onChange={(e) => setSequenceLength(parseInt(e.target.value, 10) || 4)}
+                />
+                <Input
+                  label="Starting Number"
+                  type="number"
+                  min={1}
+                  value={startingNumber}
+                  onChange={(e) => setStartingNumber(parseInt(e.target.value, 10) || 1001)}
+                />
+                <Select
+                  label="Reset Frequency"
+                  value={resetFrequency}
+                  align="right"
+                  onChange={(e) =>
+                    setResetFrequency(
+                      e.target.value as 'never' | 'calendar_year' | 'financial_year',
+                    )
+                  }
+                  options={[
+                    {
+                      label: 'Never (Continuous)',
+                      triggerLabel: 'Never',
+                      description: 'Continuous sequence without annual reset',
+                      value: 'never',
+                    },
+                    {
+                      label: 'Calendar Year',
+                      triggerLabel: 'Calendar Year',
+                      description: 'Resets counter to start number every Jan 1',
+                      value: 'calendar_year',
+                    },
+                    {
+                      label: 'Financial Year',
+                      triggerLabel: 'Financial Year',
+                      description: 'Resets counter to start number every Apr 1',
+                      value: 'financial_year',
+                    },
+                  ]}
+                />
+              </FormGrid>
+            </FormSection>
+
+            <FormSection title="Controls & Identity">
+              <FormGrid columns={2}>
+                <Switch
+                  label="Allow Manual Override"
+                  checked={allowManualOverride}
+                  onChange={(e) => setAllowManualOverride(e.target.checked)}
+                />
+                <Switch
+                  label="Prevent ID Reuse"
+                  checked={preventIdReuse}
+                  onChange={(e) => setPreventIdReuse(e.target.checked)}
+                />
+                <Switch
+                  label="Auto-provision User Account"
+                  checked={autoProvisionUser}
+                  onChange={(e) => setAutoProvisionUser(e.target.checked)}
+                />
+                <Select
+                  label="Activation Timing"
+                  value={activationTiming}
+                  align="right"
+                  onChange={(e) =>
+                    setActivationTiming(e.target.value as 'instant' | 'joining_date' | 'manual')
+                  }
+                  options={[
+                    {
+                      label: 'Instant (Immediately on hire)',
+                      triggerLabel: 'Instant',
+                      description: 'Platform identity created immediately upon hire',
+                      value: 'instant',
+                    },
+                    {
+                      label: 'On Joining Date (Scheduled)',
+                      triggerLabel: 'On Joining Date',
+                      description: 'Account created automatically on employee joining date',
+                      value: 'joining_date',
+                    },
+                    {
+                      label: 'Manual Activation (HR triggers invite)',
+                      triggerLabel: 'Manual Activation',
+                      description: 'HR sends manual invitation link when ready',
+                      value: 'manual',
+                    },
+                  ]}
+                />
+              </FormGrid>
+            </FormSection>
+          </Stack>
+
+          <Toolbar
+            className="bezent-settings-save-toolbar"
+            right={
+              <Button variant="primary" onClick={handleSaveSettings} disabled={savingSettings}>
+                {savingSettings ? 'Saving...' : 'Save'}
+              </Button>
+            }
+          />
+        </Card>
+      </Stack>
+
+      {/* ── RIGHT COLUMN: Master Catalogs Hub ─────────────────────────────── */}
+      <Card variant="default" padding="md" className="bezent-settings-equal-card">
+        <Stack gap="sm" className="bezent-settings-card-content">
+          <CardHeader>
+            <CardTitle>Master Catalogs</CardTitle>
+            <div className="bezent-settings-catalog-segments" role="tablist">
+              <button
+                type="button"
+                role="tab"
+                aria-selected={activeCatalog === 'types'}
+                className={`bezent-settings-catalog-segment-btn ${
+                  activeCatalog === 'types' ? 'bezent-settings-catalog-segment-btn--active' : ''
+                }`}
+                onClick={() => setActiveCatalog('types')}
+              >
+                Employment Types
+              </button>
+              <button
+                type="button"
+                role="tab"
+                aria-selected={activeCatalog === 'designations'}
+                className={`bezent-settings-catalog-segment-btn ${
+                  activeCatalog === 'designations'
+                    ? 'bezent-settings-catalog-segment-btn--active'
+                    : ''
+                }`}
+                onClick={() => setActiveCatalog('designations')}
+              >
+                Designations
+              </button>
+              <button
+                type="button"
+                role="tab"
+                aria-selected={activeCatalog === 'job-levels'}
+                className={`bezent-settings-catalog-segment-btn ${
+                  activeCatalog === 'job-levels'
+                    ? 'bezent-settings-catalog-segment-btn--active'
+                    : ''
+                }`}
+                onClick={() => setActiveCatalog('job-levels')}
+              >
+                Job Levels &amp; Grades
+              </button>
+            </div>
           </CardHeader>
 
-          <FormSection title="Numbering Rules">
-            <FormGrid columns={3}>
-              <Select
-                label="Generation Mode"
-                value={generationMode}
-                onChange={(e) => setGenerationMode(e.target.value as 'automatic' | 'manual')}
-                options={[
-                  { label: 'Automatic (System sequence)', value: 'automatic' },
-                  { label: 'Manual (User assigned)', value: 'manual' },
-                ]}
-              />
-              <Input
-                label="ID Prefix"
-                value={idPrefix}
-                onChange={(e) => setIdPrefix(e.target.value)}
-                placeholder="e.g. EMP-, BEZ-"
-              />
-              <Input
-                label="ID Suffix (Optional)"
-                value={idSuffix}
-                onChange={(e) => setIdSuffix(e.target.value)}
-                placeholder="e.g. -HQ, /2026"
-              />
-              <Input
-                label="Sequence Length (Digits)"
-                type="number"
-                min={3}
-                max={10}
-                value={sequenceLength}
-                onChange={(e) => setSequenceLength(parseInt(e.target.value, 10) || 4)}
-              />
-              <Input
-                label="Starting Number"
-                type="number"
-                min={1}
-                value={startingNumber}
-                onChange={(e) => setStartingNumber(parseInt(e.target.value, 10) || 1001)}
-              />
-              <Select
-                label="Reset Frequency"
-                value={resetFrequency}
-                onChange={(e) =>
-                  setResetFrequency(e.target.value as 'never' | 'calendar_year' | 'financial_year')
+          {/* Catalog View 1: Employment Types Master */}
+          {activeCatalog === 'types' && (
+            <Stack gap="md">
+              <Toolbar
+                left={<CardTitle>Employment Types Master</CardTitle>}
+                right={
+                  <Button
+                    variant="primary"
+                    size="sm"
+                    className="bezent-settings-add-btn"
+                    aria-label="Add Employment Type"
+                    title="Add Employment Type"
+                    onClick={() => setShowAddTypeModal(true)}
+                  >
+                    <BezentIcon name="add" size={16} />
+                  </Button>
                 }
-                options={[
-                  { label: 'Never (Continuous)', value: 'never' },
-                  { label: 'Calendar Year', value: 'calendar_year' },
-                  { label: 'Financial Year', value: 'financial_year' },
-                ]}
               />
-            </FormGrid>
-          </FormSection>
 
-          <FormSection title="Controls & Overrides">
-            <Grid columns={2} gap="md">
-              <Switch
-                label="Allow Manual Override (Permit HR managers to type custom ID numbers on registration)"
-                checked={allowManualOverride}
-                onChange={(e) => setAllowManualOverride(e.target.checked)}
-              />
-              <Switch
-                label="Prevent ID Reuse (Prevent reassigning retired or terminated employee IDs)"
-                checked={preventIdReuse}
-                onChange={(e) => setPreventIdReuse(e.target.checked)}
-              />
-            </Grid>
-          </FormSection>
-        </Stack>
-      </Card>
+              <Table>
+                <TableHead>
+                  <TableRow>
+                    <TableHeaderCell>Code</TableHeaderCell>
+                    <TableHeaderCell>Name</TableHeaderCell>
+                    <TableHeaderCell>Weekly Hours</TableHeaderCell>
+                    <TableHeaderCell>Notice Period</TableHeaderCell>
+                    <TableHeaderCell>Benefits Eligible</TableHeaderCell>
+                    <TableHeaderCell>Status</TableHeaderCell>
+                    <TableHeaderCell align="right">Actions</TableHeaderCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {initialEmploymentTypes.map((et) => (
+                    <TableRow key={et.id}>
+                      <TableCell>
+                        <strong>{et.code}</strong>
+                      </TableCell>
+                      <TableCell>{et.name}</TableCell>
+                      <TableCell>{et.workHoursPerWeek} hrs</TableCell>
+                      <TableCell>{et.defaultNoticeDays} days</TableCell>
+                      <TableCell>
+                        {et.isBenefitsEligible ? (
+                          <Badge variant="success">Eligible</Badge>
+                        ) : (
+                          <Badge variant="neutral">Ineligible</Badge>
+                        )}
+                      </TableCell>
+                      <TableCell>
+                        {et.isActive ? (
+                          <Badge variant="success">Active</Badge>
+                        ) : (
+                          <Badge variant="neutral">Inactive</Badge>
+                        )}
+                      </TableCell>
+                      <TableCell align="right">
+                        <Inline gap="xs" justify="end">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="bezent-settings-row-action-btn bezent-settings-row-action-btn--danger"
+                            aria-label={`Delete ${et.name}`}
+                            title="Delete Employment Type"
+                            onClick={() => handleDeleteEmploymentType(et.id, et.code)}
+                          >
+                            <BezentIcon name="trash" size={14} />
+                            <span className="bezent-sr-only">Delete</span>
+                          </Button>
+                        </Inline>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </Stack>
+          )}
 
-      {/* User Provisioning & Identity Card */}
-      <Card variant="default" padding="lg">
-        <Stack gap="md">
-          <CardHeader>
-            <div>
-              <CardTitle>User Account Auto-Provisioning</CardTitle>
-              <CardDescription>
-                Synchronize workforce hires with platform User accounts for portal access.
-              </CardDescription>
+          {/* Catalog View 2: Designations */}
+          {activeCatalog === 'designations' && (
+            <div className="bezent-settings-smart-catalog">
+              <DesignationsSection />
             </div>
-          </CardHeader>
+          )}
 
-          <Grid columns={2} gap="md">
-            <Switch
-              label="Auto-provision User Account (Create platform identity on hire or conversion)"
-              checked={autoProvisionUser}
-              onChange={(e) => setAutoProvisionUser(e.target.checked)}
-            />
-            <Select
-              label="Activation Timing"
-              value={activationTiming}
-              onChange={(e) =>
-                setActivationTiming(e.target.value as 'instant' | 'joining_date' | 'manual')
-              }
-              options={[
-                { label: 'Instant (Immediately on hire)', value: 'instant' },
-                { label: 'On Joining Date (Scheduled)', value: 'joining_date' },
-                { label: 'Manual Activation (HR triggers invite)', value: 'manual' },
-              ]}
-            />
-          </Grid>
-        </Stack>
-      </Card>
-
-      {/* Save Settings Toolbar */}
-      <Toolbar
-        right={
-          <Button variant="primary" onClick={handleSaveSettings} disabled={savingSettings}>
-            <BezentIcon name="check" size={16} />
-            {savingSettings ? 'Saving Settings...' : 'Save General Settings'}
-          </Button>
-        }
-      />
-
-      {/* Employment Types Master Card */}
-      <Card variant="default" padding="lg">
-        <Stack gap="md">
-          <CardHeader>
-            <div>
-              <CardTitle>Employment Types Master</CardTitle>
-              <CardDescription>
-                Define employment classifications, weekly working hour standards, and default notice
-                periods.
-              </CardDescription>
+          {/* Catalog View 3: Job Levels & Grades */}
+          {activeCatalog === 'job-levels' && (
+            <div className="bezent-settings-smart-catalog">
+              <JobLevelsGradesSection />
             </div>
-            <Button variant="secondary" onClick={() => setShowAddTypeModal(true)}>
-              <BezentIcon name="plus" size={16} />
-              Add Employment Type
-            </Button>
-          </CardHeader>
-
-          <Table>
-            <TableHead>
-              <TableRow>
-                <TableHeaderCell>Code</TableHeaderCell>
-                <TableHeaderCell>Name</TableHeaderCell>
-                <TableHeaderCell>Weekly Hours</TableHeaderCell>
-                <TableHeaderCell>Notice Period</TableHeaderCell>
-                <TableHeaderCell>Benefits Eligible</TableHeaderCell>
-                <TableHeaderCell>Status</TableHeaderCell>
-                <TableHeaderCell>Actions</TableHeaderCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {initialEmploymentTypes.map((et) => (
-                <TableRow key={et.id}>
-                  <TableCell>
-                    <strong>{et.code}</strong>
-                  </TableCell>
-                  <TableCell>{et.name}</TableCell>
-                  <TableCell>{et.workHoursPerWeek} hrs</TableCell>
-                  <TableCell>{et.defaultNoticeDays} days</TableCell>
-                  <TableCell>
-                    {et.isBenefitsEligible ? (
-                      <Badge variant="success">Eligible</Badge>
-                    ) : (
-                      <Badge variant="neutral">Ineligible</Badge>
-                    )}
-                  </TableCell>
-                  <TableCell>
-                    {et.isActive ? (
-                      <Badge variant="success">Active</Badge>
-                    ) : (
-                      <Badge variant="neutral">Inactive</Badge>
-                    )}
-                  </TableCell>
-                  <TableCell>
-                    <Inline gap="xs">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => handleDeleteEmploymentType(et.id, et.code)}
-                      >
-                        <BezentIcon name="trash" size={14} />
-                        Delete
-                      </Button>
-                    </Inline>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+          )}
         </Stack>
       </Card>
 
-      {/* Add Employment Type Modal */}
+      {/* ── Add Employment Type Modal ─────────────────────────────────────── */}
       {showAddTypeModal && (
         <Modal
           isOpen={showAddTypeModal}
@@ -412,6 +522,6 @@ export function GeneralNumberingTab({
           </Stack>
         </Modal>
       )}
-    </Stack>
+    </div>
   );
 }

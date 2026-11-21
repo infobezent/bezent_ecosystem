@@ -1,8 +1,7 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import {
   FormSection,
   FormGrid,
-  FormField,
   Input,
   Select,
   Button,
@@ -17,6 +16,9 @@ import {
   Grid,
   EmptyState,
 } from '../../../../design-system';
+import { RegistrationField, useRegistrationConfig } from '../registration/registrationConfig';
+import type { RegistrationFieldConfig } from '../../settings/api/registrationSettingsApi';
+import type { Chapter04SkillsState } from '../types/registration.types';
 
 export interface SkillEntry {
   id: string;
@@ -134,33 +136,69 @@ const LEVEL_OPTIONS_BY_TYPE: Record<'Beginner' | 'Intermediate' | 'Advanced' | '
     ],
   };
 
-import type { Chapter04SkillsState } from '../types/registration.types';
+const KNOWN_SKILL_TYPES = new Set([
+  'Technical',
+  'Functional',
+  'Soft Skill',
+  'Language',
+  'Professional',
+]);
+
+type ParentSkill = Chapter04SkillsState['skills'][number];
+
+function fromParentSkill(p: ParentSkill): SkillEntry {
+  const isKnownSkillName = SKILL_MASTER.some((s) => s.name === p.skillName);
+  const isKnownSkillType = KNOWN_SKILL_TYPES.has(p.skillType);
+  const examiner = SAMPLE_EMPLOYEES.find((e) => e.id === p.examinerEmployeeId);
+  const verifiedBy = SAMPLE_EMPLOYEES.find((e) => e.id === p.verifiedByEmployeeId);
+  const mentor = SAMPLE_EMPLOYEES.find((e) => e.id === p.mentorEmployeeId);
+  return {
+    id: p.id,
+    skillName: isKnownSkillName ? p.skillName : 'Other',
+    customSkillName: isKnownSkillName ? undefined : p.skillName,
+    skillType: (isKnownSkillType ? p.skillType : 'Other') as SkillEntry['skillType'],
+    customSkillType: isKnownSkillType ? undefined : p.skillType,
+    levelType: p.proficiency,
+    level: p.level || '',
+    levelDate: p.assessedOn || '',
+    yearsOfExperience: p.yearsOfExperience !== undefined ? String(p.yearsOfExperience) : '',
+    examinerId: p.examinerEmployeeId || '',
+    examinerName: examiner ? examiner.name : 'Unassigned',
+    verifiedById: p.verifiedByEmployeeId || '',
+    verifiedByName: verifiedBy ? verifiedBy.name : 'Unassigned',
+    mentorId: p.mentorEmployeeId || '',
+    mentorName: mentor ? mentor.name : 'Unassigned',
+  };
+}
+
+function toParentSkill(entry: SkillEntry): ParentSkill {
+  return {
+    id: entry.id,
+    skillName: entry.skillName === 'Other' ? entry.customSkillName || 'Other' : entry.skillName,
+    skillType: entry.skillType === 'Other' ? entry.customSkillType || 'Other' : entry.skillType,
+    proficiency: entry.levelType,
+    level: entry.level || undefined,
+    assessedOn: entry.levelDate || undefined,
+    yearsOfExperience: entry.yearsOfExperience ? Number(entry.yearsOfExperience) : undefined,
+    examinerEmployeeId: entry.examinerId || undefined,
+    verifiedByEmployeeId: entry.verifiedById || undefined,
+    mentorEmployeeId: entry.mentorId || undefined,
+  };
+}
 
 export interface SkillsSectionProps {
   value?: Chapter04SkillsState;
   onChange?: (updated: Chapter04SkillsState) => void;
 }
 
-export function SkillsSection({ value: _value, onChange: _onChange }: SkillsSectionProps = {}) {
-  const [skillsList, setSkillsList] = useState<SkillEntry[]>([
-    {
-      id: 'skill-01',
-      skillName: 'TypeScript',
-      skillType: 'Technical',
-      levelType: 'Advanced',
-      level: 'Level 3 — Subject Matter Specialist',
-      levelDate: '2026-01-15',
-      yearsOfExperience: '4.5',
-      examinerId: 'EMP103',
-      examinerName: 'Arun Kumar',
-      verifiedById: 'EMP102',
-      verifiedByName: 'Priya S',
-      mentorId: 'EMP101',
-      mentorName: 'Rakesh Kumar',
-    },
-  ]);
+export function SkillsSection({ value, onChange }: SkillsSectionProps = {}) {
+  const skillsList = useMemo(() => (value?.skills ?? []).map(fromParentSkill), [value?.skills]);
 
-  // Form state for adding/editing a skill
+  const commitSkills = (next: SkillEntry[]) => {
+    onChange?.({ skills: next.map(toParentSkill) });
+  };
+
+  // Form state for adding/editing a skill (a single staging entry, not yet committed)
   const [selectedSkill, setSelectedSkill] = useState('TypeScript');
   const [customSkillName, setCustomSkillName] = useState('');
 
@@ -177,12 +215,10 @@ export function SkillsSection({ value: _value, onChange: _onChange }: SkillsSect
   const [levelDate, setLevelDate] = useState('2026-03-01');
   const [yearsOfExperience, setYearsOfExperience] = useState('3.5');
 
-  // Employee Selectors
   const [examinerId, setExaminerId] = useState('EMP103');
   const [verifiedById, setVerifiedById] = useState('EMP102');
   const [mentorId, setMentorId] = useState('EMP101');
 
-  // Search Modals State
   const [activePickerField, setActivePickerField] = useState<
     'examiner' | 'verifiedBy' | 'mentor' | null
   >(null);
@@ -190,20 +226,13 @@ export function SkillsSection({ value: _value, onChange: _onChange }: SkillsSect
 
   const [editingId, setEditingId] = useState<string | null>(null);
 
-  // AUTOMATION: Handle Skill Selection -> Auto suggest Skill Type
-  const handleSkillChange = (value: string) => {
-    setSelectedSkill(value);
-    if (value === 'Other') {
-      setSkillType('Other');
-      return;
-    }
-    const match = SKILL_MASTER.find((s) => s.name === value);
-    if (match) {
-      setSkillType(match.defaultType);
-    }
-  };
+  const config = useRegistrationConfig();
 
-  // AUTOMATION: Handle Level Type change -> Update Level options
+  const skillFields = useMemo(() => {
+    const fields = config.fields.filter((f) => f.section === 'skills' && f.enabled);
+    return [...fields].sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
+  }, [config.fields]);
+
   const handleLevelTypeChange = (
     newLevelType: 'Beginner' | 'Intermediate' | 'Advanced' | 'Expert',
   ) => {
@@ -241,13 +270,12 @@ export function SkillsSection({ value: _value, onChange: _onChange }: SkillsSect
     };
 
     if (editingId) {
-      setSkillsList((prev) => prev.map((item) => (item.id === editingId ? entry : item)));
+      commitSkills(skillsList.map((item) => (item.id === editingId ? entry : item)));
       setEditingId(null);
     } else {
-      setSkillsList((prev) => [...prev, entry]);
+      commitSkills([...skillsList, entry]);
     }
 
-    // Reset Form for next entry
     setSelectedSkill('React.js');
     setSkillType('Technical');
     setLevelType('Intermediate');
@@ -274,7 +302,7 @@ export function SkillsSection({ value: _value, onChange: _onChange }: SkillsSect
   };
 
   const handleRemoveSkill = (id: string) => {
-    setSkillsList((prev) => prev.filter((item) => item.id !== id));
+    commitSkills(skillsList.filter((item) => item.id !== id));
   };
 
   const getSelectedEmployee = (id: string) => {
@@ -296,31 +324,179 @@ export function SkillsSection({ value: _value, onChange: _onChange }: SkillsSect
     setSearchFilter('');
   };
 
-  const skillOptions = [
-    ...SKILL_MASTER.map((s) => ({ value: s.name, label: `${s.name} (${s.defaultType})` })),
-    { value: 'Other', label: 'Other / Add New Skill' },
-  ];
-
-  const skillTypeOptions = [
-    { value: 'Technical', label: 'Technical' },
-    { value: 'Functional', label: 'Functional' },
-    { value: 'Soft Skill', label: 'Soft Skill' },
-    { value: 'Language', label: 'Language' },
-    { value: 'Professional', label: 'Professional' },
-    { value: 'Other', label: 'Other' },
-  ];
-
-  const levelTypeOptions = [
-    { value: 'Beginner', label: 'Beginner' },
-    { value: 'Intermediate', label: 'Intermediate' },
-    { value: 'Advanced', label: 'Advanced' },
-    { value: 'Expert', label: 'Expert' },
-  ];
-
   const currentLevelOptions = (LEVEL_OPTIONS_BY_TYPE[levelType] || []).map((lvl) => ({
     value: lvl,
     label: lvl,
   }));
+
+  const renderField = (field: RegistrationFieldConfig) => {
+    const key = field.key;
+    const catalogOptions = Array.isArray(field.config?.options)
+      ? (field.config.options as Array<{ value: string; label: string }>)
+      : undefined;
+
+    switch (key) {
+      case 'skills.skillName': {
+        const options = [
+          ...(catalogOptions ??
+            SKILL_MASTER.map((s) => ({ value: s.name, label: `${s.name} (${s.defaultType})` }))),
+          { value: 'Other', label: 'Other / Add New Skill' },
+        ];
+        return (
+          <RegistrationField key={key} fieldKey={key} value={selectedSkill}>
+            <Stack gap="xs">
+              <Select
+                options={options}
+                value={selectedSkill}
+                onChange={(e) => setSelectedSkill(e.target.value)}
+              />
+              {selectedSkill === 'Other' && (
+                <Input
+                  type="text"
+                  placeholder="Enter Skill"
+                  value={customSkillName}
+                  onChange={(e) => setCustomSkillName(e.target.value)}
+                />
+              )}
+            </Stack>
+          </RegistrationField>
+        );
+      }
+      case 'skills.skillType': {
+        const options = [
+          ...(catalogOptions ?? [
+            { value: 'Technical', label: 'Technical' },
+            { value: 'Functional', label: 'Functional' },
+            { value: 'Soft Skill', label: 'Soft Skill' },
+            { value: 'Language', label: 'Language' },
+            { value: 'Professional', label: 'Professional' },
+          ]),
+          { value: 'Other', label: 'Other' },
+        ];
+        return (
+          <RegistrationField key={key} fieldKey={key} value={skillType}>
+            <Stack gap="xs">
+              <Select
+                options={options}
+                value={skillType}
+                onChange={(e) => setSkillType(e.target.value as SkillEntry['skillType'])}
+              />
+              {skillType === 'Other' && (
+                <Input
+                  type="text"
+                  placeholder="Enter Skill Type"
+                  value={customSkillType}
+                  onChange={(e) => setCustomSkillType(e.target.value)}
+                />
+              )}
+            </Stack>
+          </RegistrationField>
+        );
+      }
+      case 'skills.levelType':
+        return (
+          <RegistrationField key={key} fieldKey={key} value={levelType}>
+            <Select
+              options={
+                catalogOptions ?? [
+                  { value: 'Beginner', label: 'Beginner' },
+                  { value: 'Intermediate', label: 'Intermediate' },
+                  { value: 'Advanced', label: 'Advanced' },
+                  { value: 'Expert', label: 'Expert' },
+                ]
+              }
+              value={levelType}
+              onChange={(e) =>
+                handleLevelTypeChange(
+                  e.target.value as 'Beginner' | 'Intermediate' | 'Advanced' | 'Expert',
+                )
+              }
+            />
+          </RegistrationField>
+        );
+      case 'skills.level':
+        return (
+          <RegistrationField key={key} fieldKey={key} value={level}>
+            <Select
+              options={catalogOptions ?? currentLevelOptions}
+              value={level}
+              onChange={(e) => setLevel(e.target.value)}
+            />
+          </RegistrationField>
+        );
+      case 'skills.levelDate':
+        return (
+          <RegistrationField key={key} fieldKey={key} value={levelDate}>
+            <Input type="date" value={levelDate} onChange={(e) => setLevelDate(e.target.value)} />
+          </RegistrationField>
+        );
+      case 'skills.yearsOfExperience':
+        return (
+          <RegistrationField key={key} fieldKey={key} value={yearsOfExperience}>
+            <Input
+              type="number"
+              step="0.5"
+              min="0"
+              value={yearsOfExperience}
+              onChange={(e) => setYearsOfExperience(e.target.value)}
+            />
+          </RegistrationField>
+        );
+      case 'skills.examiner':
+        return (
+          <RegistrationField key={key} fieldKey={key} value={examinerId}>
+            <Inline gap="xs" align="center">
+              <Avatar initials={getSelectedEmployee(examinerId).initials} size="sm" />
+              <span>{getSelectedEmployee(examinerId).name}</span>
+              <Button
+                type="button"
+                variant="secondary"
+                size="sm"
+                onClick={() => setActivePickerField('examiner')}
+              >
+                Select
+              </Button>
+            </Inline>
+          </RegistrationField>
+        );
+      case 'skills.verifiedBy':
+        return (
+          <RegistrationField key={key} fieldKey={key} value={verifiedById}>
+            <Inline gap="xs" align="center">
+              <Avatar initials={getSelectedEmployee(verifiedById).initials} size="sm" />
+              <span>{getSelectedEmployee(verifiedById).name}</span>
+              <Button
+                type="button"
+                variant="secondary"
+                size="sm"
+                onClick={() => setActivePickerField('verifiedBy')}
+              >
+                Select
+              </Button>
+            </Inline>
+          </RegistrationField>
+        );
+      case 'skills.mentor':
+        return (
+          <RegistrationField key={key} fieldKey={key} value={mentorId}>
+            <Inline gap="xs" align="center">
+              <Avatar initials={getSelectedEmployee(mentorId).initials} size="sm" />
+              <span>{getSelectedEmployee(mentorId).name}</span>
+              <Button
+                type="button"
+                variant="secondary"
+                size="sm"
+                onClick={() => setActivePickerField('mentor')}
+              >
+                Select
+              </Button>
+            </Inline>
+          </RegistrationField>
+        );
+      default:
+        return null;
+    }
+  };
 
   return (
     <Stack gap="xl">
@@ -332,133 +508,7 @@ export function SkillsSection({ value: _value, onChange: _onChange }: SkillsSect
               <CardTitle>{editingId ? 'Edit Skill Entry' : 'Add New Skill Entry'}</CardTitle>
 
               <FormGrid columns={2} layout="horizontal" labelWidth="md">
-                {/* 1. Skill */}
-                <FormField label="Skill" required>
-                  <Stack gap="xs">
-                    <Select
-                      options={skillOptions}
-                      value={selectedSkill}
-                      onChange={(e) => handleSkillChange(e.target.value)}
-                    />
-                    {selectedSkill === 'Other' && (
-                      <Input
-                        type="text"
-                        placeholder="Enter Skill"
-                        value={customSkillName}
-                        onChange={(e) => setCustomSkillName(e.target.value)}
-                      />
-                    )}
-                  </Stack>
-                </FormField>
-
-                {/* 2. Skill Type */}
-                <FormField label="Skill Type" required>
-                  <Stack gap="xs">
-                    <Select
-                      options={skillTypeOptions}
-                      value={skillType}
-                      onChange={(e) => setSkillType(e.target.value as SkillEntry['skillType'])}
-                    />
-                    {skillType === 'Other' && (
-                      <Input
-                        type="text"
-                        placeholder="Enter Skill Type"
-                        value={customSkillType}
-                        onChange={(e) => setCustomSkillType(e.target.value)}
-                      />
-                    )}
-                  </Stack>
-                </FormField>
-
-                {/* 3. Level Type */}
-                <FormField label="Level Type" required>
-                  <Select
-                    options={levelTypeOptions}
-                    value={levelType}
-                    onChange={(e) =>
-                      handleLevelTypeChange(
-                        e.target.value as 'Beginner' | 'Intermediate' | 'Advanced' | 'Expert',
-                      )
-                    }
-                  />
-                </FormField>
-
-                {/* 4. Level */}
-                <FormField label="Level" required>
-                  <Select
-                    options={currentLevelOptions}
-                    value={level}
-                    onChange={(e) => setLevel(e.target.value)}
-                  />
-                </FormField>
-
-                {/* 5. Level Date */}
-                <FormField label="Level Date" required>
-                  <Input
-                    type="date"
-                    value={levelDate}
-                    onChange={(e) => setLevelDate(e.target.value)}
-                  />
-                </FormField>
-
-                {/* 6. Years of Experience */}
-                <FormField label="Experience" required>
-                  <Input
-                    type="number"
-                    step="0.5"
-                    min="0"
-                    value={yearsOfExperience}
-                    onChange={(e) => setYearsOfExperience(e.target.value)}
-                  />
-                </FormField>
-
-                {/* 7. Examiner */}
-                <FormField label="Examiner" required>
-                  <Inline gap="xs" align="center">
-                    <Avatar initials={getSelectedEmployee(examinerId).initials} size="sm" />
-                    <span>{getSelectedEmployee(examinerId).name}</span>
-                    <Button
-                      type="button"
-                      variant="secondary"
-                      size="sm"
-                      onClick={() => setActivePickerField('examiner')}
-                    >
-                      Select
-                    </Button>
-                  </Inline>
-                </FormField>
-
-                {/* 8. Verified By */}
-                <FormField label="Verified By" required>
-                  <Inline gap="xs" align="center">
-                    <Avatar initials={getSelectedEmployee(verifiedById).initials} size="sm" />
-                    <span>{getSelectedEmployee(verifiedById).name}</span>
-                    <Button
-                      type="button"
-                      variant="secondary"
-                      size="sm"
-                      onClick={() => setActivePickerField('verifiedBy')}
-                    >
-                      Select
-                    </Button>
-                  </Inline>
-                </FormField>
-
-                {/* 9. Mentor */}
-                <FormField label="Mentor" required>
-                  <Inline gap="xs" align="center">
-                    <Avatar initials={getSelectedEmployee(mentorId).initials} size="sm" />
-                    <span>{getSelectedEmployee(mentorId).name}</span>
-                    <Button
-                      type="button"
-                      variant="secondary"
-                      size="sm"
-                      onClick={() => setActivePickerField('mentor')}
-                    >
-                      Select
-                    </Button>
-                  </Inline>
-                </FormField>
+                {skillFields.map((field) => renderField(field))}
               </FormGrid>
 
               <Inline gap="sm">

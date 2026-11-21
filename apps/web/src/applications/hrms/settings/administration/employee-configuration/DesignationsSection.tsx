@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, useCallback, type FormEvent } from 'react';
+import { useState, useEffect, useMemo, useCallback, useRef, type FormEvent } from 'react';
 import {
   Alert,
   Badge,
@@ -69,6 +69,23 @@ export function DesignationsSection({
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<'all' | 'active' | 'inactive'>('all');
   const [deptFilter, setDeptFilter] = useState<string>('all');
+  const [isFilterOpen, setIsFilterOpen] = useState(false);
+  const filterPopoverRef = useRef<HTMLDivElement>(null);
+  const hasActiveFilters = statusFilter !== 'all' || deptFilter !== 'all';
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (filterPopoverRef.current && !filterPopoverRef.current.contains(event.target as Node)) {
+        setIsFilterOpen(false);
+      }
+    }
+    if (isFilterOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [isFilterOpen]);
 
   // Modal / Form state
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -282,36 +299,24 @@ export function DesignationsSection({
   return (
     <Page maxWidth="full" gap="md">
       <Stack gap="lg" align="stretch">
-        {/* Navigation Breadcrumb Toolbar */}
-        <Toolbar align="center">
-          <div className="bezent-toolbar__right">
-            <Inline gap="xs" align="center">
-              {onBack && (
-                <Button variant="ghost" size="sm" onClick={onBack}>
-                  <BezentIcon name="arrow_back" size={16} />
-                  Settings
-                </Button>
-              )}
-              <span>Settings</span>
-              <span>/</span>
-              <span>Organization</span>
-              <span>/</span>
-              <strong>Designations</strong>
-            </Inline>
-          </div>
-        </Toolbar>
+        {/* Navigation Back (if onBack provided) */}
+        {onBack && (
+          <Toolbar align="center">
+            <Button variant="ghost" size="sm" onClick={onBack}>
+              <BezentIcon name="arrow_back" size={16} />
+              Back
+            </Button>
+          </Toolbar>
+        )}
 
         {/* Page Header */}
         <PageHeader
           title="Designations"
-          subtitle="Define organizational job titles, company-wide roles, and department-specific designations."
-          actions={
-            canManage ? (
-              <Button variant="primary" onClick={openAddModal}>
-                <BezentIcon name="add" size={16} />
-                Add Designation
-              </Button>
-            ) : undefined
+          subtitle={
+            <span className="bezent-sr-only">
+              Define organizational job titles, company-wide roles, and department-specific
+              designations.
+            </span>
           }
         />
 
@@ -338,19 +343,67 @@ export function DesignationsSection({
           </Alert>
         )}
 
-        {/* Filters Toolbar */}
-        <Card variant="flat" padding="md">
-          <CardBody>
-            <Inline gap="md" align="center" wrap justify="between">
-              <Inline gap="sm" align="center" wrap>
-                <SearchInput
-                  placeholder="Search designations..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  onClear={() => setSearchQuery('')}
-                />
+        {/* Compact Search & Filter Toolbar with Dropdown Popover */}
+        <div className="bezent-settings-search-filter-wrapper">
+          <div className="bezent-settings-search-filter-bar" ref={filterPopoverRef}>
+            <div className="bezent-settings-search-input-box">
+              <SearchInput
+                placeholder="Search designations..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                onClear={() => setSearchQuery('')}
+              />
+              <button
+                type="button"
+                className={`bezent-settings-filter-btn ${
+                  isFilterOpen ? 'bezent-settings-filter-btn--open' : ''
+                } ${hasActiveFilters ? 'bezent-settings-filter-btn--active' : ''}`}
+                onClick={() => setIsFilterOpen(!isFilterOpen)}
+                aria-label="Toggle filters"
+                title="Filter by Status and Scope"
+              >
+                <BezentIcon name="filter" size={16} />
+                {hasActiveFilters && <span className="bezent-settings-filter-dot" />}
+              </button>
+              {canManage && (
+                <Button
+                  variant="primary"
+                  size="sm"
+                  className="bezent-settings-add-btn"
+                  aria-label="Add Designation"
+                  title="Add Designation"
+                  onClick={openAddModal}
+                >
+                  <BezentIcon name="add" size={16} />
+                  <span className="bezent-sr-only">Add Designation</span>
+                </Button>
+              )}
+            </div>
 
+            {/* Floating Filter Popover Dropdown (Status & Scopes) */}
+            <div
+              className={`bezent-settings-filter-popover ${
+                isFilterOpen ? 'bezent-settings-filter-popover--open' : ''
+              }`}
+            >
+              <div className="bezent-settings-filter-popover__header">
+                <span className="bezent-settings-filter-popover__title">Filter Designations</span>
+                {hasActiveFilters && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => {
+                      setStatusFilter('all');
+                      setDeptFilter('all');
+                    }}
+                  >
+                    Reset
+                  </Button>
+                )}
+              </div>
+              <Stack gap="sm">
                 <Select
+                  label="Status"
                   aria-label="Filter by Status"
                   value={statusFilter}
                   onChange={(e) => setStatusFilter(e.target.value as 'all' | 'active' | 'inactive')}
@@ -362,6 +415,7 @@ export function DesignationsSection({
                 />
 
                 <Select
+                  label="Scope / Department"
                   aria-label="Filter by Scope or Department"
                   value={deptFilter}
                   onChange={(e) => setDeptFilter(e.target.value)}
@@ -374,20 +428,16 @@ export function DesignationsSection({
                     })),
                   ]}
                 />
-              </Inline>
+              </Stack>
+            </div>
+          </div>
 
-              <Inline gap="xs" align="center" wrap>
-                <Badge variant="neutral">Total: {counts.total}</Badge>
-                <Badge variant="success">Active: {counts.active}</Badge>
-                {counts.inactive > 0 && (
-                  <Badge variant="warning">Inactive: {counts.inactive}</Badge>
-                )}
-                <Badge variant="neutral">Company-wide: {counts.companyWide}</Badge>
-                <Badge variant="neutral">Department-specific: {counts.deptSpecific}</Badge>
-              </Inline>
-            </Inline>
-          </CardBody>
-        </Card>
+          <Inline gap="xs" align="center">
+            <Badge variant="neutral">Total: {counts.total}</Badge>
+            <Badge variant="success">Active: {counts.active}</Badge>
+            {counts.inactive > 0 && <Badge variant="warning">Inactive: {counts.inactive}</Badge>}
+          </Inline>
+        </div>
 
         {/* Designations Table or Empty/Loading State */}
         {loading ? (
@@ -454,26 +504,41 @@ export function DesignationsSection({
                   <TableCell align="right">
                     {canManage && (
                       <Inline gap="xs" justify="end">
-                        <Button variant="secondary" size="sm" onClick={() => openEditModal(desig)}>
+                        <Button
+                          variant="secondary"
+                          size="sm"
+                          className="bezent-settings-row-action-btn"
+                          aria-label={`Edit ${desig.name}`}
+                          title="Edit Designation"
+                          onClick={() => openEditModal(desig)}
+                        >
                           <BezentIcon name="edit" size={14} />
-                          Edit
+                          <span className="bezent-sr-only">Edit</span>
                         </Button>
 
                         {desig.status === 'active' ? (
                           <Button
                             variant="secondary"
                             size="sm"
+                            className="bezent-settings-row-action-btn bezent-settings-row-action-btn--danger"
+                            aria-label={`Deactivate ${desig.name}`}
+                            title="Deactivate Designation"
                             onClick={() => setDeactivateTarget(desig)}
                           >
-                            Deactivate
+                            <BezentIcon name="block" size={14} />
+                            <span className="bezent-sr-only">Deactivate</span>
                           </Button>
                         ) : (
                           <Button
                             variant="secondary"
                             size="sm"
+                            className="bezent-settings-row-action-btn bezent-settings-row-action-btn--success"
+                            aria-label={`Reactivate ${desig.name}`}
+                            title="Reactivate Designation"
                             onClick={() => handleReactivate(desig)}
                           >
-                            Reactivate
+                            <BezentIcon name="check" size={14} />
+                            <span className="bezent-sr-only">Reactivate</span>
                           </Button>
                         )}
                       </Inline>

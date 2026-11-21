@@ -1,7 +1,16 @@
 import type { ReactNode } from 'react';
-import { Avatar, Badge, Button, Inline, Stack, Tabs } from '../../../../design-system/components';
+import {
+  Avatar,
+  Badge,
+  Button,
+  IconButton,
+  Inline,
+  Section,
+  Stack,
+} from '../../../../design-system/components';
 import { BezentIcon } from '../../../../design-system/icons';
 import type { EmployeeProfile } from '../api/employeesApi';
+import type { EditableSectionType } from './ProfileSectionInlineForms';
 import {
   EMPLOYMENT_STATUS_LABELS,
   employmentStatusVariant,
@@ -70,6 +79,8 @@ export interface EmployeeProfileViewProps {
   /** Edit profile action callback (permission checked by caller) */
   onEditProfile?: () => void;
   canEdit?: boolean;
+  onEditSection?: (section: EditableSectionType) => void;
+  onReload?: () => void;
   /** Active or selected avatar ID */
   avatarId?: string;
   /** Optional callback fired when avatar edit/selection is clicked */
@@ -101,6 +112,8 @@ export function EmployeeProfileView({
   onNavigateWorkflow = () => {},
   onEditProfile,
   canEdit = false,
+  onEditSection,
+  onReload,
   avatarId,
   onOpenAvatarPicker,
   documents = [],
@@ -114,52 +127,21 @@ export function EmployeeProfileView({
   const avatarColor = getAvatarColor(employee.id || employee.employeeNumber);
   const resolvedAvatarId = avatarId ?? getEmployeeAvatarId(employee.id || employee.employeeNumber);
 
-  // Normalize legacy tab query parameter mappings
-  const effectiveTab: ProfileTabId =
-    activeTab === 'overview' ? 'personal' : activeTab === 'emergency' ? 'contact' : activeTab;
-
   return (
     <Stack gap="lg">
-      {/* Top Breadcrumb & Action Toolbar */}
-      <Inline justify="between" align="center">
-        <Button
-          variant="text"
-          size="sm"
-          leftIcon={<BezentIcon name="arrowLeft" size={14} />}
-          onClick={onBack}
-        >
-          Employees
-        </Button>
-
-        <Inline gap="sm" align="center">
-          {onOpenAvatarPicker && (
-            <Button
-              variant="secondary"
-              size="md"
-              leftIcon={<BezentIcon name="user" size={15} />}
-              onClick={onOpenAvatarPicker}
-            >
-              Change Avatar
-            </Button>
-          )}
-
-          {canEdit && onEditProfile && (
-            <Button
-              variant="primary"
-              size="md"
-              leftIcon={<BezentIcon name="edit" size={15} />}
-              onClick={onEditProfile}
-            >
-              Edit Profile
-            </Button>
-          )}
-        </Inline>
-      </Inline>
-
       {/* Hero Identity Header Card matching approved Workforce UI */}
       <div className="bezent-profile-header-card">
         <div className="bezent-profile-identity-row">
           <div className="bezent-profile-identity-left">
+            <IconButton
+              label="Back to Employees"
+              variant="ghost"
+              onClick={onBack}
+              aria-label="Back to Employees"
+            >
+              <BezentIcon name="arrowLeft" size={20} />
+            </IconButton>
+
             {onOpenAvatarPicker ? (
               <button
                 type="button"
@@ -241,62 +223,99 @@ export function EmployeeProfileView({
         </div>
       </div>
 
-      {/* 8-Section Navigation Tabs */}
-      <Tabs
-        activeId={effectiveTab}
-        onChange={(id) => onTabChange(id as ProfileTabId)}
-        items={PROFILE_TABS.map((tab) => ({ id: tab.id, label: tab.label }))}
-      />
-
-      {/* Section Content Panels */}
-      {activeTab === 'overview' && (
+      {activeTab === 'overview' ? (
         <ProfileOverview employee={employee} onOpenEmployee={onOpenEmployee} />
+      ) : (
+        <>
+          {/* 1. Personal Details */}
+          <div id="sec-personal">
+            <CanonicalPersonalSection
+              profile={profile}
+              canEdit={canEdit}
+              onEditSection={onEditSection}
+              includeContact={false}
+              onReload={onReload}
+            />
+          </div>
+
+          {/* 2. Contact & Addresses */}
+          <div id="sec-contact">
+            <ContactSection
+              profile={profile}
+              canEdit={canEdit}
+              onEditSection={onEditSection}
+              includeEmergency={false}
+              onReload={onReload}
+            />
+          </div>
+
+          {/* 3. Employment Status & Terms */}
+          <div id="sec-employment">
+            <EmploymentSection employee={employee} onNavigateWorkflow={onNavigateWorkflow} />
+          </div>
+
+          {/* 4. Position & Placement */}
+          <div id="sec-organization">
+            <OrganizationSection
+              employee={employee}
+              onOpenEmployee={onOpenEmployee}
+              onNavigateWorkflow={onNavigateWorkflow}
+            />
+          </div>
+
+          {/* 5. Emergency Contacts */}
+          <div id="sec-emergency">
+            <EmergencyContactsSection
+              contacts={profile.emergencyContacts}
+              canEdit={canEdit}
+              onEditSection={onEditSection}
+              profile={profile}
+              onReload={onReload}
+            />
+          </div>
+
+          {/* 6. Salary & Bank Details */}
+          <div id="sec-payroll">
+            <PayrollSection
+              profile={profile}
+              canEdit={canEdit}
+              onEditSection={onEditSection}
+              onReload={onReload}
+            />
+          </div>
+
+          {/* 7. Documents */}
+          <div id="sec-documents">
+            <DocumentsSection
+              documents={documents}
+              loading={documentsLoading}
+              error={documentsError}
+              onViewDocument={onViewDocument}
+              onRetry={onRetryDocuments}
+            />
+          </div>
+
+          {/* 8. Employment History */}
+          <div id="sec-history">{history}</div>
+
+          {/* 9. Accounts & System Access */}
+          <div id="sec-accounts">
+            <SystemAccountsSection employee={employee} />
+          </div>
+
+          {/* 10. Skills & Competencies */}
+          <div id="sec-skills">
+            <Section title="Skills & Competencies">
+              <SkillsSection skills={profile.skills} onOpenEmployee={onOpenEmployee} />
+            </Section>
+          </div>
+
+          {/* 11. Working Hours & Schedule */}
+          <div id="sec-work">
+            <WorkSection workSchedule={profile.workSchedule} />
+          </div>
+        </>
       )}
-
-      {effectiveTab === 'personal' && activeTab !== 'overview' && (
-        <CanonicalPersonalSection profile={profile} />
-      )}
-
-      {effectiveTab === 'employment' && (
-        <EmploymentSection employee={employee} onNavigateWorkflow={onNavigateWorkflow} />
-      )}
-
-      {effectiveTab === 'organization' && (
-        <OrganizationSection
-          employee={employee}
-          onOpenEmployee={onOpenEmployee}
-          onNavigateWorkflow={onNavigateWorkflow}
-        />
-      )}
-
-      {effectiveTab === 'contact' && <ContactSection profile={profile} />}
-
-      {effectiveTab === 'payroll' && <PayrollSection profile={profile} />}
-
-      {effectiveTab === 'documents' && (
-        <DocumentsSection
-          documents={documents}
-          loading={documentsLoading}
-          error={documentsError}
-          onViewDocument={onViewDocument}
-          onRetry={onRetryDocuments}
-        />
-      )}
-
-      {effectiveTab === 'accounts' && <SystemAccountsSection employee={employee} />}
-
-      {effectiveTab === 'history' && history}
-
-      {/* Deep Link Backward Compatibility Tabs */}
-      {activeTab === 'accounts' && <AccountsSection bankAccount={profile.bankAccount} />}
-      {activeTab === 'emergency' && (
-        <EmergencyContactsSection contacts={profile.emergencyContacts} />
-      )}
-      {activeTab === 'skills' && (
-        <SkillsSection skills={profile.skills} onOpenEmployee={onOpenEmployee} />
-      )}
-      {activeTab === 'work' && <WorkSection workSchedule={profile.workSchedule} />}
-      {activeTab === 'milestones' && <MilestonesSection employeeId={employee.id} />}
     </Stack>
   );
 }

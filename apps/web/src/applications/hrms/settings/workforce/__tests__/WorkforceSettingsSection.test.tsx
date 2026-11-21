@@ -1,7 +1,8 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { renderToStaticMarkup } from 'react-dom/server';
-import { WorkforceSettingsSection } from '../WorkforceSettingsSection';
+import { WorkforceSettingsSection, WORKFORCE_PRIMARY_TABS } from '../WorkforceSettingsSection';
 import { GeneralNumberingTab } from '../tabs/GeneralNumberingTab';
+import { FormsOnboardingTab } from '../tabs/FormsOnboardingTab';
 import { ProbationConfirmationTab } from '../tabs/ProbationConfirmationTab';
 import { TransfersLifecycleTab } from '../tabs/TransfersLifecycleTab';
 import { OffboardingClearanceTab } from '../tabs/OffboardingClearanceTab';
@@ -136,6 +137,14 @@ describe('Workforce Settings Canonical 7 Tabs UI', () => {
     expect(html).toContain('Loading Workforce Settings...');
   });
 
+  it('WorkforceSettingsSection defines clean text-only primary tabs without icons', () => {
+    expect(WORKFORCE_PRIMARY_TABS).toEqual([
+      { id: 'setup', label: 'Setup & Hierarchy' },
+      { id: 'forms-onboarding', label: 'Forms & Onboarding' },
+      { id: 'lifecycle', label: 'Employee Lifecycle' },
+    ]);
+  });
+
   it('Tab 1: GeneralNumberingTab renders auto-numbering live preview and employment types', () => {
     const html = renderToStaticMarkup(
       <GeneralNumberingTab
@@ -177,6 +186,26 @@ describe('Workforce Settings Canonical 7 Tabs UI', () => {
     expect(html).toContain('Require Dual-Manager Approval');
     expect(html).toContain('Auto-Reassign Attendance Shifts');
     expect(html).toContain('Auto-Reassign Leave Approver');
+  });
+
+  it('Tab 2: FormsOnboardingTab renders Phase 1 single-page layout with all 7 configuration sections', () => {
+    const html = renderToStaticMarkup(<FormsOnboardingTab />);
+
+    // Page Heading
+    expect(html).toContain('Forms &amp; Onboarding');
+
+    // Section 1: Candidate Intake Form (Full width)
+    expect(html).toContain('Candidate Intake Form');
+    expect(html).toContain('bezent-forms-onboarding-card--full');
+
+    // Sections 2-7 in balanced grid
+    expect(html).toContain('Pipeline Stages');
+    expect(html).toContain('Checklist Templates');
+    expect(html).toContain('Required Documents');
+    expect(html).toContain('Employee Conversion');
+    expect(html).toContain('Notifications &amp; Reminders');
+    expect(html).toContain('General Settings');
+    expect(html).toContain('bezent-forms-onboarding-grid');
   });
 
   it('Tab 7: OffboardingClearanceTab renders notice matrix and department clearance items', () => {

@@ -2,10 +2,7 @@ import { useState, type ButtonHTMLAttributes, type ReactNode } from 'react';
 import { Tooltip, type TooltipDirection } from '../Tooltip';
 import './IconButton.css';
 
-export interface IconButtonProps extends Omit<
-  ButtonHTMLAttributes<HTMLButtonElement>,
-  'className' | 'children'
-> {
+export interface IconButtonProps extends Omit<ButtonHTMLAttributes<HTMLButtonElement>, 'children'> {
   /** Icon content — typically a `<BezentIcon>`, but not required to be. */
   children: ReactNode;
   /**
@@ -22,6 +19,7 @@ export interface IconButtonProps extends Omit<
    * `solid`: 34px brand-filled control (old Quick Create "+" button).
    */
   variant?: 'ghost' | 'solid';
+  className?: string;
 }
 
 /**
@@ -41,6 +39,7 @@ export function IconButton({
   active = false,
   tooltipDirection = 'down',
   variant = 'ghost',
+  className = '',
   onMouseEnter,
   onMouseLeave,
   ...rest
@@ -48,7 +47,7 @@ export function IconButton({
   const [hovered, setHovered] = useState(false);
 
   return (
-    <div className="bezent-icon-btn-anchor">
+    <div className={`bezent-icon-btn-anchor ${className}`.trim()}>
       <button
         type="button"
         aria-label={label}
@@ -65,6 +64,7 @@ export function IconButton({
         {...rest}
       >
         {children}
+        <span className="bezent-sr-only">{label}</span>
       </button>
       {hovered && !active && <Tooltip label={label} direction={tooltipDirection} />}
     </div>

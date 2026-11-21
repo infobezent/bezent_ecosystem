@@ -33,18 +33,18 @@ function renderWizard(props?: {
 
 describe('Employee Registration Wizard — Navigation & Identity Context', () => {
   describe('1. Canonical Step Sequence & Ordering', () => {
-    it('defines Personal Information as Chapter 01 and General as Chapter 02', () => {
-      expect(REGISTRATION_CHAPTERS[0]?.id).toBe('personal');
+    it('defines General as Chapter 01 and Personal Information as Chapter 02', () => {
+      expect(REGISTRATION_CHAPTERS[0]?.id).toBe('general');
       expect(REGISTRATION_CHAPTERS[0]?.stepNumber).toBe('01');
-      expect(REGISTRATION_CHAPTERS[0]?.label).toBe('Personal Information');
+      expect(REGISTRATION_CHAPTERS[0]?.label).toBe('General');
 
-      expect(REGISTRATION_CHAPTERS[1]?.id).toBe('general');
+      expect(REGISTRATION_CHAPTERS[1]?.id).toBe('personal');
       expect(REGISTRATION_CHAPTERS[1]?.stepNumber).toBe('02');
-      expect(REGISTRATION_CHAPTERS[1]?.label).toBe('General');
+      expect(REGISTRATION_CHAPTERS[1]?.label).toBe('Personal Information');
 
       expect(REGISTRATION_CHAPTERS[2]?.id).toBe('onboarding');
       expect(REGISTRATION_CHAPTERS[2]?.stepNumber).toBe('03');
-      expect(REGISTRATION_CHAPTERS[2]?.label).toBe('Administration');
+      expect(REGISTRATION_CHAPTERS[2]?.label).toBe('Onboarding');
 
       expect(REGISTRATION_CHAPTERS[3]?.id).toBe('skills');
       expect(REGISTRATION_CHAPTERS[4]?.id).toBe('emergency');
@@ -59,8 +59,8 @@ describe('Employee Registration Wizard — Navigation & Identity Context', () =>
     it('orders REGISTRATION_SECTIONS canonically matching the 10-step journey', () => {
       const sectionIds = REGISTRATION_SECTIONS.map((s) => s.id);
       expect(sectionIds).toEqual([
-        'personal',
         'general',
+        'personal',
         'onboarding',
         'skills',
         'emergency',
@@ -74,24 +74,24 @@ describe('Employee Registration Wizard — Navigation & Identity Context', () =>
   });
 
   describe('2. Initial Step Mount & Back Button Status', () => {
-    it('defaults to Personal Information (Step 01) on new registration with Back button disabled', () => {
+    it('defaults to General (Step 01) on new registration with Back button disabled', () => {
       const html = renderWizard();
 
       // First step is selected in carousel
-      expect(html).toContain('id="focus-chapter-personal"');
-      expect(html).toMatch(/id="focus-chapter-personal"[^>]*aria-selected="true"/);
+      expect(html).toContain('id="focus-chapter-general"');
+      expect(html).toMatch(/id="focus-chapter-general"[^>]*aria-selected="true"/);
 
       // Back button is disabled on the first step
       expect(html).toMatch(/<button[^>]*disabled=""[^>]*>[\s\S]*?← Back/);
     });
 
-    it('renders Back button enabled on subsequent steps (General, Administration, Review)', () => {
-      // General step (Step 02)
-      const generalHtml = renderWizard({
-        initialEntries: ['/hrms/administration/onboarding/registration?chapter=general'],
+    it('renders Back button enabled on subsequent steps (Personal, Administration, Review)', () => {
+      // Personal Information step (Step 02)
+      const personalHtml = renderWizard({
+        initialEntries: ['/hrms/administration/onboarding/registration?chapter=personal'],
       });
-      expect(generalHtml).toMatch(/id="focus-chapter-general"[^>]*aria-selected="true"/);
-      expect(generalHtml).not.toMatch(/<button[^>]*disabled=""[^>]*>\s*← Back/);
+      expect(personalHtml).toMatch(/id="focus-chapter-personal"[^>]*aria-selected="true"/);
+      expect(personalHtml).not.toMatch(/<button[^>]*disabled=""[^>]*>\s*← Back/);
 
       // Administration step (Step 03)
       const adminHtml = renderWizard({
@@ -113,7 +113,7 @@ describe('Employee Registration Wizard — Navigation & Identity Context', () =>
     const steps = [
       { id: 'personal', label: 'Personal Information' },
       { id: 'general', label: 'General' },
-      { id: 'onboarding', label: 'Administration' },
+      { id: 'onboarding', label: 'Onboarding' },
       { id: 'skills', label: 'Skills' },
       { id: 'emergency', label: 'Emergency Contact' },
       { id: 'accounts', label: 'Accounts' },
@@ -176,7 +176,7 @@ describe('Employee Registration Wizard — Navigation & Identity Context', () =>
       // Stepper labels remain exactly canonical step names
       expect(html).toContain('Personal Information');
       expect(html).toContain('General');
-      expect(html).toContain('Administration');
+      expect(html).toContain('Onboarding');
       expect(html).toContain('Skills');
       expect(html).toContain('Emergency Contact');
       expect(html).toContain('Accounts');
