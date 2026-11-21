@@ -35,10 +35,10 @@ export function canItemOpenFlyout(item: ShellNavItem): boolean {
 
 /**
  * Canonical layout tokens from design-system/tokens/layout.css:
- * --shell-nav-item-height: 68px
- * --shell-nav-item-gap: 2px
+ * --shell-nav-item-height: 58px
+ * --shell-nav-item-gap: 8px
  */
-const NAV_ITEM_HEIGHT = 68;
+const NAV_ITEM_HEIGHT = 58;
 const NAV_ITEM_GAP = 2;
 const NAV_LIST_PADDING_BOTTOM = 8;
 

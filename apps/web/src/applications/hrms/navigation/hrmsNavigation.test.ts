@@ -71,12 +71,13 @@ describe('canonical HRMS navigation catalog', () => {
   it('freezes the primary sidebar order', () => {
     expect(destinations.filter((d) => d.sidebar).map((d) => d.id)).toEqual([
       'dashboard',
-      'workforce',
-      'recruitment',
       'attendance',
       'leave',
+      'recruitment',
+      'workforce',
       'payroll',
       'performance',
+      'learning',
     ]);
   });
 

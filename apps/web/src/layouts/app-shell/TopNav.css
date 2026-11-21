@@ -74,6 +74,20 @@
   transition: color 0.15s ease;
 }
 
+.top-nav__brand-name {
+  font-family: var(--font-family-base);
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: -0.035em;
+  color: var(--text-brand, var(--text-primary, #0f172a));
+  line-height: 1;
+  user-select: none;
+  white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+  transition: color 0.15s ease;
+}
+
 /* ── Search slot ─────────────────────────────────────────────────────── */
 
 .top-nav__search-slot {
@@ -206,5 +220,9 @@
 }
 
 [data-theme='dark'] .top-nav__wordmark-svg {
+  color: #f8fafc;
+}
+
+[data-theme='dark'] .top-nav__brand-name {
   color: #f8fafc;
 }

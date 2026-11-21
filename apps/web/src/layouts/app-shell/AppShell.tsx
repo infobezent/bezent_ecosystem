@@ -18,6 +18,10 @@ export interface AppShellProps {
   onSubSelect?: (itemId: string, subId: string) => void;
   /** More launcher data; when omitted the sidebar has no More button. */
   launcher?: ShellLauncher;
+  /** Custom logo of the purchasing company / tenant. */
+  companyLogo?: string | null;
+  /** Custom name of the purchasing company / tenant. */
+  companyName?: string | null;
   /** Initials shown in the profile avatar. */
   userInitials: string;
   userName?: string;
@@ -74,6 +78,8 @@ export function AppShell({
   activeSubId,
   onSubSelect,
   launcher,
+  companyLogo,
+  companyName,
   userInitials,
   userName,
   userEmail,
@@ -131,6 +137,8 @@ export function AppShell({
         .join(' ')}
     >
       <TopNav
+        companyLogo={companyLogo}
+        companyName={companyName}
         userInitials={userInitials}
         userName={userName}
         userEmail={userEmail}

@@ -1,17 +1,6 @@
 /*
  * BEZENT LeftSidebar — source: old approved UI `LeftNav`/`ZohoRailBtn`
  * (`App.tsx` 621-1019) with `SIDEBAR_NAV_TOKENS` (now --shell-nav-* tokens).
- *
- * Refined under visual refinement specifications & Zoho People reference impact:
- * - Clean white sidebar background with subtle right border.
- * - Symmetrical vertical layout: squircle tile above text label.
- * - Squircle tile (40px x 40px, border-radius 11px):
- *   - Inactive: Deep midnight navy (#1b224c) with pure white icon.
- *   - Inactive Hover: Elevated lighter navy (#262f66) with translateY(-1px) & subtle shadow.
- *   - Active: Vivid electric blue (#0077ff) with white icon, glow shadow, and translateY(-1px).
- * - Standardized Material Symbols (20px) in pure white (#ffffff) for high contrast and punch.
- * - Centered labels with zero truncation: 11px font size, clean text wrap for long titles like "Performance".
- * - Seamless dark mode adaptation.
  */
 
 .left-sidebar {
@@ -23,9 +12,10 @@
   align-items: center;
   min-height: 0;
   padding: 8px 0 6px;
-  background: #ffffff;
+  background: var(--bg-sidebar, var(--bg-header));
   font-family: var(--font-family-base);
-  border-right: 1px solid var(--border-subtle, #f1f5f9);
+  /* No border-right: surface contrast between --bg-sidebar (#F6F8FC) and
+     --bg-surface (#FFF) provides the visual separation naturally. */
 }
 
 .left-sidebar__list {
@@ -36,8 +26,8 @@
   flex-direction: column;
   align-items: center;
   justify-content: flex-start;
-  gap: var(--shell-nav-item-gap, 2px);
-  padding: 6px 0 8px;
+  gap: var(--shell-nav-item-gap, 6px);
+  padding: 6px 0 12px;
   overflow-x: hidden;
   overflow-y: auto;
   scrollbar-width: none;
@@ -63,15 +53,15 @@
 
 .left-sidebar__item {
   width: var(--shell-nav-item-width, 78px);
-  max-width: calc(100% - 12px);
-  height: var(--shell-nav-item-height, 68px);
+  max-width: 100%;
+  height: 58px;
   box-sizing: border-box;
-  padding: 4px 2px 2px;
+  padding: 2px 2px;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 3px;
+  gap: 2px;
   flex-shrink: 0;
   border: none;
   border-radius: var(--radius-md, 8px);
@@ -82,15 +72,13 @@
   position: relative;
 }
 
-/* Suppress legacy absolute squircle ::before to allow clean unified item surface */
-.left-sidebar__item::before {
-  display: none;
-}
-
-/* ── Squircle Navigation Icon Tile Container ── */
+/* ── Selection & Hover Squircle Tile Container ────────────────────────
+   Directly applied to .bezent-nav-icon-box so the squircle background
+   and the icon glyph are in the identical DOM container, ensuring zero
+   vertical drift or misalignment across active, hover, and inactive states. */
 .left-sidebar .bezent-nav-icon-anchor {
-  width: 40px;
-  height: 40px;
+  width: var(--shell-nav-surface-size, 36px);
+  height: var(--shell-nav-surface-size, 36px);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -99,203 +87,213 @@
 }
 
 .left-sidebar .bezent-nav-icon-box {
-  width: 40px;
-  height: 40px;
-  border-radius: 11px;
+  width: var(--shell-nav-surface-size, 36px);
+  height: var(--shell-nav-surface-size, 36px);
+  border-radius: var(--radius-md, 8px);
   display: flex;
   align-items: center;
   justify-content: center;
   position: relative;
   flex-shrink: 0;
+  background: var(--nav-icon-bg, #eff1f4);
   transition:
-    background-color var(--motion-duration-nav-icon, 0.15s) cubic-bezier(0.4, 0, 0.2, 1),
-    transform var(--motion-duration-nav-icon, 0.15s) cubic-bezier(0.4, 0, 0.2, 1),
-    box-shadow var(--motion-duration-nav-icon, 0.15s) cubic-bezier(0.4, 0, 0.2, 1);
+    background-color var(--motion-duration-nav-icon, 0.15s) ease,
+    transform var(--motion-duration-nav-icon, 0.15s) ease;
 }
 
-/* 1. Inactive Squircle Tile: Deep Midnight Navy */
-.left-sidebar .bezent-nav-icon-box,
-.left-sidebar__item:not(.is-active) .bezent-nav-icon-box {
-  background: #1b224c !important;
-  box-shadow: 0 2px 5px rgba(15, 23, 42, 0.08);
+/* Suppress legacy absolute squircle ::before to eliminate multi-layer displacement */
+.left-sidebar__item::before {
+  display: none !important;
 }
 
-/* 2. Inactive Hover: Elevated Richer Navy with subtle lift */
-.left-sidebar__item:hover:not(.is-active):not(.is-current-page) .bezent-nav-icon-box {
-  background: #262f66 !important;
-  transform: translateY(-1px);
-  box-shadow: 0 4px 10px rgba(15, 23, 42, 0.16);
-}
-
-/* 3. Active Squircle Tile: Vivid Electric Blue with Glow */
+/* Active squircle tile (Solid) */
 .left-sidebar__item.is-active .bezent-nav-icon-box {
-  background: #0077ff !important;
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(0, 119, 255, 0.35);
+  background: var(--nav-selected, #c2e7ff) !important;
 }
 
 .left-sidebar__item.is-active:hover .bezent-nav-icon-box {
-  background: #006ee6 !important;
-  box-shadow: 0 4px 14px rgba(0, 119, 255, 0.45);
+  background: var(--nav-selected, #c2e7ff) !important;
 }
 
-/* ── Navigation Icon Inside Squircle: Always Crisp Pure White ── */
-.left-sidebar__item .bezent-material-icon {
-  font-size: 20px;
+/* Inactive hover squircle tile */
+.left-sidebar__item:hover:not(.is-active):not(.is-current-page) .bezent-nav-icon-box {
+  background: #e2e6eb !important;
+}
+
+/* Dimmed current-page indicator when More launcher takes active rail focus (BZ-03) */
+.left-sidebar__item.is-current-page .bezent-nav-icon-box {
+  background: transparent !important;
+}
+
+/* ── Centered Material Symbols Icon Inside Squircle ────────────────── */
+.left-sidebar .bezent-material-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
   width: 20px;
   height: 20px;
-  line-height: 20px;
-  color: #ffffff !important;
-  --icon-opsz-val: 24;
-  --icon-wght-val: 400 !important;
+  line-height: 1;
+  font-size: 20px;
+  /* Optical vertical centering: centers glyph within the 36px squircle */
+  transform: translateY(-1px);
+  color: var(--nav-icon-default, #1e293b);
+  --icon-fill-val: 0 !important;
   font-variation-settings:
-    'FILL' var(--icon-fill-val, 0),
-    'wght' 400,
+    'FILL' 0,
+    'wght' 500,
     'GRAD' 0,
-    'opsz' 24 !important;
+    'opsz' 20 !important;
   transition:
-    transform var(--motion-duration-icon, 0.15s) ease,
-    opacity var(--motion-duration-icon, 0.15s) ease;
+    color var(--motion-duration-icon, 0.15s) ease,
+    transform var(--motion-duration-icon, 0.15s) ease;
 }
 
-/* Active solid glyph fill */
+/* Ensure More horizontal dots are well-proportioned */
+.left-sidebar .bezent-material-icon[data-size='20'],
+.left-sidebar .bezent-material-icon[data-size='22'] {
+  --icon-opsz-val: 20;
+}
+
 .left-sidebar__item.is-active .bezent-material-icon {
+  color: var(--nav-icon-active, #001d3d);
   --icon-fill-val: 1 !important;
   font-variation-settings:
     'FILL' 1,
-    'wght' 400,
+    'wght' 500,
     'GRAD' 0,
-    'opsz' 24 !important;
+    'opsz' 20 !important;
 }
 
-/* Inactive outline glyph */
 .left-sidebar__item:not(.is-active) .bezent-material-icon {
+  color: var(--nav-icon-default, #1e293b);
   --icon-fill-val: 0 !important;
+  font-variation-settings:
+    'FILL' 0,
+    'wght' 500,
+    'GRAD' 0,
+    'opsz' 20 !important;
+}
+
+.left-sidebar__item:hover:not(.is-active) .bezent-material-icon {
+  color: #0f172a;
 }
 
 .left-sidebar__item:focus-visible {
-  outline: 2px solid var(--border-focus, #3b82f6);
+  outline: 2px solid var(--border-focus);
   outline-offset: -2px;
 }
 
-/* ── Typography and Zero-Truncation Label Area ── */
+/* ── Typography and Single-Line Clean Label Area ── */
 .left-sidebar__label-area {
   width: 100%;
   max-width: 100%;
-  min-height: 20px;
+  height: 14px;
   flex-shrink: 0;
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   justify-content: center;
-  overflow: visible;
-  padding: 0 2px;
+  overflow: hidden;
+  padding: 0 1px;
   box-sizing: border-box;
 }
 
 .left-sidebar__label {
-  width: 100%;
+  display: block;
   max-width: 100%;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
   overflow: hidden;
   text-overflow: ellipsis;
+  white-space: nowrap;
   font-family: var(--font-family-base);
   font-size: 11px;
-  font-weight: 500;
-  line-height: 12.5px;
+  font-weight: 550;
+  line-height: 14px;
   letter-spacing: -0.2px;
   text-align: center;
-  word-break: break-word;
-  overflow-wrap: break-word;
-  hyphens: auto;
-  color: var(--nav-label-default, #555e6d);
+  color: var(--nav-label-default, #1e293b);
   transition: color var(--motion-duration-icon, 0.15s) ease;
 }
 
 .left-sidebar__item:hover .left-sidebar__label {
-  color: #1e293b;
+  color: #000000;
 }
 
 .left-sidebar__item.is-active .left-sidebar__label {
-  font-weight: 600;
-  color: #0077ff;
+  font-weight: 700;
+  color: var(--nav-label-active, #000000);
 }
 
 /* Dimmed current-page indicator when More launcher takes active rail focus (BZ-03) */
 .left-sidebar__item.is-current-page {
   position: relative;
-  background: transparent !important;
 }
 
-.left-sidebar__item.is-current-page .bezent-nav-icon-box {
-  background: #1b224c !important;
+.left-sidebar__item.is-current-page .bezent-nav-icon-anchor {
   opacity: 0.75;
 }
 
 .left-sidebar__item.is-current-page .left-sidebar__label {
-  color: var(--text-secondary, #64748b);
+  color: var(--text-secondary);
   font-weight: 500;
-  opacity: 0.85;
+  opacity: 1;
+}
+
+/* When More launcher takes active rail focus, current-page item suppresses the selection squircle */
+.left-sidebar__item.is-current-page .bezent-nav-icon-box {
+  background: transparent !important;
 }
 
 .left-sidebar__more-dot {
   position: absolute;
-  top: -2px;
-  right: -2px;
-  width: 6px;
-  height: 6px;
+  top: 4px;
+  right: 4px;
+  width: 5px;
+  height: 5px;
   border-radius: 50%;
-  background: #0077ff;
-  box-shadow: 0 0 0 2px #ffffff;
+  background: var(--nav-icon-active);
   pointer-events: none;
 }
 
 .left-sidebar__badge-dot {
   position: absolute;
-  top: -2px;
-  right: -2px;
+  top: 1px;
+  right: 1px;
   width: 8px;
   height: 8px;
   border-radius: 50%;
-  background: #ef4444;
-  box-shadow: 0 0 0 2px #ffffff;
+  background: #b3261e;
+  box-shadow: 0 0 0 2px var(--app-canvas, #f6f8fc);
   pointer-events: none;
 }
 
 /* ── Dark Mode Navigation & Active State ─────────────────────────────── */
 
-[data-theme='dark'] .left-sidebar {
-  background: var(--bg-sidebar, #0a0f1d);
-  border-right-color: #1e293b;
+[data-theme='dark'] .left-sidebar .bezent-nav-icon-box {
+  background: rgba(255, 255, 255, 0.05);
 }
 
-[data-theme='dark'] .left-sidebar .bezent-nav-icon-box,
-[data-theme='dark'] .left-sidebar__item:not(.is-active) .bezent-nav-icon-box {
-  background: #141c38 !important;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
-}
-
-[data-theme='dark']
-  .left-sidebar__item:hover:not(.is-active):not(.is-current-page)
-  .bezent-nav-icon-box {
-  background: #1c274c !important;
-  border-color: rgba(255, 255, 255, 0.16);
+[data-theme='dark'] .left-sidebar__item:hover:not(.is-active):not(.is-current-page) .bezent-nav-icon-box {
+  background: rgba(22, 131, 255, 0.12) !important;
 }
 
 [data-theme='dark'] .left-sidebar__item.is-active .bezent-nav-icon-box {
-  background: #0077ff !important;
-  border: 1px solid rgba(255, 255, 255, 0.18);
-  box-shadow: 0 4px 14px rgba(0, 119, 255, 0.5);
+  background: var(--nav-selected, #0b254e) !important;
+  border: none;
+  box-shadow: none;
 }
 
 [data-theme='dark'] .left-sidebar__item.is-active:hover .bezent-nav-icon-box {
-  background: #006ee6 !important;
+  background: var(--nav-selected, #0b254e) !important;
 }
 
-[data-theme='dark'] .left-sidebar__item .bezent-material-icon {
-  color: #ffffff !important;
+[data-theme='dark'] .left-sidebar__item.is-active .bezent-material-icon {
+  color: #38bdf8 !important;
+  --icon-fill-val: 1 !important;
+  font-variation-settings:
+    'FILL' 1,
+    'wght' 500,
+    'GRAD' 0,
+    'opsz' 24 !important;
+  filter: none;
 }
 
 [data-theme='dark'] .left-sidebar__label {
@@ -303,20 +301,15 @@
 }
 
 [data-theme='dark'] .left-sidebar__item:hover .left-sidebar__label {
-  color: #f8fafc;
+  color: var(--nav-label-hover, #f8fafc);
 }
 
 [data-theme='dark'] .left-sidebar__item.is-active .left-sidebar__label {
-  color: #38bdf8;
-  font-weight: 600;
+  color: var(--nav-label-active, #ffffff);
+  font-weight: 650;
 }
 
 [data-theme='dark'] .left-sidebar__badge-dot {
   background: #ef4444;
-  box-shadow: 0 0 0 2px #0a0f1d;
-}
-
-[data-theme='dark'] .left-sidebar__more-dot {
-  background: #38bdf8;
-  box-shadow: 0 0 0 2px #0a0f1d;
+  box-shadow: 0 0 0 2px #020b1c;
 }

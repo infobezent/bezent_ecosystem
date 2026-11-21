@@ -24,6 +24,8 @@ export interface CompanyAccess {
   companyId: string;
   companyName: string;
   companyCode: string;
+  logoUrl?: string | null;
+  brandingMode?: 'own_logo' | 'tenant_logo' | 'initials';
   isMember: boolean;
   isPlatformOversight: boolean;
   isTenantAdmin?: boolean;

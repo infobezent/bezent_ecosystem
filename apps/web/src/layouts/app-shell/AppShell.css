@@ -25,7 +25,7 @@
 }
 
 .app-shell--rail-open .app-shell__workspace {
-  margin-right: 12px;
+  margin-right: 0;
 }
 
 /* Overlay utility drawer */
