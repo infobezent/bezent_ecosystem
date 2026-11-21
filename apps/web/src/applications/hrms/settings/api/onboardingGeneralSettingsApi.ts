@@ -25,10 +25,7 @@ export async function fetchGeneralConfig(): Promise<OnboardingGeneralSettingsCon
   const res = await authorizedFetch(
     `${appConfig.apiBaseUrl}/hrms/settings/onboarding/general-config`,
   );
-  return handleResponse<OnboardingGeneralSettingsConfig>(
-    res,
-    'Failed to fetch general settings',
-  );
+  return handleResponse<OnboardingGeneralSettingsConfig>(res, 'Failed to fetch general settings');
 }
 
 /**
@@ -45,10 +42,7 @@ export async function updateGeneralConfig(
       body: JSON.stringify(dto),
     },
   );
-  return handleResponse<OnboardingGeneralSettingsConfig>(
-    res,
-    'Failed to save general settings',
-  );
+  return handleResponse<OnboardingGeneralSettingsConfig>(res, 'Failed to save general settings');
 }
 
 /**
@@ -61,8 +55,5 @@ export async function resetGeneralConfig(): Promise<OnboardingGeneralSettingsCon
       method: 'POST',
     },
   );
-  return handleResponse<OnboardingGeneralSettingsConfig>(
-    res,
-    'Failed to reset general settings',
-  );
+  return handleResponse<OnboardingGeneralSettingsConfig>(res, 'Failed to reset general settings');
 }

@@ -474,7 +474,6 @@ export function JobLevelsGradesSection({
         {/* ==================================================== */}
         {activeMaster === 'job-levels' && (
           <Stack gap="md">
-
             {/* Error Message */}
             {errorJl && (
               <Alert variant="error">
@@ -606,7 +605,6 @@ export function JobLevelsGradesSection({
         {/* ==================================================== */}
         {activeMaster === 'grades' && (
           <Stack gap="md">
-
             {/* Error Message */}
             {errorGrd && (
               <Alert variant="error">

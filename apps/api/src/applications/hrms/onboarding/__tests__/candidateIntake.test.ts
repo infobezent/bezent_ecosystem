@@ -107,7 +107,12 @@ describe('Candidate Intake Form Engine & Service Tests', () => {
         metadata: {
           fieldRules: {
             'address.permanentAddress': [
-              { targetFieldKey: 'address.sameAsCurrent', operator: 'equals', value: true, action: 'hide' },
+              {
+                targetFieldKey: 'address.sameAsCurrent',
+                operator: 'equals',
+                value: true,
+                action: 'hide',
+              },
             ],
           },
         },

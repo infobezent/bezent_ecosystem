@@ -48,17 +48,8 @@ export const DEFAULT_GENERAL_CONFIG: OnboardingGeneralSettingsConfig = {
     ],
     assignedHrAccessScope: 'all_hr',
     managerVisibilityScope: 'assigned_reports_only',
-    documentAccessRoles: [
-      'super_admin',
-      'company_admin',
-      'hr_manager',
-      'hr_executive',
-    ],
-    roleBasedOnboardingActions: [
-      'super_admin',
-      'company_admin',
-      'hr_manager',
-    ],
+    documentAccessRoles: ['super_admin', 'company_admin', 'hr_manager', 'hr_executive'],
+    roleBasedOnboardingActions: ['super_admin', 'company_admin', 'hr_manager'],
   },
   workflow: {
     allowCandidateStageSkipping: false,
@@ -158,7 +149,9 @@ export function OnboardingGeneralSettingsManagement({
   };
 
   const handleResetToDefaults = async () => {
-    if (!window.confirm('Are you sure you want to reset all general settings to system defaults?')) {
+    if (
+      !window.confirm('Are you sure you want to reset all general settings to system defaults?')
+    ) {
       return;
     }
     try {
@@ -212,18 +205,13 @@ export function OnboardingGeneralSettingsManagement({
     >
       {/* 1. Header (Clean & Embedded-Aware) */}
       <div
-        className={`bezent-genpref-header ${
-          isEmbedded ? 'bezent-genpref-header--embedded' : ''
-        }`}
+        className={`bezent-genpref-header ${isEmbedded ? 'bezent-genpref-header--embedded' : ''}`}
       >
-        <div
-          className={`bezent-genpref-header-copy ${
-            isEmbedded ? 'bezent-sr-only' : ''
-          }`}
-        >
+        <div className={`bezent-genpref-header-copy ${isEmbedded ? 'bezent-sr-only' : ''}`}>
           <h2 className="bezent-genpref-header-title">General Settings</h2>
           <p className="bezent-genpref-header-sub">
-            Configure overarching onboarding preferences, access boundaries, stage workflow rules, and regional date/time formats.
+            Configure overarching onboarding preferences, access boundaries, stage workflow rules,
+            and regional date/time formats.
           </p>
         </div>
 
@@ -305,9 +293,12 @@ export function OnboardingGeneralSettingsManagement({
                 <span className="bezent-genpref-card__subtitle">
                   Defaults, registration permissions, and module status
                 </span>
-                <span className="bezent-genpref-summary-label">Default Pipeline &amp; Checklist</span>
+                <span className="bezent-genpref-summary-label">
+                  Default Pipeline &amp; Checklist
+                </span>
                 <span className="bezent-genpref-summary-val">
-                  {config.preferences.defaultPipelineId} • {config.preferences.defaultChecklistTemplateId}
+                  {config.preferences.defaultPipelineId} •{' '}
+                  {config.preferences.defaultChecklistTemplateId}
                 </span>
                 <span className="bezent-genpref-summary-label">Initial Status</span>
                 <span className="bezent-genpref-summary-val">
@@ -315,7 +306,10 @@ export function OnboardingGeneralSettingsManagement({
                 </span>
                 <span className="bezent-genpref-summary-label">Candidate Registration</span>
                 <span className="bezent-genpref-summary-val">
-                  Self-registration {config.preferences.candidateSelfRegistrationEnabled ? 'enabled' : 'disabled'} • HR manual creation {config.preferences.hrManualCreationEnabled ? 'enabled' : 'disabled'}
+                  Self-registration{' '}
+                  {config.preferences.candidateSelfRegistrationEnabled ? 'enabled' : 'disabled'} •
+                  HR manual creation{' '}
+                  {config.preferences.hrManualCreationEnabled ? 'enabled' : 'disabled'}
                 </span>
                 <span className="bezent-genpref-summary-label">Profile Editing</span>
                 <span className="bezent-genpref-summary-val">
@@ -323,11 +317,7 @@ export function OnboardingGeneralSettingsManagement({
                     ? 'Allowed after submission'
                     : 'Locked upon submission'}
                 </span>
-                <Button
-                  variant="secondary"
-                  size="sm"
-                  onClick={() => setPreferencesModalOpen(true)}
-                >
+                <Button variant="secondary" size="sm" onClick={() => setPreferencesModalOpen(true)}>
                   Configure
                 </Button>
               </div>
@@ -383,18 +373,16 @@ export function OnboardingGeneralSettingsManagement({
                   {config.access.managerVisibilityScope === 'assigned_reports_only'
                     ? 'Direct & indirect reports only'
                     : config.access.managerVisibilityScope === 'department_wide'
-                    ? 'Department-wide candidates'
-                    : 'All organization candidates'}
+                      ? 'Department-wide candidates'
+                      : 'All organization candidates'}
                 </span>
                 <span className="bezent-genpref-summary-label">Role Permissions</span>
                 <span className="bezent-genpref-summary-val">
-                  {config.access.hrOnboardingAccessRoles.length} HR roles • {config.access.documentAccessRoles.length} document viewers • {config.access.roleBasedOnboardingActions.length} transition roles
+                  {config.access.hrOnboardingAccessRoles.length} HR roles •{' '}
+                  {config.access.documentAccessRoles.length} document viewers •{' '}
+                  {config.access.roleBasedOnboardingActions.length} transition roles
                 </span>
-                <Button
-                  variant="secondary"
-                  size="sm"
-                  onClick={() => setAccessModalOpen(true)}
-                >
+                <Button variant="secondary" size="sm" onClick={() => setAccessModalOpen(true)}>
                   Configure
                 </Button>
               </div>
@@ -435,11 +423,16 @@ export function OnboardingGeneralSettingsManagement({
                 </span>
                 <span className="bezent-genpref-summary-label">Stage Progression</span>
                 <span className="bezent-genpref-summary-val">
-                  Stage skipping {config.workflow.allowCandidateStageSkipping ? 'permitted' : 'disallowed'} • Backward reasons {config.workflow.requireReasonForBackwardStageMovement ? 'mandatory' : 'optional'}
+                  Stage skipping{' '}
+                  {config.workflow.allowCandidateStageSkipping ? 'permitted' : 'disallowed'} •
+                  Backward reasons{' '}
+                  {config.workflow.requireReasonForBackwardStageMovement ? 'mandatory' : 'optional'}
                 </span>
                 <span className="bezent-genpref-summary-label">Checklist Tasks</span>
                 <span className="bezent-genpref-summary-val">
-                  Reassignment {config.workflow.allowChecklistReassignment ? 'allowed' : 'locked'} • Overdue completion {config.workflow.allowOverdueTaskCompletion ? 'allowed' : 'restricted'}
+                  Reassignment {config.workflow.allowChecklistReassignment ? 'allowed' : 'locked'} •
+                  Overdue completion{' '}
+                  {config.workflow.allowOverdueTaskCompletion ? 'allowed' : 'restricted'}
                 </span>
                 <span className="bezent-genpref-summary-label">Action Approvals</span>
                 <span className="bezent-genpref-summary-val">
@@ -453,11 +446,7 @@ export function OnboardingGeneralSettingsManagement({
                     ? 'Reopening completed cases allowed'
                     : 'Completed cases permanently archived'}
                 </span>
-                <Button
-                  variant="secondary"
-                  size="sm"
-                  onClick={() => setWorkflowModalOpen(true)}
-                >
+                <Button variant="secondary" size="sm" onClick={() => setWorkflowModalOpen(true)}>
                   Configure
                 </Button>
               </div>
@@ -466,7 +455,9 @@ export function OnboardingGeneralSettingsManagement({
             <div className="bezent-genpref-tile__badge bezent-genpref-tile__badge--workflow">
               <span className="bezent-genpref-tile__badge-dot" />
               <span className="bezent-genpref-tile__badge-text">
-                {config.workflow.allowCandidateStageSkipping ? 'STAGE SKIPPING ON' : 'STRICT PIPELINE'}
+                {config.workflow.allowCandidateStageSkipping
+                  ? 'STAGE SKIPPING ON'
+                  : 'STRICT PIPELINE'}
               </span>
             </div>
           </div>
@@ -497,12 +488,11 @@ export function OnboardingGeneralSettingsManagement({
                   Timezone, date formats, and working week
                 </span>
                 <span className="bezent-genpref-summary-label">Tenant Timezone</span>
-                <span className="bezent-genpref-summary-val">
-                  {config.dateTime.timezone}
-                </span>
+                <span className="bezent-genpref-summary-val">{config.dateTime.timezone}</span>
                 <span className="bezent-genpref-summary-label">Display Formats</span>
                 <span className="bezent-genpref-summary-val">
-                  {config.dateTime.dateFormat} • {config.dateTime.timeFormat === '12_hour' ? '12h AM/PM' : '24h'}
+                  {config.dateTime.dateFormat} •{' '}
+                  {config.dateTime.timeFormat === '12_hour' ? '12h AM/PM' : '24h'}
                 </span>
                 <span className="bezent-genpref-summary-label">SLA Calculation</span>
                 <span className="bezent-genpref-summary-val">
@@ -514,11 +504,7 @@ export function OnboardingGeneralSettingsManagement({
                 <span className="bezent-genpref-summary-val">
                   {formatDays(config.dateTime.workingDays)}
                 </span>
-                <Button
-                  variant="secondary"
-                  size="sm"
-                  onClick={() => setDateTimeModalOpen(true)}
-                >
+                <Button variant="secondary" size="sm" onClick={() => setDateTimeModalOpen(true)}>
                   Configure
                 </Button>
               </div>

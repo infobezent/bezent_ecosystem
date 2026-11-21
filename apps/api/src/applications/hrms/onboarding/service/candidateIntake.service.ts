@@ -1,11 +1,7 @@
 import { randomUUID } from 'node:crypto';
 import { eq, and } from 'drizzle-orm';
 import { getDb } from '../../../../db/connection.js';
-import {
-  onboardingCases,
-  employees,
-  type OnboardingCase,
-} from '../../../../db/schema.js';
+import { onboardingCases, employees, type OnboardingCase } from '../../../../db/schema.js';
 import { FormsService } from '../../settings/forms/service/forms.service.js';
 import { NotificationSettingsService } from '../../settings/onboarding/service/notificationSettings.service.js';
 import {
@@ -15,11 +11,7 @@ import {
   NotFoundError,
   ValidationError,
 } from '../../../../app/errors/AppError.js';
-import type {
-  CandidateIntakeConfig,
-  FormVersionSnapshot,
-  ResolvedForm,
-} from '../../settings/forms/types/form.types.js';
+import type { CandidateIntakeConfig, ResolvedForm } from '../../settings/forms/types/form.types.js';
 
 export interface ManualEntryDto {
   saveAsDraft?: boolean;
@@ -81,7 +73,8 @@ export class CandidateIntakeService {
       companyId,
       'candidate-intake',
     );
-    const config: CandidateIntakeConfig = (currentForm.form.metadata?.intakeConfig as CandidateIntakeConfig) ?? {
+    const config: CandidateIntakeConfig = (currentForm.form.metadata
+      ?.intakeConfig as CandidateIntakeConfig) ?? {
       formName: 'Candidate Intake Form',
       formDescription: 'Pre-hire registration and information collection form.',
       hrManualEntryEnabled: true,
@@ -163,7 +156,7 @@ export class CandidateIntakeService {
             errors[field.key] = 'Invalid email address format';
           }
         } else if (field.type === 'phone' && typeof value === 'string') {
-          const phoneClean = value.replace(/[\s\-\(\)\+]/g, '');
+          const phoneClean = value.replace(/[\s()+-]/g, '');
           if (!/^\d{7,15}$/.test(phoneClean)) {
             errors[field.key] = 'Invalid phone number (must be 7-15 digits)';
           }
@@ -214,7 +207,8 @@ export class CandidateIntakeService {
     const phone = (answers['contact.mobileNumber'] as string) || null;
     const firstName = (answers['personal.firstName'] as string) || 'Candidate';
     const lastName = (answers['personal.lastName'] as string) || null;
-    const joiningDate = (answers['employment.expectedJoiningDate'] as string) || dto.joiningDate || null;
+    const joiningDate =
+      (answers['employment.expectedJoiningDate'] as string) || dto.joiningDate || null;
     const departmentId = (answers['employment.department'] as string) || dto.departmentId || null;
     const designationId = (answers['employment.position'] as string) || dto.designationId || null;
     const locationId = (answers['employment.workLocation'] as string) || dto.locationId || null;
@@ -303,7 +297,9 @@ export class CandidateIntakeService {
     const { version, config } = await this.getLatestIntakeForm(tenantId, companyId);
 
     if (!config.candidateSelfServiceEnabled) {
-      throw new BadRequestError('Candidate self-service is currently disabled in form configuration');
+      throw new BadRequestError(
+        'Candidate self-service is currently disabled in form configuration',
+      );
     }
 
     // Verify duplicate active employee
@@ -410,7 +406,10 @@ export class CandidateIntakeService {
   }> {
     const db = getDb();
     // Search onboarding cases by draftPayload.invitationToken
-    const allCases = await db.select().from(onboardingCases).where(eq(onboardingCases.status, 'draft'));
+    const allCases = await db
+      .select()
+      .from(onboardingCases)
+      .where(eq(onboardingCases.status, 'draft'));
     const matched = allCases.find((c: OnboardingCase) => {
       const payload = c.draftPayload as any;
       return payload && payload.invitationToken === token;
@@ -471,7 +470,10 @@ export class CandidateIntakeService {
    */
   async saveCandidateDraft(token: string, answers: Record<string, unknown>): Promise<void> {
     const db = getDb();
-    const allCases = await db.select().from(onboardingCases).where(eq(onboardingCases.status, 'draft'));
+    const allCases = await db
+      .select()
+      .from(onboardingCases)
+      .where(eq(onboardingCases.status, 'draft'));
     const matched = allCases.find((c: OnboardingCase) => {
       const payload = c.draftPayload as any;
       return payload && payload.invitationToken === token;
@@ -566,7 +568,8 @@ export class CandidateIntakeService {
 
     return {
       success: true,
-      message: 'Candidate registration submitted successfully. Your details are now under HR review.',
+      message:
+        'Candidate registration submitted successfully. Your details are now under HR review.',
     };
   }
 
@@ -626,7 +629,8 @@ export class CandidateIntakeService {
         departmentId: (answers['employment.department'] as string) || caseRecord.departmentId,
         designationId: (answers['employment.position'] as string) || caseRecord.designationId,
         locationId: (answers['employment.workLocation'] as string) || caseRecord.locationId,
-        joiningDate: (answers['employment.expectedJoiningDate'] as string) || caseRecord.joiningDate,
+        joiningDate:
+          (answers['employment.expectedJoiningDate'] as string) || caseRecord.joiningDate,
         employmentType: (answers['employment.employmentType'] as any) || caseRecord.employmentType,
         draftPayload: nextPayload,
       })

@@ -22,9 +22,7 @@ export function ConfigureStagesModal({
   onSaveStages,
 }: ConfigureStagesModalProps) {
   const [stages, setStages] = useState<PipelineStageConfig[]>(() =>
-    pipeline?.stages
-      ? [...pipeline.stages].sort((a, b) => a.displayOrder - b.displayOrder)
-      : [],
+    pipeline?.stages ? [...pipeline.stages].sort((a, b) => a.displayOrder - b.displayOrder) : [],
   );
   const [editingStage, setEditingStage] = useState<PipelineStageConfig | null>(null);
   const [stageModalOpen, setStageModalOpen] = useState(false);
@@ -96,9 +94,7 @@ export function ConfigureStagesModal({
       return;
     }
 
-    setStages((prev) =>
-      prev.map((s) => (s.id === stageId ? { ...s, isActive: active } : s)),
-    );
+    setStages((prev) => prev.map((s) => (s.id === stageId ? { ...s, isActive: active } : s)));
     setError(null);
   };
 
@@ -126,8 +122,8 @@ export function ConfigureStagesModal({
           s.id === savedStage.id
             ? s
             : s.stageType === 'final'
-            ? { ...s, stageType: 'standard', isTerminal: false, allowManualExit: true }
-            : s,
+              ? { ...s, stageType: 'standard', isTerminal: false, allowManualExit: true }
+              : s,
         );
         // Move the new final stage to the end if not already at the end
         const nonFinal = updatedStages.filter((s) => s.id !== savedStage.id);
@@ -146,7 +142,10 @@ export function ConfigureStagesModal({
             ? { ...s, stageType: 'standard' as const, isTerminal: false, allowManualExit: true }
             : s,
         );
-        updatedStages = [...existingDemoted, { ...savedStage, displayOrder: existingDemoted.length + 1 }];
+        updatedStages = [
+          ...existingDemoted,
+          { ...savedStage, displayOrder: existingDemoted.length + 1 },
+        ];
       } else {
         // Insert right before the final stage
         const finalStageIdx = stages.findIndex((s) => s.stageType === 'final' || s.isTerminal);
@@ -173,7 +172,9 @@ export function ConfigureStagesModal({
     if (!stage) return;
 
     if (stage.stageType === 'final' || stage.isTerminal || stage.stageKey === 'completed') {
-      setError('Cannot delete the Final stage. A pipeline must have exactly one terminal milestone.');
+      setError(
+        'Cannot delete the Final stage. A pipeline must have exactly one terminal milestone.',
+      );
       return;
     }
 
@@ -288,10 +289,12 @@ export function ConfigureStagesModal({
 
           <div className="bezent-pipeline-stages-banner">
             <span className="bezent-pipeline-stages-banner-lead">
-              <strong>Entry Stage:</strong> The first stage is the entry milestone for new candidates.
+              <strong>Entry Stage:</strong> The first stage is the entry milestone for new
+              candidates.
             </span>
             <span className="bezent-pipeline-stages-banner-sub">
-              <strong>Final Stage:</strong> Exactly one stage is terminal, triggering candidate conversion into the workforce.
+              <strong>Final Stage:</strong> Exactly one stage is terminal, triggering candidate
+              conversion into the workforce.
             </span>
           </div>
 

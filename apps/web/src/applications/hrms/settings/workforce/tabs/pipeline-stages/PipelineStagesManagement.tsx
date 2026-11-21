@@ -328,9 +328,7 @@ export function PipelineStagesManagement({ isEmbedded = false }: PipelineStagesM
         p.id === pipeline.id ? { ...p, isActive: !p.isActive } : p,
       );
       persistPipelines(next);
-      showSuccessBanner(
-        `"${pipeline.name}" is now ${!pipeline.isActive ? 'Active' : 'Inactive'}.`,
-      );
+      showSuccessBanner(`"${pipeline.name}" is now ${!pipeline.isActive ? 'Active' : 'Inactive'}.`);
       setOpenDropdownId(null);
       await loadData();
     } catch (err) {
@@ -607,11 +605,7 @@ export function PipelineStagesManagement({ isEmbedded = false }: PipelineStagesM
         </div>
 
         <div className="bezent-pipeline-assignment-bar__action">
-          <Button
-            variant="secondary"
-            size="sm"
-            onClick={() => setAssignmentRulesModalOpen(true)}
-          >
+          <Button variant="secondary" size="sm" onClick={() => setAssignmentRulesModalOpen(true)}>
             Configure Assignment Rules
           </Button>
         </div>

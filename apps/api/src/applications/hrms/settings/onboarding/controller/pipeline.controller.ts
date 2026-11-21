@@ -6,11 +6,17 @@ export class PipelineController {
   constructor(private readonly service = new PipelineService()) {}
 
   private getTenantAndCompany(req: Request): { tenantId: string; companyId: string } {
-    const tenantId = (req.headers['x-tenant-id'] as string) || (req as unknown as { tenantId?: string }).tenantId;
-    const companyId = (req.headers['x-company-id'] as string) || (req as unknown as { companyId?: string }).companyId;
+    const tenantId =
+      (req.headers['x-tenant-id'] as string) || (req as unknown as { tenantId?: string }).tenantId;
+    const companyId =
+      (req.headers['x-company-id'] as string) ||
+      (req as unknown as { companyId?: string }).companyId;
 
     if (!tenantId || !companyId) {
-      throw new BadRequestError('Tenant ID and Company ID are required', 'TENANT_OR_COMPANY_MISSING');
+      throw new BadRequestError(
+        'Tenant ID and Company ID are required',
+        'TENANT_OR_COMPANY_MISSING',
+      );
     }
 
     return { tenantId, companyId };
@@ -109,7 +115,11 @@ export class PipelineController {
   saveAssignmentRules = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const { tenantId, companyId } = this.getTenantAndCompany(req);
-      const rules = await this.service.saveAssignmentRules(tenantId, companyId, req.body.rules || []);
+      const rules = await this.service.saveAssignmentRules(
+        tenantId,
+        companyId,
+        req.body.rules || [],
+      );
       res.json({ success: true, data: rules });
     } catch (err) {
       next(err);

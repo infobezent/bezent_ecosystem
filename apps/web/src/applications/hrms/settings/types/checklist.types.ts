@@ -1,22 +1,12 @@
 export type ChecklistCategory = 'General' | 'HR' | 'IT' | 'Finance' | 'Custom';
 
-export type TaskAssigneeRole =
-  | 'hr'
-  | 'it'
-  | 'finance'
-  | 'manager'
-  | 'employee'
-  | 'specific_role';
+export type TaskAssigneeRole = 'hr' | 'it' | 'finance' | 'manager' | 'employee' | 'specific_role';
 
 export type AttachmentRequirement = 'none' | 'optional' | 'required';
 
 export type TaskVisibility = 'internal' | 'employee_visible';
 
-export type ChecklistApplicableTo =
-  | 'all'
-  | 'employment_type'
-  | 'department'
-  | 'location';
+export type ChecklistApplicableTo = 'all' | 'employment_type' | 'department' | 'location';
 
 export interface ChecklistTaskGroup {
   id: string;

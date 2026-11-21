@@ -28,16 +28,46 @@ onboardingSettingsRouter.use(
 );
 
 // Pipeline Stages & Rules Configuration
-onboardingSettingsRouter.get('/hrms/settings/onboarding/pipelines', pipelineController.listPipelines);
-onboardingSettingsRouter.post('/hrms/settings/onboarding/pipelines', pipelineController.createPipeline);
-onboardingSettingsRouter.get('/hrms/settings/onboarding/pipelines/:pipelineId', pipelineController.getPipeline);
-onboardingSettingsRouter.patch('/hrms/settings/onboarding/pipelines/:pipelineId', pipelineController.updatePipeline);
-onboardingSettingsRouter.put('/hrms/settings/onboarding/pipelines/:pipelineId/stages', pipelineController.savePipelineStages);
-onboardingSettingsRouter.post('/hrms/settings/onboarding/pipelines/:pipelineId/duplicate', pipelineController.duplicatePipeline);
-onboardingSettingsRouter.delete('/hrms/settings/onboarding/pipelines/:pipelineId', pipelineController.deletePipeline);
-onboardingSettingsRouter.get('/hrms/settings/onboarding/pipeline-rules', pipelineController.listAssignmentRules);
-onboardingSettingsRouter.put('/hrms/settings/onboarding/pipeline-rules', pipelineController.saveAssignmentRules);
-onboardingSettingsRouter.post('/hrms/settings/onboarding/pipeline-resolve', pipelineController.resolvePipeline);
+onboardingSettingsRouter.get(
+  '/hrms/settings/onboarding/pipelines',
+  pipelineController.listPipelines,
+);
+onboardingSettingsRouter.post(
+  '/hrms/settings/onboarding/pipelines',
+  pipelineController.createPipeline,
+);
+onboardingSettingsRouter.get(
+  '/hrms/settings/onboarding/pipelines/:pipelineId',
+  pipelineController.getPipeline,
+);
+onboardingSettingsRouter.patch(
+  '/hrms/settings/onboarding/pipelines/:pipelineId',
+  pipelineController.updatePipeline,
+);
+onboardingSettingsRouter.put(
+  '/hrms/settings/onboarding/pipelines/:pipelineId/stages',
+  pipelineController.savePipelineStages,
+);
+onboardingSettingsRouter.post(
+  '/hrms/settings/onboarding/pipelines/:pipelineId/duplicate',
+  pipelineController.duplicatePipeline,
+);
+onboardingSettingsRouter.delete(
+  '/hrms/settings/onboarding/pipelines/:pipelineId',
+  pipelineController.deletePipeline,
+);
+onboardingSettingsRouter.get(
+  '/hrms/settings/onboarding/pipeline-rules',
+  pipelineController.listAssignmentRules,
+);
+onboardingSettingsRouter.put(
+  '/hrms/settings/onboarding/pipeline-rules',
+  pipelineController.saveAssignmentRules,
+);
+onboardingSettingsRouter.post(
+  '/hrms/settings/onboarding/pipeline-resolve',
+  pipelineController.resolvePipeline,
+);
 
 // Aggregate and Idempotent Initialization
 onboardingSettingsRouter.get('/hrms/settings/onboarding', controller.getAggregateSettings);
@@ -323,4 +353,3 @@ onboardingSettingsRouter.post(
   '/hrms/settings/onboarding/notifications/history/:id/retry',
   notifController.retryNotification,
 );
-

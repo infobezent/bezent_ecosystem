@@ -328,9 +328,7 @@ export const Select = forwardRef<HTMLSelectElement, SelectProps>(function Select
             !selectedOption || selectedOption.value === '' ? 'is-placeholder' : ''
           }`}
         >
-          {selectedOption
-            ? selectedOption.triggerLabel || selectedOption.label
-            : placeholder}
+          {selectedOption ? selectedOption.triggerLabel || selectedOption.label : placeholder}
         </span>
 
         <span className={`bezent-select-arrow ${isOpen ? 'is-open' : ''}`} aria-hidden="true">

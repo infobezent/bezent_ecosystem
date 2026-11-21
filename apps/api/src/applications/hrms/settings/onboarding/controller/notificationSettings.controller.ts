@@ -48,7 +48,11 @@ export class NotificationSettingsController {
   updateSettings = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const { tenantId, companyId } = this.getTenantAndCompany(req);
-      const data = await this.service.updateSettings(tenantId, companyId, req.body.configs || req.body);
+      const data = await this.service.updateSettings(
+        tenantId,
+        companyId,
+        req.body.configs || req.body,
+      );
       res.json({ success: true, data });
     } catch (err) {
       next(err);
@@ -79,7 +83,12 @@ export class NotificationSettingsController {
   updateReminderRule = async (req: Request<{ id: string }>, res: Response, next: NextFunction) => {
     try {
       const { tenantId, companyId } = this.getTenantAndCompany(req);
-      const data = await this.service.updateReminderRule(tenantId, companyId, req.params.id, req.body);
+      const data = await this.service.updateReminderRule(
+        tenantId,
+        companyId,
+        req.params.id,
+        req.body,
+      );
       res.json({ success: true, data });
     } catch (err) {
       next(err);
@@ -140,14 +149,23 @@ export class NotificationSettingsController {
   updateEmailTemplate = async (req: Request<{ id: string }>, res: Response, next: NextFunction) => {
     try {
       const { tenantId, companyId } = this.getTenantAndCompany(req);
-      const data = await this.service.updateEmailTemplate(tenantId, companyId, req.params.id, req.body);
+      const data = await this.service.updateEmailTemplate(
+        tenantId,
+        companyId,
+        req.params.id,
+        req.body,
+      );
       res.json({ success: true, data });
     } catch (err) {
       next(err);
     }
   };
 
-  duplicateEmailTemplate = async (req: Request<{ id: string }>, res: Response, next: NextFunction) => {
+  duplicateEmailTemplate = async (
+    req: Request<{ id: string }>,
+    res: Response,
+    next: NextFunction,
+  ) => {
     try {
       const { tenantId, companyId } = this.getTenantAndCompany(req);
       const data = await this.service.duplicateEmailTemplate(tenantId, companyId, req.params.id);

@@ -1,12 +1,5 @@
 import React, { useState } from 'react';
-import {
-  Modal,
-  Button,
-  Input,
-  FormField,
-  Stack,
-  Inline,
-} from '../../../../../../design-system';
+import { Modal, Button, Input, FormField, Stack, Inline } from '../../../../../../design-system';
 import { BezentIcon } from '../../../../../../design-system/icons';
 import type {
   DocumentCategory,
@@ -188,10 +181,7 @@ export function ManageCategoriesModal({
             const isEditing = editingCatId === cat.id;
 
             return (
-              <div
-                key={cat.id}
-                className="bezent-reqdocs-item-row"
-              >
+              <div key={cat.id} className="bezent-reqdocs-item-row">
                 {isEditing ? (
                   <Inline gap="xs" className="bezent-reqdocs-item-row__main">
                     <Input
@@ -208,11 +198,7 @@ export function ManageCategoriesModal({
                     >
                       Save
                     </Button>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => setEditingCatId(null)}
-                    >
+                    <Button variant="ghost" size="sm" onClick={() => setEditingCatId(null)}>
                       Cancel
                     </Button>
                   </Inline>

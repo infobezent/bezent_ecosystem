@@ -292,8 +292,16 @@ export function ReminderRulesModal({
       }
     >
       <Stack gap="md" className="bezent-notifrem-rules-container">
-        {error && <Alert variant="danger" title="Error">{error}</Alert>}
-        {successMsg && <Alert variant="success" title="Success">{successMsg}</Alert>}
+        {error && (
+          <Alert variant="danger" title="Error">
+            {error}
+          </Alert>
+        )}
+        {successMsg && (
+          <Alert variant="success" title="Success">
+            {successMsg}
+          </Alert>
+        )}
 
         {isEditingOrAdding ? (
           <form onSubmit={handleSaveForm} className="bezent-remindrules-form">
@@ -464,88 +472,101 @@ export function ReminderRulesModal({
           </form>
         ) : (
           <div className="bezent-notifrem-table-container">
-          <table className="bezent-notifrem-table" aria-label="Automated reminder rules table">
-            <thead>
-              <tr>
-                <th scope="col" className="bezent-notifrem-th bezent-remindrules-th--name">Rule Name</th>
-                <th scope="col" className="bezent-notifrem-th bezent-remindrules-th--active">Active</th>
-                <th scope="col" className="bezent-notifrem-th bezent-remindrules-th--schedule">Schedule & Trigger</th>
-                <th scope="col" className="bezent-notifrem-th bezent-remindrules-th--channels">Channels</th>
-                <th scope="col" className="bezent-notifrem-th bezent-remindrules-th--escalation">Escalation</th>
-                <th scope="col" className="bezent-notifrem-th bezent-remindrules-th--actions">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {rules.map((rule) => (
-                <tr key={rule.id} className="bezent-notifrem-tr">
-                  <td className="bezent-notifrem-td">
-                    <div className="bezent-notifrem-cell-stack">
-                      <span className="bezent-notifrem-event-name">{rule.name}</span>
-                      <span className="bezent-notifrem-event-desc">
-                        Recipients: {rule.recipients.map(formatRecipientLabel).join(', ')}
-                      </span>
-                    </div>
-                  </td>
-                  <td className="bezent-notifrem-td bezent-notifrem-td--center">
-                    <Switch
-                      checked={rule.isActive}
-                      onChange={(e) => handleToggleActive(rule, e.target.checked)}
-                      aria-label={`Toggle active for ${rule.name}`}
-                    />
-                  </td>
-                  <td className="bezent-notifrem-td">
-                    <div className="bezent-notifrem-cell-stack">
-                      <span className="bezent-notifrem-badge-label">
-                        {rule.delayAmount} {rule.delayUnit} ({rule.triggerType.replace(/_/g, ' ')})
-                      </span>
-                      <span className="bezent-notifrem-event-desc">
-                        {rule.repeatInterval > 0
-                          ? `Repeats every ${rule.repeatInterval} ${rule.delayUnit} (Max: ${rule.maxReminderCount})`
-                          : `One-time notice`}
-                      </span>
-                    </div>
-                  </td>
-                  <td className="bezent-notifrem-td">
-                    <Inline gap="xs">
-                      {rule.emailEnabled && <Badge variant="info">Email</Badge>}
-                      {rule.inAppEnabled && <Badge variant="neutral">In-App</Badge>}
-                      {!rule.emailEnabled && !rule.inAppEnabled && (
-                        <Badge variant="warning">None</Badge>
-                      )}
-                    </Inline>
-                  </td>
-                  <td className="bezent-notifrem-td">
-                    {rule.escalationEnabled ? (
-                      <Badge variant="warning">
-                        Escalates to {formatRecipientLabel(rule.escalationRecipient || '')}
-                      </Badge>
-                    ) : (
-                      <span className="bezent-notifrem-event-desc">Disabled</span>
-                    )}
-                  </td>
-                  <td className="bezent-notifrem-td bezent-notifrem-td--right">
-                    <Inline gap="xs" justify="end">
-                      <IconButton
-                        label="Edit rule"
-                        variant="ghost"
-                        onClick={() => startEdit(rule)}
-                      >
-                        <BezentIcon name="edit" size={16} />
-                      </IconButton>
-                      <IconButton
-                        label="Delete rule"
-                        variant="ghost"
-                        onClick={() => handleDelete(rule.id)}
-                      >
-                        <BezentIcon name="delete" size={16} />
-                      </IconButton>
-                    </Inline>
-                  </td>
+            <table className="bezent-notifrem-table" aria-label="Automated reminder rules table">
+              <thead>
+                <tr>
+                  <th scope="col" className="bezent-notifrem-th bezent-remindrules-th--name">
+                    Rule Name
+                  </th>
+                  <th scope="col" className="bezent-notifrem-th bezent-remindrules-th--active">
+                    Active
+                  </th>
+                  <th scope="col" className="bezent-notifrem-th bezent-remindrules-th--schedule">
+                    Schedule & Trigger
+                  </th>
+                  <th scope="col" className="bezent-notifrem-th bezent-remindrules-th--channels">
+                    Channels
+                  </th>
+                  <th scope="col" className="bezent-notifrem-th bezent-remindrules-th--escalation">
+                    Escalation
+                  </th>
+                  <th scope="col" className="bezent-notifrem-th bezent-remindrules-th--actions">
+                    Actions
+                  </th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+              </thead>
+              <tbody>
+                {rules.map((rule) => (
+                  <tr key={rule.id} className="bezent-notifrem-tr">
+                    <td className="bezent-notifrem-td">
+                      <div className="bezent-notifrem-cell-stack">
+                        <span className="bezent-notifrem-event-name">{rule.name}</span>
+                        <span className="bezent-notifrem-event-desc">
+                          Recipients: {rule.recipients.map(formatRecipientLabel).join(', ')}
+                        </span>
+                      </div>
+                    </td>
+                    <td className="bezent-notifrem-td bezent-notifrem-td--center">
+                      <Switch
+                        checked={rule.isActive}
+                        onChange={(e) => handleToggleActive(rule, e.target.checked)}
+                        aria-label={`Toggle active for ${rule.name}`}
+                      />
+                    </td>
+                    <td className="bezent-notifrem-td">
+                      <div className="bezent-notifrem-cell-stack">
+                        <span className="bezent-notifrem-badge-label">
+                          {rule.delayAmount} {rule.delayUnit} ({rule.triggerType.replace(/_/g, ' ')}
+                          )
+                        </span>
+                        <span className="bezent-notifrem-event-desc">
+                          {rule.repeatInterval > 0
+                            ? `Repeats every ${rule.repeatInterval} ${rule.delayUnit} (Max: ${rule.maxReminderCount})`
+                            : `One-time notice`}
+                        </span>
+                      </div>
+                    </td>
+                    <td className="bezent-notifrem-td">
+                      <Inline gap="xs">
+                        {rule.emailEnabled && <Badge variant="info">Email</Badge>}
+                        {rule.inAppEnabled && <Badge variant="neutral">In-App</Badge>}
+                        {!rule.emailEnabled && !rule.inAppEnabled && (
+                          <Badge variant="warning">None</Badge>
+                        )}
+                      </Inline>
+                    </td>
+                    <td className="bezent-notifrem-td">
+                      {rule.escalationEnabled ? (
+                        <Badge variant="warning">
+                          Escalates to {formatRecipientLabel(rule.escalationRecipient || '')}
+                        </Badge>
+                      ) : (
+                        <span className="bezent-notifrem-event-desc">Disabled</span>
+                      )}
+                    </td>
+                    <td className="bezent-notifrem-td bezent-notifrem-td--right">
+                      <Inline gap="xs" justify="end">
+                        <IconButton
+                          label="Edit rule"
+                          variant="ghost"
+                          onClick={() => startEdit(rule)}
+                        >
+                          <BezentIcon name="edit" size={16} />
+                        </IconButton>
+                        <IconButton
+                          label="Delete rule"
+                          variant="ghost"
+                          onClick={() => handleDelete(rule.id)}
+                        >
+                          <BezentIcon name="delete" size={16} />
+                        </IconButton>
+                      </Inline>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         )}
       </Stack>
     </Modal>

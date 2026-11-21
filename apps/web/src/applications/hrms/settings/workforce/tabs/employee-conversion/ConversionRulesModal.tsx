@@ -39,8 +39,10 @@ export function ConversionRulesModal({
   const [allowRetryFailedConversion, setAllowRetryFailedConversion] = useState<boolean>(
     () => initialRules?.allowRetryFailedConversion ?? true,
   );
-  const [restrictedRoles, setRestrictedRoles] = useState<string[]>(
-    () => initialRules?.restrictedRoles ? [...initialRules.restrictedRoles] : ['super_admin', 'company_admin', 'hr_manager'],
+  const [restrictedRoles, setRestrictedRoles] = useState<string[]>(() =>
+    initialRules?.restrictedRoles
+      ? [...initialRules.restrictedRoles]
+      : ['super_admin', 'company_admin', 'hr_manager'],
   );
   const [recordAuditHistory, setRecordAuditHistory] = useState<boolean>(
     () => initialRules?.recordAuditHistory ?? true,
@@ -124,11 +126,7 @@ export function ConversionRulesModal({
         </div>
       }
     >
-      <form
-        id="conversion-rules-form"
-        onSubmit={handleSubmit}
-        className="bezent-convrule-form"
-      >
+      <form id="conversion-rules-form" onSubmit={handleSubmit} className="bezent-convrule-form">
         {error && <Alert variant="danger">{error}</Alert>}
 
         <div className="bezent-convrule-list">
@@ -168,7 +166,9 @@ export function ConversionRulesModal({
               </div>
               <div className="bezent-convrule-content">
                 <div className="bezent-convrule-title-row">
-                  <h4 className="bezent-convrule-title">Validate Required Fields Before Conversion</h4>
+                  <h4 className="bezent-convrule-title">
+                    Validate Required Fields Before Conversion
+                  </h4>
                   {validateRequiredFields && (
                     <Badge variant="warning" size="sm">
                       Gatekeeper

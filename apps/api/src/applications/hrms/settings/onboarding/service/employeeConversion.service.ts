@@ -108,7 +108,9 @@ export class EmployeeConversionService {
 
     // 1. Gather all candidate attributes
     const candidateData: Record<string, unknown> = {
-      fullName: candidateCase.fullName || `${candidateCase.firstName || ''} ${candidateCase.lastName || ''}`.trim(),
+      fullName:
+        candidateCase.fullName ||
+        `${candidateCase.firstName || ''} ${candidateCase.lastName || ''}`.trim(),
       firstName: candidateCase.firstName,
       lastName: candidateCase.lastName,
       email: candidateCase.email,
@@ -188,7 +190,9 @@ export class EmployeeConversionService {
 
     return {
       caseId,
-      candidateName: candidateCase.fullName || `${candidateCase.firstName || ''} ${candidateCase.lastName || ''}`.trim(),
+      candidateName:
+        candidateCase.fullName ||
+        `${candidateCase.firstName || ''} ${candidateCase.lastName || ''}`.trim(),
       email: candidateCase.email || '',
       phone: candidateCase.phone,
       departmentId: candidateCase.departmentId,
@@ -217,7 +221,10 @@ export class EmployeeConversionService {
     const config = await this.repo.getConfig(tenantId, companyId);
 
     // 1. Enforce Role Restriction if enabled
-    if (config.conversionRules.restrictedRoles && config.conversionRules.restrictedRoles.length > 0) {
+    if (
+      config.conversionRules.restrictedRoles &&
+      config.conversionRules.restrictedRoles.length > 0
+    ) {
       if (actor?.role && !config.conversionRules.restrictedRoles.includes(actor.role)) {
         throw new ForbiddenError(
           `Role '${actor.role}' is not authorized to convert onboarding candidates into employees.`,
@@ -239,14 +246,17 @@ export class EmployeeConversionService {
         success: true,
         caseId,
         employeeId: String(existingAudit.employeeId),
-        employeeNumber: existingAudit.employeeNumber ? String(existingAudit.employeeNumber) : undefined,
-        postConversionResults: (existingAudit.postConversionResults as ConversionResult['postConversionResults']) || {
-          profileCreated: true,
-          checklistsApplied: true,
-          documentsApplied: true,
-          essAccessEnabled: true,
-          notificationsSent: true,
-        },
+        employeeNumber: existingAudit.employeeNumber
+          ? String(existingAudit.employeeNumber)
+          : undefined,
+        postConversionResults:
+          (existingAudit.postConversionResults as ConversionResult['postConversionResults']) || {
+            profileCreated: true,
+            checklistsApplied: true,
+            documentsApplied: true,
+            essAccessEnabled: true,
+            notificationsSent: true,
+          },
         auditLogId: existingAudit.auditLogId ? String(existingAudit.auditLogId) : undefined,
       };
     }
@@ -265,7 +275,9 @@ export class EmployeeConversionService {
 
     // 5. Gather Candidate Data
     const candidateData: Record<string, unknown> = {
-      fullName: candidateCase.fullName || `${candidateCase.firstName || ''} ${candidateCase.lastName || ''}`.trim(),
+      fullName:
+        candidateCase.fullName ||
+        `${candidateCase.firstName || ''} ${candidateCase.lastName || ''}`.trim(),
       firstName: candidateCase.firstName,
       lastName: candidateCase.lastName,
       email: candidateCase.email,
@@ -302,7 +314,11 @@ export class EmployeeConversionService {
 
     // 7. Duplicate Employee Guard
     if (config.conversionRules.preventDuplicateEmployee && candidateCase.email) {
-      const existingEmp = await this.employeeRepo.getByEmail(tenantId, companyId, candidateCase.email);
+      const existingEmp = await this.employeeRepo.getByEmail(
+        tenantId,
+        companyId,
+        candidateCase.email,
+      );
       if (existingEmp) {
         throw new ConflictError(
           `Duplicate employee creation blocked: An employee record with email '${candidateCase.email}' already exists (#${existingEmp.employeeNumber}).`,
@@ -413,7 +429,9 @@ export class EmployeeConversionService {
       try {
         postResults.essAccessEnabled = true;
       } catch (err) {
-        secondaryErrors.push(`ESS Access: ${err instanceof Error ? err.message : 'Failed to enable ESS access'}`);
+        secondaryErrors.push(
+          `ESS Access: ${err instanceof Error ? err.message : 'Failed to enable ESS access'}`,
+        );
       }
     }
 
@@ -509,13 +527,14 @@ export class EmployeeConversionService {
       throw new NotFoundError(`Onboarding case '${caseId}' not found.`);
     }
 
-    const currentResults = (existingAudit.postConversionResults as ConversionResult['postConversionResults']) || {
-      profileCreated: true,
-      checklistsApplied: false,
-      documentsApplied: false,
-      essAccessEnabled: false,
-      notificationsSent: false,
-    };
+    const currentResults =
+      (existingAudit.postConversionResults as ConversionResult['postConversionResults']) || {
+        profileCreated: true,
+        checklistsApplied: false,
+        documentsApplied: false,
+        essAccessEnabled: false,
+        notificationsSent: false,
+      };
 
     const secondaryErrors: string[] = [];
 
@@ -575,7 +594,9 @@ export class EmployeeConversionService {
       success: true,
       caseId,
       employeeId: String(existingAudit.employeeId),
-      employeeNumber: existingAudit.employeeNumber ? String(existingAudit.employeeNumber) : undefined,
+      employeeNumber: existingAudit.employeeNumber
+        ? String(existingAudit.employeeNumber)
+        : undefined,
       postConversionResults: currentResults,
       auditLogId: existingAudit.auditLogId ? String(existingAudit.auditLogId) : undefined,
       errors: secondaryErrors.length > 0 ? secondaryErrors : undefined,

@@ -158,11 +158,7 @@ export function NotificationHistoryModal({
                 <Button variant="secondary" onClick={onClose}>
                   Close
                 </Button>
-                <Button
-                  variant="secondary"
-                  onClick={handleRefreshClick}
-                  loading={refreshing}
-                >
+                <Button variant="secondary" onClick={handleRefreshClick} loading={refreshing}>
                   Refresh Log
                 </Button>
               </div>
@@ -172,8 +168,16 @@ export function NotificationHistoryModal({
       }
     >
       <Stack gap="md" className="bezent-notifrem-history-container">
-        {error && <Alert variant="danger" title="Error">{error}</Alert>}
-        {successMsg && <Alert variant="success" title="Success">{successMsg}</Alert>}
+        {error && (
+          <Alert variant="danger" title="Error">
+            {error}
+          </Alert>
+        )}
+        {successMsg && (
+          <Alert variant="success" title="Success">
+            {successMsg}
+          </Alert>
+        )}
 
         {/* DEDICATED CLEAN & NEAT VIEW UI */}
         {selectedItem ? (
@@ -196,16 +200,13 @@ export function NotificationHistoryModal({
                       {renderStatusBadge(selectedItem.status)}
                     </div>
                     <span className="bezent-history-view-sub-title">
-                      {selectedItem.templateName || 'Direct Notification'} &bull; Channel: {selectedItem.channel.toUpperCase()}
+                      {selectedItem.templateName || 'Direct Notification'} &bull; Channel:{' '}
+                      {selectedItem.channel.toUpperCase()}
                     </span>
                   </div>
                 </div>
 
-                <Button
-                  variant="secondary"
-                  size="sm"
-                  onClick={() => setSelectedItem(null)}
-                >
+                <Button variant="secondary" size="sm" onClick={() => setSelectedItem(null)}>
                   &larr; Back to Log
                 </Button>
               </div>
@@ -240,7 +241,9 @@ export function NotificationHistoryModal({
                 <div className="bezent-history-meta-block">
                   <span className="bezent-history-meta-label">Attempts</span>
                   <span className="bezent-history-meta-val">
-                    {selectedItem.retryCount > 0 ? `${selectedItem.retryCount + 1} attempts (${selectedItem.retryCount} retried)` : '1st Attempt'}
+                    {selectedItem.retryCount > 0
+                      ? `${selectedItem.retryCount + 1} attempts (${selectedItem.retryCount} retried)`
+                      : '1st Attempt'}
                   </span>
                 </div>
               </div>
@@ -249,7 +252,9 @@ export function NotificationHistoryModal({
             {/* 2. Message Envelope & Body */}
             <div className="bezent-history-view-card">
               <div className="bezent-history-card-header">
-                <h4 className="bezent-history-card-title">Message Payload &amp; Delivery Envelope</h4>
+                <h4 className="bezent-history-card-title">
+                  Message Payload &amp; Delivery Envelope
+                </h4>
               </div>
               <div className="bezent-history-envelope">
                 <div className="bezent-history-envelope-row">
@@ -266,17 +271,13 @@ export function NotificationHistoryModal({
                 </div>
                 <div className="bezent-history-envelope-row">
                   <span className="bezent-history-envelope-label">Subject:</span>
-                  <span className="bezent-history-envelope-subject">
-                    {selectedItem.subject}
-                  </span>
+                  <span className="bezent-history-envelope-subject">{selectedItem.subject}</span>
                 </div>
               </div>
 
               <div className="bezent-history-body-container">
                 <div className="bezent-history-body-paper">
-                  <pre className="bezent-history-body-text">
-                    {selectedItem.contentSnippet}
-                  </pre>
+                  <pre className="bezent-history-body-text">{selectedItem.contentSnippet}</pre>
                 </div>
               </div>
             </div>
@@ -291,7 +292,8 @@ export function NotificationHistoryModal({
                   <div>
                     <h5 className="bezent-history-failure-title">Delivery Failure Diagnostics</h5>
                     <p className="bezent-history-failure-desc">
-                      {selectedItem.failureReason || 'SMTP delivery rejected by recipient gateway or mailbox quota exceeded.'}
+                      {selectedItem.failureReason ||
+                        'SMTP delivery rejected by recipient gateway or mailbox quota exceeded.'}
                     </p>
                   </div>
                 </div>
@@ -347,12 +349,24 @@ export function NotificationHistoryModal({
               <table className="bezent-notifrem-table" aria-label="Notification history log table">
                 <thead>
                   <tr>
-                    <th scope="col" className="bezent-notifrem-th bezent-history-th--recipient">Recipient</th>
-                    <th scope="col" className="bezent-notifrem-th bezent-history-th--event">Event &amp; Template</th>
-                    <th scope="col" className="bezent-notifrem-th bezent-history-th--channel">Channel</th>
-                    <th scope="col" className="bezent-notifrem-th bezent-history-th--date">Sent Date</th>
-                    <th scope="col" className="bezent-notifrem-th bezent-history-th--status">Status</th>
-                    <th scope="col" className="bezent-notifrem-th bezent-history-th--actions">Actions</th>
+                    <th scope="col" className="bezent-notifrem-th bezent-history-th--recipient">
+                      Recipient
+                    </th>
+                    <th scope="col" className="bezent-notifrem-th bezent-history-th--event">
+                      Event &amp; Template
+                    </th>
+                    <th scope="col" className="bezent-notifrem-th bezent-history-th--channel">
+                      Channel
+                    </th>
+                    <th scope="col" className="bezent-notifrem-th bezent-history-th--date">
+                      Sent Date
+                    </th>
+                    <th scope="col" className="bezent-notifrem-th bezent-history-th--status">
+                      Status
+                    </th>
+                    <th scope="col" className="bezent-notifrem-th bezent-history-th--actions">
+                      Actions
+                    </th>
                   </tr>
                 </thead>
                 <tbody>
@@ -367,8 +381,13 @@ export function NotificationHistoryModal({
                       <tr key={item.id} className="bezent-notifrem-tr">
                         <td className="bezent-notifrem-td">
                           <div className="bezent-notifrem-cell-stack">
-                            <span className="bezent-notifrem-event-name">{formatRecipient(item.recipient)}</span>
-                            <span className="bezent-notifrem-event-desc bezent-history-subject-truncate" title={item.subject}>
+                            <span className="bezent-notifrem-event-name">
+                              {formatRecipient(item.recipient)}
+                            </span>
+                            <span
+                              className="bezent-notifrem-event-desc bezent-history-subject-truncate"
+                              title={item.subject}
+                            >
                               {item.subject}
                             </span>
                           </div>

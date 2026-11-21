@@ -16,11 +16,7 @@ import {
   fetchEmployeeAction,
   type EmployeeActionDetail as EmployeeActionDetailData,
 } from '../api/employeeAdministrationApi';
-import {
-  ACTION_STATUS_LABELS,
-  actionStatusVariant,
-  actionTypeLabel,
-} from '../model/actionCatalog';
+import { ACTION_STATUS_LABELS, actionStatusVariant, actionTypeLabel } from '../model/actionCatalog';
 import { EmployeeActionDetail } from './EmployeeActionDetail';
 import { ClearanceChecklist } from './ClearanceChecklist';
 
@@ -159,9 +155,7 @@ export function EmployeeActionDetailModal({
       variant="drawer"
       size="drawer"
       className="bezent-wf-action-drawer"
-      title={
-        action ? actionTypeLabel(action.actionType) : 'Employee Action'
-      }
+      title={action ? actionTypeLabel(action.actionType) : 'Employee Action'}
       headerActions={
         action ? (
           <Badge variant={actionStatusVariant(action.status)} size="sm">

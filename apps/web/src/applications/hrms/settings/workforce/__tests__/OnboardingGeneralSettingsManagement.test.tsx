@@ -21,8 +21,18 @@ vi.mock('../../../api/onboardingGeneralSettingsApi', () => ({
 vi.mock('../../../api/pipelineSettingsApi', () => ({
   fetchPipelines: vi.fn().mockResolvedValue({
     data: [
-      { id: 'standard_onboarding', name: 'Standard Enterprise Onboarding Pipeline', isActive: true, isDefault: true },
-      { id: 'executive_onboarding', name: 'Executive Onboarding', isActive: true, isDefault: false },
+      {
+        id: 'standard_onboarding',
+        name: 'Standard Enterprise Onboarding Pipeline',
+        isActive: true,
+        isDefault: true,
+      },
+      {
+        id: 'executive_onboarding',
+        name: 'Executive Onboarding',
+        isActive: true,
+        isDefault: false,
+      },
     ],
   }),
 }));
@@ -30,7 +40,12 @@ vi.mock('../../../api/pipelineSettingsApi', () => ({
 vi.mock('../../../api/checklistSettingsApi', () => ({
   fetchChecklistTemplates: vi.fn().mockResolvedValue({
     data: [
-      { id: 'standard_checklists', name: 'Standard New Hire Checklist', isActive: true, isDefault: true },
+      {
+        id: 'standard_checklists',
+        name: 'Standard New Hire Checklist',
+        isActive: true,
+        isDefault: true,
+      },
     ],
   }),
 }));

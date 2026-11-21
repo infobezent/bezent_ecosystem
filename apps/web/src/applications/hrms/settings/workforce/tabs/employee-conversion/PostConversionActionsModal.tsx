@@ -197,7 +197,9 @@ export function PostConversionActionsModal({
               </div>
               <div className="bezent-postact-content">
                 <div className="bezent-postact-title-row">
-                  <h4 className="bezent-postact-title">Enable Employee Self-Service (ESS) Access</h4>
+                  <h4 className="bezent-postact-title">
+                    Enable Employee Self-Service (ESS) Access
+                  </h4>
                   {enableEssAccess && (
                     <Badge variant="info" size="sm">
                       Self-Service
@@ -252,7 +254,8 @@ export function PostConversionActionsModal({
             <BezentIcon name="security" size={16} />
           </div>
           <span className="bezent-postact-guarantee-text">
-            <strong>Idempotent Guarantee:</strong> Secondary actions are failure-isolated and can be safely retried.
+            <strong>Idempotent Guarantee:</strong> Secondary actions are failure-isolated and can be
+            safely retried.
           </span>
         </div>
       </form>

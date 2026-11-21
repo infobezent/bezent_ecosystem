@@ -207,15 +207,13 @@ export function LeftSidebar({
   // If the active item is in overflow, More indicates active selection
   const isActiveItemInOverflow = Boolean(
     activeId &&
-      activeId !== 'settings' &&
-      items.some((item) => item.id === activeId) &&
-      !visibleItems.some((item) => item.id === activeId),
+    activeId !== 'settings' &&
+    items.some((item) => item.id === activeId) &&
+    !visibleItems.some((item) => item.id === activeId),
   );
   const isMoreButtonActive =
     activeRailItem === 'more' ||
-    (!isMoreOpen &&
-      activeId !== 'settings' &&
-      (Boolean(more?.active) || isActiveItemInOverflow));
+    (!isMoreOpen && activeId !== 'settings' && (Boolean(more?.active) || isActiveItemInOverflow));
 
   const onKeyDown = (e: KeyboardEvent) => {
     if (e.key === 'Escape' && flyoutParentId) closeNow();

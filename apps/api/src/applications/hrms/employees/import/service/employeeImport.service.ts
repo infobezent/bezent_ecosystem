@@ -576,9 +576,7 @@ export class EmployeeImportService {
             inFileRow.status === 'duplicate' ||
             inFileRow.issues.length > 0)
         ) {
-          const alreadyHasManagerIssue = row.issues.some(
-            (i) => i.field === 'Reporting Manager ID',
-          );
+          const alreadyHasManagerIssue = row.issues.some((i) => i.field === 'Reporting Manager ID');
           if (!alreadyHasManagerIssue) {
             row.issues.push({
               category: 'reference',

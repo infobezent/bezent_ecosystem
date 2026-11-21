@@ -139,7 +139,8 @@ export class NotificationSettingsService {
       dayType: dto.dayType ?? 'business_days',
       emailEnabled: dto.emailEnabled ?? true,
       inAppEnabled: dto.inAppEnabled ?? false,
-      recipients: Array.isArray(dto.recipients) && dto.recipients.length > 0 ? dto.recipients : ['candidate'],
+      recipients:
+        Array.isArray(dto.recipients) && dto.recipients.length > 0 ? dto.recipients : ['candidate'],
       escalationEnabled: dto.escalationEnabled ?? false,
       escalateAfterCount: Number(dto.escalateAfterCount ?? 0),
       escalationRecipient: dto.escalationRecipient ?? '',
@@ -169,21 +170,40 @@ export class NotificationSettingsService {
     const updated: ReminderRule = {
       ...existing,
       name: dto.name !== undefined ? dto.name.trim() : existing.name,
-      relatedEvent: dto.relatedEvent !== undefined ? dto.relatedEvent.trim() : existing.relatedEvent,
+      relatedEvent:
+        dto.relatedEvent !== undefined ? dto.relatedEvent.trim() : existing.relatedEvent,
       isActive: dto.isActive !== undefined ? Boolean(dto.isActive) : existing.isActive,
       triggerType: dto.triggerType ?? existing.triggerType,
       delayAmount: dto.delayAmount !== undefined ? Number(dto.delayAmount) : existing.delayAmount,
       delayUnit: dto.delayUnit ?? existing.delayUnit,
-      repeatInterval: dto.repeatInterval !== undefined ? Number(dto.repeatInterval) : existing.repeatInterval,
-      maxReminderCount: dto.maxReminderCount !== undefined ? Number(dto.maxReminderCount) : existing.maxReminderCount,
+      repeatInterval:
+        dto.repeatInterval !== undefined ? Number(dto.repeatInterval) : existing.repeatInterval,
+      maxReminderCount:
+        dto.maxReminderCount !== undefined
+          ? Number(dto.maxReminderCount)
+          : existing.maxReminderCount,
       dayType: dto.dayType ?? existing.dayType,
-      emailEnabled: dto.emailEnabled !== undefined ? Boolean(dto.emailEnabled) : existing.emailEnabled,
-      inAppEnabled: dto.inAppEnabled !== undefined ? Boolean(dto.inAppEnabled) : existing.inAppEnabled,
+      emailEnabled:
+        dto.emailEnabled !== undefined ? Boolean(dto.emailEnabled) : existing.emailEnabled,
+      inAppEnabled:
+        dto.inAppEnabled !== undefined ? Boolean(dto.inAppEnabled) : existing.inAppEnabled,
       recipients: Array.isArray(dto.recipients) ? dto.recipients : existing.recipients,
-      escalationEnabled: dto.escalationEnabled !== undefined ? Boolean(dto.escalationEnabled) : existing.escalationEnabled,
-      escalateAfterCount: dto.escalateAfterCount !== undefined ? Number(dto.escalateAfterCount) : existing.escalateAfterCount,
-      escalationRecipient: dto.escalationRecipient !== undefined ? dto.escalationRecipient : existing.escalationRecipient,
-      maxEscalationAttempts: dto.maxEscalationAttempts !== undefined ? Number(dto.maxEscalationAttempts) : existing.maxEscalationAttempts,
+      escalationEnabled:
+        dto.escalationEnabled !== undefined
+          ? Boolean(dto.escalationEnabled)
+          : existing.escalationEnabled,
+      escalateAfterCount:
+        dto.escalateAfterCount !== undefined
+          ? Number(dto.escalateAfterCount)
+          : existing.escalateAfterCount,
+      escalationRecipient:
+        dto.escalationRecipient !== undefined
+          ? dto.escalationRecipient
+          : existing.escalationRecipient,
+      maxEscalationAttempts:
+        dto.maxEscalationAttempts !== undefined
+          ? Number(dto.maxEscalationAttempts)
+          : existing.maxEscalationAttempts,
       updatedAt: new Date().toISOString(),
     };
 
@@ -276,7 +296,8 @@ export class NotificationSettingsService {
       ...existing,
       name: dto.name !== undefined ? dto.name.trim() : existing.name,
       category: dto.category !== undefined ? dto.category.trim() : existing.category,
-      relatedEvent: dto.relatedEvent !== undefined ? dto.relatedEvent.trim() : existing.relatedEvent,
+      relatedEvent:
+        dto.relatedEvent !== undefined ? dto.relatedEvent.trim() : existing.relatedEvent,
       subject: dto.subject !== undefined ? dto.subject.trim() : existing.subject,
       body: dto.body !== undefined ? dto.body.trim() : existing.body,
       isActive: dto.isActive !== undefined ? Boolean(dto.isActive) : existing.isActive,
@@ -324,7 +345,9 @@ export class NotificationSettingsService {
       throw new NotFoundError(`Email template not found: ${templateId}`);
     }
     if (target.isSystem) {
-      throw new BadRequestError('System templates cannot be deleted. You can deactivate them instead.');
+      throw new BadRequestError(
+        'System templates cannot be deleted. You can deactivate them instead.',
+      );
     }
 
     const filtered = templates.filter((t) => t.id !== templateId);

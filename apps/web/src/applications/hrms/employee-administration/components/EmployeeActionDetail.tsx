@@ -1,10 +1,4 @@
-import {
-  Alert,
-  Avatar,
-  Badge,
-  Button,
-  Stack,
-} from '../../../../design-system/components';
+import { Alert, Avatar, Badge, Button, Stack } from '../../../../design-system/components';
 import { BezentIcon } from '../../../../design-system/icons';
 import type { EmployeeActionDetail as EmployeeActionDetailData } from '../api/employeeAdministrationApi';
 import {
@@ -114,9 +108,7 @@ export function EmployeeActionDetail({ action, today, onOpenEmployee }: Employee
         <div className="bezent-wf-action-diff-list">
           {action.changes.map((change) => (
             <div key={change.field} className="bezent-wf-action-diff-card">
-              <div className="bezent-wf-action-diff-field">
-                {FIELD_LABELS[change.field]}
-              </div>
+              <div className="bezent-wf-action-diff-field">{FIELD_LABELS[change.field]}</div>
               <div className="bezent-wf-action-diff-compare">
                 <div className="bezent-wf-action-diff-box bezent-wf-action-diff-box--current">
                   <span className="bezent-wf-action-diff-tag">Current Value</span>
@@ -160,7 +152,9 @@ export function EmployeeActionDetail({ action, today, onOpenEmployee }: Employee
             )}
             <div className="bezent-wf-action-meta-item">
               <span className="bezent-wf-action-meta-label">Requested By</span>
-              <span className="bezent-wf-action-meta-val">{action.requestedBy ?? 'Not recorded'}</span>
+              <span className="bezent-wf-action-meta-val">
+                {action.requestedBy ?? 'Not recorded'}
+              </span>
             </div>
             <div className="bezent-wf-action-meta-item">
               <span className="bezent-wf-action-meta-label">Requested On</span>
@@ -232,9 +226,7 @@ export function EmployeeActionDetail({ action, today, onOpenEmployee }: Employee
                       <span className="bezent-wf-action-timeline-actor">· {entry.actor}</span>
                     )}
                   </div>
-                  {entry.notes && (
-                    <p className="bezent-wf-action-timeline-notes">{entry.notes}</p>
-                  )}
+                  {entry.notes && <p className="bezent-wf-action-timeline-notes">{entry.notes}</p>}
                 </div>
               </div>
             ))}

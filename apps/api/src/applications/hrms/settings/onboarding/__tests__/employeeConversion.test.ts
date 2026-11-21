@@ -56,7 +56,9 @@ describe('HRMS Employee Conversion Configuration & Candidate Conversion API', ()
       // 2. Field Mappings
       expect(Array.isArray(data.fieldMappings)).toBe(true);
       expect(data.fieldMappings.length).toBeGreaterThanOrEqual(12);
-      const destFields = data.fieldMappings.map((m: { destinationField: string }) => m.destinationField);
+      const destFields = data.fieldMappings.map(
+        (m: { destinationField: string }) => m.destinationField,
+      );
       expect(destFields).toContain('displayName');
       expect(destFields).toContain('email');
       expect(destFields).toContain('phone');
@@ -219,9 +221,7 @@ describe('HRMS Employee Conversion Configuration & Candidate Conversion API', ()
     });
 
     it('previews conversion readiness for complete candidate case', async () => {
-      const res = await hrms.get(
-        `/api/v1/hrms/onboarding/cases/${testCaseId}/conversion-preview`,
-      );
+      const res = await hrms.get(`/api/v1/hrms/onboarding/cases/${testCaseId}/conversion-preview`);
 
       expect(res.status).toBe(200);
       expect(res.body.success).toBe(true);
@@ -286,13 +286,11 @@ describe('HRMS Employee Conversion Configuration & Candidate Conversion API', ()
     });
 
     it('executes manual candidate to employee conversion', async () => {
-      const res = await hrms
-        .post(`/api/v1/hrms/onboarding/cases/${activeCaseId}/convert`)
-        .send({
-          effectiveDate: '2026-11-20',
-          status: 'probation',
-          notes: 'Converted via manual HR verification.',
-        });
+      const res = await hrms.post(`/api/v1/hrms/onboarding/cases/${activeCaseId}/convert`).send({
+        effectiveDate: '2026-11-20',
+        status: 'probation',
+        notes: 'Converted via manual HR verification.',
+      });
 
       expect(res.status).toBe(201);
       expect(res.body.success).toBe(true);
@@ -313,9 +311,7 @@ describe('HRMS Employee Conversion Configuration & Candidate Conversion API', ()
     });
 
     it('prevents duplicate conversion idempotently on repeated calls', async () => {
-      const res = await hrms
-        .post(`/api/v1/hrms/onboarding/cases/${activeCaseId}/convert`)
-        .send();
+      const res = await hrms.post(`/api/v1/hrms/onboarding/cases/${activeCaseId}/convert`).send();
 
       expect(res.status).toBe(201);
       expect(res.body.success).toBe(true);

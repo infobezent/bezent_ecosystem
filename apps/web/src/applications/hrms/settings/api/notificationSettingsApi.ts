@@ -86,7 +86,10 @@ export async function deleteReminderRule(id: string): Promise<void> {
   }
 }
 
-export async function evaluateReminderRules(): Promise<{ evaluatedRulesCount: number; remindersDispatched: number }> {
+export async function evaluateReminderRules(): Promise<{
+  evaluatedRulesCount: number;
+  remindersDispatched: number;
+}> {
   const res = await authorizedFetch(`${BASE_URL}/reminder-rules/evaluate`, {
     method: 'POST',
   });
@@ -102,7 +105,9 @@ export async function fetchEmailTemplates(): Promise<EmailTemplate[]> {
   return handleResponse<EmailTemplate[]>(res, 'Failed to fetch email templates');
 }
 
-export async function createEmailTemplate(template: Partial<EmailTemplate>): Promise<EmailTemplate> {
+export async function createEmailTemplate(
+  template: Partial<EmailTemplate>,
+): Promise<EmailTemplate> {
   const res = await authorizedFetch(`${BASE_URL}/email-templates`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },

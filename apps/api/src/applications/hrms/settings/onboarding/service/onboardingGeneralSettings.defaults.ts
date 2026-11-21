@@ -30,17 +30,8 @@ export function getDefaultAccessPermissions(): AccessPermissionsConfig {
     ],
     assignedHrAccessScope: 'all_hr',
     managerVisibilityScope: 'assigned_reports_only',
-    documentAccessRoles: [
-      'super_admin',
-      'company_admin',
-      'hr_manager',
-      'hr_executive',
-    ],
-    roleBasedOnboardingActions: [
-      'super_admin',
-      'company_admin',
-      'hr_manager',
-    ],
+    documentAccessRoles: ['super_admin', 'company_admin', 'hr_manager', 'hr_executive'],
+    roleBasedOnboardingActions: ['super_admin', 'company_admin', 'hr_manager'],
   };
 }
 

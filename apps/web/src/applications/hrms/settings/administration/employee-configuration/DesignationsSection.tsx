@@ -75,10 +75,7 @@ export function DesignationsSection({
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
-      if (
-        filterPopoverRef.current &&
-        !filterPopoverRef.current.contains(event.target as Node)
-      ) {
+      if (filterPopoverRef.current && !filterPopoverRef.current.contains(event.target as Node)) {
         setIsFilterOpen(false);
       }
     }

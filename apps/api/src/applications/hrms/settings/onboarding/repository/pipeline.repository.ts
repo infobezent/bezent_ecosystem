@@ -78,7 +78,8 @@ export class PipelineRepository {
         companyId,
         name: 'Executive & Leadership Onboarding',
         code: 'executive',
-        description: 'Accelerated onboarding pipeline tailored for senior leadership and executive hires.',
+        description:
+          'Accelerated onboarding pipeline tailored for senior leadership and executive hires.',
         isDefault: false,
         isActive: true,
         stages: [
@@ -86,7 +87,8 @@ export class PipelineRepository {
             id: `stg_exec_pre_${companyId}`,
             stageKey: 'preboarding_exec',
             name: 'Executive Pre-boarding',
-            description: 'Leadership welcome pack, executive equipment provisioning and agreements.',
+            description:
+              'Leadership welcome pack, executive equipment provisioning and agreements.',
             stageType: 'standard',
             displayOrder: 1,
             isRequired: true,
@@ -186,7 +188,11 @@ export class PipelineRepository {
     }
 
     const metadata = row.metadata as { pipelines?: OnboardingPipeline[] };
-    if (!metadata.pipelines || !Array.isArray(metadata.pipelines) || metadata.pipelines.length === 0) {
+    if (
+      !metadata.pipelines ||
+      !Array.isArray(metadata.pipelines) ||
+      metadata.pipelines.length === 0
+    ) {
       return this.createDefaultPipelines(tenantId, companyId);
     }
 

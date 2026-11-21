@@ -21,12 +21,7 @@ export const SUPPORTED_EVENT_KEYS = [
 export type SupportedEventKey = (typeof SUPPORTED_EVENT_KEYS)[number];
 
 export type NotificationRecipientType =
-  | 'candidate'
-  | 'hr_team'
-  | 'assigned_hr'
-  | 'reporting_manager'
-  | 'task_owner'
-  | string;
+  'candidate' | 'hr_team' | 'assigned_hr' | 'reporting_manager' | 'task_owner' | string;
 
 export interface EventNotificationConfig {
   id: string;
@@ -41,10 +36,7 @@ export interface EventNotificationConfig {
 }
 
 export type ReminderTriggerType =
-  | 'before_due_date'
-  | 'after_due_date'
-  | 'after_inactivity'
-  | 'fixed_delay';
+  'before_due_date' | 'after_due_date' | 'after_inactivity' | 'fixed_delay';
 
 export type ReminderScheduleUnit = 'hours' | 'days';
 export type ReminderDayType = 'business_days' | 'calendar_days';

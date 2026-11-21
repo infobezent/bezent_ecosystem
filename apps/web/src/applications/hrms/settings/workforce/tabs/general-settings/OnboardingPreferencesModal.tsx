@@ -1,7 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { Modal } from '../../../../../../design-system/components/Modal/Modal';
 import { Button } from '../../../../../../design-system/components/Button/Button';
-import { Select, type SelectOption } from '../../../../../../design-system/components/Select/Select';
+import {
+  Select,
+  type SelectOption,
+} from '../../../../../../design-system/components/Select/Select';
 import { Switch } from '../../../../../../design-system/components/Switch/Switch';
 import { Alert } from '../../../../../../design-system/components/Alert/Alert';
 import { BezentIcon } from '../../../../../../design-system/icons';

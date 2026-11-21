@@ -87,11 +87,10 @@ export function CreateEditTemplateModal({
         setApplicableValue(template.applicableValue || '');
         setIsActive(template.isActive !== false);
 
-        const loadedGroups = template.groups && template.groups.length > 0
-          ? [...template.groups].sort((a, b) => a.displayOrder - b.displayOrder)
-          : [
-              { id: 'grp_default', name: 'General Tasks', displayOrder: 1 },
-            ];
+        const loadedGroups =
+          template.groups && template.groups.length > 0
+            ? [...template.groups].sort((a, b) => a.displayOrder - b.displayOrder)
+            : [{ id: 'grp_default', name: 'General Tasks', displayOrder: 1 }];
         setGroups(loadedGroups);
 
         const loadedTasks = template.tasks
@@ -134,9 +133,7 @@ export function CreateEditTemplateModal({
       setError('Group name cannot be empty');
       return;
     }
-    setGroups(
-      groups.map((g) => (g.id === groupId ? { ...g, name: editingGroupName.trim() } : g)),
-    );
+    setGroups(groups.map((g) => (g.id === groupId ? { ...g, name: editingGroupName.trim() } : g)));
     setEditingGroupId(null);
     setEditingGroupName('');
     setError(null);
@@ -428,7 +425,8 @@ export function CreateEditTemplateModal({
                 <div className="bezent-cif-switch-copy">
                   <span className="bezent-cif-switch-title">Active Template</span>
                   <span className="bezent-cif-switch-hint">
-                    Active templates can be selected or assigned to onboarding pipelines and candidates.
+                    Active templates can be selected or assigned to onboarding pipelines and
+                    candidates.
                   </span>
                 </div>
                 <Switch
@@ -567,7 +565,9 @@ export function CreateEditTemplateModal({
                       <div className="bezent-checklist-tasks-list">
                         {groupTasks.length === 0 ? (
                           <div className="bezent-checklist-group-empty">
-                            <span>No tasks in this group yet. Click &quot;Add Task&quot; above.</span>
+                            <span>
+                              No tasks in this group yet. Click &quot;Add Task&quot; above.
+                            </span>
                           </div>
                         ) : (
                           groupTasks.map((t, taskIdx) => (
@@ -605,8 +605,8 @@ export function CreateEditTemplateModal({
                                     {t.dueOffsetDays === 0
                                       ? 'Day 0'
                                       : t.dueOffsetDays > 0
-                                      ? `+${t.dueOffsetDays}d`
-                                      : `${t.dueOffsetDays}d`}
+                                        ? `+${t.dueOffsetDays}d`
+                                        : `${t.dueOffsetDays}d`}
                                   </span>
                                   {t.isRequired ? (
                                     <span className="bezent-checklist-badge bezent-checklist-badge--req">

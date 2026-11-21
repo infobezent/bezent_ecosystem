@@ -399,7 +399,8 @@ export class EmployeeConversionRepository {
 
       const isAuto =
         updated.settings.conversionMode === 'automatic' ||
-        (updated.settings.conversionMode === 'both' && updated.settings.defaultMode === 'automatic');
+        (updated.settings.conversionMode === 'both' &&
+          updated.settings.defaultMode === 'automatic');
 
       if (convRows.length > 0) {
         await this.db

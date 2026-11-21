@@ -13,10 +13,7 @@ import type { EmployeeProfile } from '../api/employeesApi';
 import { updateEmployee, updateEmployeeSection } from '../api/employeesApi';
 
 export type EditableSectionType =
-  | 'personal-details'
-  | 'personal-contact'
-  | 'emergency-contacts'
-  | 'bank-account';
+  'personal-details' | 'personal-contact' | 'emergency-contacts' | 'bank-account';
 
 export interface InlineFormProps {
   profile: EmployeeProfile;

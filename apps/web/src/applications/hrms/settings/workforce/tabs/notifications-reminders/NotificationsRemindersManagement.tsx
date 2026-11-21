@@ -157,7 +157,9 @@ export function NotificationsRemindersManagement({
   };
 
   return (
-    <div className={`bezent-notifrem-workspace ${isEmbedded ? 'bezent-notifrem-workspace--embedded' : ''}`}>
+    <div
+      className={`bezent-notifrem-workspace ${isEmbedded ? 'bezent-notifrem-workspace--embedded' : ''}`}
+    >
       {/* Top Header Banner: Supported Channels (Sleek Compact Strip) */}
       <div className="bezent-notifrem-header-banner">
         <Inline justify="between" align="center" className="bezent-notifrem-channels-bar">
@@ -171,23 +173,35 @@ export function NotificationsRemindersManagement({
           <Inline gap="xs" align="center" className="bezent-notifrem-channels-pills">
             <div className="bezent-notifrem-channel-pill bezent-notifrem-channel-pill--active">
               <span className="bezent-notifrem-channel-indicator" />
-              <span>Email &mdash; <strong>Enabled</strong></span>
+              <span>
+                Email &mdash; <strong>Enabled</strong>
+              </span>
             </div>
             <div className="bezent-notifrem-channel-pill bezent-notifrem-channel-pill--active">
               <span className="bezent-notifrem-channel-indicator" />
-              <span>In-App Notifications &mdash; <strong>Enabled</strong></span>
+              <span>
+                In-App Notifications &mdash; <strong>Enabled</strong>
+              </span>
             </div>
             <div className="bezent-notifrem-channel-pill bezent-notifrem-channel-pill--future">
-              <span>SMS &mdash; <em>Future</em></span>
+              <span>
+                SMS &mdash; <em>Future</em>
+              </span>
             </div>
             <div className="bezent-notifrem-channel-pill bezent-notifrem-channel-pill--future">
-              <span>WhatsApp &mdash; <em>Future</em></span>
+              <span>
+                WhatsApp &mdash; <em>Future</em>
+              </span>
             </div>
           </Inline>
         </Inline>
       </div>
 
-      {error && <Alert variant="danger" title="Error">{error}</Alert>}
+      {error && (
+        <Alert variant="danger" title="Error">
+          {error}
+        </Alert>
+      )}
 
       {/* 4 Modern Interactive Square Tiles Grid */}
       <div className="bezent-notifrem-cards-grid bezent-notifrem-tiles-grid">
@@ -214,7 +228,8 @@ export function NotificationsRemindersManagement({
               Notification Settings
             </h3>
             <span className="bezent-notifrem-card__desc bezent-sr-only">
-              Event-driven alert triggers and dual-channel routing across candidate email deliveries and in-app feed notifications.
+              Event-driven alert triggers and dual-channel routing across candidate email deliveries
+              and in-app feed notifications.
             </span>
             <span className="bezent-notifrem-card__meta bezent-sr-only">
               Independent email and in-app toggles with recipient role resolution
@@ -253,7 +268,8 @@ export function NotificationsRemindersManagement({
               Reminder Rules
             </h3>
             <span className="bezent-notifrem-card__desc bezent-sr-only">
-              Automated scheduled reminders, inactivity timeouts, repeat frequency limits, and manager escalation policies.
+              Automated scheduled reminders, inactivity timeouts, repeat frequency limits, and
+              manager escalation policies.
             </span>
             <span className="bezent-notifrem-card__meta bezent-sr-only">
               {overview.reminderCounts.total} rules configured (business &amp; calendar days)
@@ -300,7 +316,8 @@ export function NotificationsRemindersManagement({
               Email Templates
             </h3>
             <span className="bezent-notifrem-card__desc bezent-sr-only">
-              Branded email notification layouts, invitation messages, and contextual dynamic variables panel with test delivery.
+              Branded email notification layouts, invitation messages, and contextual dynamic
+              variables panel with test delivery.
             </span>
             <span className="bezent-notifrem-card__meta bezent-sr-only">
               {overview.templateCounts.active} active templates &bull; Variable interpolation
@@ -339,7 +356,8 @@ export function NotificationsRemindersManagement({
               Notification History
             </h3>
             <span className="bezent-notifrem-card__desc bezent-sr-only">
-              Comprehensive audit log of sent emails, in-app feed alerts, recipient delivery statuses, and failure recovery.
+              Comprehensive audit log of sent emails, in-app feed alerts, recipient delivery
+              statuses, and failure recovery.
             </span>
             <span className="bezent-notifrem-card__meta bezent-sr-only">
               {overview.historyCounts.total} total logged notices &bull; Retry failed supported
@@ -351,7 +369,9 @@ export function NotificationsRemindersManagement({
             <span className="bezent-notifrem-tile__badge-dot" />
             <span className="bezent-notifrem-tile__badge-text">
               {overview.historyCounts.sent} Sent
-              {overview.historyCounts.failed > 0 ? ` (${overview.historyCounts.failed} Failed)` : ''}
+              {overview.historyCounts.failed > 0
+                ? ` (${overview.historyCounts.failed} Failed)`
+                : ''}
             </span>
           </div>
         </div>

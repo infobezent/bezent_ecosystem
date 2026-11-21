@@ -1,10 +1,7 @@
 import { randomUUID } from 'node:crypto';
 import { and, eq } from 'drizzle-orm';
 import { getDb } from '../../../../../db/connection.js';
-import {
-  formCustomizations,
-  onboardingGeneralSettings,
-} from '../../../../../db/schema.js';
+import { formCustomizations, onboardingGeneralSettings } from '../../../../../db/schema.js';
 import type {
   OnboardingGeneralSettingsConfig,
   UpdateOnboardingGeneralSettingsConfigDto,
@@ -21,10 +18,7 @@ export class OnboardingGeneralSettingsRepository {
   /**
    * Retrieves the current general settings configuration for tenant and company
    */
-  async getConfig(
-    tenantId: string,
-    companyId: string,
-  ): Promise<OnboardingGeneralSettingsConfig> {
+  async getConfig(tenantId: string, companyId: string): Promise<OnboardingGeneralSettingsConfig> {
     const rows = await this.db
       .select()
       .from(formCustomizations)

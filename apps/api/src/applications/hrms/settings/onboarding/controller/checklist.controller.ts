@@ -7,8 +7,7 @@ export class ChecklistController {
 
   private getTenantAndCompany(req: Request): { tenantId: string; companyId: string } {
     const tenantId =
-      (req.headers['x-tenant-id'] as string) ||
-      (req as unknown as { tenantId?: string }).tenantId;
+      (req.headers['x-tenant-id'] as string) || (req as unknown as { tenantId?: string }).tenantId;
     const companyId =
       (req.headers['x-company-id'] as string) ||
       (req as unknown as { companyId?: string }).companyId;

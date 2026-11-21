@@ -11,10 +11,7 @@ import { Badge } from '../../../../../../design-system/components/Badge/Badge';
 import { Alert } from '../../../../../../design-system/components/Alert/Alert';
 import { BezentIcon } from '../../../../../../design-system/icons';
 import type { EmailTemplate } from '../../../types/notificationSettings.types';
-import {
-  previewEmailTemplate,
-  sendTestEmail,
-} from '../../../api/notificationSettingsApi';
+import { previewEmailTemplate, sendTestEmail } from '../../../api/notificationSettingsApi';
 
 interface EmailTemplatesModalProps {
   isOpen: boolean;
@@ -95,13 +92,17 @@ export function EmailTemplatesModal({
   const [isEditorExpanded, setIsEditorExpanded] = useState(false);
 
   // Variable insertion & focus tracking
-  const [lastFocusedField, setLastFocusedField] = useState<'subject' | 'body' | 'to' | 'replyTo'>('body');
+  const [lastFocusedField, setLastFocusedField] = useState<'subject' | 'body' | 'to' | 'replyTo'>(
+    'body',
+  );
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Preview & Test states
   const [isPreviewMode, setIsPreviewMode] = useState(false);
-  const [renderedPreview, setRenderedPreview] = useState<{ subject: string; body: string } | null>(null);
+  const [renderedPreview, setRenderedPreview] = useState<{ subject: string; body: string } | null>(
+    null,
+  );
   const [previewLoading, setPreviewLoading] = useState(false);
 
   // Test Email state
@@ -147,7 +148,7 @@ export function EmailTemplatesModal({
     setTplReplyTo('');
     setTplSubject('Welcome to {{company_name}} - Action Required');
     setTplBody(
-      'Dear ${First_Name},\n\nWarm greetings from the ${companyName} team!\n\nTo kickstart your onboarding process, please take a moment to set up your account by clicking on the following link to create your password and gain access to our portal: link\n\nOnce you\'ve successfully set up your account, you\'ll be ready to dive into our comprehensive onboarding process.\n\nFor subsequent logins, access the portal through this link.\n\nWe look forward to working with you and making your transition into our team seamless and enjoyable.\n\nBest Regards,\n${Person performing this action}',
+      "Dear ${First_Name},\n\nWarm greetings from the ${companyName} team!\n\nTo kickstart your onboarding process, please take a moment to set up your account by clicking on the following link to create your password and gain access to our portal: link\n\nOnce you've successfully set up your account, you'll be ready to dive into our comprehensive onboarding process.\n\nFor subsequent logins, access the portal through this link.\n\nWe look forward to working with you and making your transition into our team seamless and enjoyable.\n\nBest Regards,\n${Person performing this action}",
     );
     setTplActive(true);
     setIsPreviewMode(false);
@@ -403,12 +404,24 @@ export function EmailTemplatesModal({
       }
     >
       <Stack gap="md" className="bezent-notifrem-templates-container">
-        {error && <Alert variant="danger" title="Error">{error}</Alert>}
-        {successMsg && <Alert variant="success" title="Success">{successMsg}</Alert>}
+        {error && (
+          <Alert variant="danger" title="Error">
+            {error}
+          </Alert>
+        )}
+        {successMsg && (
+          <Alert variant="success" title="Success">
+            {successMsg}
+          </Alert>
+        )}
 
         {/* Test Email Dialog Modal */}
         {showTestDialog && (
-          <div className="bezent-templates-test-dialog" role="dialog" aria-label="Send Test Email Dialog">
+          <div
+            className="bezent-templates-test-dialog"
+            role="dialog"
+            aria-label="Send Test Email Dialog"
+          >
             <div className="bezent-templates-test-header">
               <div className="bezent-templates-test-title-wrap">
                 <div className="bezent-templates-test-icon">
@@ -502,7 +515,9 @@ export function EmailTemplatesModal({
 
               <div className="bezent-templates-preview-hint">
                 <BezentIcon name="info" size={14} />
-                <span>Simulated preview replacing merge tags with candidate registration data.</span>
+                <span>
+                  Simulated preview replacing merge tags with candidate registration data.
+                </span>
               </div>
             </div>
           ) : (
@@ -585,8 +600,14 @@ export function EmailTemplatesModal({
                           value={tplFrom}
                           onChange={(e) => setTplFrom(e.target.value)}
                           options={[
-                            { value: 'Person performing this action', label: 'Person performing this action' },
-                            { value: 'BEZENT System Dispatch <notifications@bezent.internal>', label: 'BEZENT System Dispatch <notifications@bezent.internal>' },
+                            {
+                              value: 'Person performing this action',
+                              label: 'Person performing this action',
+                            },
+                            {
+                              value: 'BEZENT System Dispatch <notifications@bezent.internal>',
+                              label: 'BEZENT System Dispatch <notifications@bezent.internal>',
+                            },
                             { value: 'Assigned HR Team', label: 'Assigned HR Team' },
                             { value: 'Reporting Manager', label: 'Reporting Manager' },
                           ]}
@@ -742,7 +763,9 @@ export function EmailTemplatesModal({
                           <button
                             type="button"
                             className="bezent-zoho-expand-btn"
-                            title={isEditorExpanded ? 'Minimize editor' : 'Expand editor full width'}
+                            title={
+                              isEditorExpanded ? 'Minimize editor' : 'Expand editor full width'
+                            }
                             onClick={() => setIsEditorExpanded(!isEditorExpanded)}
                             aria-label="Toggle full width editor"
                           >
@@ -752,7 +775,11 @@ export function EmailTemplatesModal({
                       </div>
 
                       {/* Middle Rich Text Formatting Toolbar */}
-                      <div className="bezent-zoho-toolbar" role="toolbar" aria-label="Formatting toolbar">
+                      <div
+                        className="bezent-zoho-toolbar"
+                        role="toolbar"
+                        aria-label="Formatting toolbar"
+                      >
                         <button
                           type="button"
                           className="bezent-zoho-tb-btn bezent-zoho-tb-btn--bold"
@@ -793,7 +820,11 @@ export function EmailTemplatesModal({
                         >
                           F
                         </button>
-                        <select className="bezent-zoho-tb-select" title="Font size" defaultValue="12">
+                        <select
+                          className="bezent-zoho-tb-select"
+                          title="Font size"
+                          defaultValue="12"
+                        >
                           <option value="10">10</option>
                           <option value="11">11</option>
                           <option value="12">12</option>
@@ -889,7 +920,11 @@ export function EmailTemplatesModal({
                           type="button"
                           className="bezent-zoho-tb-btn"
                           title="Insert Table"
-                          onClick={() => handleFormat('\n| Header 1 | Header 2 |\n| --- | --- |\n| Value 1 | Value 2 |\n')}
+                          onClick={() =>
+                            handleFormat(
+                              '\n| Header 1 | Header 2 |\n| --- | --- |\n| Value 1 | Value 2 |\n',
+                            )
+                          }
                         >
                           田
                         </button>
@@ -987,13 +1022,16 @@ export function EmailTemplatesModal({
                         <button
                           type="button"
                           className="bezent-zoho-link-btn"
-                          onClick={() => alert('Standard Templates: Select company attachment template')}
+                          onClick={() =>
+                            alert('Standard Templates: Select company attachment template')
+                          }
                         >
                           Select Templates
                         </button>
                       </div>
                       <span className="bezent-zoho-dropzone-hint">
-                        Supported file format: .CSV, .DOC, .PDF, .XLS, .XLSX, .ZIP, .JPG, .JPEG, .PNG.
+                        Supported file format: .CSV, .DOC, .PDF, .XLS, .XLSX, .ZIP, .JPG, .JPEG,
+                        .PNG.
                       </span>
 
                       {attachedFile && (
@@ -1039,10 +1077,18 @@ export function EmailTemplatesModal({
             <table className="bezent-notifrem-table" aria-label="Email templates table">
               <thead>
                 <tr>
-                  <th scope="col" className="bezent-notifrem-th bezent-templates-th--name">Template Name</th>
-                  <th scope="col" className="bezent-notifrem-th bezent-templates-th--category">Category / Event</th>
-                  <th scope="col" className="bezent-notifrem-th bezent-templates-th--status">Status</th>
-                  <th scope="col" className="bezent-notifrem-th bezent-templates-th--actions">Actions</th>
+                  <th scope="col" className="bezent-notifrem-th bezent-templates-th--name">
+                    Template Name
+                  </th>
+                  <th scope="col" className="bezent-notifrem-th bezent-templates-th--category">
+                    Category / Event
+                  </th>
+                  <th scope="col" className="bezent-notifrem-th bezent-templates-th--status">
+                    Status
+                  </th>
+                  <th scope="col" className="bezent-notifrem-th bezent-templates-th--actions">
+                    Actions
+                  </th>
                 </tr>
               </thead>
               <tbody>
@@ -1059,14 +1105,17 @@ export function EmailTemplatesModal({
                           )}
                         </Inline>
                         <span className="bezent-notifrem-event-desc">
-                          v{tpl.version} &bull; Updated {new Date(tpl.updatedAt).toLocaleDateString()}
+                          v{tpl.version} &bull; Updated{' '}
+                          {new Date(tpl.updatedAt).toLocaleDateString()}
                         </span>
                       </div>
                     </td>
                     <td className="bezent-notifrem-td">
                       <div className="bezent-notifrem-cell-stack">
                         <span className="bezent-notifrem-badge-label">{tpl.category}</span>
-                        <span className="bezent-notifrem-event-desc">{formatEventLabel(tpl.relatedEvent)}</span>
+                        <span className="bezent-notifrem-event-desc">
+                          {formatEventLabel(tpl.relatedEvent)}
+                        </span>
                       </div>
                     </td>
                     <td className="bezent-notifrem-td bezent-notifrem-td--center">

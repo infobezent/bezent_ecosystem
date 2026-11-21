@@ -1,5 +1,8 @@
 import type { Request, Response, NextFunction } from 'express';
-import { EmployeeConversionService, type ConversionActor } from '../service/employeeConversion.service.js';
+import {
+  EmployeeConversionService,
+  type ConversionActor,
+} from '../service/employeeConversion.service.js';
 import { BadRequestError } from '../../../../../app/errors/AppError.js';
 
 export class EmployeeConversionController {
@@ -97,8 +100,16 @@ export class EmployeeConversionController {
       const { tenantId, companyId } = this.getTenantAndCompany(req);
       const caseId = String(req.params.caseId);
       const actor = this.getActor(req);
-      const data = await this.service.executeConversion(tenantId, companyId, caseId, req.body, actor);
-      res.status(201).json({ success: true, data, message: 'Candidate converted to employee successfully' });
+      const data = await this.service.executeConversion(
+        tenantId,
+        companyId,
+        caseId,
+        req.body,
+        actor,
+      );
+      res
+        .status(201)
+        .json({ success: true, data, message: 'Candidate converted to employee successfully' });
     } catch (err) {
       next(err);
     }

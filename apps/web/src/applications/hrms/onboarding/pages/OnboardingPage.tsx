@@ -843,10 +843,7 @@ export function OnboardingPage({ title = 'Onboarding', onAddNewHire }: Onboardin
                                       : `${item.stage === 'preboarding' ? 'Start' : 'Continue'} registration for ${item.fullName}`
                                   }
                                 >
-                                  <BezentIcon
-                                    name={isCompleted ? 'eye' : 'edit'}
-                                    size={16}
-                                  />
+                                  <BezentIcon name={isCompleted ? 'eye' : 'edit'} size={16} />
                                 </IconButton>
                                 {!isCompleted && item.status === 'active' && (
                                   <IconButton
@@ -1012,10 +1009,7 @@ export function OnboardingPage({ title = 'Onboarding', onAddNewHire }: Onboardin
                                       : `${item.stage === 'preboarding' ? 'Start' : 'Continue'} registration for ${item.fullName}`
                                   }
                                 >
-                                  <BezentIcon
-                                    name={isCompleted ? 'eye' : 'edit'}
-                                    size={16}
-                                  />
+                                  <BezentIcon name={isCompleted ? 'eye' : 'edit'} size={16} />
                                 </IconButton>
                                 {!isCompleted && item.status === 'active' && (
                                   <IconButton

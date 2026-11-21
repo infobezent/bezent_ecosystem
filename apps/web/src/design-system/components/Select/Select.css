@@ -138,7 +138,9 @@
   justify-content: center;
   color: var(--text-secondary, #64748b);
   pointer-events: none;
-  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), color 0.15s ease;
+  transition:
+    transform 0.2s cubic-bezier(0.16, 1, 0.3, 1),
+    color 0.15s ease;
 }
 
 .bezent-select-arrow.is-open {
@@ -196,7 +198,7 @@
   }
 }
 
-@keyframes bezentSelectFadeIn
+@keyframes bezentSelectFadeIn {
   from {
     opacity: 0;
     transform: translateY(-4px) scale(0.98);

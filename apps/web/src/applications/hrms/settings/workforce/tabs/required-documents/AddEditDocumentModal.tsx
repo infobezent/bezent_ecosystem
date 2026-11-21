@@ -43,8 +43,12 @@ export function AddEditDocumentModal({
   );
   const [isCustomCategory, setIsCustomCategory] = useState(false);
   const [customCategoryName, setCustomCategoryName] = useState('');
-  const [isRequired, setIsRequired] = useState(() => (editingDocument ? editingDocument.isRequired : true));
-  const [isActive, setIsActive] = useState(() => (editingDocument ? editingDocument.isActive : true));
+  const [isRequired, setIsRequired] = useState(() =>
+    editingDocument ? editingDocument.isRequired : true,
+  );
+  const [isActive, setIsActive] = useState(() =>
+    editingDocument ? editingDocument.isActive : true,
+  );
 
   // Upload Configuration
   const [selectedFormats, setSelectedFormats] = useState<string[]>(
@@ -53,32 +57,32 @@ export function AddEditDocumentModal({
   const [maxFileSizeMb, setMaxFileSizeMb] = useState(
     () => editingDocument?.uploadConfig?.maxFileSizeMb || 5,
   );
-  const [allowMultiple, setAllowMultiple] = useState(
-    () => Boolean(editingDocument?.uploadConfig?.allowMultiple),
+  const [allowMultiple, setAllowMultiple] = useState(() =>
+    Boolean(editingDocument?.uploadConfig?.allowMultiple),
   );
   const [maxFiles, setMaxFiles] = useState(() => editingDocument?.uploadConfig?.maxFiles || 3);
-  const [expiryApplicable, setExpiryApplicable] = useState(
-    () => Boolean(editingDocument?.uploadConfig?.expiryApplicable),
+  const [expiryApplicable, setExpiryApplicable] = useState(() =>
+    Boolean(editingDocument?.uploadConfig?.expiryApplicable),
   );
-  const [requireExpiry, setRequireExpiry] = useState(
-    () => Boolean(editingDocument?.uploadConfig?.requireExpiry),
+  const [requireExpiry, setRequireExpiry] = useState(() =>
+    Boolean(editingDocument?.uploadConfig?.requireExpiry),
   );
 
   // Verification Configuration
   const [verificationRequired, setVerificationRequired] = useState(
     () => editingDocument?.verificationConfig?.verificationRequired ?? true,
   );
-  const [verificationResponsibility, setVerificationResponsibility] = useState<'hr' | 'specific_role'>(
-    () => editingDocument?.verificationConfig?.verificationResponsibility ?? 'hr',
-  );
+  const [verificationResponsibility, setVerificationResponsibility] = useState<
+    'hr' | 'specific_role'
+  >(() => editingDocument?.verificationConfig?.verificationResponsibility ?? 'hr');
   const [specificRoleName, setSpecificRoleName] = useState(
     () => editingDocument?.verificationConfig?.specificRoleName || '',
   );
   const [allowReupload, setAllowReupload] = useState(
     () => editingDocument?.verificationConfig?.allowReupload ?? true,
   );
-  const [reverificationOnExpiry, setReverificationOnExpiry] = useState(
-    () => Boolean(editingDocument?.verificationConfig?.reverificationOnExpiry),
+  const [reverificationOnExpiry, setReverificationOnExpiry] = useState(() =>
+    Boolean(editingDocument?.verificationConfig?.reverificationOnExpiry),
   );
 
   const [saving, setSaving] = useState(false);
@@ -102,10 +106,14 @@ export function AddEditDocumentModal({
       setRequireExpiry(Boolean(editingDocument.uploadConfig?.requireExpiry));
 
       setVerificationRequired(editingDocument.verificationConfig?.verificationRequired ?? true);
-      setVerificationResponsibility(editingDocument.verificationConfig?.verificationResponsibility ?? 'hr');
+      setVerificationResponsibility(
+        editingDocument.verificationConfig?.verificationResponsibility ?? 'hr',
+      );
       setSpecificRoleName(editingDocument.verificationConfig?.specificRoleName || '');
       setAllowReupload(editingDocument.verificationConfig?.allowReupload ?? true);
-      setReverificationOnExpiry(Boolean(editingDocument.verificationConfig?.reverificationOnExpiry));
+      setReverificationOnExpiry(
+        Boolean(editingDocument.verificationConfig?.reverificationOnExpiry),
+      );
     } else {
       setName('');
       setDescription('');
@@ -184,7 +192,8 @@ export function AddEditDocumentModal({
         verificationConfig: {
           verificationRequired,
           verificationResponsibility,
-          specificRoleName: verificationResponsibility === 'specific_role' ? specificRoleName.trim() : null,
+          specificRoleName:
+            verificationResponsibility === 'specific_role' ? specificRoleName.trim() : null,
           allowReupload,
           reverificationOnExpiry: expiryApplicable ? reverificationOnExpiry : false,
         },
@@ -376,7 +385,9 @@ export function AddEditDocumentModal({
                 <Switch
                   checked={requireExpiry}
                   onChange={(e) => setRequireExpiry(e.target.checked)}
-                  label={requireExpiry ? 'Candidate must provide expiry date' : 'Expiry date optional'}
+                  label={
+                    requireExpiry ? 'Candidate must provide expiry date' : 'Expiry date optional'
+                  }
                 />
               </FormField>
             </div>
@@ -390,7 +401,11 @@ export function AddEditDocumentModal({
             <Switch
               checked={verificationRequired}
               onChange={(e) => setVerificationRequired(e.target.checked)}
-              label={verificationRequired ? 'Requires HR/Admin Verification' : 'Auto-Accept without verification'}
+              label={
+                verificationRequired
+                  ? 'Requires HR/Admin Verification'
+                  : 'Auto-Accept without verification'
+              }
             />
           </FormField>
 
@@ -426,7 +441,9 @@ export function AddEditDocumentModal({
             <Switch
               checked={allowReupload}
               onChange={(e) => setAllowReupload(e.target.checked)}
-              label={allowReupload ? 'Allowed if rejected or requested' : 'Locked after first submission'}
+              label={
+                allowReupload ? 'Allowed if rejected or requested' : 'Locked after first submission'
+              }
             />
           </FormField>
 
@@ -435,7 +452,11 @@ export function AddEditDocumentModal({
               <Switch
                 checked={reverificationOnExpiry}
                 onChange={(e) => setReverificationOnExpiry(e.target.checked)}
-                label={reverificationOnExpiry ? 'Yes — Flag for re-verification upon expiry' : 'No automated re-verification'}
+                label={
+                  reverificationOnExpiry
+                    ? 'Yes — Flag for re-verification upon expiry'
+                    : 'No automated re-verification'
+                }
               />
             </FormField>
           )}

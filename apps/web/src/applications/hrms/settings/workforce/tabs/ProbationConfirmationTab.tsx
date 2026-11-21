@@ -87,7 +87,9 @@ export function ProbationConfirmationTab({
           </div>
         </div>
         <div className="bezent-lifecycle-card__header-right">
-          <Badge variant="success" size="sm">● Active</Badge>
+          <Badge variant="success" size="sm">
+            ● Active
+          </Badge>
           <Button variant="primary" size="sm" onClick={handleSave} disabled={saving}>
             <BezentIcon name="check" size={14} />
             {saving ? 'Saving...' : 'Save Probation Policy'}
@@ -111,7 +113,9 @@ export function ProbationConfirmationTab({
           <div className="bezent-lifecycle-metric-item">
             <span className="bezent-lifecycle-metric-label">Evaluation Mode</span>
             <span className="bezent-lifecycle-metric-value bezent-lifecycle-metric-value--active">
-              {confirmationMode === 'manager_review' ? 'Manager Review Required' : 'Auto-Confirm on Due Date'}
+              {confirmationMode === 'manager_review'
+                ? 'Manager Review Required'
+                : 'Auto-Confirm on Due Date'}
             </span>
           </div>
           <div className="bezent-lifecycle-metric-item">
@@ -120,7 +124,9 @@ export function ProbationConfirmationTab({
           </div>
           <div className="bezent-lifecycle-metric-item">
             <span className="bezent-lifecycle-metric-label">Auto Confirmation Letter</span>
-            <span className={`bezent-lifecycle-metric-value ${autoGenerateLetter ? 'bezent-lifecycle-metric-value--success' : ''}`}>
+            <span
+              className={`bezent-lifecycle-metric-value ${autoGenerateLetter ? 'bezent-lifecycle-metric-value--success' : ''}`}
+            >
               {autoGenerateLetter ? 'Enabled' : 'Disabled'}
             </span>
           </div>

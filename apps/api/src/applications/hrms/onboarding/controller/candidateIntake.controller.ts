@@ -65,11 +65,7 @@ export class CandidateIntakeController {
     }
   };
 
-  saveDraftByToken = async (
-    req: Request<{ token: string }>,
-    res: Response,
-    next: NextFunction,
-  ) => {
+  saveDraftByToken = async (req: Request<{ token: string }>, res: Response, next: NextFunction) => {
     try {
       const { token } = req.params;
       await this.service.saveCandidateDraft(token, req.body.answers || req.body);
@@ -79,17 +75,10 @@ export class CandidateIntakeController {
     }
   };
 
-  submitByToken = async (
-    req: Request<{ token: string }>,
-    res: Response,
-    next: NextFunction,
-  ) => {
+  submitByToken = async (req: Request<{ token: string }>, res: Response, next: NextFunction) => {
     try {
       const { token } = req.params;
-      const result = await this.service.submitCandidateIntake(
-        token,
-        req.body.answers || req.body,
-      );
+      const result = await this.service.submitCandidateIntake(token, req.body.answers || req.body);
       res.json({ data: result });
     } catch (err) {
       next(err);
@@ -116,11 +105,7 @@ export class CandidateIntakeController {
     }
   };
 
-  requestChanges = async (
-    req: Request<{ caseId: string }>,
-    res: Response,
-    next: NextFunction,
-  ) => {
+  requestChanges = async (req: Request<{ caseId: string }>, res: Response, next: NextFunction) => {
     try {
       const { tenantId, companyId } = requireContext(req);
       const user = (req as any).user;

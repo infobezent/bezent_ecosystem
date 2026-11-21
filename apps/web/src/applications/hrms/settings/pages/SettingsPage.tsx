@@ -59,7 +59,11 @@ export function SettingsPageInner({ initialModule = 'overview' }: SettingsPageIn
           <div className="bezent-settings-zoho-banner">
             <div className="bezent-settings-zoho-banner__company">
               <div className="bezent-settings-zoho-banner__logo" aria-hidden="true">
-                <img src={bezentMark} alt="Company Logo" className="bezent-settings-zoho-banner__logo-img" />
+                <img
+                  src={bezentMark}
+                  alt="Company Logo"
+                  className="bezent-settings-zoho-banner__logo-img"
+                />
               </div>
               <div className="bezent-settings-zoho-banner__company-info">
                 <h3 className="bezent-settings-zoho-banner__company-name">
@@ -72,7 +76,9 @@ export function SettingsPageInner({ initialModule = 'overview' }: SettingsPageIn
               <Avatar initials={userInitials} size="md" color="blue" />
               <div className="bezent-settings-zoho-banner__user-info">
                 <div className="bezent-settings-zoho-banner__user-name">{userName}</div>
-                <div className="bezent-settings-zoho-banner__user-role">{userRole || 'Super Administrator'}</div>
+                <div className="bezent-settings-zoho-banner__user-role">
+                  {userRole || 'Super Administrator'}
+                </div>
               </div>
             </div>
           </div>
@@ -116,7 +122,9 @@ export function SettingsPageInner({ initialModule = 'overview' }: SettingsPageIn
                 aria-label={`${mod.name} Settings`}
                 title={mod.description}
               >
-                <div className={`bezent-settings-zoho-tile__icon bezent-settings-zoho-tile__icon--${mod.id}`}>
+                <div
+                  className={`bezent-settings-zoho-tile__icon bezent-settings-zoho-tile__icon--${mod.id}`}
+                >
                   <BezentIcon name={mod.icon as BezentIconName} size={24} />
                 </div>
                 <div className="bezent-settings-zoho-tile__name">{mod.name}</div>

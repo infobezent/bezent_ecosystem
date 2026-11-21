@@ -119,12 +119,7 @@ Please review the notes and upload a clear, valid copy:
 
 Warm regards,
 {{company_name}} HR Team`,
-    availableVariables: [
-      'candidate_name',
-      'company_name',
-      'document_name',
-      'registration_link',
-    ],
+    availableVariables: ['candidate_name', 'company_name', 'document_name', 'registration_link'],
     isActive: true,
     isSystem: true,
     version: 1,
@@ -173,12 +168,7 @@ Please review your task list and ensure timely completion prior to the joining d
 
 Thank you,
 BEZENT Operations Team`,
-    availableVariables: [
-      'candidate_name',
-      'company_name',
-      'position_name',
-      'joining_date',
-    ],
+    availableVariables: ['candidate_name', 'company_name', 'position_name', 'joining_date'],
     isActive: true,
     isSystem: true,
     version: 1,
@@ -199,12 +189,7 @@ We are excited to welcome you on your first day: {{joining_date}}.
 
 Warm regards,
 {{company_name}} Onboarding Team`,
-    availableVariables: [
-      'candidate_name',
-      'company_name',
-      'position_name',
-      'joining_date',
-    ],
+    availableVariables: ['candidate_name', 'company_name', 'position_name', 'joining_date'],
     isActive: true,
     isSystem: true,
     version: 1,
@@ -225,12 +210,7 @@ You can now log in to the BEZENT Employee Self-Service (ESS) portal using your c
 
 Welcome aboard!
 {{company_name}}`,
-    availableVariables: [
-      'employee_name',
-      'company_name',
-      'position_name',
-      'joining_date',
-    ],
+    availableVariables: ['employee_name', 'company_name', 'position_name', 'joining_date'],
     isActive: true,
     isSystem: true,
     version: 1,
@@ -244,7 +224,8 @@ export const DEFAULT_EVENT_CONFIGS: EventNotificationConfig[] = [
     id: 'evc_candidate_invited',
     eventKey: 'candidate_invited',
     name: 'Candidate invited',
-    description: 'Triggered when a new hire is sent an invitation to complete pre-onboarding intake.',
+    description:
+      'Triggered when a new hire is sent an invitation to complete pre-onboarding intake.',
     enabled: true,
     emailEnabled: true,
     inAppEnabled: false,
@@ -321,7 +302,8 @@ export const DEFAULT_EVENT_CONFIGS: EventNotificationConfig[] = [
     id: 'evc_document_rejected',
     eventKey: 'document_rejected',
     name: 'Document rejected',
-    description: 'Triggered when HR marks a submitted credential as rejected and requests a re-upload.',
+    description:
+      'Triggered when HR marks a submitted credential as rejected and requests a re-upload.',
     enabled: true,
     emailEnabled: true,
     inAppEnabled: true,

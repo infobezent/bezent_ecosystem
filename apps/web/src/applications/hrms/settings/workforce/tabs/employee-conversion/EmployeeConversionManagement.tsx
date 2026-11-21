@@ -247,7 +247,9 @@ export function EmployeeConversionManagement({
   };
 
   const handleResetToDefaults = async () => {
-    if (!window.confirm('Are you sure you want to reset all conversion settings to system defaults?')) {
+    if (
+      !window.confirm('Are you sure you want to reset all conversion settings to system defaults?')
+    ) {
       return;
     }
     try {
@@ -276,18 +278,13 @@ export function EmployeeConversionManagement({
     >
       {/* 1. Header (Clean & Embedded-Aware) */}
       <div
-        className={`bezent-empconv-header ${
-          isEmbedded ? 'bezent-empconv-header--embedded' : ''
-        }`}
+        className={`bezent-empconv-header ${isEmbedded ? 'bezent-empconv-header--embedded' : ''}`}
       >
-        <div
-          className={`bezent-empconv-header-copy ${
-            isEmbedded ? 'bezent-sr-only' : ''
-          }`}
-        >
+        <div className={`bezent-empconv-header-copy ${isEmbedded ? 'bezent-sr-only' : ''}`}>
           <h2 className="bezent-empconv-header-title">Employee Conversion</h2>
           <p className="bezent-empconv-header-sub">
-            Configure criteria, field mappings, mandatory prerequisites, and post-conversion handoffs for promoting candidates into active employees.
+            Configure criteria, field mappings, mandatory prerequisites, and post-conversion
+            handoffs for promoting candidates into active employees.
           </p>
         </div>
 
@@ -380,7 +377,9 @@ export function EmployeeConversionManagement({
             onClick={() => setFieldMappingModalOpen(true)}
             role="button"
             tabIndex={0}
-            onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && setFieldMappingModalOpen(true)}
+            onKeyDown={(e) =>
+              (e.key === 'Enter' || e.key === ' ') && setFieldMappingModalOpen(true)
+            }
             title="Configure Field Mapping"
             aria-label="Field Mapping"
           >
@@ -414,7 +413,9 @@ export function EmployeeConversionManagement({
             onClick={() => setRequiredInfoModalOpen(true)}
             role="button"
             tabIndex={0}
-            onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && setRequiredInfoModalOpen(true)}
+            onKeyDown={(e) =>
+              (e.key === 'Enter' || e.key === ' ') && setRequiredInfoModalOpen(true)
+            }
             title="Configure Required Information"
             aria-label="Required Information"
           >
@@ -504,9 +505,7 @@ export function EmployeeConversionManagement({
 
             <div className="bezent-empconv-tile__badge bezent-empconv-tile__badge--rules">
               <span className="bezent-empconv-tile__badge-dot" />
-              <span className="bezent-empconv-tile__badge-text">
-                Safeguards Protected
-              </span>
+              <span className="bezent-empconv-tile__badge-text">Safeguards Protected</span>
             </div>
           </div>
         </div>

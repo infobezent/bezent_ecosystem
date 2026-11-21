@@ -929,9 +929,7 @@ export function ContactSection({
             />
             <Divider />
             <Grid columns={2} gap="md">
-              <DetailItem label="Current Address">
-                {currentAddress || 'Not recorded'}
-              </DetailItem>
+              <DetailItem label="Current Address">{currentAddress || 'Not recorded'}</DetailItem>
               <DetailItem label="Permanent Address">
                 {permanentAddress || 'Same as current address'}
               </DetailItem>

@@ -169,12 +169,15 @@ export function OffboardingClearanceTab({
             <div className="bezent-lifecycle-card__title-group">
               <h3 className="bezent-lifecycle-card__title">Notice Period Governance Matrix</h3>
               <p className="bezent-lifecycle-card__desc">
-                Define mandatory notice periods by employment status and resignation withdrawal terms.
+                Define mandatory notice periods by employment status and resignation withdrawal
+                terms.
               </p>
             </div>
           </div>
           <div className="bezent-lifecycle-card__header-right">
-            <Badge variant="success" size="sm">● Active</Badge>
+            <Badge variant="success" size="sm">
+              ● Active
+            </Badge>
             <Button variant="primary" size="sm" onClick={handleSavePolicy} disabled={savingPolicy}>
               <BezentIcon name="check" size={14} />
               {savingPolicy ? 'Saving...' : 'Save Notice Policy'}
@@ -201,8 +204,14 @@ export function OffboardingClearanceTab({
             </div>
             <div className="bezent-lifecycle-metric-item">
               <span className="bezent-lifecycle-metric-label">Buyout &amp; Leave Offset</span>
-              <span className={`bezent-lifecycle-metric-value ${allowNoticeBuyout && allowLeaveOffset ? 'bezent-lifecycle-metric-value--success' : ''}`}>
-                {allowNoticeBuyout && allowLeaveOffset ? 'Fully Permitted' : allowNoticeBuyout || allowLeaveOffset ? 'Partial' : 'Restricted'}
+              <span
+                className={`bezent-lifecycle-metric-value ${allowNoticeBuyout && allowLeaveOffset ? 'bezent-lifecycle-metric-value--success' : ''}`}
+              >
+                {allowNoticeBuyout && allowLeaveOffset
+                  ? 'Fully Permitted'
+                  : allowNoticeBuyout || allowLeaveOffset
+                    ? 'Partial'
+                    : 'Restricted'}
               </span>
             </div>
           </div>
@@ -275,7 +284,9 @@ export function OffboardingClearanceTab({
               <BezentIcon name="checklist" size={20} />
             </div>
             <div className="bezent-lifecycle-card__title-group">
-              <h3 className="bezent-lifecycle-card__title">Department Clearance Checklist Templates</h3>
+              <h3 className="bezent-lifecycle-card__title">
+                Department Clearance Checklist Templates
+              </h3>
               <p className="bezent-lifecycle-card__desc">
                 Define mandatory handover tasks across IT, Administration, Finance, and HR before
                 Full & Final (F&F) settlement.

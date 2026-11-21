@@ -21,8 +21,8 @@ export function RequiredInformationModal({
   initialItems,
   onSave,
 }: RequiredInformationModalProps) {
-  const [items, setItems] = useState<RequiredInfoItem[]>(
-    () => (initialItems ? [...initialItems] : []),
+  const [items, setItems] = useState<RequiredInfoItem[]>(() =>
+    initialItems ? [...initialItems] : [],
   );
 
   const [searchTerm, setSearchTerm] = useState('');
@@ -72,8 +72,7 @@ export function RequiredInformationModal({
     const groupItems = term
       ? rawGroupItems.filter(
           (i) =>
-            i.fieldName.toLowerCase().includes(term) ||
-            i.fieldKey.toLowerCase().includes(term),
+            i.fieldName.toLowerCase().includes(term) || i.fieldKey.toLowerCase().includes(term),
         )
       : rawGroupItems;
 

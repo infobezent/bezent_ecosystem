@@ -64,9 +64,7 @@ export async function resetConversionConfig(): Promise<EmployeeConversionConfig>
 /**
  * Evaluates candidate conversion readiness
  */
-export async function fetchConversionPreview(
-  caseId: string,
-): Promise<ConversionCandidatePreview> {
+export async function fetchConversionPreview(caseId: string): Promise<ConversionCandidatePreview> {
   const res = await authorizedFetch(
     `${appConfig.apiBaseUrl}/hrms/onboarding/cases/${caseId}/conversion-preview`,
   );

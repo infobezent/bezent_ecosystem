@@ -43,7 +43,7 @@ export function AddEditStageModal({
       setStageType(stage.stageType || (stage.isTerminal ? 'final' : 'standard'));
       setColor(stage.color || '');
       setAllowManualEntry(stage.allowManualEntry ?? true);
-      setAllowManualExit(stage.allowManualExit ?? (stage.stageType !== 'final'));
+      setAllowManualExit(stage.allowManualExit ?? stage.stageType !== 'final');
       setRequireChecklist(Boolean(stage.requireChecklist));
       setRequireDocVerification(Boolean(stage.requireDocVerification));
       setRequireHrApproval(Boolean(stage.requireHrApproval));
@@ -81,9 +81,7 @@ export function AddEditStageModal({
 
     // Name uniqueness check within pipeline
     const duplicate = existingStages.find(
-      (s) =>
-        s.id !== stage?.id &&
-        s.name.trim().toLowerCase() === trimmedName.toLowerCase(),
+      (s) => s.id !== stage?.id && s.name.trim().toLowerCase() === trimmedName.toLowerCase(),
     );
     if (duplicate) {
       setError(`A stage named "${trimmedName}" already exists in this pipeline.`);

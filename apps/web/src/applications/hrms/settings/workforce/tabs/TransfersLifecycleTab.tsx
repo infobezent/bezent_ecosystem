@@ -77,7 +77,9 @@ export function TransfersLifecycleTab({ initialPolicy, onReload }: TransfersLife
             <BezentIcon name="switchAccount" size={20} />
           </div>
           <div className="bezent-lifecycle-card__title-group">
-            <h3 className="bezent-lifecycle-card__title">Internal Transfers &amp; Lifecycle Governance</h3>
+            <h3 className="bezent-lifecycle-card__title">
+              Internal Transfers &amp; Lifecycle Governance
+            </h3>
             <p className="bezent-lifecycle-card__desc">
               Govern internal mobility, department/location movements, dual-manager approvals, and
               automated operational reassignments.
@@ -85,7 +87,9 @@ export function TransfersLifecycleTab({ initialPolicy, onReload }: TransfersLife
           </div>
         </div>
         <div className="bezent-lifecycle-card__header-right">
-          <Badge variant="success" size="sm">● Active</Badge>
+          <Badge variant="success" size="sm">
+            ● Active
+          </Badge>
           <Button variant="primary" size="sm" onClick={handleSave} disabled={saving}>
             <BezentIcon name="check" size={14} />
             {saving ? 'Saving...' : 'Save Lifecycle Policy'}
@@ -104,7 +108,9 @@ export function TransfersLifecycleTab({ initialPolicy, onReload }: TransfersLife
         <div className="bezent-lifecycle-metrics-strip">
           <div className="bezent-lifecycle-metric-item">
             <span className="bezent-lifecycle-metric-label">Dual-Manager Approval</span>
-            <span className={`bezent-lifecycle-metric-value ${requireReleasingManagerApproval ? 'bezent-lifecycle-metric-value--success' : ''}`}>
+            <span
+              className={`bezent-lifecycle-metric-value ${requireReleasingManagerApproval ? 'bezent-lifecycle-metric-value--success' : ''}`}
+            >
               {requireReleasingManagerApproval ? 'Required' : 'Single Approver'}
             </span>
           </div>
@@ -116,13 +122,17 @@ export function TransfersLifecycleTab({ initialPolicy, onReload }: TransfersLife
           </div>
           <div className="bezent-lifecycle-metric-item">
             <span className="bezent-lifecycle-metric-label">Shift Roster Auto-Sync</span>
-            <span className={`bezent-lifecycle-metric-value ${autoReassignShifts ? 'bezent-lifecycle-metric-value--success' : ''}`}>
+            <span
+              className={`bezent-lifecycle-metric-value ${autoReassignShifts ? 'bezent-lifecycle-metric-value--success' : ''}`}
+            >
               {autoReassignShifts ? 'Enabled' : 'Disabled'}
             </span>
           </div>
           <div className="bezent-lifecycle-metric-item">
             <span className="bezent-lifecycle-metric-label">Leave Approver Auto-Sync</span>
-            <span className={`bezent-lifecycle-metric-value ${autoReassignLeaveApprover ? 'bezent-lifecycle-metric-value--success' : ''}`}>
+            <span
+              className={`bezent-lifecycle-metric-value ${autoReassignLeaveApprover ? 'bezent-lifecycle-metric-value--success' : ''}`}
+            >
               {autoReassignLeaveApprover ? 'Enabled' : 'Disabled'}
             </span>
           </div>

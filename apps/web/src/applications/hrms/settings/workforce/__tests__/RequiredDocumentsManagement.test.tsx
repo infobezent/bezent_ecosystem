@@ -118,12 +118,7 @@ describe('Required Documents Settings & Management UI Components', () => {
     it('renders large applicability popup with employment types, departments, locations, and pipelines', () => {
       const doc = DEFAULT_DOCUMENT_REQUIREMENTS[0]!;
       const html = renderToStaticMarkup(
-        <ApplicabilityRulesModal
-          isOpen={true}
-          onClose={vi.fn()}
-          onSave={vi.fn()}
-          document={doc}
-        />,
+        <ApplicabilityRulesModal isOpen={true} onClose={vi.fn()} onSave={vi.fn()} document={doc} />,
       );
 
       expect(html).toContain('Configure Applicability Rules');

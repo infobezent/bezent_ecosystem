@@ -32,7 +32,11 @@ function field(key: string, label: string, options: FieldOptions = {}): SystemFi
   };
 }
 
-function requiredField(key: string, label: string, options: FieldOptions = {}): SystemFieldDefinition {
+function requiredField(
+  key: string,
+  label: string,
+  options: FieldOptions = {},
+): SystemFieldDefinition {
   return field(key, label, { ...options, defaultRequired: true });
 }
 
@@ -94,7 +98,8 @@ export const CANDIDATE_INTAKE_FORM: SystemFormDefinition = {
     {
       key: 'address',
       label: 'Address Details',
-      description: 'Current residence and permanent address coordinates with same-as-current conditional logic.',
+      description:
+        'Current residence and permanent address coordinates with same-as-current conditional logic.',
       configurable: true,
       fields: [
         requiredField('address.currentAddress', 'Current Address', { width: 'full' }),
@@ -121,7 +126,8 @@ export const CANDIDATE_INTAKE_FORM: SystemFormDefinition = {
     {
       key: 'employment',
       label: 'Employment Information',
-      description: 'Role assignment, department, and work coordinates (HR-controlled and read-only to candidate).',
+      description:
+        'Role assignment, department, and work coordinates (HR-controlled and read-only to candidate).',
       configurable: true,
       fields: [
         field('employment.position', 'Position / Job Title', { width: 'half' }),
@@ -144,7 +150,10 @@ export const CANDIDATE_INTAKE_FORM: SystemFormDefinition = {
           width: 'half',
           config: { entity: 'employee' },
         }),
-        field('employment.expectedJoiningDate', 'Expected Joining Date', { ...DATE, width: 'half' }),
+        field('employment.expectedJoiningDate', 'Expected Joining Date', {
+          ...DATE,
+          width: 'half',
+        }),
       ],
     },
 

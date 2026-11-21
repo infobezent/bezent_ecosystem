@@ -1,7 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { Modal } from '../../../../../../design-system/components/Modal/Modal';
 import { Button } from '../../../../../../design-system/components/Button/Button';
-import { Select, type SelectOption } from '../../../../../../design-system/components/Select/Select';
+import {
+  Select,
+  type SelectOption,
+} from '../../../../../../design-system/components/Select/Select';
 import { Alert } from '../../../../../../design-system/components/Alert/Alert';
 import type {
   DateTimePreferencesConfig,
@@ -150,9 +153,7 @@ export function DateTimePreferencesModal({
               id="genpref-timezone"
               options={TIMEZONE_OPTIONS}
               value={formData.timezone}
-              onChange={(e) =>
-                setFormData((prev) => ({ ...prev, timezone: e.target.value }))
-              }
+              onChange={(e) => setFormData((prev) => ({ ...prev, timezone: e.target.value }))}
             />
           </div>
 

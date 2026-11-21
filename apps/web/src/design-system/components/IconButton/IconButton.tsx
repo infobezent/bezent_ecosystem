@@ -2,10 +2,7 @@ import { useState, type ButtonHTMLAttributes, type ReactNode } from 'react';
 import { Tooltip, type TooltipDirection } from '../Tooltip';
 import './IconButton.css';
 
-export interface IconButtonProps extends Omit<
-  ButtonHTMLAttributes<HTMLButtonElement>,
-  'children'
-> {
+export interface IconButtonProps extends Omit<ButtonHTMLAttributes<HTMLButtonElement>, 'children'> {
   /** Icon content — typically a `<BezentIcon>`, but not required to be. */
   children: ReactNode;
   /**

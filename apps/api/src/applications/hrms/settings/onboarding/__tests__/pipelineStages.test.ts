@@ -1,8 +1,6 @@
 import { describe, it, expect, beforeAll } from 'vitest';
 import request from 'supertest';
-import {
-  hrmsTestHeaders,
-} from '../../../../../platform/__tests__/support/testSession.js';
+import { hrmsTestHeaders } from '../../../../../platform/__tests__/support/testSession.js';
 import { createApp } from '../../../../../app/server/createApp.js';
 import { pingDatabase } from '../../../../../db/connection.js';
 
@@ -165,7 +163,8 @@ describe('HRMS Pipeline Stages & Assignment Rules API', () => {
         .set('x-company-id', companyA)
         .set('x-tenant-id', tenantA);
 
-      const target = listRes.body.data.find((p: { isDefault: boolean }) => !p.isDefault) || listRes.body.data[0];
+      const target =
+        listRes.body.data.find((p: { isDefault: boolean }) => !p.isDefault) || listRes.body.data[0];
 
       const validStages = [
         {

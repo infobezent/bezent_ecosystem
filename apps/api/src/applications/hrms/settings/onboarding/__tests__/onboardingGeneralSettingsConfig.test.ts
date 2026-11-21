@@ -1,8 +1,10 @@
 import { describe, it, expect, beforeAll } from 'vitest';
 import request from 'supertest';
+import { and, eq } from 'drizzle-orm';
 import { hrmsTestHeaders } from '../../../../../platform/__tests__/support/testSession.js';
 import { createApp } from '../../../../../app/server/createApp.js';
-import { pingDatabase } from '../../../../../db/connection.js';
+import { pingDatabase, getDb } from '../../../../../db/connection.js';
+import { formCustomizations } from '../../../../../db/schema.js';
 import { OnboardingGeneralSettingsService } from '../service/onboardingGeneralSettings.service.js';
 
 describe('HRMS Forms & Onboarding General Settings API & Service', () => {
@@ -23,6 +25,16 @@ describe('HRMS Forms & Onboarding General Settings API & Service', () => {
     if (!connected) {
       throw new Error('MySQL database is unreachable.');
     }
+    const db = getDb();
+    await db
+      .delete(formCustomizations)
+      .where(
+        and(
+          eq(formCustomizations.tenantId, tenantA),
+          eq(formCustomizations.companyId, companyA),
+          eq(formCustomizations.formKey, 'onboarding_general_settings_v2'),
+        ),
+      );
     hrms = request.agent(app).set(await hrmsTestHeaders(companyA, tenantA));
     hrmsOther = request.agent(app).set(await hrmsTestHeaders(otherCompany, otherTenant));
   });
@@ -84,7 +96,9 @@ describe('HRMS Forms & Onboarding General Settings API & Service', () => {
       expect(updateRes.status).toBe(200);
       expect(updateRes.body.success).toBe(true);
       expect(updateRes.body.data.preferences.defaultCandidateStatus).toBe('in_progress');
-      expect(updateRes.body.data.preferences.allowCandidateProfileEditingAfterSubmission).toBe(true);
+      expect(updateRes.body.data.preferences.allowCandidateProfileEditingAfterSubmission).toBe(
+        true,
+      );
       expect(updateRes.body.data.preferences.candidateSelfRegistrationEnabled).toBe(false);
 
       // Verify persistence via GET
@@ -206,7 +220,9 @@ describe('HRMS Forms & Onboarding General Settings API & Service', () => {
       // Fetch other company
       const otherRes = await hrmsOther.get('/api/v1/hrms/settings/onboarding/general-config');
       expect(otherRes.status).toBe(200);
-      expect(otherRes.body.data.preferences.allowCandidateProfileEditingAfterSubmission).toBe(false);
+      expect(otherRes.body.data.preferences.allowCandidateProfileEditingAfterSubmission).toBe(
+        false,
+      );
     });
   });
 });

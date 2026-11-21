@@ -28,18 +28,11 @@ const VALID_MANAGER_SCOPES: ManagerVisibilityScope[] = [
   'all',
 ];
 
-const VALID_DAY_CALCULATIONS: DayCalculationMode[] = [
-  'business_days',
-  'calendar_days',
-];
+const VALID_DAY_CALCULATIONS: DayCalculationMode[] = ['business_days', 'calendar_days'];
 
 const VALID_TIME_FORMATS: TimeFormatMode[] = ['12_hour', '24_hour'];
 
-const VALID_DATE_FORMATS: SupportedDateFormat[] = [
-  'DD/MM/YYYY',
-  'MM/DD/YYYY',
-  'YYYY-MM-DD',
-];
+const VALID_DATE_FORMATS: SupportedDateFormat[] = ['DD/MM/YYYY', 'MM/DD/YYYY', 'YYYY-MM-DD'];
 
 export class OnboardingGeneralSettingsService {
   constructor(
@@ -49,10 +42,7 @@ export class OnboardingGeneralSettingsService {
   /**
    * Retrieves current general configuration
    */
-  async getConfig(
-    tenantId: string,
-    companyId: string,
-  ): Promise<OnboardingGeneralSettingsConfig> {
+  async getConfig(tenantId: string, companyId: string): Promise<OnboardingGeneralSettingsConfig> {
     if (!tenantId || !companyId) {
       throw new AppError('Tenant ID and Company ID are required', 400);
     }
@@ -110,20 +100,14 @@ export class OnboardingGeneralSettingsService {
 
     // Validate dateTime
     if (dto.dateTime) {
-      if (
-        dto.dateTime.dateFormat &&
-        !VALID_DATE_FORMATS.includes(dto.dateTime.dateFormat)
-      ) {
+      if (dto.dateTime.dateFormat && !VALID_DATE_FORMATS.includes(dto.dateTime.dateFormat)) {
         throw new AppError(
           `Invalid date format: ${dto.dateTime.dateFormat}. Supported: ${VALID_DATE_FORMATS.join(', ')}`,
           400,
         );
       }
 
-      if (
-        dto.dateTime.timeFormat &&
-        !VALID_TIME_FORMATS.includes(dto.dateTime.timeFormat)
-      ) {
+      if (dto.dateTime.timeFormat && !VALID_TIME_FORMATS.includes(dto.dateTime.timeFormat)) {
         throw new AppError(
           `Invalid time format: ${dto.dateTime.timeFormat}. Supported: ${VALID_TIME_FORMATS.join(', ')}`,
           400,

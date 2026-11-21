@@ -54,8 +54,8 @@ export function FieldMappingModal({
   initialMappings,
   onSave,
 }: FieldMappingModalProps) {
-  const [mappings, setMappings] = useState<FieldMappingItem[]>(
-    () => (initialMappings ? [...initialMappings] : []),
+  const [mappings, setMappings] = useState<FieldMappingItem[]>(() =>
+    initialMappings ? [...initialMappings] : [],
   );
 
   const [searchTerm, setSearchTerm] = useState('');
@@ -75,8 +75,14 @@ export function FieldMappingModal({
   const finalDest = destinationField === 'custom' ? customDestination.trim() : destinationField;
   const sourceObj = STANDARD_CANDIDATE_FIELDS.find((f) => f.value === sourceField);
   const destObj = STANDARD_EMPLOYEE_FIELDS.find((f) => f.value === destinationField);
-  const sourceLabel = sourceField === 'custom' ? (customSource.trim() || 'Custom Field') : (sourceObj?.label || finalSource);
-  const destLabel = destinationField === 'custom' ? (customDestination.trim() || 'Custom Field') : (destObj?.label || finalDest);
+  const sourceLabel =
+    sourceField === 'custom'
+      ? customSource.trim() || 'Custom Field'
+      : sourceObj?.label || finalSource;
+  const destLabel =
+    destinationField === 'custom'
+      ? customDestination.trim() || 'Custom Field'
+      : destObj?.label || finalDest;
   const existingMapping = mappings.find((m) => m.destinationField === finalDest && m.isActive);
 
   // Duplicate destination detection
@@ -95,9 +101,7 @@ export function FieldMappingModal({
 
   // Unmapped mandatory employee fields detection
   const unmappedMandatoryFields = useMemo(() => {
-    const mapped = new Set(
-      mappings.filter((m) => m.isActive).map((m) => m.destinationField),
-    );
+    const mapped = new Set(mappings.filter((m) => m.isActive).map((m) => m.destinationField));
     const mandatory = [
       { key: 'displayName', label: 'Employee Name' },
       { key: 'email', label: 'Work Email' },
@@ -109,9 +113,7 @@ export function FieldMappingModal({
   }, [mappings]);
 
   const handleToggleActive = (id: string) => {
-    setMappings((prev) =>
-      prev.map((m) => (m.id === id ? { ...m, isActive: !m.isActive } : m)),
-    );
+    setMappings((prev) => prev.map((m) => (m.id === id ? { ...m, isActive: !m.isActive } : m)));
   };
 
   const handleRemove = (id: string) => {
@@ -283,7 +285,9 @@ export function FieldMappingModal({
               <div className="bezent-fieldmap-panel">
                 <div className="bezent-fieldmap-panel-header">
                   <span className="bezent-fieldmap-panel-label">Candidate Field</span>
-                  <span className="bezent-fieldmap-panel-chip">candidate.{finalSource || 'source'}</span>
+                  <span className="bezent-fieldmap-panel-chip">
+                    candidate.{finalSource || 'source'}
+                  </span>
                 </div>
                 <Select
                   id="add-source-field"
@@ -315,7 +319,9 @@ export function FieldMappingModal({
               <div className="bezent-fieldmap-panel">
                 <div className="bezent-fieldmap-panel-header">
                   <span className="bezent-fieldmap-panel-label">Employee Field</span>
-                  <span className="bezent-fieldmap-panel-chip">employee.{finalDest || 'target'}</span>
+                  <span className="bezent-fieldmap-panel-chip">
+                    employee.{finalDest || 'target'}
+                  </span>
                 </div>
                 <Select
                   id="add-dest-field"
@@ -361,7 +367,12 @@ export function FieldMappingModal({
 
             {/* Actions */}
             <div className="bezent-fieldmap-add-actions">
-              <Button variant="secondary" size="sm" type="button" onClick={() => setIsAdding(false)}>
+              <Button
+                variant="secondary"
+                size="sm"
+                type="button"
+                onClick={() => setIsAdding(false)}
+              >
                 Cancel
               </Button>
               <Button
@@ -382,11 +393,23 @@ export function FieldMappingModal({
           <table className="bezent-fieldmap-table" aria-label="Field mappings table">
             <thead>
               <tr>
-                <th scope="col" className="bezent-fieldmap-th bezent-fieldmap-th--source">Candidate Field</th>
-                <th scope="col" className="bezent-fieldmap-th bezent-fieldmap-th--arrow" aria-label="Direction"></th>
-                <th scope="col" className="bezent-fieldmap-th bezent-fieldmap-th--dest">Employee Field</th>
-                <th scope="col" className="bezent-fieldmap-th bezent-fieldmap-th--status">Status</th>
-                <th scope="col" className="bezent-fieldmap-th bezent-fieldmap-th--actions">Actions</th>
+                <th scope="col" className="bezent-fieldmap-th bezent-fieldmap-th--source">
+                  Candidate Field
+                </th>
+                <th
+                  scope="col"
+                  className="bezent-fieldmap-th bezent-fieldmap-th--arrow"
+                  aria-label="Direction"
+                ></th>
+                <th scope="col" className="bezent-fieldmap-th bezent-fieldmap-th--dest">
+                  Employee Field
+                </th>
+                <th scope="col" className="bezent-fieldmap-th bezent-fieldmap-th--status">
+                  Status
+                </th>
+                <th scope="col" className="bezent-fieldmap-th bezent-fieldmap-th--actions">
+                  Actions
+                </th>
               </tr>
             </thead>
             <tbody>
@@ -411,7 +434,11 @@ export function FieldMappingModal({
 
                       <td className="bezent-fieldmap-td bezent-fieldmap-td--arrow">
                         <div className="bezent-fieldmap-arrow-badge" aria-hidden="true">
-                          <BezentIcon name="arrowRight" size={13} color="var(--text-secondary, #64748b)" />
+                          <BezentIcon
+                            name="arrowRight"
+                            size={13}
+                            color="var(--text-secondary, #64748b)"
+                          />
                         </div>
                       </td>
 
@@ -437,7 +464,10 @@ export function FieldMappingModal({
 
                       <td className="bezent-fieldmap-td bezent-fieldmap-td--actions">
                         {m.isSystem ? (
-                          <span className="bezent-fieldmap-core-tag" title="Core schema mapping (required)">
+                          <span
+                            className="bezent-fieldmap-core-tag"
+                            title="Core schema mapping (required)"
+                          >
                             Core
                           </span>
                         ) : (

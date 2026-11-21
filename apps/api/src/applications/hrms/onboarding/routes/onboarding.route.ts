@@ -13,8 +13,14 @@ const conversionController = new EmployeeConversionController();
 
 // Public Candidate Intake Self-Service routes (Token-secured, no platform session)
 onboardingRouter.get('/public/candidate-intake/:token', candidateIntakeController.getByToken);
-onboardingRouter.post('/public/candidate-intake/:token/save-draft', candidateIntakeController.saveDraftByToken);
-onboardingRouter.post('/public/candidate-intake/:token/submit', candidateIntakeController.submitByToken);
+onboardingRouter.post(
+  '/public/candidate-intake/:token/save-draft',
+  candidateIntakeController.saveDraftByToken,
+);
+onboardingRouter.post(
+  '/public/candidate-intake/:token/submit',
+  candidateIntakeController.submitByToken,
+);
 
 // Viewing onboarding needs hrms.onboarding.read; every change to a case
 // needs hrms.onboarding.manage (ADR-017). Covers all routes under the prefix.
@@ -24,11 +30,26 @@ onboardingRouter.use(
 );
 
 // Candidate Intake HR Operations
-onboardingRouter.get('/hrms/onboarding/candidate-intake/latest-form', candidateIntakeController.getLatestForm);
-onboardingRouter.post('/hrms/onboarding/candidate-intake/manual-entry', candidateIntakeController.createManualEntry);
-onboardingRouter.post('/hrms/onboarding/candidate-intake/invite', candidateIntakeController.inviteCandidate);
-onboardingRouter.post('/hrms/onboarding/candidate-intake/:caseId/approve', candidateIntakeController.approveSubmission);
-onboardingRouter.post('/hrms/onboarding/candidate-intake/:caseId/request-changes', candidateIntakeController.requestChanges);
+onboardingRouter.get(
+  '/hrms/onboarding/candidate-intake/latest-form',
+  candidateIntakeController.getLatestForm,
+);
+onboardingRouter.post(
+  '/hrms/onboarding/candidate-intake/manual-entry',
+  candidateIntakeController.createManualEntry,
+);
+onboardingRouter.post(
+  '/hrms/onboarding/candidate-intake/invite',
+  candidateIntakeController.inviteCandidate,
+);
+onboardingRouter.post(
+  '/hrms/onboarding/candidate-intake/:caseId/approve',
+  candidateIntakeController.approveSubmission,
+);
+onboardingRouter.post(
+  '/hrms/onboarding/candidate-intake/:caseId/request-changes',
+  candidateIntakeController.requestChanges,
+);
 
 // Existing New Hire compatibility routes
 onboardingRouter.get('/hrms/onboarding/new-hires', controller.listNewHires);

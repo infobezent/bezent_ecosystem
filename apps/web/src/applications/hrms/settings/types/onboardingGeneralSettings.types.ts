@@ -8,28 +8,17 @@
  */
 
 export type CandidateInitialStatus =
-  | 'draft'
-  | 'invited'
-  | 'in_progress'
-  | 'submitted'
-  | 'under_review'
-  | 'approved';
+  'draft' | 'invited' | 'in_progress' | 'submitted' | 'under_review' | 'approved';
 
 export type AssignedHrAccessScope = 'assigned_only' | 'all_hr';
 
-export type ManagerVisibilityScope =
-  | 'assigned_reports_only'
-  | 'department_wide'
-  | 'all';
+export type ManagerVisibilityScope = 'assigned_reports_only' | 'department_wide' | 'all';
 
 export type DayCalculationMode = 'business_days' | 'calendar_days';
 
 export type TimeFormatMode = '12_hour' | '24_hour';
 
-export type SupportedDateFormat =
-  | 'DD/MM/YYYY'
-  | 'MM/DD/YYYY'
-  | 'YYYY-MM-DD';
+export type SupportedDateFormat = 'DD/MM/YYYY' | 'MM/DD/YYYY' | 'YYYY-MM-DD';
 
 export interface OnboardingPreferencesConfig {
   defaultPipelineId: string;

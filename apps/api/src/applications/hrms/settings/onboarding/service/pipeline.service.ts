@@ -272,10 +272,7 @@ export class PipelineService {
 
   private validateAndNormalizeStages(stages: PipelineStageConfig[]): PipelineStageConfig[] {
     if (!stages || stages.length === 0) {
-      throw new BadRequestError(
-        'A pipeline must contain at least one stage',
-        'EMPTY_STAGES_LIST',
-      );
+      throw new BadRequestError('A pipeline must contain at least one stage', 'EMPTY_STAGES_LIST');
     }
 
     // 1. Stage names must be non-empty and unique
@@ -314,7 +311,11 @@ export class PipelineService {
 
     // 3. The final stage must be at the very end
     const lastStage = stages[stages.length - 1]!;
-    if (lastStage.stageType !== 'final' && !lastStage.isTerminal && lastStage.stageKey !== 'completed') {
+    if (
+      lastStage.stageType !== 'final' &&
+      !lastStage.isTerminal &&
+      lastStage.stageKey !== 'completed'
+    ) {
       throw new BadRequestError(
         'The final stage must be placed as the last stage in the sequence.',
         'FINAL_STAGE_MUST_BE_LAST',

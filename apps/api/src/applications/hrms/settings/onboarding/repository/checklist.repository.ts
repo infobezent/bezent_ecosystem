@@ -1,10 +1,7 @@
 import { randomUUID } from 'node:crypto';
 import { and, eq } from 'drizzle-orm';
 import { getDb } from '../../../../../db/connection.js';
-import {
-  formCustomizations,
-  onboardingChecklistTemplates,
-} from '../../../../../db/schema.js';
+import { formCustomizations, onboardingChecklistTemplates } from '../../../../../db/schema.js';
 import type {
   ChecklistTemplate,
   ChecklistTaskGroup,
@@ -33,7 +30,8 @@ export class ChecklistRepository {
       {
         id: `tsk_hr_1_${companyId}`,
         name: 'Send Welcome Kit & First-Day Schedule',
-        description: 'Send greeting email with first day schedule, reporting manager, and dress code.',
+        description:
+          'Send greeting email with first day schedule, reporting manager, and dress code.',
         groupId: hrGroups[0]!.id,
         assignedTo: 'hr',
         isRequired: true,
@@ -59,7 +57,8 @@ export class ChecklistRepository {
       {
         id: `tsk_hr_3_${companyId}`,
         name: 'Conduct HR Induction & Orientation Session',
-        description: 'Walkthrough of company values, policies, leaves, and attendance expectations.',
+        description:
+          'Walkthrough of company values, policies, leaves, and attendance expectations.',
         groupId: hrGroups[1]!.id,
         assignedTo: 'hr',
         isRequired: true,
@@ -72,7 +71,8 @@ export class ChecklistRepository {
       {
         id: `tsk_hr_4_${companyId}`,
         name: 'Sign Employee Handbook & Code of Conduct',
-        description: 'Obtain digital acknowledgment of company handbook and non-disclosure agreement.',
+        description:
+          'Obtain digital acknowledgment of company handbook and non-disclosure agreement.',
         groupId: hrGroups[1]!.id,
         assignedTo: 'employee',
         isRequired: true,
@@ -93,7 +93,8 @@ export class ChecklistRepository {
       {
         id: `tsk_it_1_${companyId}`,
         name: 'Configure Laptop & Peripheral Hardware',
-        description: 'Set up company workstation with corporate image and endpoint protection software.',
+        description:
+          'Set up company workstation with corporate image and endpoint protection software.',
         groupId: itGroups[0]!.id,
         assignedTo: 'it',
         isRequired: true,
@@ -152,7 +153,8 @@ export class ChecklistRepository {
         tenantId,
         companyId,
         name: 'IT Hardware & Access Checklist',
-        description: 'Technical provisioning tasks for equipment allocation, security, and credentials.',
+        description:
+          'Technical provisioning tasks for equipment allocation, security, and credentials.',
         category: 'IT',
         applicableTo: 'all',
         isActive: true,
@@ -187,7 +189,11 @@ export class ChecklistRepository {
     }
 
     const metadata = row.metadata as { templates?: ChecklistTemplate[] };
-    if (!metadata.templates || !Array.isArray(metadata.templates) || metadata.templates.length === 0) {
+    if (
+      !metadata.templates ||
+      !Array.isArray(metadata.templates) ||
+      metadata.templates.length === 0
+    ) {
       return this.createDefaultTemplates(tenantId, companyId);
     }
 

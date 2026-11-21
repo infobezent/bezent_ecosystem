@@ -272,7 +272,7 @@ export class ChecklistService {
       ...t,
       id: taskIdMap.get(t.id) || `tsk_${randomUUID()}`,
       groupId: groupIdMap.get(t.groupId) || fallbackGroupId,
-      dependencyTaskId: t.dependencyTaskId ? taskIdMap.get(t.dependencyTaskId) ?? null : null,
+      dependencyTaskId: t.dependencyTaskId ? (taskIdMap.get(t.dependencyTaskId) ?? null) : null,
     }));
 
     const duplicate: ChecklistTemplate = {
@@ -292,11 +292,7 @@ export class ChecklistService {
     return duplicate;
   }
 
-  async deleteTemplate(
-    tenantId: string,
-    companyId: string,
-    templateId: string,
-  ): Promise<void> {
+  async deleteTemplate(tenantId: string, companyId: string, templateId: string): Promise<void> {
     const templates = await this.repository.getTemplates(tenantId, companyId);
     const target = templates.find((t) => t.id === templateId);
     if (!target) {

@@ -155,12 +155,7 @@ describe('Pipeline Stages Management UI Components', () => {
 
   it('renders CreateEditPipelineModal with form controls', () => {
     const html = renderToStaticMarkup(
-      <CreateEditPipelineModal
-        isOpen={true}
-        onClose={vi.fn()}
-        onSave={vi.fn()}
-        pipeline={null}
-      />,
+      <CreateEditPipelineModal isOpen={true} onClose={vi.fn()} onSave={vi.fn()} pipeline={null} />,
     );
     expect(html).toContain('Create Pipeline');
     expect(html).toContain('Pipeline Name');

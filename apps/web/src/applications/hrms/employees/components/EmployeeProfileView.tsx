@@ -1,5 +1,13 @@
 import type { ReactNode } from 'react';
-import { Avatar, Badge, Button, IconButton, Inline, Section, Stack } from '../../../../design-system/components';
+import {
+  Avatar,
+  Badge,
+  Button,
+  IconButton,
+  Inline,
+  Section,
+  Stack,
+} from '../../../../design-system/components';
 import { BezentIcon } from '../../../../design-system/icons';
 import type { EmployeeProfile } from '../api/employeesApi';
 import type { EditableSectionType } from './ProfileSectionInlineForms';
@@ -288,9 +296,7 @@ export function EmployeeProfileView({
           </div>
 
           {/* 8. Employment History */}
-          <div id="sec-history">
-            {history}
-          </div>
+          <div id="sec-history">{history}</div>
 
           {/* 9. Accounts & System Access */}
           <div id="sec-accounts">

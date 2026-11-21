@@ -76,9 +76,7 @@ describe('HRMS Checklist Builder & Templates API', () => {
           description: 'High-touch checklist for senior executives',
           category: 'Custom',
           applicableTo: 'all',
-          groups: [
-            { id: 'grp_exec_1', name: 'Board & Leadership Introduction', displayOrder: 1 },
-          ],
+          groups: [{ id: 'grp_exec_1', name: 'Board & Leadership Introduction', displayOrder: 1 }],
           tasks: [
             {
               id: 'tsk_exec_1',
@@ -229,9 +227,7 @@ describe('HRMS Checklist Builder & Templates API', () => {
       const source = listRes.body.data[0];
 
       const res = await hrmsA
-        .post(
-          `/api/v1/hrms/settings/onboarding/checklist-builder/templates/${source.id}/duplicate`,
-        )
+        .post(`/api/v1/hrms/settings/onboarding/checklist-builder/templates/${source.id}/duplicate`)
         .set('x-company-id', companyA)
         .set('x-tenant-id', tenantA);
 
@@ -253,9 +249,7 @@ describe('HRMS Checklist Builder & Templates API', () => {
       );
 
       const res = await hrmsA
-        .delete(
-          `/api/v1/hrms/settings/onboarding/checklist-builder/templates/${copyTemplate.id}`,
-        )
+        .delete(`/api/v1/hrms/settings/onboarding/checklist-builder/templates/${copyTemplate.id}`)
         .set('x-company-id', companyA)
         .set('x-tenant-id', tenantA);
 

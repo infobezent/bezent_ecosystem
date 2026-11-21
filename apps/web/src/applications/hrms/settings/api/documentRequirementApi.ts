@@ -233,10 +233,7 @@ export async function generateCandidateDocuments(
       body: JSON.stringify(params),
     },
   );
-  return handleResponse<CandidateDocumentInstance[]>(
-    res,
-    'Failed to generate candidate documents',
-  );
+  return handleResponse<CandidateDocumentInstance[]>(res, 'Failed to generate candidate documents');
 }
 
 export async function uploadCandidateDocument(

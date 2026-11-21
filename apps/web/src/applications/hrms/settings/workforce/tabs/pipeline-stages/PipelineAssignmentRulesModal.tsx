@@ -175,9 +175,7 @@ export function PipelineAssignmentRulesModal({
   };
 
   const handleToggleActive = (ruleId: string, active: boolean) => {
-    setRules((prev) =>
-      prev.map((r) => (r.id === ruleId ? { ...r, isActive: active } : r)),
-    );
+    setRules((prev) => prev.map((r) => (r.id === ruleId ? { ...r, isActive: active } : r)));
   };
 
   // Check for duplicate condition conflicts
@@ -296,8 +294,8 @@ export function PipelineAssignmentRulesModal({
 
         {conflictingRules.length > 0 && (
           <Alert variant="warning" title="Potential Overlap Detected">
-            Multiple rules evaluate the same condition criteria. Higher priority rules will evaluate first:{' '}
-            {conflictingRules.join('; ')}.
+            Multiple rules evaluate the same condition criteria. Higher priority rules will evaluate
+            first: {conflictingRules.join('; ')}.
           </Alert>
         )}
 
@@ -533,13 +531,16 @@ export function PipelineAssignmentRulesModal({
           <h5 className="bezent-pipeline-precedence-title">Assignment Precedence Order</h5>
           <ol className="bezent-pipeline-precedence-list">
             <li>
-              <strong>1. Priority Matching Rule:</strong> Evaluated in ascending priority order (1 takes precedence over 2).
+              <strong>1. Priority Matching Rule:</strong> Evaluated in ascending priority order (1
+              takes precedence over 2).
             </li>
             <li>
-              <strong>2. Manual HR Selection:</strong> Explicit operator override takes precedence for custom hiring cases.
+              <strong>2. Manual HR Selection:</strong> Explicit operator override takes precedence
+              for custom hiring cases.
             </li>
             <li>
-              <strong>3. Organization Default:</strong> Falls back directly to the designated Default Pipeline when no rules match.
+              <strong>3. Organization Default:</strong> Falls back directly to the designated
+              Default Pipeline when no rules match.
             </li>
           </ol>
         </div>

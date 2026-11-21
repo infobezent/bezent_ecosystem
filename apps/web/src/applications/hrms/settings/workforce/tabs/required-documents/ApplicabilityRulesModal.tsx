@@ -1,12 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import {
-  Modal,
-  Button,
-  Switch,
-  FormField,
-  Stack,
-  Inline,
-} from '../../../../../../design-system';
+import { Modal, Button, Switch, FormField, Stack, Inline } from '../../../../../../design-system';
 import type {
   DocumentRequirement,
   SaveDocumentApplicabilityDto,
@@ -63,8 +56,8 @@ export function ApplicabilityRulesModal({
   onSave,
   document,
 }: ApplicabilityRulesModalProps) {
-  const [allEmployees, setAllEmployees] = useState(
-    () => (document?.applicability ? document.applicability.allEmployees : true),
+  const [allEmployees, setAllEmployees] = useState(() =>
+    document?.applicability ? document.applicability.allEmployees : true,
   );
   const [selectedEmpTypes, setSelectedEmpTypes] = useState<string[]>(
     () => document?.applicability?.employmentTypes || [],
@@ -112,7 +105,14 @@ export function ApplicabilityRulesModal({
   const handleSave = async () => {
     if (!document) return;
 
-    if (!allEmployees && selectedEmpTypes.length === 0 && selectedDeptIds.length === 0 && selectedLocIds.length === 0 && selectedPipelineIds.length === 0 && selectedStageKeys.length === 0) {
+    if (
+      !allEmployees &&
+      selectedEmpTypes.length === 0 &&
+      selectedDeptIds.length === 0 &&
+      selectedLocIds.length === 0 &&
+      selectedPipelineIds.length === 0 &&
+      selectedStageKeys.length === 0
+    ) {
       setError('Please select at least one criteria or enable "All Employees"');
       return;
     }
@@ -281,7 +281,9 @@ export function ApplicabilityRulesModal({
                       className={`bezent-reqdocs-pill ${
                         isSelected ? 'bezent-reqdocs-pill--selected' : ''
                       }`}
-                      onClick={() => toggleItem(selectedPipelineIds, setSelectedPipelineIds, pipe.id)}
+                      onClick={() =>
+                        toggleItem(selectedPipelineIds, setSelectedPipelineIds, pipe.id)
+                      }
                     >
                       {pipe.label}
                     </button>

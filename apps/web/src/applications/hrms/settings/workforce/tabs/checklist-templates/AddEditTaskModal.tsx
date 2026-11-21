@@ -47,8 +47,9 @@ export function AddEditTaskModal({
           task.visibility === 'internal'
       : false,
   );
-  const [attachmentRequirement, setAttachmentRequirement] =
-    useState<AttachmentRequirement>(task?.attachmentRequirement || 'none');
+  const [attachmentRequirement, setAttachmentRequirement] = useState<AttachmentRequirement>(
+    task?.attachmentRequirement || 'none',
+  );
   const [approvalRequired, setApprovalRequired] = useState(task ? task.approvalRequired : false);
   const [dependencyTaskId, setDependencyTaskId] = useState(task?.dependencyTaskId ?? '');
   const [visibility, setVisibility] = useState<TaskVisibility>(
@@ -126,12 +127,7 @@ export function AddEditTaskModal({
   const dependencyOptions = allExistingTasks.filter((t) => !task || t.id !== task.id);
 
   return (
-    <Modal
-      isOpen={isOpen}
-      onClose={onClose}
-      title={task ? 'Edit Task' : 'Add New Task'}
-      size="md"
-    >
+    <Modal isOpen={isOpen} onClose={onClose} title={task ? 'Edit Task' : 'Add New Task'} size="md">
       <form onSubmit={handleSubmit} className="bezent-checklist-task-form">
         {validationError && (
           <div className="bezent-checklist-form-error" role="alert">
@@ -249,8 +245,8 @@ export function AddEditTaskModal({
               {dueOffsetDays < 0
                 ? `${Math.abs(dueOffsetDays)} days before joining date`
                 : dueOffsetDays === 0
-                ? 'On joining day'
-                : `${dueOffsetDays} days after joining date`}
+                  ? 'On joining day'
+                  : `${dueOffsetDays} days after joining date`}
             </span>
           </div>
 

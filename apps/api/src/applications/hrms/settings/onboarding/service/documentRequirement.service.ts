@@ -25,9 +25,7 @@ import type {
 } from '../types/documentRequirement.types.js';
 
 export class DocumentRequirementService {
-  constructor(
-    private readonly repository = new DocumentRequirementRepository(),
-  ) {}
+  constructor(private readonly repository = new DocumentRequirementRepository()) {}
 
   // ==================== Category Operations ====================
 
@@ -54,10 +52,11 @@ export class DocumentRequirementService {
       );
     }
 
-    const code = trimmedName
-      .toLowerCase()
-      .replace(/[^a-z0-9]+/g, '_')
-      .replace(/^_+|_+$/g, '') || 'custom_category';
+    const code =
+      trimmedName
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, '_')
+        .replace(/^_+|_+$/g, '') || 'custom_category';
 
     const now = new Date().toISOString();
     const newCategory: DocumentCategory = {
@@ -201,10 +200,7 @@ export class DocumentRequirementService {
     const categories = await this.repository.getCategories(tenantId, companyId);
     const catExists = categories.some((c) => c.id === dto.categoryId);
     if (!catExists) {
-      throw new BadRequestError(
-        `Category '${dto.categoryId}' not found`,
-        'CATEGORY_NOT_FOUND',
-      );
+      throw new BadRequestError(`Category '${dto.categoryId}' not found`, 'CATEGORY_NOT_FOUND');
     }
 
     const requirements = await this.repository.getRequirements(tenantId, companyId);
@@ -461,10 +457,18 @@ export class DocumentRequirementService {
       const app = r.applicability;
       if (app.allEmployees) {
         // If allEmployees is true, check if pipeline or stage restrictions apply
-        if (app.pipelineIds.length > 0 && params.pipelineId && !app.pipelineIds.includes(params.pipelineId)) {
+        if (
+          app.pipelineIds.length > 0 &&
+          params.pipelineId &&
+          !app.pipelineIds.includes(params.pipelineId)
+        ) {
           return false;
         }
-        if (app.stageKeys.length > 0 && params.stageKey && !app.stageKeys.includes(params.stageKey)) {
+        if (
+          app.stageKeys.length > 0 &&
+          params.stageKey &&
+          !app.stageKeys.includes(params.stageKey)
+        ) {
           return false;
         }
         return true;
@@ -637,12 +641,16 @@ export class DocumentRequirementService {
     const instances = await this.repository.getCandidateDocuments(tenantId, companyId, caseId);
     const target = instances.find((i) => i.id === docId || i.requirementId === docId);
     if (!target) {
-      throw new NotFoundError(`Candidate document instance '${docId}' not found for case '${caseId}'`);
+      throw new NotFoundError(
+        `Candidate document instance '${docId}' not found for case '${caseId}'`,
+      );
     }
 
     // 1. Validate file format
     const ext = dto.fileName.split('.').pop()?.toLowerCase() || '';
-    const allowed = target.uploadConfig.allowedFormats.map((f) => f.toLowerCase().replace(/^\./, ''));
+    const allowed = target.uploadConfig.allowedFormats.map((f) =>
+      f.toLowerCase().replace(/^\./, ''),
+    );
     if (allowed.length > 0 && !allowed.includes(ext)) {
       throw new BadRequestError(
         `File format '.${ext}' is not allowed. Permitted formats: ${allowed.join(', ')}`,
@@ -686,7 +694,9 @@ export class DocumentRequirementService {
       mimeType: dto.mimeType,
       uploadedAt: now,
       uploadedBy: actor.id,
-      storageKey: dto.storageKey || `secure/onboarding/${companyId}/${caseId}/${randomUUID()}_${dto.fileName}`,
+      storageKey:
+        dto.storageKey ||
+        `secure/onboarding/${companyId}/${caseId}/${randomUUID()}_${dto.fileName}`,
     };
 
     if (!target.uploadConfig.allowMultiple) {
@@ -736,7 +746,9 @@ export class DocumentRequirementService {
     const instances = await this.repository.getCandidateDocuments(tenantId, companyId, caseId);
     const target = instances.find((i) => i.id === docId || i.requirementId === docId);
     if (!target) {
-      throw new NotFoundError(`Candidate document instance '${docId}' not found for case '${caseId}'`);
+      throw new NotFoundError(
+        `Candidate document instance '${docId}' not found for case '${caseId}'`,
+      );
     }
 
     const now = new Date().toISOString();
@@ -795,7 +807,9 @@ export class DocumentRequirementService {
     const instances = await this.repository.getCandidateDocuments(tenantId, companyId, caseId);
     const target = instances.find((i) => i.id === docId || i.requirementId === docId);
     if (!target) {
-      throw new NotFoundError(`Candidate document instance '${docId}' not found for case '${caseId}'`);
+      throw new NotFoundError(
+        `Candidate document instance '${docId}' not found for case '${caseId}'`,
+      );
     }
 
     const now = new Date().toISOString();

@@ -3,14 +3,11 @@ import { DocumentRequirementService } from '../service/documentRequirement.servi
 import { BadRequestError } from '../../../../../app/errors/AppError.js';
 
 export class DocumentRequirementController {
-  constructor(
-    private readonly service = new DocumentRequirementService(),
-  ) {}
+  constructor(private readonly service = new DocumentRequirementService()) {}
 
   private getContext(req: Request) {
     const tenantId =
-      (req.headers['x-tenant-id'] as string) ||
-      (req as unknown as { tenantId?: string }).tenantId;
+      (req.headers['x-tenant-id'] as string) || (req as unknown as { tenantId?: string }).tenantId;
     const companyId =
       (req.headers['x-company-id'] as string) ||
       (req as unknown as { companyId?: string }).companyId;

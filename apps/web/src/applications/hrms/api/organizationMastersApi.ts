@@ -131,8 +131,10 @@ export async function fetchJobLevels(): Promise<MasterOption[]> {
     `${appConfig.apiBaseUrl}/hrms/workforce/job-levels?${query.toString()}`,
   );
 
-  let body: { data?: { id: string; name: string; code: string }[]; error?: { message?: string } } | null =
-    null;
+  let body: {
+    data?: { id: string; name: string; code: string }[];
+    error?: { message?: string };
+  } | null = null;
   try {
     body = await res.json();
   } catch {
@@ -161,8 +163,10 @@ export async function fetchGrades(): Promise<MasterOption[]> {
     `${appConfig.apiBaseUrl}/hrms/workforce/grades?${query.toString()}`,
   );
 
-  let body: { data?: { id: string; name: string; code: string }[]; error?: { message?: string } } | null =
-    null;
+  let body: {
+    data?: { id: string; name: string; code: string }[];
+    error?: { message?: string };
+  } | null = null;
   try {
     body = await res.json();
   } catch {

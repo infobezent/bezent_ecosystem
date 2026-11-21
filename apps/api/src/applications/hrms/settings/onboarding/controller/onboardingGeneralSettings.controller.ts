@@ -3,9 +3,7 @@ import { OnboardingGeneralSettingsService } from '../service/onboardingGeneralSe
 import { BadRequestError } from '../../../../../app/errors/AppError.js';
 
 export class OnboardingGeneralSettingsController {
-  constructor(
-    private readonly service = new OnboardingGeneralSettingsService(),
-  ) {}
+  constructor(private readonly service = new OnboardingGeneralSettingsService()) {}
 
   private getTenantAndCompany(req: Request): { tenantId: string; companyId: string } {
     const companyContext = req.companyContext;
@@ -53,12 +51,7 @@ export class OnboardingGeneralSettingsController {
     try {
       const { tenantId, companyId } = this.getTenantAndCompany(req);
       const actorUserId = this.getActorUserId(req);
-      const data = await this.service.updateConfig(
-        tenantId,
-        companyId,
-        req.body,
-        actorUserId,
-      );
+      const data = await this.service.updateConfig(tenantId, companyId, req.body, actorUserId);
       res.json({ success: true, data });
     } catch (err) {
       next(err);

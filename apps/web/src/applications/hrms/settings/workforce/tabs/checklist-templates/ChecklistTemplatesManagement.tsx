@@ -26,7 +26,8 @@ export const DEFAULT_CHECKLIST_TEMPLATES: ChecklistTemplate[] = [
     tenantId: 'default',
     companyId: 'default',
     name: 'Standard Employee Onboarding Checklist',
-    description: 'Comprehensive task checklist for general full-time employee onboarding and setup.',
+    description:
+      'Comprehensive task checklist for general full-time employee onboarding and setup.',
     category: 'General',
     applicableTo: 'all',
     isActive: true,
@@ -160,7 +161,8 @@ export const DEFAULT_CHECKLIST_TEMPLATES: ChecklistTemplate[] = [
       {
         id: 'tsk_google_workspace',
         name: 'Create Corporate Email & Google Workspace Account',
-        description: 'Provision Google Workspace inbox, Google Drive access, and internal Slack user.',
+        description:
+          'Provision Google Workspace inbox, Google Drive access, and internal Slack user.',
         groupId: 'grp_hardware_creds',
         assignedTo: 'it',
         isRequired: true,
@@ -370,14 +372,14 @@ export function ChecklistTemplatesManagement({
   // Toggle Active
   const handleToggleActive = async (template: ChecklistTemplate) => {
     try {
-      await updateChecklistTemplate(template.id, { isActive: !template.isActive }).catch(() => null);
+      await updateChecklistTemplate(template.id, { isActive: !template.isActive }).catch(
+        () => null,
+      );
       const next = templates.map((t) =>
         t.id === template.id ? { ...t, isActive: !t.isActive } : t,
       );
       persistTemplates(next);
-      showSuccessBanner(
-        `"${template.name}" is now ${!template.isActive ? 'Active' : 'Inactive'}.`,
-      );
+      showSuccessBanner(`"${template.name}" is now ${!template.isActive ? 'Active' : 'Inactive'}.`);
       setOpenDropdownId(null);
       await loadData();
     } catch (err) {

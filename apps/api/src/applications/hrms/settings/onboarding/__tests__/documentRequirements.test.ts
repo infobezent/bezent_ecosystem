@@ -91,7 +91,9 @@ describe('HRMS Required Documents Configuration & Candidate Workflow API', () =>
         .set('x-company-id', companyA)
         .set('x-tenant-id', tenantA);
 
-      const idProofCat = catsRes.body.data.find((c: { name: string }) => c.name === 'Identity Proof');
+      const idProofCat = catsRes.body.data.find(
+        (c: { name: string }) => c.name === 'Identity Proof',
+      );
       expect(idProofCat).toBeDefined();
 
       const deleteRes = await hrmsA
@@ -367,7 +369,9 @@ describe('HRMS Required Documents Configuration & Candidate Workflow API', () =>
 
       expect(reqRes.status).toBe(200);
       expect(reqRes.body.data.status).toBe('rejected');
-      expect(reqRes.body.data.rejectionReason).toBe('Uploaded copy is blurry. Please provide a clear color scan.');
+      expect(reqRes.body.data.rejectionReason).toBe(
+        'Uploaded copy is blurry. Please provide a clear color scan.',
+      );
     });
   });
 

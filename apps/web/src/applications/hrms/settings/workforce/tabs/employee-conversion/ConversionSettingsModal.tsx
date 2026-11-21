@@ -155,7 +155,8 @@ export function ConversionSettingsModal({
                   <div className="bezent-convsettings-locked-card">
                     <BezentIcon name="settings" size={14} color="#64748b" />
                     <span>
-                      Locked to <strong>{conversionMode === 'manual' ? 'Manual' : 'Automatic'}</strong>
+                      Locked to{' '}
+                      <strong>{conversionMode === 'manual' ? 'Manual' : 'Automatic'}</strong>
                     </span>
                   </div>
                 </div>
@@ -192,7 +193,9 @@ export function ConversionSettingsModal({
                 id="conv-status-select"
                 label="Initial Employee Status"
                 value={defaultEmploymentStatus}
-                onChange={(e) => setDefaultEmploymentStatus(e.target.value as DefaultEmploymentStatus)}
+                onChange={(e) =>
+                  setDefaultEmploymentStatus(e.target.value as DefaultEmploymentStatus)
+                }
                 options={[
                   { value: 'probation', label: 'Probation' },
                   { value: 'active', label: 'Active (Confirmed)' },

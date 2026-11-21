@@ -238,7 +238,8 @@ export class DocumentRequirementRepository {
         companyId,
         name: 'Degree Certificate / Diploma',
         documentType: 'edu_degree',
-        description: 'Highest academic degree qualification certificate or consolidated marksheets.',
+        description:
+          'Highest academic degree qualification certificate or consolidated marksheets.',
         categoryId: eduCat,
         isRequired: true,
         isActive: true,
@@ -275,7 +276,8 @@ export class DocumentRequirementRepository {
         companyId,
         name: 'Previous Experience & Relieving Letter',
         documentType: 'emp_relieving',
-        description: 'Official service certificate and relieving letter from immediate prior employer.',
+        description:
+          'Official service certificate and relieving letter from immediate prior employer.',
         categoryId: empCat,
         isRequired: false,
         isActive: true,
@@ -312,7 +314,8 @@ export class DocumentRequirementRepository {
         companyId,
         name: 'Bank Passbook / Cancelled Cheque',
         documentType: 'bank_cheque',
-        description: 'Account proof with visible beneficiary name, account number, and IFSC/routing code.',
+        description:
+          'Account proof with visible beneficiary name, account number, and IFSC/routing code.',
         categoryId: bankCat,
         isRequired: true,
         isActive: true,
@@ -370,7 +373,11 @@ export class DocumentRequirementRepository {
     }
 
     const metadata = row.metadata as { categories?: DocumentCategory[] };
-    if (!metadata.categories || !Array.isArray(metadata.categories) || metadata.categories.length === 0) {
+    if (
+      !metadata.categories ||
+      !Array.isArray(metadata.categories) ||
+      metadata.categories.length === 0
+    ) {
       const defaults = this.getDefaultCategories(tenantId, companyId);
       await this.saveAllCategories(tenantId, companyId, defaults);
       return defaults;
@@ -441,7 +448,11 @@ export class DocumentRequirementRepository {
     }
 
     const metadata = row.metadata as { requirements?: DocumentRequirement[] };
-    if (!metadata.requirements || !Array.isArray(metadata.requirements) || metadata.requirements.length === 0) {
+    if (
+      !metadata.requirements ||
+      !Array.isArray(metadata.requirements) ||
+      metadata.requirements.length === 0
+    ) {
       const categories = await this.getCategories(tenantId, companyId);
       const defaults = this.getDefaultRequirements(tenantId, companyId, categories);
       await this.saveAllRequirements(tenantId, companyId, defaults);

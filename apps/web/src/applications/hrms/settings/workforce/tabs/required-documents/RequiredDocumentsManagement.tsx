@@ -298,7 +298,8 @@ export const DEFAULT_DOCUMENT_REQUIREMENTS: DocumentRequirement[] = [
     companyId: 'default',
     name: 'Bank Passbook / Cancelled Cheque',
     documentType: 'bank_cheque',
-    description: 'Account proof with visible beneficiary name, account number, and IFSC/routing code.',
+    description:
+      'Account proof with visible beneficiary name, account number, and IFSC/routing code.',
     categoryId: 'cat_bank_documents',
     isRequired: true,
     isActive: true,
@@ -382,7 +383,9 @@ export function RequiredDocumentsManagement({
   const [targetCategoryId, setTargetCategoryId] = useState<string | undefined>(undefined);
 
   const [applicabilityModalOpen, setApplicabilityModalOpen] = useState(false);
-  const [targetApplicabilityDoc, setTargetApplicabilityDoc] = useState<DocumentRequirement | null>(null);
+  const [targetApplicabilityDoc, setTargetApplicabilityDoc] = useState<DocumentRequirement | null>(
+    null,
+  );
 
   const [manageCategoriesModalOpen, setManageCategoriesModalOpen] = useState(false);
 
@@ -487,13 +490,16 @@ export function RequiredDocumentsManagement({
         const updated = await updateDocumentRequirement(editingDocument.id, {
           ...data,
           categoryId: resolvedCategoryId,
-        }).catch(() => ({
-          ...editingDocument,
-          ...data,
-          categoryId: resolvedCategoryId,
-          version: editingDocument.version + 1,
-          updatedAt: 'Just now',
-        } as DocumentRequirement));
+        }).catch(
+          () =>
+            ({
+              ...editingDocument,
+              ...data,
+              categoryId: resolvedCategoryId,
+              version: editingDocument.version + 1,
+              updatedAt: 'Just now',
+            }) as DocumentRequirement,
+        );
 
         const next = documents.map((d) => (d.id === editingDocument.id ? updated : d));
         persistDocuments(next);
@@ -502,44 +508,48 @@ export function RequiredDocumentsManagement({
         const created = await createDocumentRequirement({
           ...data,
           categoryId: resolvedCategoryId,
-        }).catch(() => ({
-          id: `doc_${Date.now().toString(36)}`,
-          tenantId: 'default',
-          companyId: 'default',
-          name: data.name,
-          documentType: data.name.toLowerCase().replace(/\s+/g, '_'),
-          description: data.description,
-          categoryId: resolvedCategoryId,
-          isRequired: data.isRequired ?? true,
-          isActive: data.isActive ?? true,
-          displayOrder: documents.length + 1,
-          uploadConfig: {
-            allowedFormats: data.uploadConfig?.allowedFormats || ['pdf', 'jpg', 'png'],
-            maxFileSizeMb: data.uploadConfig?.maxFileSizeMb || 5,
-            allowMultiple: Boolean(data.uploadConfig?.allowMultiple),
-            maxFiles: data.uploadConfig?.maxFiles || 1,
-            expiryApplicable: Boolean(data.uploadConfig?.expiryApplicable),
-            requireExpiry: Boolean(data.uploadConfig?.requireExpiry),
-          },
-          verificationConfig: {
-            verificationRequired: data.verificationConfig?.verificationRequired ?? true,
-            verificationResponsibility: data.verificationConfig?.verificationResponsibility || 'hr',
-            specificRoleName: data.verificationConfig?.specificRoleName || null,
-            allowReupload: data.verificationConfig?.allowReupload ?? true,
-            reverificationOnExpiry: Boolean(data.verificationConfig?.reverificationOnExpiry),
-          },
-          applicability: {
-            allEmployees: true,
-            employmentTypes: [],
-            departmentIds: [],
-            locationIds: [],
-            pipelineIds: [],
-            stageKeys: [],
-          },
-          version: 1,
-          createdAt: 'Just now',
-          updatedAt: 'Just now',
-        } as DocumentRequirement));
+        }).catch(
+          () =>
+            ({
+              id: `doc_${Date.now().toString(36)}`,
+              tenantId: 'default',
+              companyId: 'default',
+              name: data.name,
+              documentType: data.name.toLowerCase().replace(/\s+/g, '_'),
+              description: data.description,
+              categoryId: resolvedCategoryId,
+              isRequired: data.isRequired ?? true,
+              isActive: data.isActive ?? true,
+              displayOrder: documents.length + 1,
+              uploadConfig: {
+                allowedFormats: data.uploadConfig?.allowedFormats || ['pdf', 'jpg', 'png'],
+                maxFileSizeMb: data.uploadConfig?.maxFileSizeMb || 5,
+                allowMultiple: Boolean(data.uploadConfig?.allowMultiple),
+                maxFiles: data.uploadConfig?.maxFiles || 1,
+                expiryApplicable: Boolean(data.uploadConfig?.expiryApplicable),
+                requireExpiry: Boolean(data.uploadConfig?.requireExpiry),
+              },
+              verificationConfig: {
+                verificationRequired: data.verificationConfig?.verificationRequired ?? true,
+                verificationResponsibility:
+                  data.verificationConfig?.verificationResponsibility || 'hr',
+                specificRoleName: data.verificationConfig?.specificRoleName || null,
+                allowReupload: data.verificationConfig?.allowReupload ?? true,
+                reverificationOnExpiry: Boolean(data.verificationConfig?.reverificationOnExpiry),
+              },
+              applicability: {
+                allEmployees: true,
+                employmentTypes: [],
+                departmentIds: [],
+                locationIds: [],
+                pipelineIds: [],
+                stageKeys: [],
+              },
+              version: 1,
+              createdAt: 'Just now',
+              updatedAt: 'Just now',
+            }) as DocumentRequirement,
+        );
 
         const next = [...documents, created];
         persistDocuments(next);
@@ -569,14 +579,17 @@ export function RequiredDocumentsManagement({
 
   const handleDuplicateDocument = async (doc: DocumentRequirement) => {
     try {
-      const duplicated = await duplicateDocumentRequirement(doc.id).catch(() => ({
-        ...doc,
-        id: `doc_${Date.now().toString(36)}`,
-        name: `${doc.name} (Copy)`,
-        documentType: `${doc.documentType}_copy`,
-        createdAt: 'Just now',
-        updatedAt: 'Just now',
-      } as DocumentRequirement));
+      const duplicated = await duplicateDocumentRequirement(doc.id).catch(
+        () =>
+          ({
+            ...doc,
+            id: `doc_${Date.now().toString(36)}`,
+            name: `${doc.name} (Copy)`,
+            documentType: `${doc.documentType}_copy`,
+            createdAt: 'Just now',
+            updatedAt: 'Just now',
+          }) as DocumentRequirement,
+      );
 
       const next = [...documents, duplicated];
       persistDocuments(next);
@@ -960,7 +973,8 @@ export function RequiredDocumentsManagement({
 
                   {/* Screen Reader and Test Compatibility */}
                   <span className="bezent-sr-only">
-                    {doc.isRequired ? 'Required' : 'Optional'} {doc.isActive ? 'Active' : 'Inactive'}
+                    {doc.isRequired ? 'Required' : 'Optional'}{' '}
+                    {doc.isActive ? 'Active' : 'Inactive'}
                     <span>Configure</span>
                   </span>
                 </div>
