@@ -9,7 +9,8 @@ export type SettingsModuleId =
   | 'performance'
   | 'employees'
   | 'hr-settings'
-  | 'milestones';
+  | 'milestones'
+  | 'templates';
 
 export interface SettingsModuleCard {
   id: SettingsModuleId;
@@ -70,6 +71,14 @@ export const SETTINGS_MODULE_CARDS: SettingsModuleCard[] = [
     description:
       'Configure lifetime working-hour recognition milestones, poster templates, and gift catalogue.',
     icon: 'sparkles',
+  },
+  {
+    id: 'templates',
+    name: 'Templates',
+    tagline: 'Forms, Emails & Letters',
+    description:
+      'Configure employee forms, automated email notifications, and official company letter formats.',
+    icon: 'documents',
   },
 ];
 

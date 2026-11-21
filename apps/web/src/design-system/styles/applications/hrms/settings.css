@@ -439,6 +439,27 @@
   border-color: #fbcfe8;
 }
 
+/* 8. Templates — Royal Indigo / Slate */
+.bezent-settings-zoho-tile--templates {
+  background: linear-gradient(
+    180deg,
+    rgba(224, 231, 255, 0.92) 0%,
+    rgba(238, 242, 255, 0.72) 44%,
+    rgba(255, 255, 255, 0.98) 100%
+  );
+  border-color: rgba(199, 210, 254, 0.75);
+}
+.bezent-settings-zoho-tile--templates:hover {
+  border-color: #6366f1;
+  box-shadow:
+    0 12px 24px -4px rgba(99, 102, 241, 0.18),
+    0 4px 8px rgba(0, 0, 0, 0.04);
+}
+.bezent-settings-zoho-tile__icon--templates {
+  color: #4f46e5;
+  border-color: #c7d2fe;
+}
+
 /* Dark mode adjustments */
 [data-theme='dark'] .bezent-settings-zoho-banner {
   background: #111827;
@@ -565,6 +586,25 @@
 [data-theme='dark'] .bezent-settings-zoho-tile--milestones:hover {
   border-color: #f472b6;
   box-shadow: 0 12px 28px -4px rgba(0, 0, 0, 0.55);
+}
+
+[data-theme='dark'] .bezent-settings-zoho-tile--templates {
+  background: linear-gradient(
+    180deg,
+    rgba(99, 102, 241, 0.22) 0%,
+    rgba(30, 41, 59, 0.92) 55%,
+    #1e293b 100%
+  );
+  border-color: rgba(99, 102, 241, 0.3);
+}
+[data-theme='dark'] .bezent-settings-zoho-tile--templates:hover {
+  border-color: #818cf8;
+  box-shadow: 0 12px 28px -4px rgba(0, 0, 0, 0.55);
+}
+[data-theme='dark'] .bezent-settings-zoho-tile__icon--templates {
+  background: rgba(99, 102, 241, 0.2);
+  color: #a5b4fc;
+  border-color: rgba(99, 102, 241, 0.4);
 }
 
 [data-theme='dark'] .bezent-settings-zoho-search-box {
@@ -11911,4 +11951,401 @@
 
 [data-theme='dark'] .bezent-workforce-settings-header {
   border-bottom-color: #334155;
+}
+
+/* ── Templates Studio & Hub (Forms, Emails & Letters) ── */
+.bezent-templates-workspace {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  width: 100%;
+}
+
+.bezent-templates-breadcrumbs {
+  font-size: 13.5px;
+  color: var(--text-secondary, #64748b);
+}
+
+.bezent-templates-hub-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.bezent-templates-search-wrapper {
+  min-width: 280px;
+}
+
+/* Outer Section Container Card */
+.bezent-templates-section-card {
+  background: var(--bg-surface, #ffffff);
+  border: 1px solid var(--border-subtle, #e2e8f0);
+  border-radius: var(--radius-card, 16px);
+  padding: 22px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.03);
+  box-sizing: border-box;
+}
+
+.bezent-templates-section-header {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.bezent-templates-section-title-wrap {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.bezent-templates-section-icon {
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.bezent-templates-section-icon--forms {
+  background: #f0fdf4;
+  color: #16a34a;
+  border: 1px solid #bbf7d0;
+}
+
+.bezent-templates-section-icon--emails {
+  background: #eff6ff;
+  color: #2563eb;
+  border: 1px solid #bfdbfe;
+}
+
+.bezent-templates-section-icon--letters {
+  background: #faf5ff;
+  color: #7c3aed;
+  border: 1px solid #e9d5ff;
+}
+
+.bezent-templates-section-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text-primary, #0f172a);
+  margin: 0;
+  line-height: 1.25;
+}
+
+.bezent-templates-count-badge {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text-secondary, #64748b);
+  background: var(--bg-surface-secondary, #f1f5f9);
+  padding: 2px 7px;
+  border-radius: 9999px;
+  border: 1px solid var(--border-subtle, #e2e8f0);
+}
+
+.bezent-templates-section-desc {
+  font-size: 13px;
+  color: var(--text-secondary, #64748b);
+  margin: 0;
+  line-height: 1.4;
+}
+
+/* Card Icon Variants */
+.bezent-cif-card__icon--forms {
+  background: #f0fdf4;
+  color: #16a34a;
+  border: 1px solid #bbf7d0;
+  box-shadow: 0 1px 3px rgba(22, 163, 74, 0.08);
+}
+
+.bezent-cif-card__icon--emails {
+  background: #eff6ff;
+  color: #2563eb;
+  border: 1px solid #bfdbfe;
+  box-shadow: 0 1px 3px rgba(37, 99, 235, 0.08);
+}
+
+.bezent-cif-card__icon--letters {
+  background: #faf5ff;
+  color: #7c3aed;
+  border: 1px solid #e9d5ff;
+  box-shadow: 0 1px 3px rgba(124, 58, 237, 0.08);
+}
+
+/* Meta Strips & Tags */
+.bezent-template-meta-strip {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 16px;
+  padding: 10px 14px;
+  background: var(--bg-surface-secondary, #f8fafc);
+  border: 1px solid var(--border-subtle, #e2e8f0);
+  border-radius: var(--radius-sm, 8px);
+}
+
+.bezent-template-meta-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12.5px;
+}
+
+.bezent-template-meta-label {
+  font-weight: 600;
+  color: var(--text-secondary, #64748b);
+}
+
+.bezent-template-meta-val {
+  color: var(--text-primary, #0f172a);
+}
+
+.bezent-template-meta-tag {
+  background: #eff6ff;
+  color: #1d4ed8;
+  font-weight: 600;
+  padding: 1px 6px;
+  border-radius: 4px;
+  text-transform: capitalize;
+}
+
+.bezent-template-tags-title {
+  display: block;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--text-secondary, #64748b);
+  margin-bottom: 6px;
+}
+
+.bezent-template-tags-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 12px;
+}
+
+.bezent-template-tag-chip {
+  background: #eff6ff;
+  color: #1d4ed8;
+  border: 1px solid #bfdbfe;
+  border-radius: 6px;
+  padding: 3px 8px;
+  font-size: 11.5px;
+  font-family: monospace;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.bezent-template-tag-chip:hover {
+  background: #dbeafe;
+  border-color: #3b82f6;
+  color: #1e40af;
+}
+
+.bezent-template-tag-chip--purple {
+  background: #faf5ff;
+  color: #6d28d9;
+  border-color: #ddd6fe;
+}
+
+.bezent-template-tag-chip--purple:hover {
+  background: #f3e8ff;
+  border-color: #8b5cf6;
+  color: #5b21b6;
+}
+
+/* Email Mockup Preview */
+.bezent-email-preview-container {
+  border: 1px solid var(--border-default, #cbd5e1);
+  border-radius: var(--radius-card, 12px);
+  overflow: hidden;
+  background: #ffffff;
+}
+
+.bezent-email-preview-header {
+  background: #f8fafc;
+  border-bottom: 1px solid #e2e8f0;
+  padding: 10px 14px;
+  font-size: 13px;
+  color: #334155;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.bezent-email-preview-body {
+  padding: 20px;
+  background: #f1f5f9;
+}
+
+.bezent-email-preview-card {
+  background: #ffffff;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+  padding: 24px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.bezent-email-preview-brand {
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 2px solid #2563eb;
+}
+
+.bezent-email-brand-text {
+  font-size: 16px;
+  font-weight: 800;
+  color: #1e3a8a;
+  letter-spacing: -0.02em;
+}
+
+.bezent-email-pre {
+  white-space: pre-wrap;
+  font-family: inherit;
+  font-size: 13.5px;
+  line-height: 1.6;
+  color: #1e293b;
+  margin: 0;
+}
+
+.bezent-email-preview-footer {
+  margin-top: 24px;
+  padding-top: 14px;
+  border-top: 1px solid #e2e8f0;
+  font-size: 11.5px;
+  color: #64748b;
+  text-align: center;
+}
+
+.bezent-email-preview-footer p {
+  margin: 2px 0;
+}
+
+/* Letterhead Sheet Preview */
+.bezent-letter-preview-sheet {
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  border-radius: var(--radius-sm, 6px);
+  padding: 40px;
+  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.06);
+  color: #0f172a;
+}
+
+.bezent-letter-head {
+  text-align: center;
+  margin-bottom: 16px;
+}
+
+.bezent-letter-head__company {
+  font-size: 18px;
+  font-weight: 800;
+  color: #0f172a;
+  letter-spacing: 0.05em;
+  margin: 0 0 4px 0;
+}
+
+.bezent-letter-head__address {
+  font-size: 11.5px;
+  color: #475569;
+  margin: 0 0 2px 0;
+}
+
+.bezent-letter-head__cin {
+  font-size: 11px;
+  color: #64748b;
+  margin: 0;
+}
+
+.bezent-letter-divider {
+  height: 2px;
+  background: linear-gradient(90deg, #1e3a8a, #3b82f6, #1e3a8a);
+  margin: 16px 0 24px 0;
+}
+
+.bezent-letter-body {
+  margin-bottom: 32px;
+}
+
+.bezent-letter-pre {
+  white-space: pre-wrap;
+  font-family: inherit;
+  font-size: 13px;
+  line-height: 1.7;
+  color: #1e293b;
+  margin: 0;
+}
+
+.bezent-letter-signature-block {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  margin-top: 40px;
+  padding-top: 20px;
+}
+
+.bezent-letter-seal-circle {
+  border: 2px dashed #94a3b8;
+  border-radius: 50%;
+  padding: 16px 12px;
+  font-size: 9px;
+  font-weight: 700;
+  color: #64748b;
+  text-align: center;
+  letter-spacing: 0.06em;
+  width: 76px;
+  height: 76px;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.bezent-letter-signature-line {
+  text-align: right;
+  font-size: 12.5px;
+}
+
+.bezent-letter-signatory-name {
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0 0 2px 0;
+}
+
+.bezent-letter-signatory-title {
+  color: #475569;
+  margin: 0 0 2px 0;
+}
+
+.bezent-letter-signatory-company {
+  color: #64748b;
+  font-size: 11.5px;
+  margin: 0;
+}
+
+/* Dark mode adjustments for Templates Studio */
+[data-theme='dark'] .bezent-templates-section-card {
+  background: #111827;
+  border-color: #1f2937;
+}
+
+[data-theme='dark'] .bezent-templates-count-badge {
+  background: #1e293b;
+  border-color: #334155;
+  color: #94a3b8;
+}
+
+[data-theme='dark'] .bezent-template-meta-strip {
+  background: #0f172a;
+  border-color: #1e293b;
+}
+
+[data-theme='dark'] .bezent-template-meta-val {
+  color: #f1f5f9;
 }

@@ -19,6 +19,7 @@ import { AttendanceSettingsSection } from '../attendance';
 import { TimesheetsSettingsSection } from '../timesheets';
 import { PerformanceSettingsSection } from '../performance';
 import { MilestonesSettingsSection } from '../milestones/MilestonesSettingsSection';
+import { TemplatesSettingsSection } from '../templates';
 import bezentMark from '../../../../assets/bezent-mark.png';
 
 export interface SettingsPageInnerProps {
@@ -133,6 +134,8 @@ export function SettingsPageInner({ initialModule = 'overview' }: SettingsPageIn
             ))}
           </div>
         </Stack>
+      ) : activeModule === 'templates' ? (
+        <TemplatesSettingsSection onBack={() => setActiveModule('overview')} />
       ) : activeModule === 'workforce' ||
         activeModule === 'onboarding' ||
         activeModule === 'employees' ||
@@ -183,9 +186,13 @@ function RoutedSettingsPage() {
     searchParams.get('module') === 'hr-settings' ||
     searchParams.get('tab') === 'onboarding' ||
     searchParams.has('sub');
+  const isTemplatesSettings = searchParams.get('module') === 'templates';
   const requestedModule = SETTINGS_MODULE_CARDS.find((m) => m.id === searchParams.get('module'));
-  const initialModule: SettingsModuleId =
-    isWorkflowSettings || isWorkforceSettings ? 'workforce' : (requestedModule?.id ?? 'overview');
+  const initialModule: SettingsModuleId = isTemplatesSettings
+    ? 'templates'
+    : isWorkflowSettings || isWorkforceSettings
+      ? 'workforce'
+      : (requestedModule?.id ?? 'overview');
   return <SettingsPageInner initialModule={initialModule} />;
 }
 
