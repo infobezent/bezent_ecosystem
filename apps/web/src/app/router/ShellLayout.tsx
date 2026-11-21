@@ -302,7 +302,7 @@ export function ShellLayout() {
       <AppShell
         workspaceVariant={resolvedWorkspaceVariant}
         companyLogo={activeCompany?.logoUrl || undefined}
-        companyName="bezent"
+        companyName="Bezent"
         isSettingsActive={activeId === 'settings' || pathname.includes('/settings')}
         topNavSearch={
           <GlobalSearch
