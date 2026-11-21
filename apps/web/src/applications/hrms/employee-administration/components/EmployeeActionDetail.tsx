@@ -1,30 +1,20 @@
 import {
   Alert,
+  Avatar,
   Badge,
   Button,
-  Grid,
-  Section,
   Stack,
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeaderCell,
-  TableRow,
 } from '../../../../design-system/components';
 import { BezentIcon } from '../../../../design-system/icons';
 import type { EmployeeActionDetail as EmployeeActionDetailData } from '../api/employeeAdministrationApi';
 import {
-  ACTION_STATUS_LABELS,
   EMPLOYMENT_STATUS_LABELS,
   FIELD_LABELS,
-  actionStatusVariant,
   actionTypeLabel,
   changeValueLabel,
   employmentStatusVariant,
   formatDate,
 } from '../model/actionCatalog';
-import { DetailItem } from '../../employees/components/DetailItem';
 
 const HISTORY_EVENT_LABELS: Record<EmployeeActionDetailData['history'][number]['event'], string> = {
   created: 'Action created',
@@ -32,6 +22,14 @@ const HISTORY_EVENT_LABELS: Record<EmployeeActionDetailData['history'][number]['
   applied: 'Action applied',
   cancelled: 'Action cancelled',
 };
+
+function getInitials(name: string): string {
+  const parts = name.trim().split(/\s+/);
+  if (parts.length >= 2) {
+    return `${parts[0]?.[0] ?? ''}${parts[1]?.[0] ?? ''}`.toUpperCase();
+  }
+  return name.slice(0, 2).toUpperCase();
+}
 
 export interface EmployeeActionDetailProps {
   action: EmployeeActionDetailData;
@@ -47,7 +45,7 @@ export function EmployeeActionDetail({ action, today, onOpenEmployee }: Employee
   const isSeparation = action.category === 'separation';
 
   return (
-    <Stack gap="lg">
+    <Stack gap="md">
       {action.status === 'pending' && action.effectiveDate > today && (
         <Alert variant="info" title="Scheduled">
           This action becomes effective on {formatDate(action.effectiveDate)} and can be applied
@@ -55,119 +53,194 @@ export function EmployeeActionDetail({ action, today, onOpenEmployee }: Employee
         </Alert>
       )}
 
-      <Section title="Employee" variant="plain">
-        <Grid columns={3} gap="md">
-          <DetailItem label="Employee">
+      {/* Employee Identity Hero */}
+      <div className="bezent-wf-action-hero">
+        <Avatar
+          initials={getInitials(employee.fullName)}
+          size="md"
+          shape="circle"
+          alt={employee.fullName}
+        />
+        <div className="bezent-wf-action-hero__body">
+          <div className="bezent-wf-action-hero__name-row">
             {onOpenEmployee ? (
               <Button
                 variant="text"
                 size="sm"
                 onClick={() => onOpenEmployee(employee.id)}
                 aria-label={`Open profile of ${employee.fullName}`}
+                className="bezent-wf-action-hero__name-btn"
               >
                 {employee.fullName}
               </Button>
             ) : (
-              employee.fullName
+              <span className="bezent-wf-action-hero__name">{employee.fullName}</span>
             )}
-          </DetailItem>
-          <DetailItem label="Employee ID">{employee.employeeNumber}</DetailItem>
-          <DetailItem label="Employment Status">
             <Badge variant={employmentStatusVariant(employee.employmentStatus)} size="sm">
               {EMPLOYMENT_STATUS_LABELS[employee.employmentStatus]}
             </Badge>
-          </DetailItem>
-          <DetailItem label="Department">{employee.departmentName ?? 'Not set'}</DetailItem>
-          <DetailItem label="Designation">{employee.designationName ?? 'Not set'}</DetailItem>
-          <DetailItem label="Location">{employee.locationName ?? 'Not set'}</DetailItem>
-        </Grid>
-      </Section>
+          </div>
+          <div className="bezent-wf-action-hero__meta">
+            <span className="bezent-wf-action-hero__id">{employee.employeeNumber}</span>
+            {employee.designationName && (
+              <>
+                <span className="bezent-wf-action-hero__sep">•</span>
+                <span>{employee.designationName}</span>
+              </>
+            )}
+            {employee.departmentName && (
+              <>
+                <span className="bezent-wf-action-hero__sep">•</span>
+                <span>{employee.departmentName}</span>
+              </>
+            )}
+            {employee.locationName && (
+              <>
+                <span className="bezent-wf-action-hero__sep">•</span>
+                <span>{employee.locationName}</span>
+              </>
+            )}
+          </div>
+        </div>
+      </div>
 
-      <Section title={`Change · ${actionTypeLabel(action.actionType)}`} variant="plain">
-        <Table compact aria-label="Requested change">
-          <TableHead>
-            <TableRow>
-              <TableHeaderCell>Field</TableHeaderCell>
-              <TableHeaderCell>Current Value</TableHeaderCell>
-              <TableHeaderCell aria-label="changes to" />
-              <TableHeaderCell>New Value</TableHeaderCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {action.changes.map((change) => (
-              <TableRow key={change.field}>
-                <TableCell>{FIELD_LABELS[change.field]}</TableCell>
-                <TableCell>{changeValueLabel(change, 'from')}</TableCell>
-                <TableCell aria-hidden="true">
-                  <BezentIcon name="arrowRight" size={14} />
-                </TableCell>
-                <TableCell>{changeValueLabel(change, 'to')}</TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </Section>
+      {/* Changes / Visual Diff Card */}
+      <div className="bezent-wf-action-section">
+        <div className="bezent-wf-action-section__header">
+          <span className="bezent-wf-action-section__title">
+            Requested Change · {actionTypeLabel(action.actionType)}
+          </span>
+        </div>
+        <div className="bezent-wf-action-diff-list">
+          {action.changes.map((change) => (
+            <div key={change.field} className="bezent-wf-action-diff-card">
+              <div className="bezent-wf-action-diff-field">
+                {FIELD_LABELS[change.field]}
+              </div>
+              <div className="bezent-wf-action-diff-compare">
+                <div className="bezent-wf-action-diff-box bezent-wf-action-diff-box--current">
+                  <span className="bezent-wf-action-diff-tag">Current Value</span>
+                  <span className="bezent-wf-action-diff-val">
+                    {changeValueLabel(change, 'from')}
+                  </span>
+                </div>
+                <div className="bezent-wf-action-diff-arrow" aria-hidden="true">
+                  <BezentIcon name="arrowRight" size={16} />
+                </div>
+                <div className="bezent-wf-action-diff-box bezent-wf-action-diff-box--new">
+                  <span className="bezent-wf-action-diff-tag">New Value</span>
+                  <span className="bezent-wf-action-diff-val">
+                    {changeValueLabel(change, 'to')}
+                  </span>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
 
-      <Section title="Request" variant="plain">
-        <Grid columns={3} gap="md">
-          <DetailItem label="Status">
-            <Badge variant={actionStatusVariant(action.status)} size="sm">
-              {ACTION_STATUS_LABELS[action.status]}
-            </Badge>
-          </DetailItem>
-          <DetailItem label="Effective Date">{formatDate(action.effectiveDate)}</DetailItem>
-          {isSeparation && (
-            <DetailItem
-              label={action.actionType === 'resignation' ? 'Resignation Date' : 'Notice Date'}
-            >
-              {formatDate(action.requestDate)}
-            </DetailItem>
+      {/* Request Details */}
+      <div className="bezent-wf-action-section">
+        <div className="bezent-wf-action-section__header">
+          <span className="bezent-wf-action-section__title">Request Details</span>
+        </div>
+        <div className="bezent-wf-action-meta-card">
+          <div className="bezent-wf-action-meta-grid">
+            <div className="bezent-wf-action-meta-item">
+              <span className="bezent-wf-action-meta-label">Effective Date</span>
+              <span className="bezent-wf-action-meta-val">{formatDate(action.effectiveDate)}</span>
+            </div>
+            {isSeparation && (
+              <div className="bezent-wf-action-meta-item">
+                <span className="bezent-wf-action-meta-label">
+                  {action.actionType === 'resignation' ? 'Resignation Date' : 'Notice Date'}
+                </span>
+                <span className="bezent-wf-action-meta-val">{formatDate(action.requestDate)}</span>
+              </div>
+            )}
+            <div className="bezent-wf-action-meta-item">
+              <span className="bezent-wf-action-meta-label">Requested By</span>
+              <span className="bezent-wf-action-meta-val">{action.requestedBy ?? 'Not recorded'}</span>
+            </div>
+            <div className="bezent-wf-action-meta-item">
+              <span className="bezent-wf-action-meta-label">Requested On</span>
+              <span className="bezent-wf-action-meta-val">{formatDate(action.createdAt)}</span>
+            </div>
+            {action.appliedAt && (
+              <div className="bezent-wf-action-meta-item">
+                <span className="bezent-wf-action-meta-label">Applied On</span>
+                <span className="bezent-wf-action-meta-val">{formatDate(action.appliedAt)}</span>
+              </div>
+            )}
+            {action.cancelledAt && (
+              <div className="bezent-wf-action-meta-item">
+                <span className="bezent-wf-action-meta-label">Cancelled On</span>
+                <span className="bezent-wf-action-meta-val">{formatDate(action.cancelledAt)}</span>
+              </div>
+            )}
+          </div>
+
+          {action.reason && (
+            <div className="bezent-wf-action-reason-box">
+              <span className="bezent-wf-action-meta-label">Reason</span>
+              <p className="bezent-wf-action-reason-val">{action.reason}</p>
+            </div>
           )}
-          <DetailItem label="Requested By">{action.requestedBy ?? 'Not recorded'}</DetailItem>
-          <DetailItem label="Requested On">{formatDate(action.createdAt)}</DetailItem>
-          {action.appliedAt && (
-            <DetailItem label="Applied On">{formatDate(action.appliedAt)}</DetailItem>
-          )}
-          {action.cancelledAt && (
-            <DetailItem label="Cancelled On">{formatDate(action.cancelledAt)}</DetailItem>
-          )}
-        </Grid>
-        <Stack gap="md">
-          <DetailItem label="Reason">{action.reason}</DetailItem>
+
           {action.cancellationReason && (
-            <DetailItem label="Cancellation Reason">{action.cancellationReason}</DetailItem>
+            <div className="bezent-wf-action-reason-box bezent-wf-action-reason-box--cancelled">
+              <span className="bezent-wf-action-meta-label">Cancellation Reason</span>
+              <p className="bezent-wf-action-reason-val">{action.cancellationReason}</p>
+            </div>
           )}
-        </Stack>
-      </Section>
+        </div>
+      </div>
 
-      <Section title="History" variant="plain">
-        <Table compact aria-label="Action history">
-          <TableHead>
-            <TableRow>
-              <TableHeaderCell>Event</TableHeaderCell>
-              <TableHeaderCell>Status</TableHeaderCell>
-              <TableHeaderCell>Actor</TableHeaderCell>
-              <TableHeaderCell>Timestamp</TableHeaderCell>
-              <TableHeaderCell>Notes</TableHeaderCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {action.history.map((entry) => (
-              <TableRow key={entry.id}>
-                <TableCell>{HISTORY_EVENT_LABELS[entry.event]}</TableCell>
-                <TableCell>
-                  {entry.fromStatus && entry.fromStatus !== entry.toStatus
-                    ? `${entry.fromStatus} → ${entry.toStatus}`
-                    : entry.toStatus}
-                </TableCell>
-                <TableCell>{entry.actor ?? 'Not recorded'}</TableCell>
-                <TableCell>{formatDate(entry.createdAt)}</TableCell>
-                <TableCell>{entry.notes ?? '—'}</TableCell>
-              </TableRow>
+      {/* Activity Timeline */}
+      {action.history && action.history.length > 0 && (
+        <div className="bezent-wf-action-section">
+          <div className="bezent-wf-action-section__header">
+            <span className="bezent-wf-action-section__title">Activity History</span>
+          </div>
+          <div className="bezent-wf-action-timeline">
+            {action.history.map((entry, idx) => (
+              <div key={entry.id} className="bezent-wf-action-timeline-item">
+                <div className="bezent-wf-action-timeline-marker">
+                  <span
+                    className={`bezent-wf-action-timeline-dot bezent-wf-action-timeline-dot--${entry.event}`}
+                  />
+                  {idx < action.history.length - 1 && (
+                    <span className="bezent-wf-action-timeline-line" />
+                  )}
+                </div>
+                <div className="bezent-wf-action-timeline-content">
+                  <div className="bezent-wf-action-timeline-row">
+                    <span className="bezent-wf-action-timeline-event">
+                      {HISTORY_EVENT_LABELS[entry.event]}
+                    </span>
+                    <span className="bezent-wf-action-timeline-date">
+                      {formatDate(entry.createdAt)}
+                    </span>
+                  </div>
+                  <div className="bezent-wf-action-timeline-sub">
+                    <span className="bezent-wf-action-timeline-status">
+                      {entry.fromStatus && entry.fromStatus !== entry.toStatus
+                        ? `${entry.fromStatus} → ${entry.toStatus}`
+                        : entry.toStatus}
+                    </span>
+                    {entry.actor && (
+                      <span className="bezent-wf-action-timeline-actor">· {entry.actor}</span>
+                    )}
+                  </div>
+                  {entry.notes && (
+                    <p className="bezent-wf-action-timeline-notes">{entry.notes}</p>
+                  )}
+                </div>
+              </div>
             ))}
-          </TableBody>
-        </Table>
-      </Section>
+          </div>
+        </div>
+      )}
     </Stack>
   );
 }

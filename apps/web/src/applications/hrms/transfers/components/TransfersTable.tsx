@@ -6,6 +6,7 @@ import {
   CardBody,
   EmptyState,
   Grid,
+  IconButton,
   Inline,
   LoadingState,
   Stack,
@@ -198,79 +199,59 @@ export const TransfersTable: React.FC<TransfersTableProps> = ({
                         </span>
                       </Stack>
                     </Inline>
-                    <div className="bezent-table-action-menu">
-                      <button
-                        type="button"
-                        className={`bezent-table-action-btn ${isMenuOpen ? 'is-active' : ''}`}
+                    <div className="bezent-table-row-actions">
+                      <IconButton
+                        label="View Details"
+                        variant="ghost"
+                        tooltipDirection="left"
                         onClick={(e) => {
                           e.stopPropagation();
-                          setActiveMenuId((prev) => (prev === action.id ? null : action.id));
+                          onOpenAction(action.id);
                         }}
-                        title="Actions"
-                        aria-label={`Actions for transfer of ${action.employeeName}`}
+                        aria-label={`View transfer details for ${action.employeeName}`}
                       >
-                        <BezentIcon name="more" size={16} />
-                      </button>
-                      {isMenuOpen && (
-                        <div
-                          className="bezent-table-action-menu__dropdown"
-                          role="menu"
-                          onClick={(e) => e.stopPropagation()}
+                        <BezentIcon name="eye" size={16} />
+                      </IconButton>
+                      {canApply && (
+                        <IconButton
+                          label="Apply Transfer"
+                          variant="ghost"
+                          tooltipDirection="left"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            onApplyAction(action);
+                          }}
+                          aria-label={`Apply transfer for ${action.employeeName}`}
                         >
-                          <button
-                            type="button"
-                            role="menuitem"
-                            className="bezent-table-action-menu__item"
-                            onClick={() => {
-                              setActiveMenuId(null);
-                              onOpenAction(action.id);
-                            }}
-                          >
-                            <BezentIcon name="eye" size={16} />
-                            View Transfer Details
-                          </button>
-                          {canApply && (
-                            <button
-                              type="button"
-                              role="menuitem"
-                              className="bezent-table-action-menu__item"
-                              onClick={() => {
-                                setActiveMenuId(null);
-                                onApplyAction(action);
-                              }}
-                            >
-                              <BezentIcon name="checkCircle" size={16} />
-                              Apply Transfer
-                            </button>
-                          )}
-                          {isPending && (
-                            <button
-                              type="button"
-                              role="menuitem"
-                              className="bezent-table-action-menu__item bezent-table-action-menu__item--danger"
-                              onClick={() => {
-                                setActiveMenuId(null);
-                                onCancelAction(action);
-                              }}
-                            >
-                              <BezentIcon name="close" size={16} />
-                              Cancel Transfer
-                            </button>
-                          )}
-                          <button
-                            type="button"
-                            role="menuitem"
-                            className="bezent-table-action-menu__item"
-                            onClick={() => {
-                              setActiveMenuId(null);
-                              onOpenEmployee(action.employeeId);
-                            }}
-                          >
-                            <BezentIcon name="employees" size={16} />
-                            View Employee Profile
-                          </button>
-                        </div>
+                          <BezentIcon name="checkCircle" size={16} />
+                        </IconButton>
                       )}
+                      {isPending && (
+                        <IconButton
+                          label="Cancel Transfer"
+                          variant="ghost"
+                          tooltipDirection="left"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            onCancelAction(action);
+                          }}
+                          aria-label={`Cancel transfer for ${action.employeeName}`}
+                        >
+                          <BezentIcon name="close" size={16} />
+                        </IconButton>
+                      )}
+                      <IconButton
+                        label="View Profile"
+                        variant="ghost"
+                        tooltipDirection="left"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onOpenEmployee(action.employeeId);
+                        }}
+                        aria-label={`View profile of ${action.employeeName}`}
+                      >
+                        <BezentIcon name="employees" size={16} />
+                      </IconButton>
                     </div>
                   </Inline>
 
@@ -445,86 +426,59 @@ export const TransfersTable: React.FC<TransfersTableProps> = ({
 
                 {/* Actions Menu */}
                 <TableCell align="right" className="bezent-table-col--actions">
-                  <div className="bezent-table-action-menu">
-                    <button
-                      type="button"
-                      className={`bezent-table-action-btn ${isMenuOpen ? 'is-active' : ''}`}
-                      aria-label={`Actions for transfer of ${action.employeeName}`}
-                      aria-expanded={isMenuOpen}
+                  <div className="bezent-table-row-actions">
+                    <IconButton
+                      label="View Details"
+                      variant="ghost"
+                      tooltipDirection="left"
                       onClick={(e) => {
                         e.stopPropagation();
-                        setActiveMenuId((prev) => (prev === action.id ? null : action.id));
+                        onOpenAction(action.id);
                       }}
+                      aria-label={`View transfer details for ${action.employeeName}`}
                     >
-                      <BezentIcon name="more" size={18} />
-                    </button>
-
-                    {isMenuOpen && (
-                      <div
-                        className={`bezent-table-action-menu__dropdown ${
-                          isNearBottom ? 'bezent-table-action-menu__dropdown--upwards' : ''
-                        }`}
-                        role="menu"
-                        aria-label={`Actions for transfer of ${action.employeeName}`}
-                        onClick={(e) => e.stopPropagation()}
+                      <BezentIcon name="eye" size={16} />
+                    </IconButton>
+                    {canApply && (
+                      <IconButton
+                        label="Apply Transfer"
+                        variant="ghost"
+                        tooltipDirection="left"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onApplyAction(action);
+                        }}
+                        aria-label={`Apply transfer for ${action.employeeName}`}
                       >
-                        <button
-                          type="button"
-                          role="menuitem"
-                          className="bezent-table-action-menu__item"
-                          onClick={() => {
-                            setActiveMenuId(null);
-                            onOpenAction(action.id);
-                          }}
-                        >
-                          <BezentIcon name="eye" size={16} />
-                          View Transfer Details
-                        </button>
-
-                        {canApply && (
-                          <button
-                            type="button"
-                            role="menuitem"
-                            className="bezent-table-action-menu__item"
-                            onClick={() => {
-                              setActiveMenuId(null);
-                              onApplyAction(action);
-                            }}
-                          >
-                            <BezentIcon name="checkCircle" size={16} />
-                            Apply Transfer
-                          </button>
-                        )}
-
-                        {isPending && (
-                          <button
-                            type="button"
-                            role="menuitem"
-                            className="bezent-table-action-menu__item bezent-table-action-menu__item--danger"
-                            onClick={() => {
-                              setActiveMenuId(null);
-                              onCancelAction(action);
-                            }}
-                          >
-                            <BezentIcon name="close" size={16} />
-                            Cancel Transfer
-                          </button>
-                        )}
-
-                        <button
-                          type="button"
-                          role="menuitem"
-                          className="bezent-table-action-menu__item"
-                          onClick={() => {
-                            setActiveMenuId(null);
-                            onOpenEmployee(action.employeeId);
-                          }}
-                        >
-                          <BezentIcon name="employees" size={16} />
-                          View Employee Profile
-                        </button>
-                      </div>
+                        <BezentIcon name="checkCircle" size={16} />
+                      </IconButton>
                     )}
+                    {isPending && (
+                      <IconButton
+                        label="Cancel Transfer"
+                        variant="ghost"
+                        tooltipDirection="left"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onCancelAction(action);
+                        }}
+                        aria-label={`Cancel transfer for ${action.employeeName}`}
+                      >
+                        <BezentIcon name="close" size={16} />
+                      </IconButton>
+                    )}
+                    <IconButton
+                      label="View Profile"
+                      variant="ghost"
+                      tooltipDirection="left"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onOpenEmployee(action.employeeId);
+                      }}
+                      aria-label={`View profile of ${action.employeeName}`}
+                    >
+                      <BezentIcon name="employees" size={16} />
+                    </IconButton>
                   </div>
                 </TableCell>
               </TableRow>

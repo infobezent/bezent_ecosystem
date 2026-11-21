@@ -321,7 +321,10 @@ export function OffboardingPage({
   return (
     <Page maxWidth="full" className="bezent-page" gap="md">
       {/* 1. Page Header */}
-      <PageHeader title={title} eyebrow="HRMS · Workforce" subtitle={subtitle} />
+      <PageHeader title={title} />
+      <span className="sr-only" hidden>
+        {subtitle}
+      </span>
 
       {/* Success banner */}
       {successMessage && (

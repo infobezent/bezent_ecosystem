@@ -51,14 +51,15 @@ Administration
     └── Employee Numbering
 ```
 
-### 1. Forms (`administration/forms/`)
+### 1. Forms (`settings/forms/`; see `docs/architecture/FORM-ENGINE.md`)
 
-- **`FormEditorPage.tsx`**: Visual Form Builder supporting Chapters, Sections, Fields, drag-and-drop ordering, and context-sensitive right inspector (Form Settings, Chapter Settings, Field Settings).
-- **`FormCanvas.tsx`**: Form editor canvas with inline section editing and sortable field positioning.
-- **`FieldProperties.tsx`**: Capability-driven field inspector for system and custom field metadata.
-- **`FieldToolbox.tsx`**: Toolbox of available draggable field types and outline tree mode.
-- **`FormsSettings.tsx`**: Administration Forms landing page listing active system and custom forms.
-- **`RegistrationSettingsSection.tsx`**: Quick toggle configuration view for Employee Registration.
+The visual Form Builder (`FormsListPage.tsx`, `FormBuilderPage.tsx`, and the
+presentational `builder/` components) now lives under
+`apps/web/src/applications/hrms/settings/forms/`, serving every BEZENT system
+form (Employee Registration, Candidate Intake) from the same editor.
+`administration/forms/types.ts` remains in place: it holds the chapter/subgroup
+metadata (`KNOWN_SECTION_GROUPS`, `getGroupsForSection`) shared with the
+Employee Registration onboarding wizard.
 
 ### 2. Onboarding (`administration/onboarding/`)
 

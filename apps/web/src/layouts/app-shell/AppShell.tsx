@@ -45,6 +45,7 @@ export interface AppShellProps {
   notificationsOpen?: boolean;
   onNotificationsToggle?: () => void;
   onSettingsClick?: () => void;
+  isSettingsActive?: boolean;
   /**
    * Workspace presentation variant.
    * - 'default': standard floating card workspace with outer margins, radius, and shadow.
@@ -94,15 +95,24 @@ export function AppShell({
   notificationsOpen,
   onNotificationsToggle,
   onSettingsClick,
+  isSettingsActive: isSettingsActiveProp,
   workspaceVariant = 'default',
   children,
 }: AppShellProps) {
   const [railOpen, setRailOpen] = useState(true);
   const [moreOpen, setMoreOpen] = useState(false);
 
+  const isSettingsActive =
+    isSettingsActiveProp ??
+    (activeNavId === 'settings' ||
+      launcher?.activeItemId === 'settings' ||
+      (typeof window !== 'undefined' && window.location.pathname.includes('/settings')));
+
   // More shows a marker when the active destination lives only in the launcher.
   const moreActive =
+    !isSettingsActive &&
     !!launcher?.activeItemId &&
+    launcher.activeItemId !== 'settings' &&
     launcher.items.some((i) => i.id === launcher.activeItemId) &&
     !navItems.some((n) => n.id === launcher.activeItemId);
 
@@ -186,6 +196,7 @@ export function AppShell({
         notificationsOpen={notificationsOpen}
         onNotificationsToggle={onNotificationsToggle}
         onAccountSettings={onSettingsClick || onAccountSettings}
+        isSettingsActive={isSettingsActive}
       />
       <BottomBar />
     </div>

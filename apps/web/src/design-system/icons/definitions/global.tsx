@@ -1284,6 +1284,12 @@ export const GLOBAL_ICON_DEFINITIONS: Record<string, IconDefinition> = {
     <path d="m6 9 6 6 6-6" {...S(c, sw)} />
   )),
   check: glyph('check', 'Check', (c, sw) => <path d="M20 6 9 17l-5-5" {...S(c, sw)} />),
+  checkCircle: glyph('checkCircle', 'Check circle', (c, sw) => (
+    <g {...S(c, sw)}>
+      <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+      <path d="m9 11 3 3L22 4" />
+    </g>
+  )),
   arrowRight: glyph('arrowRight', 'Arrow right', (c, sw) => (
     <path d="M5 12h14m-7-7 7 7-7 7" {...S(c, sw)} />
   )),
@@ -1500,6 +1506,18 @@ export const GLOBAL_ICON_DEFINITIONS: Record<string, IconDefinition> = {
       <rect x="14" y="3" width="7" height="7" rx="1.5" />
       <rect x="3" y="14" width="7" height="7" rx="1.5" />
       <rect x="14" y="14" width="7" height="7" rx="1.5" />
+    </g>
+  )),
+  eye: glyph('eye', 'View', (c, sw) => (
+    <g {...S(c, sw)}>
+      <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z" />
+      <circle cx="12" cy="12" r="3" />
+    </g>
+  )),
+  block: glyph('block', 'Block / Deactivate', (c, sw) => (
+    <g {...S(c, sw)}>
+      <circle cx="12" cy="12" r="10" />
+      <line x1="4.93" y1="4.93" x2="19.07" y2="19.07" />
     </g>
   )),
 };

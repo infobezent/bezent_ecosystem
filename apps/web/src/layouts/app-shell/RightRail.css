@@ -233,6 +233,7 @@
 .bezent-right-rail-btn.is-active,
 .bezent-right-rail-btn.is-active:hover {
   background-color: var(--primary, #d3e3fd);
+  color: var(--icon-active, #041e49);
 }
 
 .right-rail__badge-dot {

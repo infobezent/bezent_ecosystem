@@ -1,4 +1,5 @@
 import { EMPLOYEE_REGISTRATION_FORM } from './employeeRegistration.form.js';
+import { CANDIDATE_INTAKE_FORM } from './candidateIntake.form.js';
 import type {
   SystemFieldDefinition,
   SystemFormDefinition,
@@ -7,11 +8,20 @@ import type {
 
 /** Registry of BEZENT system forms, by stable form key. */
 const SYSTEM_FORMS: ReadonlyMap<string, SystemFormDefinition> = new Map(
-  [EMPLOYEE_REGISTRATION_FORM].map((form) => [form.key, form]),
+  [EMPLOYEE_REGISTRATION_FORM, CANDIDATE_INTAKE_FORM].map((form) => [form.key, form]),
 );
 
 export function getSystemForm(formKey: string): SystemFormDefinition | undefined {
   return SYSTEM_FORMS.get(formKey);
+}
+
+/** The registry's forms, in a stable order, for form-picker UIs. */
+export function listSystemForms(): Pick<SystemFormDefinition, 'key' | 'name' | 'description'>[] {
+  return [EMPLOYEE_REGISTRATION_FORM, CANDIDATE_INTAKE_FORM].map(({ key, name, description }) => ({
+    key,
+    name,
+    description,
+  }));
 }
 
 export interface LocatedSystemField {

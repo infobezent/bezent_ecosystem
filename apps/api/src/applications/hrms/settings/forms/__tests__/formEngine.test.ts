@@ -68,11 +68,8 @@ describe('Employee Registration system form definition', () => {
     ]);
   });
 
-  it('makes only General and Personal Information configurable', () => {
-    expect(FORM.sections.filter((s) => s.configurable).map((s) => s.label)).toEqual([
-      'General',
-      'Personal Information',
-    ]);
+  it('makes every section configurable', () => {
+    expect(FORM.sections.every((s) => s.configurable)).toBe(true);
     expect(FORM.sections.find((s) => s.key === 'general')!.fields).toHaveLength(17);
     expect(FORM.sections.find((s) => s.key === 'personal')!.fields).toHaveLength(29);
   });
@@ -174,7 +171,7 @@ describe('Form resolver', () => {
     });
   });
 
-  it('ignores overrides in non-configurable sections and for fields no longer defined', () => {
+  it('ignores the effect of overrides on a protected field, and drops fields no longer defined', () => {
     const resolved = resolveForm(FORM, [
       override('online_access.companyEmail', false, false),
       override('personal.retiredField', false, false),
@@ -182,7 +179,7 @@ describe('Form resolver', () => {
     expect(fieldOf(resolved, 'online_access.companyEmail')).toMatchObject({
       enabled: true,
       required: true,
-      overridden: false,
+      overridden: true,
     });
     expect(
       resolved.sections.flatMap((s) => s.fields).some((f) => f.key === 'personal.retiredField'),
@@ -379,18 +376,18 @@ describe('Override validation', () => {
     ).toContain('system-required');
   });
 
-  it('rejects unknown keys, non-configurable fields, duplicates and required-while-disabled', () => {
+  it('rejects unknown keys, protected-field violations, duplicates and required-while-disabled', () => {
     const errors = errorsOf({
       fields: [
         { key: 'personal.shoeSize', enabled: true, required: false },
-        { key: 'online_access.companyEmail', enabled: true, required: true },
+        { key: 'online_access.companyEmail', enabled: false, required: true },
         { key: 'personal.gender', enabled: false, required: true },
         { key: 'personal.city', enabled: true, required: false },
         { key: 'personal.city', enabled: true, required: true },
       ],
     });
     expect(errors['fields[0].key']).toContain('Unknown');
-    expect(errors['fields[1].key']).toContain('not configurable');
+    expect(errors['fields[1]']).toContain('system-required');
     expect(errors['fields[2]']).toContain('cannot be required while disabled');
     expect(errors['fields[4].key']).toContain('Duplicate');
   });

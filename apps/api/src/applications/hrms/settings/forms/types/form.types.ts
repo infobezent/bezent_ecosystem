@@ -113,7 +113,8 @@ export interface SystemFormDefinition {
   key: string;
   name: string;
   description: string;
-  kind: 'system';
+  /** 'system' for BEZENT's built-in forms, 'custom' for a company's own (sections: []; entirely company-defined). */
+  kind: FormKind;
   status: FormStatus;
   /** In display order (fixed). */
   sections: readonly SystemSectionDefinition[];
@@ -161,12 +162,65 @@ export interface CustomSectionDefinition {
   order?: number;
 }
 
+export interface CandidateIntakeConfig {
+  formName: string;
+  formDescription: string;
+  hrManualEntryEnabled: boolean;
+  candidateSelfServiceEnabled: boolean;
+  allowSaveDraft: boolean;
+  candidateEditingAfterSubmission: boolean;
+  status: 'draft' | 'published' | 'disabled';
+  publishedVersion: number;
+  publishedAt?: string;
+  publishedBy?: string;
+}
+
+export type ConditionalOperator =
+  'equals' | 'not_equals' | 'is_empty' | 'is_not_empty' | 'contains';
+
+export interface ConditionalRule {
+  targetFieldKey: string;
+  operator: ConditionalOperator;
+  value?: unknown;
+  action: 'show' | 'hide';
+}
+
+export interface FieldPermissionRule {
+  visibility: 'both' | 'hr_only' | 'candidate_only';
+  candidateEditable: boolean;
+  hrEditable: boolean;
+  readOnly: boolean;
+}
+
+export interface FieldValidationRule {
+  minLength?: number;
+  maxLength?: number;
+  min?: number;
+  max?: number;
+  pattern?: string;
+  allowedExtensions?: string[];
+  maxSizeMb?: number;
+}
+
+export interface FormVersionSnapshot {
+  version: number;
+  publishedAt: string;
+  publishedBy?: string;
+  config: CandidateIntakeConfig;
+  snapshot: ResolvedForm;
+}
+
 export interface FormCustomizationMetadata {
   sections?: Record<string, FormCustomizationSectionMeta>;
   subgroups?: Record<string, { title?: string; description?: string }>;
   fieldSubgroups?: Record<string, string>;
   customSections?: CustomSectionDefinition[];
   sectionOrder?: string[];
+  intakeConfig?: CandidateIntakeConfig;
+  publishedSnapshots?: Record<number, FormVersionSnapshot>;
+  fieldRules?: Record<string, ConditionalRule[]>;
+  fieldPermissions?: Record<string, FieldPermissionRule>;
+  fieldValidation?: Record<string, FieldValidationRule>;
 }
 
 export interface FormCustomizationState {

@@ -1,10 +1,12 @@
-import type { ReactNode } from 'react';
+import { useState, type ReactNode } from 'react';
 import {
   Alert,
   Badge,
   Button,
+  Divider,
   EmptyState,
   Grid,
+  IconButton,
   Section,
   Stack,
   Table,
@@ -14,6 +16,14 @@ import {
   TableHeaderCell,
   TableRow,
 } from '../../../../design-system/components';
+import { BezentIcon } from '../../../../design-system/icons';
+import type { EditableSectionType } from './ProfileSectionInlineForms';
+import {
+  PersonalDetailsInlineForm,
+  ContactDetailsInlineForm,
+  EmergencyContactsInlineForm,
+  BankAccountInlineForm,
+} from './ProfileSectionInlineForms';
 import type {
   BankAccount,
   EmergencyContact,
@@ -150,8 +160,21 @@ export function ProfileOverview({
 // Personal
 // ---------------------------------------------------------------------------
 
-export function PersonalSection({ profile }: { profile: EmployeeProfile }) {
-  const { personal, familyMembers, nominees } = profile;
+export function PersonalSection({
+  profile,
+  canEdit = false,
+  onEditSection,
+  includeContact = true,
+  onReload,
+}: {
+  profile: EmployeeProfile;
+  canEdit?: boolean;
+  onEditSection?: (section: EditableSectionType) => void;
+  includeContact?: boolean;
+  onReload?: () => void;
+}) {
+  const [isEditing, setIsEditing] = useState(false);
+  const { employee, personal, familyMembers, nominees } = profile;
   const address = personal
     ? [
         personal.addressStreet,
@@ -166,49 +189,155 @@ export function PersonalSection({ profile }: { profile: EmployeeProfile }) {
     : '';
 
   if (!personal && familyMembers.length === 0 && nominees.length === 0) {
+    if (isEditing) {
+      return (
+        <Stack gap="lg">
+          <Section
+            title="Personal Details"
+            actions={
+              <Button variant="text" size="sm" onClick={() => setIsEditing(false)}>
+                Cancel
+              </Button>
+            }
+          >
+            <PersonalDetailsInlineForm
+              profile={profile}
+              onCancel={() => setIsEditing(false)}
+              onSaved={() => {
+                setIsEditing(false);
+                onReload?.();
+              }}
+            />
+          </Section>
+        </Stack>
+      );
+    }
+
     return (
-      <NothingRecorded
-        title="No personal details recorded"
-        description="Personal details, family members and nominees will appear here once recorded."
-      />
+      <Stack gap="lg">
+        <Section
+          title="Personal Details"
+          actions={
+            canEdit ? (
+              <IconButton
+                label="Edit Personal Details"
+                variant="ghost"
+                tooltipDirection="left"
+                onClick={() => {
+                  setIsEditing(true);
+                  onEditSection?.('personal-details');
+                }}
+                aria-label="Edit personal details"
+              >
+                <BezentIcon name="edit" size={16} />
+              </IconButton>
+            ) : undefined
+          }
+        >
+          <NothingRecorded
+            title="No personal details recorded"
+            description="Personal details, family members and nominees will appear here once recorded."
+          />
+        </Section>
+      </Stack>
     );
   }
 
   return (
     <Stack gap="lg">
-      {personal && (
-        <Section title="Personal Details">
+      {isEditing ? (
+        <Section
+          title="Personal Details"
+          actions={
+            <Button variant="text" size="sm" onClick={() => setIsEditing(false)}>
+              Cancel
+            </Button>
+          }
+        >
+          <PersonalDetailsInlineForm
+            profile={profile}
+            onCancel={() => setIsEditing(false)}
+            onSaved={() => {
+              setIsEditing(false);
+              onReload?.();
+            }}
+          />
+        </Section>
+      ) : (
+        <Section
+          title="Personal Details"
+          actions={
+            canEdit ? (
+              <IconButton
+                label="Edit Personal Details"
+                variant="ghost"
+                tooltipDirection="left"
+                onClick={() => {
+                  setIsEditing(true);
+                  onEditSection?.('personal-details');
+                }}
+                aria-label="Edit personal details"
+              >
+                <BezentIcon name="edit" size={16} />
+              </IconButton>
+            ) : undefined
+          }
+        >
           <Fields
             items={[
-              { label: 'Middle Name', value: personal.middleName },
-              { label: 'Preferred Name', value: personal.preferredName },
-              { label: 'Gender', value: personal.gender },
+              { label: 'First Name', value: employee.firstName || '—' },
+              { label: 'Middle Name', value: personal?.middleName || '—' },
+              { label: 'Last Name', value: employee.lastName || '—' },
+              { label: 'Preferred Name', value: personal?.preferredName || '—' },
+              { label: 'Gender', value: personal?.gender || '—' },
               {
                 label: 'Date of Birth',
-                value: personal.dateOfBirth ? formatDate(personal.dateOfBirth) : null,
+                value: personal?.dateOfBirth ? formatDate(personal.dateOfBirth) : '—',
               },
-              { label: 'Marital Status', value: personal.maritalStatus },
-              { label: 'Blood Group', value: personal.bloodGroup },
-              { label: 'Nationality', value: personal.nationality },
-              { label: 'Native Language', value: personal.nativeLanguage },
-              { label: "Father's Name", value: personal.fatherName },
-              { label: 'Guardian Name', value: personal.guardianName },
+              { label: 'Marital Status', value: personal?.maritalStatus || '—' },
+              { label: 'Blood Group', value: personal?.bloodGroup || '—' },
+              { label: 'Nationality', value: personal?.nationality || '—' },
+              { label: 'Native Language', value: personal?.nativeLanguage || '—' },
+              { label: "Father's Name", value: personal?.fatherName || '—' },
+              { label: 'Guardian Name', value: personal?.guardianName || '—' },
             ]}
           />
         </Section>
       )}
 
-      {personal && (
-        <Section title="Personal Contact">
-          <Fields
-            items={[
-              { label: 'Personal Email', value: personal.personalEmail },
-              { label: 'Home Phone', value: personal.homePhone },
-              { label: 'Business Phone', value: personal.businessPhone },
-              { label: 'Work Phone', value: personal.workPhone },
-              { label: 'Address', value: address },
-            ]}
-          />
+      {includeContact && (
+        <Section
+          title="Personal Contact"
+          actions={
+            canEdit && onEditSection ? (
+              <IconButton
+                label="Edit Personal Contact"
+                variant="ghost"
+                tooltipDirection="left"
+                onClick={() => onEditSection('personal-contact')}
+                aria-label="Edit personal contact"
+              >
+                <BezentIcon name="edit" size={16} />
+              </IconButton>
+            ) : undefined
+          }
+        >
+          {personal ? (
+            <Fields
+              items={[
+                { label: 'Personal Email', value: personal.personalEmail },
+                { label: 'Home Phone', value: personal.homePhone },
+                { label: 'Business Phone', value: personal.businessPhone },
+                { label: 'Work Phone', value: personal.workPhone },
+                { label: 'Address', value: address },
+              ]}
+            />
+          ) : (
+            <NothingRecorded
+              title="No contact details recorded"
+              description="Click the edit icon to add contact details and address."
+            />
+          )}
         </Section>
       )}
 
@@ -267,22 +396,94 @@ export function PersonalSection({ profile }: { profile: EmployeeProfile }) {
 // Emergency contacts
 // ---------------------------------------------------------------------------
 
-export function EmergencyContactsSection({ contacts }: { contacts: EmergencyContact[] }) {
+export function EmergencyContactsSection({
+  contacts,
+  canEdit = false,
+  onEditSection,
+  profile,
+  onReload,
+}: {
+  contacts: EmergencyContact[];
+  canEdit?: boolean;
+  onEditSection?: (section: EditableSectionType) => void;
+  profile?: EmployeeProfile;
+  onReload?: () => void;
+}) {
+  const [isEditing, setIsEditing] = useState(false);
+
+  if (isEditing && profile) {
+    return (
+      <Section
+        title="Emergency Contacts"
+        actions={
+          <Button variant="text" size="sm" onClick={() => setIsEditing(false)}>
+            Cancel
+          </Button>
+        }
+      >
+        <EmergencyContactsInlineForm
+          profile={profile}
+          onCancel={() => setIsEditing(false)}
+          onSaved={() => {
+            setIsEditing(false);
+            onReload?.();
+          }}
+        />
+      </Section>
+    );
+  }
+
   if (contacts.length === 0) {
     return (
-      <NothingRecorded
-        title="No emergency contacts recorded"
-        description="Primary and secondary emergency contacts will appear here once recorded."
-      />
+      <Section
+        title="Emergency Contacts"
+        actions={
+          canEdit ? (
+            <IconButton
+              label="Add Emergency Contact"
+              variant="ghost"
+              tooltipDirection="left"
+              onClick={() => {
+                setIsEditing(true);
+                onEditSection?.('emergency-contacts');
+              }}
+              aria-label="Add emergency contact"
+            >
+              <BezentIcon name="edit" size={16} />
+            </IconButton>
+          ) : undefined
+        }
+      >
+        <NothingRecorded
+          title="No emergency contacts recorded"
+          description="Primary and secondary emergency contacts will appear here once recorded."
+        />
+      </Section>
     );
   }
 
   return (
     <Stack gap="lg">
-      {contacts.map((contact) => (
+      {contacts.map((contact, idx) => (
         <Section
           key={contact.id}
           title={contact.priority === 'primary' ? 'Primary Contact' : 'Secondary Contact'}
+          actions={
+            idx === 0 && canEdit ? (
+              <IconButton
+                label="Edit Emergency Contacts"
+                variant="ghost"
+                tooltipDirection="left"
+                onClick={() => {
+                  setIsEditing(true);
+                  onEditSection?.('emergency-contacts');
+                }}
+                aria-label="Edit emergency contacts"
+              >
+                <BezentIcon name="edit" size={16} />
+              </IconButton>
+            ) : undefined
+          }
           badge={
             contact.isPrivate ? (
               <Badge variant="neutral" size="sm">
@@ -293,11 +494,11 @@ export function EmergencyContactsSection({ contacts }: { contacts: EmergencyCont
         >
           <Fields
             items={[
-              { label: 'Name', value: contact.name },
-              { label: 'Relationship', value: contact.relationship },
-              { label: 'Phone', value: contact.phone },
-              { label: 'Email', value: contact.email },
-              { label: 'Address', value: contact.address },
+              { label: 'Name', value: contact.name || '—' },
+              { label: 'Relationship', value: contact.relationship || '—' },
+              { label: 'Phone', value: contact.phone || '—' },
+              { label: 'Email', value: contact.email || '—' },
+              { label: 'Address', value: contact.address || '—' },
             ]}
           />
         </Section>
@@ -310,28 +511,49 @@ export function EmergencyContactsSection({ contacts }: { contacts: EmergencyCont
 // Accounts
 // ---------------------------------------------------------------------------
 
-export function AccountsSection({ bankAccount }: { bankAccount: BankAccount | null }) {
-  if (!bankAccount) {
-    return (
-      <NothingRecorded
-        title="No bank account recorded"
-        description="The employee's salary bank account will appear here once recorded."
-      />
-    );
-  }
-
+export function AccountsSection({
+  bankAccount,
+  canEdit = false,
+  onEditSection,
+}: {
+  bankAccount: BankAccount | null;
+  canEdit?: boolean;
+  onEditSection?: (section: EditableSectionType) => void;
+}) {
   return (
-    <Section title="Bank Account">
-      <Fields
-        items={[
-          { label: 'Account Holder', value: bankAccount.accountHolderName },
-          { label: 'Account Number', value: bankAccount.accountNumberMasked },
-          { label: 'IFSC Code', value: bankAccount.ifscCode },
-          { label: 'Bank', value: bankAccount.bankName },
-          { label: 'Branch', value: bankAccount.branchName },
-          { label: 'Bank Location', value: bankAccount.bankLocation },
-        ]}
-      />
+    <Section
+      title="Bank Account"
+      actions={
+        canEdit && onEditSection ? (
+          <IconButton
+            label={bankAccount ? 'Edit Bank Account' : 'Add Bank Account'}
+            variant="ghost"
+            tooltipDirection="left"
+            onClick={() => onEditSection('bank-account')}
+            aria-label={bankAccount ? 'Edit bank account' : 'Add bank account'}
+          >
+            <BezentIcon name="edit" size={16} />
+          </IconButton>
+        ) : undefined
+      }
+    >
+      {bankAccount ? (
+        <Fields
+          items={[
+            { label: 'Account Holder Name', value: bankAccount.accountHolderName || '—' },
+            { label: 'Bank Name', value: bankAccount.bankName || '—' },
+            { label: 'Account Number', value: bankAccount.accountNumberMasked || '—' },
+            { label: 'IFSC Code', value: bankAccount.ifscCode || '—' },
+            { label: 'Branch', value: bankAccount.branchName || '—' },
+            { label: 'Bank Location', value: bankAccount.bankLocation || '—' },
+          ]}
+        />
+      ) : (
+        <NothingRecorded
+          title="No bank account recorded"
+          description="The employee's salary bank account will appear here once recorded."
+        />
+      )}
     </Section>
   );
 }
@@ -441,10 +663,28 @@ export function WorkSection({ workSchedule }: { workSchedule: WorkSchedule | nul
 // ---------------------------------------------------------------------------
 
 /** 1. Personal Section */
-export function CanonicalPersonalSection({ profile }: { profile: EmployeeProfile }) {
+export function CanonicalPersonalSection({
+  profile,
+  canEdit = false,
+  onEditSection,
+  includeContact = true,
+  onReload,
+}: {
+  profile: EmployeeProfile;
+  canEdit?: boolean;
+  onEditSection?: (section: EditableSectionType) => void;
+  includeContact?: boolean;
+  onReload?: () => void;
+}) {
   return (
     <Stack gap="lg">
-      <PersonalSection profile={profile} />
+      <PersonalSection
+        profile={profile}
+        canEdit={canEdit}
+        onEditSection={onEditSection}
+        includeContact={includeContact}
+        onReload={onReload}
+      />
     </Stack>
   );
 }
@@ -592,7 +832,20 @@ export function OrganizationSection({
 }
 
 /** 4. Contact Section */
-export function ContactSection({ profile }: { profile: EmployeeProfile }) {
+export function ContactSection({
+  profile,
+  canEdit = false,
+  onEditSection,
+  includeEmergency = true,
+  onReload,
+}: {
+  profile: EmployeeProfile;
+  canEdit?: boolean;
+  onEditSection?: (section: EditableSectionType) => void;
+  includeEmergency?: boolean;
+  onReload?: () => void;
+}) {
+  const [isEditing, setIsEditing] = useState(false);
   const { employee, personal, emergencyContacts } = profile;
   const currentAddress = personal
     ? [
@@ -626,58 +879,153 @@ export function ContactSection({ profile }: { profile: EmployeeProfile }) {
 
   return (
     <Stack gap="lg">
-      <Section title="Work & Personal Contacts">
-        <Fields
-          items={[
-            { label: 'Work Email', value: employee.email },
-            { label: 'Work Phone', value: employee.phone ?? '—' },
-            { label: 'Personal Email', value: personal?.personalEmail ?? '—' },
-            {
-              label: 'Home / Mobile Phone',
-              value: personal?.homePhone ?? personal?.businessPhone ?? '—',
-            },
-          ]}
-        />
-      </Section>
+      {isEditing ? (
+        <Section
+          title="Contacts & Addresses"
+          actions={
+            <Button variant="text" size="sm" onClick={() => setIsEditing(false)}>
+              Cancel
+            </Button>
+          }
+        >
+          <ContactDetailsInlineForm
+            profile={profile}
+            onCancel={() => setIsEditing(false)}
+            onSaved={() => {
+              setIsEditing(false);
+              onReload?.();
+            }}
+          />
+        </Section>
+      ) : (
+        <Section
+          title="Contacts & Addresses"
+          actions={
+            canEdit ? (
+              <IconButton
+                label="Edit Contacts & Addresses"
+                variant="ghost"
+                tooltipDirection="left"
+                onClick={() => {
+                  setIsEditing(true);
+                  onEditSection?.('personal-contact');
+                }}
+                aria-label="Edit contacts and addresses"
+              >
+                <BezentIcon name="edit" size={16} />
+              </IconButton>
+            ) : undefined
+          }
+        >
+          <Stack gap="md">
+            <Fields
+              items={[
+                { label: 'Work Email', value: employee.email || '—' },
+                { label: 'Work Phone', value: personal?.workPhone || employee.phone || '—' },
+                { label: 'Personal Email', value: personal?.personalEmail || '—' },
+                { label: 'Home Phone', value: personal?.homePhone || '—' },
+                { label: 'Business Phone', value: personal?.businessPhone || '—' },
+              ]}
+            />
+            <Divider />
+            <Grid columns={2} gap="md">
+              <DetailItem label="Current Address">
+                {currentAddress || 'Not recorded'}
+              </DetailItem>
+              <DetailItem label="Permanent Address">
+                {permanentAddress || 'Same as current address'}
+              </DetailItem>
+            </Grid>
+          </Stack>
+        </Section>
+      )}
 
-      <Section title="Addresses">
-        <Fields
-          items={[
-            { label: 'Current Address', value: currentAddress || 'Not recorded' },
-            { label: 'Permanent Address', value: permanentAddress || 'Same as current address' },
-          ]}
+      {includeEmergency && (
+        <EmergencyContactsSection
+          contacts={emergencyContacts}
+          canEdit={canEdit}
+          onEditSection={onEditSection}
+          profile={profile}
+          onReload={onReload}
         />
-      </Section>
-
-      <EmergencyContactsSection contacts={emergencyContacts} />
+      )}
     </Stack>
   );
 }
 
 /** 5. Payroll Section */
-export function PayrollSection({ profile }: { profile: EmployeeProfile }) {
+export function PayrollSection({
+  profile,
+  canEdit = false,
+  onEditSection,
+  onReload,
+}: {
+  profile: EmployeeProfile;
+  canEdit?: boolean;
+  onEditSection?: (section: EditableSectionType) => void;
+  onReload?: () => void;
+}) {
+  const [isEditing, setIsEditing] = useState(false);
   const { bankAccount } = profile;
 
   return (
     <Stack gap="lg">
-      {bankAccount ? (
-        <Section title="Salary Bank Account">
-          <Fields
-            items={[
-              { label: 'Account Holder', value: bankAccount.accountHolderName },
-              { label: 'Account Number', value: bankAccount.accountNumberMasked },
-              { label: 'IFSC / Bank Code', value: bankAccount.ifscCode },
-              { label: 'Bank Name', value: bankAccount.bankName },
-              { label: 'Branch Name', value: bankAccount.branchName ?? '—' },
-              { label: 'Bank Location', value: bankAccount.bankLocation ?? '—' },
-            ]}
+      {isEditing ? (
+        <Section
+          title="Salary Bank Account"
+          actions={
+            <Button variant="text" size="sm" onClick={() => setIsEditing(false)}>
+              Cancel
+            </Button>
+          }
+        >
+          <BankAccountInlineForm
+            profile={profile}
+            onCancel={() => setIsEditing(false)}
+            onSaved={() => {
+              setIsEditing(false);
+              onReload?.();
+            }}
           />
         </Section>
       ) : (
-        <NothingRecorded
-          title="No bank account recorded"
-          description="Salary disbursement bank account will appear here once configured."
-        />
+        <Section
+          title="Salary Bank Account"
+          actions={
+            canEdit ? (
+              <IconButton
+                label={bankAccount ? 'Edit Bank Account' : 'Add Bank Account'}
+                variant="ghost"
+                tooltipDirection="left"
+                onClick={() => {
+                  setIsEditing(true);
+                  onEditSection?.('bank-account');
+                }}
+                aria-label={bankAccount ? 'Edit bank account' : 'Add bank account'}
+              >
+                <BezentIcon name="edit" size={16} />
+              </IconButton>
+            ) : undefined
+          }
+        >
+          {bankAccount ? (
+            <Fields
+              items={[
+                { label: 'Account Holder Name', value: bankAccount.accountHolderName || '—' },
+                { label: 'Bank Name', value: bankAccount.bankName || '—' },
+                { label: 'Account Number', value: bankAccount.accountNumberMasked || '—' },
+                { label: 'IFSC / Bank Code', value: bankAccount.ifscCode || '—' },
+                { label: 'Branch Name', value: bankAccount.branchName || '—' },
+                { label: 'Bank Location', value: bankAccount.bankLocation || '—' },
+              ]}
+            />
+          ) : (
+            <NothingRecorded
+              title="No bank account recorded"
+              description="Salary disbursement bank account will appear here once configured."
+            />
+          )}
+        </Section>
       )}
 
       <Section title="Statutory Identifiers & Tax">

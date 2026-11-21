@@ -334,7 +334,10 @@ export function TransfersPage({
   return (
     <Page maxWidth="full" className="bezent-page" gap="md">
       {/* 1. Page Header */}
-      <PageHeader title={title} eyebrow="HRMS · Workforce" subtitle={subtitle} />
+      <PageHeader title={title} />
+      <span className="sr-only" hidden>
+        {subtitle}
+      </span>
 
       {/* Success banner if an action was applied or cancelled */}
       {successMessage && (

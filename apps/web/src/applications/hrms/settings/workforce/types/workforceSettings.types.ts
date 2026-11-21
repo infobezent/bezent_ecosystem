@@ -167,10 +167,12 @@ export interface CreateClearanceTemplateDto {
 }
 
 export type WorkforceTabId =
+  | 'setup'
+  | 'forms-onboarding'
+  | 'lifecycle'
   | 'general'
   | 'organization'
   | 'registration-forms'
   | 'onboarding-workflows'
   | 'probation'
-  | 'lifecycle'
   | 'offboarding';

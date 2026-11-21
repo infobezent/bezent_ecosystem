@@ -1,8 +1,7 @@
-import { useState } from 'react';
+import { useMemo } from 'react';
 import {
   FormSection,
   FormGrid,
-  FormField,
   Input,
   InternationalPhoneInput,
   Select,
@@ -11,8 +10,13 @@ import {
   Card,
   Stack,
 } from '../../../../design-system';
+import { RegistrationField, useRegistrationConfig } from '../registration/registrationConfig';
+import type { RegistrationFieldConfig } from '../../settings/api/registrationSettingsApi';
+import type { ResolvedFormField } from '../../settings/api/formsApi';
+import { getGroupsForSection } from '../../settings/administration/forms/types';
+import type { Chapter05EmergencyState } from '../types/registration.types';
 
-const RELATIONSHIP_OPTIONS = [
+const FALLBACK_RELATIONSHIP_OPTIONS = [
   { value: 'Father', label: 'Father' },
   { value: 'Mother', label: 'Mother' },
   { value: 'Spouse', label: 'Spouse' },
@@ -26,240 +30,297 @@ const RELATIONSHIP_OPTIONS = [
   { value: 'Other', label: 'Other' },
 ];
 
-import type { Chapter05EmergencyState } from '../types/registration.types';
+const EMPTY_PRIMARY: NonNullable<Chapter05EmergencyState['primaryContact']> = {
+  name: '',
+  relationship: '',
+  phone: '',
+  email: '',
+  address: '',
+  isPrivate: true,
+};
+
+const EMPTY_SECONDARY: NonNullable<Chapter05EmergencyState['secondaryContact']> = {
+  name: '',
+  relationship: '',
+  phone: '',
+  email: '',
+};
 
 export interface EmergencyContactSectionProps {
   value?: Chapter05EmergencyState;
   onChange?: (updated: Chapter05EmergencyState) => void;
 }
 
-export function EmergencyContactSection({
-  value: _value,
-  onChange: _onChange,
-}: EmergencyContactSectionProps = {}) {
-  // PRIMARY CONTACT STATE
-  const [primaryName, setPrimaryName] = useState('Ramesh Kumar');
-  const [primaryRelationship, setPrimaryRelationship] = useState('Father');
-  const [customPrimaryRelationship, setCustomPrimaryRelationship] = useState('');
-  const [primaryCountryCode, setPrimaryCountryCode] = useState('+91');
-  const [primaryPhone, setPrimaryPhone] = useState('9876543210');
-  const [primaryEmail, setPrimaryEmail] = useState('ramesh.kumar@example.com');
-  const [primaryAddress, setPrimaryAddress] = useState(
-    'No. 42, Green Park Avenue, T. Nagar, Chennai - 600017, Tamil Nadu',
+function validatePhone(value: string): boolean {
+  const cleanNum = value.replace(/\D/g, '');
+  return cleanNum.length >= 7 && cleanNum.length <= 15;
+}
+
+function validateEmail(value: string): boolean {
+  if (!value) return true;
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
+}
+
+export function EmergencyContactSection({ value, onChange }: EmergencyContactSectionProps = {}) {
+  const primary = value?.primaryContact ?? EMPTY_PRIMARY;
+  const secondary = value?.secondaryContact ?? EMPTY_SECONDARY;
+
+  const updatePrimary = (
+    patch: Partial<NonNullable<Chapter05EmergencyState['primaryContact']>>,
+  ) => {
+    onChange?.({
+      primaryContact: { ...primary, ...patch },
+      secondaryContact: value?.secondaryContact ?? null,
+    });
+  };
+
+  const updateSecondary = (
+    patch: Partial<NonNullable<Chapter05EmergencyState['secondaryContact']>>,
+  ) => {
+    onChange?.({
+      primaryContact: value?.primaryContact ?? null,
+      secondaryContact: { ...secondary, ...patch },
+    });
+  };
+
+  const config = useRegistrationConfig();
+
+  const emergencyFields = useMemo(() => {
+    const fields = config.fields.filter((f) => f.section === 'emergency' && f.enabled);
+    return [...fields].sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
+  }, [config.fields]);
+
+  const groups = useMemo(
+    () =>
+      getGroupsForSection(
+        'emergency',
+        emergencyFields as unknown as ResolvedFormField[],
+        config.metadata,
+      ),
+    [emergencyFields, config.metadata],
   );
-  const [isPrimaryPrivate, setIsPrimaryPrivate] = useState(true);
 
-  // SECONDARY CONTACT STATE
-  const [secondaryName, setSecondaryName] = useState('Lakshmi Kumar');
-  const [secondaryRelationship, setSecondaryRelationship] = useState('Mother');
-  const [customSecondaryRelationship, setCustomSecondaryRelationship] = useState('');
-  const [secondaryCountryCode, setSecondaryCountryCode] = useState('+91');
-  const [secondaryMobile, setSecondaryMobile] = useState('9876543211');
-  const [secondaryEmail, setSecondaryEmail] = useState('lakshmi.k@example.com');
+  const primaryPhoneError =
+    primary.phone && !validatePhone(primary.phone)
+      ? 'Please enter a valid phone number (7-15 digits).'
+      : undefined;
+  const primaryEmailError =
+    primary.email && !validateEmail(primary.email)
+      ? 'Please enter a valid email address.'
+      : undefined;
+  const secondaryPhoneError =
+    secondary.phone && !validatePhone(secondary.phone)
+      ? 'Please enter a valid mobile number (7-15 digits).'
+      : undefined;
+  const secondaryEmailError =
+    secondary.email && !validateEmail(secondary.email)
+      ? 'Please enter a valid email address.'
+      : undefined;
 
-  // Validation States
-  const [primaryPhoneError, setPrimaryPhoneError] = useState('');
-  const [primaryEmailError, setPrimaryEmailError] = useState('');
-  const [secondaryMobileError, setSecondaryMobileError] = useState('');
-  const [secondaryEmailError, setSecondaryEmailError] = useState('');
+  const renderField = (field: RegistrationFieldConfig) => {
+    const { key, config: fConfig } = field;
+    const options = Array.isArray(fConfig?.options)
+      ? (fConfig.options as Array<{ value: string; label: string }>)
+      : FALLBACK_RELATIONSHIP_OPTIONS;
+    const isKnownOption = (val: string) => options.some((o) => o.value === val);
 
-  const validatePhone = (value: string): boolean => {
-    const cleanNum = value.replace(/\D/g, '');
-    return cleanNum.length >= 7 && cleanNum.length <= 15;
-  };
-
-  const validateEmail = (value: string): boolean => {
-    if (!value) return true; // Optional field or checked upon blur
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return emailRegex.test(value);
-  };
-
-  const handlePrimaryPhoneChange = (val: string) => {
-    setPrimaryPhone(val);
-    if (val && !validatePhone(val)) {
-      setPrimaryPhoneError('Please enter a valid phone number (7-15 digits).');
-    } else {
-      setPrimaryPhoneError('');
-    }
-  };
-
-  const handlePrimaryEmailChange = (val: string) => {
-    setPrimaryEmail(val);
-    if (val && !validateEmail(val)) {
-      setPrimaryEmailError('Please enter a valid email address.');
-    } else {
-      setPrimaryEmailError('');
-    }
-  };
-
-  const handleSecondaryMobileChange = (val: string) => {
-    setSecondaryMobile(val);
-    if (val && !validatePhone(val)) {
-      setSecondaryMobileError('Please enter a valid mobile number (7-15 digits).');
-    } else {
-      setSecondaryMobileError('');
-    }
-  };
-
-  const handleSecondaryEmailChange = (val: string) => {
-    setSecondaryEmail(val);
-    if (val && !validateEmail(val)) {
-      setSecondaryEmailError('Please enter a valid email address.');
-    } else {
-      setSecondaryEmailError('');
+    switch (key) {
+      case 'emergency.contactName':
+        return (
+          <RegistrationField key={key} fieldKey={key} value={primary.name}>
+            <Input
+              type="text"
+              placeholder="Enter Primary Contact Name"
+              value={primary.name}
+              onChange={(e) => updatePrimary({ name: e.target.value })}
+            />
+          </RegistrationField>
+        );
+      case 'emergency.relationship': {
+        const selectValue =
+          primary.relationship && !isKnownOption(primary.relationship)
+            ? 'Other'
+            : primary.relationship;
+        return (
+          <RegistrationField key={key} fieldKey={key} value={primary.relationship}>
+            <Stack gap="xs">
+              <Select
+                options={options}
+                value={selectValue}
+                onChange={(e) =>
+                  updatePrimary({ relationship: e.target.value === 'Other' ? '' : e.target.value })
+                }
+              />
+              {selectValue === 'Other' && (
+                <Input
+                  type="text"
+                  placeholder="Enter Relationship / Role"
+                  value={isKnownOption(primary.relationship) ? '' : primary.relationship}
+                  onChange={(e) => updatePrimary({ relationship: e.target.value })}
+                />
+              )}
+            </Stack>
+          </RegistrationField>
+        );
+      }
+      case 'emergency.phone':
+        return (
+          <RegistrationField
+            key={key}
+            fieldKey={key}
+            value={primary.phone}
+            error={primaryPhoneError}
+          >
+            <InternationalPhoneInput
+              id="emergency-primary-phone"
+              defaultCountry="IN"
+              placeholder="98765 43210"
+              value={primary.phone}
+              onChange={(val, parsed) => updatePrimary({ phone: parsed.nationalNumber || val })}
+            />
+          </RegistrationField>
+        );
+      case 'emergency.email':
+        return (
+          <RegistrationField
+            key={key}
+            fieldKey={key}
+            value={primary.email}
+            error={primaryEmailError}
+          >
+            <Input
+              type="email"
+              placeholder="contact@example.com"
+              value={primary.email ?? ''}
+              onChange={(e) => updatePrimary({ email: e.target.value })}
+            />
+          </RegistrationField>
+        );
+      case 'emergency.address':
+        return (
+          <RegistrationField key={key} fieldKey={key} value={primary.address} span="full">
+            <Textarea
+              rows={3}
+              placeholder="Enter complete address or relevant contact details..."
+              value={primary.address ?? ''}
+              onChange={(e) => updatePrimary({ address: e.target.value })}
+            />
+          </RegistrationField>
+        );
+      case 'emergency.isPrimaryPrivate':
+        return (
+          <RegistrationField
+            key={key}
+            fieldKey={key}
+            value={primary.isPrivate}
+            span="full"
+            hideLabel
+          >
+            <Switch
+              checked={primary.isPrivate ?? true}
+              onChange={(e) => updatePrimary({ isPrivate: e.target.checked })}
+              label={
+                primary.isPrivate
+                  ? 'Primary Emergency Contact (Private Record)'
+                  : 'Standard Emergency Contact (Public HR Record)'
+              }
+            />
+          </RegistrationField>
+        );
+      case 'emergency.secondaryContactName':
+        return (
+          <RegistrationField key={key} fieldKey={key} value={secondary.name}>
+            <Input
+              type="text"
+              placeholder="Enter Secondary Contact Name"
+              value={secondary.name}
+              onChange={(e) => updateSecondary({ name: e.target.value })}
+            />
+          </RegistrationField>
+        );
+      case 'emergency.secondaryRelationship': {
+        const selectValue =
+          secondary.relationship && !isKnownOption(secondary.relationship)
+            ? 'Other'
+            : secondary.relationship;
+        return (
+          <RegistrationField key={key} fieldKey={key} value={secondary.relationship}>
+            <Stack gap="xs">
+              <Select
+                options={options}
+                value={selectValue}
+                onChange={(e) =>
+                  updateSecondary({
+                    relationship: e.target.value === 'Other' ? '' : e.target.value,
+                  })
+                }
+              />
+              {selectValue === 'Other' && (
+                <Input
+                  type="text"
+                  placeholder="Enter Secondary Relationship"
+                  value={isKnownOption(secondary.relationship) ? '' : secondary.relationship}
+                  onChange={(e) => updateSecondary({ relationship: e.target.value })}
+                />
+              )}
+            </Stack>
+          </RegistrationField>
+        );
+      }
+      case 'emergency.secondaryMobile':
+        return (
+          <RegistrationField
+            key={key}
+            fieldKey={key}
+            value={secondary.phone}
+            error={secondaryPhoneError}
+          >
+            <InternationalPhoneInput
+              id="emergency-secondary-phone"
+              defaultCountry="IN"
+              placeholder="98765 43211"
+              value={secondary.phone}
+              onChange={(val, parsed) => updateSecondary({ phone: parsed.nationalNumber || val })}
+            />
+          </RegistrationField>
+        );
+      case 'emergency.secondaryEmail':
+        return (
+          <RegistrationField
+            key={key}
+            fieldKey={key}
+            value={secondary.email}
+            error={secondaryEmailError}
+          >
+            <Input
+              type="email"
+              placeholder="secondary@example.com"
+              value={secondary.email ?? ''}
+              onChange={(e) => updateSecondary({ email: e.target.value })}
+            />
+          </RegistrationField>
+        );
+      default:
+        return null;
     }
   };
 
   return (
     <Stack gap="xl">
-      {/* 1. PRIMARY CONTACT AREA */}
-      <Card padding="lg">
-        <FormSection title="Primary Emergency Contact">
-          <FormGrid columns={2} layout="horizontal" labelWidth="md">
-            {/* 1. Contact Name */}
-            <FormField label="Contact Name" required>
-              <Input
-                type="text"
-                placeholder="Enter Primary Contact Name"
-                value={primaryName}
-                onChange={(e) => setPrimaryName(e.target.value)}
-              />
-            </FormField>
-
-            {/* 2. Relationship / Role */}
-            <FormField label="Relationship / Role" required>
-              <Stack gap="xs">
-                <Select
-                  options={RELATIONSHIP_OPTIONS}
-                  value={primaryRelationship}
-                  onChange={(e) => setPrimaryRelationship(e.target.value)}
-                />
-                {primaryRelationship === 'Other' && (
-                  <Input
-                    type="text"
-                    placeholder="Enter Relationship / Role"
-                    value={customPrimaryRelationship}
-                    onChange={(e) => setCustomPrimaryRelationship(e.target.value)}
-                  />
+      {groups.map((group) => {
+        if (group.fields.length === 0) return null;
+        return (
+          <Card key={group.key} padding="lg">
+            <FormSection title={group.title}>
+              <FormGrid columns={2} layout="horizontal" labelWidth="md">
+                {group.fields.map((field) =>
+                  renderField(field as unknown as RegistrationFieldConfig),
                 )}
-              </Stack>
-            </FormField>
-
-            {/* 3. Phone */}
-            <FormField label="Phone" required error={primaryPhoneError}>
-              <InternationalPhoneInput
-                id="emergency-primary-phone"
-                countryCode={primaryCountryCode.replace('+', '')}
-                defaultCountry="IN"
-                onCountryCodeChange={(code) => setPrimaryCountryCode(`+${code}`)}
-                placeholder="98765 43210"
-                value={primaryPhone}
-                onChange={(val, parsed) => {
-                  handlePrimaryPhoneChange(parsed.nationalNumber || val);
-                  if (parsed.callingCode) {
-                    setPrimaryCountryCode(parsed.callingCode);
-                  }
-                }}
-              />
-            </FormField>
-
-            {/* 4. Email */}
-            <FormField label="Email" required error={primaryEmailError}>
-              <Input
-                type="email"
-                placeholder="contact@example.com"
-                value={primaryEmail}
-                onChange={(e) => handlePrimaryEmailChange(e.target.value)}
-              />
-            </FormField>
-
-            {/* 5. Address / Contact Details */}
-            <FormField label="Address Details" required span="full">
-              <Textarea
-                rows={3}
-                placeholder="Enter complete address or relevant contact details..."
-                value={primaryAddress}
-                onChange={(e) => setPrimaryAddress(e.target.value)}
-              />
-            </FormField>
-            {/* 6. Primary / Private Contact Indicator */}
-            <FormField label="Privacy Record" span="full">
-              <Switch
-                checked={isPrimaryPrivate}
-                onChange={(e) => setIsPrimaryPrivate(e.target.checked)}
-                label={
-                  isPrimaryPrivate
-                    ? 'Primary Emergency Contact (Private Record)'
-                    : 'Standard Emergency Contact (Public HR Record)'
-                }
-              />
-            </FormField>
-          </FormGrid>
-        </FormSection>
-      </Card>
-
-      {/* 2. SECONDARY CONTACT AREA */}
-      <Card padding="lg">
-        <FormSection title="Secondary Emergency Contact">
-          <FormGrid columns={2} layout="horizontal" labelWidth="md">
-            {/* 1. Secondary Contact Name */}
-            <FormField label="Secondary Contact Name">
-              <Input
-                type="text"
-                placeholder="Enter Secondary Contact Name"
-                value={secondaryName}
-                onChange={(e) => setSecondaryName(e.target.value)}
-              />
-            </FormField>
-
-            {/* 2. Secondary Relationship */}
-            <FormField label="Secondary Relationship">
-              <Stack gap="xs">
-                <Select
-                  options={RELATIONSHIP_OPTIONS}
-                  value={secondaryRelationship}
-                  onChange={(e) => setSecondaryRelationship(e.target.value)}
-                />
-                {secondaryRelationship === 'Other' && (
-                  <Input
-                    type="text"
-                    placeholder="Enter Secondary Relationship"
-                    value={customSecondaryRelationship}
-                    onChange={(e) => setCustomSecondaryRelationship(e.target.value)}
-                  />
-                )}
-              </Stack>
-            </FormField>
-
-            {/* 3. Secondary Mobile */}
-            <FormField label="Secondary Mobile" error={secondaryMobileError}>
-              <InternationalPhoneInput
-                id="emergency-secondary-phone"
-                countryCode={secondaryCountryCode.replace('+', '')}
-                defaultCountry="IN"
-                onCountryCodeChange={(code) => setSecondaryCountryCode(`+${code}`)}
-                placeholder="98765 43211"
-                value={secondaryMobile}
-                onChange={(val, parsed) => {
-                  handleSecondaryMobileChange(parsed.nationalNumber || val);
-                  if (parsed.callingCode) {
-                    setSecondaryCountryCode(parsed.callingCode);
-                  }
-                }}
-              />
-            </FormField>
-            {/* 4. Secondary Email */}
-            <FormField label="Secondary Email" error={secondaryEmailError}>
-              <Input
-                type="email"
-                placeholder="secondary@example.com"
-                value={secondaryEmail}
-                onChange={(e) => handleSecondaryEmailChange(e.target.value)}
-              />
-            </FormField>
-          </FormGrid>
-        </FormSection>
-      </Card>
+              </FormGrid>
+            </FormSection>
+          </Card>
+        );
+      })}
     </Stack>
   );
 }

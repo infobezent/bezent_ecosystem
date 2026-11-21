@@ -152,25 +152,60 @@ export function OffboardingClearanceTab({
   ];
 
   return (
-    <Stack gap="lg">
+    <div className="bezent-lifecycle-feed">
       {statusMessage && (
         <Alert variant={statusMessage.type === 'success' ? 'success' : 'error'}>
           {statusMessage.text}
         </Alert>
       )}
 
-      {/* Notice Period Matrix Card */}
-      <Card variant="default" padding="lg">
-        <Stack gap="md">
-          <CardHeader>
-            <div>
-              <CardTitle>Notice Period Governance Matrix</CardTitle>
-              <CardDescription>
-                Define mandatory notice periods by employment status and resignation withdrawal
-                terms.
-              </CardDescription>
+      {/* Card 1: Notice Period Governance Matrix */}
+      <div className="bezent-lifecycle-card">
+        <div className="bezent-lifecycle-card__header">
+          <div className="bezent-lifecycle-card__header-left">
+            <div className="bezent-lifecycle-card__icon-bubble">
+              <BezentIcon name="logOut" size={20} />
             </div>
-          </CardHeader>
+            <div className="bezent-lifecycle-card__title-group">
+              <h3 className="bezent-lifecycle-card__title">Notice Period Governance Matrix</h3>
+              <p className="bezent-lifecycle-card__desc">
+                Define mandatory notice periods by employment status and resignation withdrawal terms.
+              </p>
+            </div>
+          </div>
+          <div className="bezent-lifecycle-card__header-right">
+            <Badge variant="success" size="sm">● Active</Badge>
+            <Button variant="primary" size="sm" onClick={handleSavePolicy} disabled={savingPolicy}>
+              <BezentIcon name="check" size={14} />
+              {savingPolicy ? 'Saving...' : 'Save Notice Policy'}
+            </Button>
+          </div>
+        </div>
+
+        <div className="bezent-lifecycle-card__body">
+          {/* Option B: Metrics Summary Strip */}
+          <div className="bezent-lifecycle-metrics-strip">
+            <div className="bezent-lifecycle-metric-item">
+              <span className="bezent-lifecycle-metric-label">Probation Notice</span>
+              <span className="bezent-lifecycle-metric-value">{probationNoticeDays} Days</span>
+            </div>
+            <div className="bezent-lifecycle-metric-item">
+              <span className="bezent-lifecycle-metric-label">Confirmed Notice</span>
+              <span className="bezent-lifecycle-metric-value bezent-lifecycle-metric-value--active">
+                {confirmedNoticeDays} Days
+              </span>
+            </div>
+            <div className="bezent-lifecycle-metric-item">
+              <span className="bezent-lifecycle-metric-label">Leadership Notice</span>
+              <span className="bezent-lifecycle-metric-value">{leadershipNoticeDays} Days</span>
+            </div>
+            <div className="bezent-lifecycle-metric-item">
+              <span className="bezent-lifecycle-metric-label">Buyout &amp; Leave Offset</span>
+              <span className={`bezent-lifecycle-metric-value ${allowNoticeBuyout && allowLeaveOffset ? 'bezent-lifecycle-metric-value--success' : ''}`}>
+                {allowNoticeBuyout && allowLeaveOffset ? 'Fully Permitted' : allowNoticeBuyout || allowLeaveOffset ? 'Partial' : 'Restricted'}
+              </span>
+            </div>
+          </div>
 
           <FormSection title="Notice Durations (Days)">
             <FormGrid columns={3}>
@@ -214,48 +249,48 @@ export function OffboardingClearanceTab({
                 }
               />
             </FormGrid>
-            <Grid columns={2} gap="md">
-              <Switch
-                label="Allow Notice Buyout (Pay or deduct salary in lieu of shortfall days)"
-                checked={allowNoticeBuyout}
-                onChange={(e) => setAllowNoticeBuyout(e.target.checked)}
-              />
-              <Switch
-                label="Allow Unused Leave Offset (Offset accrued leaves against remaining notice)"
-                checked={allowLeaveOffset}
-                onChange={(e) => setAllowLeaveOffset(e.target.checked)}
-              />
-            </Grid>
+            <div className="bezent-lifecycle-switch-box">
+              <Grid columns={2} gap="md">
+                <Switch
+                  label="Allow Notice Buyout (Pay or deduct salary in lieu of shortfall days)"
+                  checked={allowNoticeBuyout}
+                  onChange={(e) => setAllowNoticeBuyout(e.target.checked)}
+                />
+                <Switch
+                  label="Allow Unused Leave Offset (Offset accrued leaves against remaining notice)"
+                  checked={allowLeaveOffset}
+                  onChange={(e) => setAllowLeaveOffset(e.target.checked)}
+                />
+              </Grid>
+            </div>
           </FormSection>
-        </Stack>
-      </Card>
+        </div>
+      </div>
 
-      <Toolbar
-        right={
-          <Button variant="primary" onClick={handleSavePolicy} disabled={savingPolicy}>
-            <BezentIcon name="check" size={16} />
-            {savingPolicy ? 'Saving...' : 'Save Notice Policy'}
-          </Button>
-        }
-      />
-
-      {/* Clearance Checklist Templates Card */}
-      <Card variant="default" padding="lg">
-        <Stack gap="md">
-          <CardHeader>
-            <div>
-              <CardTitle>Department Clearance Checklist Templates</CardTitle>
-              <CardDescription>
+      {/* Card 2: Clearance Checklist Templates Card */}
+      <div className="bezent-lifecycle-card">
+        <div className="bezent-lifecycle-card__header">
+          <div className="bezent-lifecycle-card__header-left">
+            <div className="bezent-lifecycle-card__icon-bubble">
+              <BezentIcon name="checklist" size={20} />
+            </div>
+            <div className="bezent-lifecycle-card__title-group">
+              <h3 className="bezent-lifecycle-card__title">Department Clearance Checklist Templates</h3>
+              <p className="bezent-lifecycle-card__desc">
                 Define mandatory handover tasks across IT, Administration, Finance, and HR before
                 Full & Final (F&F) settlement.
-              </CardDescription>
+              </p>
             </div>
-            <Button variant="secondary" onClick={() => setShowAddModal(true)}>
-              <BezentIcon name="plus" size={16} />
+          </div>
+          <div className="bezent-lifecycle-card__header-right">
+            <Button variant="secondary" size="sm" onClick={() => setShowAddModal(true)}>
+              <BezentIcon name="plus" size={14} />
               Add Checklist Item
             </Button>
-          </CardHeader>
+          </div>
+        </div>
 
+        <div className="bezent-lifecycle-card__body">
           <Tabs
             items={deptTabs}
             activeId={deptFilter}
@@ -308,8 +343,8 @@ export function OffboardingClearanceTab({
               ))}
             </TableBody>
           </Table>
-        </Stack>
-      </Card>
+        </div>
+      </div>
 
       {/* Add Clearance Checklist Modal */}
       {showAddModal && (
@@ -371,6 +406,6 @@ export function OffboardingClearanceTab({
           </Stack>
         </Modal>
       )}
-    </Stack>
+    </div>
   );
 }

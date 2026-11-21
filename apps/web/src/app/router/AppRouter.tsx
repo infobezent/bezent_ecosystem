@@ -6,7 +6,8 @@ import { ApprovalsPage } from '../../platform/approvals';
 import { NotesPage } from '../../platform/notes';
 import { EmployeeRegistrationPage } from '../../applications/hrms/onboarding';
 import { EmployeeEditPage } from '../../applications/hrms/employees/pages/EmployeeEditPage';
-import { FormEditorPage } from '../../applications/hrms/settings/administration/forms';
+import { FormsListPage } from '../../applications/hrms/settings/forms/FormsListPage';
+import { FormBuilderPage } from '../../applications/hrms/settings/forms/FormBuilderPage';
 import { DevPlaceholderPage } from './DevPlaceholderPage';
 import { DesignSystemShowcase } from './DesignSystemShowcase';
 import { NotFoundPage } from './NotFoundPage';
@@ -78,7 +79,7 @@ export const appRoutes: RouteObject[] = [
     errorElement: <RouteErrorBoundary />,
   },
 
-  // Standalone utility workspaces (Calendar, Tasks, Approvals, Notes, Employee Registration, Form Editor)
+  // Standalone utility workspaces (Calendar, Tasks, Approvals, Notes, Employee Registration, Form Builder)
   // These run OUTSIDE the main application ShellLayout as dedicated full-screen workspaces.
   {
     element: (
@@ -118,11 +119,11 @@ export const appRoutes: RouteObject[] = [
       },
       {
         path: '/hrms/settings/forms/:formKey',
-        element: <FormEditorPage />,
+        element: <FormBuilderPage />,
       },
       {
         path: '/hrms/settings/forms',
-        element: <FormEditorPage />,
+        element: <FormsListPage />,
       },
       {
         path: '/hrms/workforce/employees/:employeeId/edit',

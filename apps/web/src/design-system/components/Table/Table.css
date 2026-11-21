@@ -218,6 +218,37 @@ button.bezent-table-link-btn:hover {
 }
 
 /* ── Table Action Menu & Ellipsis Button ── */
+.bezent-table-row-actions {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--space-1, 4px);
+  white-space: nowrap;
+}
+
+.bezent-table-row-actions .bezent-icon-btn-anchor {
+  display: inline-flex;
+}
+
+.bezent-table-row-actions .bezent-icon-btn {
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  border: 1px solid var(--border-default, #dde3ea);
+  background: #ffffff;
+  color: var(--text-secondary, #5f6368);
+  box-shadow: none;
+  transition: all 0.14s ease;
+}
+
+.bezent-table-row-actions .bezent-icon-btn:hover {
+  background: var(--bg-surface-secondary, #f0f4f9);
+  color: var(--text-primary, #000000);
+  border-color: var(--border-default, #dde3ea);
+  transform: none;
+  box-shadow: none;
+}
+
 .bezent-table-action-menu {
   position: relative;
   display: inline-flex;
@@ -408,6 +439,18 @@ button.bezent-table-link-btn:hover {
   border-color: rgba(56, 189, 248, 0.5);
 }
 
+[data-theme='dark'] .bezent-table-row-actions .bezent-icon-btn {
+  background: transparent;
+  border-color: #334155;
+  color: var(--text-secondary, #94a3b8);
+}
+
+[data-theme='dark'] .bezent-table-row-actions .bezent-icon-btn:hover {
+  background: rgba(56, 189, 248, 0.12);
+  color: #f8fafc;
+  border-color: rgba(56, 189, 248, 0.3);
+}
+
 [data-theme='dark'] .bezent-table-action-menu__dropdown {
   background: var(--bg-card, #081b3a);
   border-color: rgba(56, 189, 248, 0.35);
@@ -485,9 +528,10 @@ button.bezent-table-link-btn:hover {
 }
 
 .bezent-table-col--actions {
-  width: 64px;
-  min-width: 64px;
-  text-align: center;
+  width: auto;
+  min-width: 80px;
+  text-align: right;
+  white-space: nowrap;
 }
 
 .bezent-table-cell--nowrap {

@@ -405,9 +405,6 @@ export const HRMS_NAV_DESTINATIONS: readonly NavDestination[] = [
     label: 'HR Settings',
     icon: 'hrSettings',
     segment: 'settings',
-    description: 'Configure HR processes, policies, and operational standards',
-    keywords: ['configuration', 'preferences'],
-    categoryId: 'hr-operations',
     permissionKey: view('settings'),
   },
 ];

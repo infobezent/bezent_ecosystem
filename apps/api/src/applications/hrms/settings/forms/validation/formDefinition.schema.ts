@@ -303,6 +303,22 @@ export function validateSaveFormDefinition(
           validatedMetadata.sectionOrder = metadata.sectionOrder.map((k) => k.trim());
         }
       }
+
+      if (isObject(metadata.intakeConfig)) {
+        validatedMetadata.intakeConfig = metadata.intakeConfig as any;
+      }
+      if (isObject(metadata.publishedSnapshots)) {
+        validatedMetadata.publishedSnapshots = metadata.publishedSnapshots as any;
+      }
+      if (isObject(metadata.fieldRules)) {
+        validatedMetadata.fieldRules = metadata.fieldRules as any;
+      }
+      if (isObject(metadata.fieldPermissions)) {
+        validatedMetadata.fieldPermissions = metadata.fieldPermissions as any;
+      }
+      if (isObject(metadata.fieldValidation)) {
+        validatedMetadata.fieldValidation = metadata.fieldValidation as any;
+      }
     }
   }
 

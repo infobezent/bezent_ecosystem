@@ -12,11 +12,7 @@ import {
 } from '../../../../design-system/components';
 import { BezentIcon } from '../../../../design-system/icons';
 import { useOptionalAuth } from '../../../../platform/auth';
-import {
-  EmployeeRegistrationFormConfiguration,
-  FormsLanding,
-  type SystemFormId,
-} from './forms/FormsSettings';
+import { FormsListPage } from '../forms/FormsListPage';
 import { GeneralSettingsSection } from './onboarding/GeneralSettingsSection';
 import { StagesSection } from './onboarding/StagesSection';
 import { ChecklistsSection } from './onboarding/ChecklistsSection';
@@ -284,7 +280,6 @@ export interface AdministrationSettingsSectionProps {
 
 export function AdministrationSettingsSectionInner({
   onBack,
-  onNavigate,
   initialTab,
   initialSecondarySection,
   onTabChange,
@@ -298,19 +293,8 @@ export function AdministrationSettingsSectionInner({
   const [secondarySection, setSecondarySection] = useState<OnboardingSecondarySection>(
     initialSecondarySection ?? 'general',
   );
-  const [openForm, setOpenForm] = useState<SystemFormId | null>(null);
-
-  const handleConfigure = (formId: SystemFormId) => {
-    if (onNavigate) {
-      onNavigate(`/hrms/settings/forms/${formId}`);
-    } else {
-      setOpenForm(formId);
-    }
-  };
-
   const handleTabChange = (newTab: AdministrationSettingsTab) => {
     setTab(newTab);
-    setOpenForm(null);
     onTabChange?.(newTab);
   };
 
@@ -363,12 +347,7 @@ export function AdministrationSettingsSectionInner({
       />
 
       {/* Tab 1: Forms Workspace */}
-      {tab === 'forms' &&
-        (openForm === 'employee-registration' ? (
-          <EmployeeRegistrationFormConfiguration onBack={() => setOpenForm(null)} />
-        ) : (
-          <FormsLanding onConfigure={handleConfigure} />
-        ))}
+      {tab === 'forms' && <FormsListPage />}
 
       {/* Tab 2: Onboarding Workspace with Secondary Navigation */}
       {tab === 'onboarding' && (

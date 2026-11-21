@@ -14,6 +14,7 @@ export type SettingsModuleId =
 export interface SettingsModuleCard {
   id: SettingsModuleId;
   name: string;
+  tagline?: string;
   description: string;
   icon: string;
 }
@@ -22,46 +23,53 @@ export const SETTINGS_MODULE_CARDS: SettingsModuleCard[] = [
   {
     id: 'dashboard',
     name: 'Dashboard',
+    tagline: 'Widgets & Views',
     description: 'Configure dashboard content, widgets, layout, and visibility settings.',
     icon: 'dashboard',
   },
   {
     id: 'workforce',
     name: 'Workforce',
+    tagline: 'Forms & Workflows',
     description:
       'Configure auto-numbering series, hierarchy, forms, onboarding workflows, probation, transfers, and clearance.',
-    icon: 'users',
+    icon: 'workforce',
   },
   {
     id: 'leave',
     name: 'Leave',
+    tagline: 'Policies & Quotas',
     description: 'Configure leave types, policies, balances, and options.',
     icon: 'leave',
   },
   {
     id: 'attendance',
     name: 'Attendance',
+    tagline: 'Shifts & Tracking',
     description: 'Configure attendance rules, statuses, and settings.',
     icon: 'attendance',
   },
   {
     id: 'timesheets',
     name: 'Timesheets',
+    tagline: 'Projects & Hours',
     description: 'Configure timesheet fields, rules, and options.',
     icon: 'timeTracker',
   },
   {
     id: 'performance',
     name: 'Performance',
+    tagline: 'Reviews & Goals',
     description: 'Configure performance fields, rating options, review cycles, and goals.',
     icon: 'performance',
   },
   {
     id: 'milestones',
     name: 'Milestones & Rewards',
+    tagline: 'Badges & Perks',
     description:
       'Configure lifetime working-hour recognition milestones, poster templates, and gift catalogue.',
-    icon: 'award',
+    icon: 'sparkles',
   },
 ];
 

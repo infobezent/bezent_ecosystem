@@ -28,6 +28,8 @@ export interface GeneralInformationProps {
     departments: MasterOption[];
     designations: MasterOption[];
     locations: MasterOption[];
+    jobLevels?: MasterOption[];
+    grades?: MasterOption[];
   } | null;
   employeeId?: string;
   data?: Partial<Chapter01GeneralState>;
@@ -500,16 +502,21 @@ export function GeneralInformation({
               id="reg-grade-level"
               value={gradeLevel}
               onChange={(e) => setGradeLevel(e.target.value)}
-              options={
-                configuredOptions || [
-                  { value: 'L1 - Entry Level', label: 'L1 - Entry Level' },
-                  { value: 'L2 - Mid Level', label: 'L2 - Mid Level' },
-                  { value: 'L3 - Senior Level', label: 'L3 - Senior Level' },
-                  { value: 'L4 - Lead', label: 'L4 - Lead' },
-                  { value: 'L5 - Executive', label: 'L5 - Executive' },
-                  { value: 'other', label: 'Other' },
-                ]
-              }
+              options={(() => {
+                const baseOptions = configuredOptions ||
+                  toOptions(masters?.jobLevels) || [
+                    { value: 'L1 - Entry Level', label: 'L1 - Entry Level' },
+                    { value: 'L2 - Mid Level', label: 'L2 - Mid Level' },
+                    { value: 'L3 - Senior Level', label: 'L3 - Senior Level' },
+                    { value: 'L4 - Lead', label: 'L4 - Lead' },
+                    { value: 'L5 - Executive', label: 'L5 - Executive' },
+                    { value: 'other', label: 'Other' },
+                  ];
+                if (gradeLevel && !baseOptions.some((o) => o.value === gradeLevel)) {
+                  return [{ value: gradeLevel, label: gradeLevel }, ...baseOptions];
+                }
+                return baseOptions;
+              })()}
             />
           </RegistrationField>
         );
