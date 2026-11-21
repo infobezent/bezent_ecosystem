@@ -30,6 +30,7 @@ import {
 import { BezentIcon } from '../../../../design-system/icons';
 import { AttendanceSectionTabs } from '../components/AttendanceSectionTabs';
 import { RequestStatStrip } from '../components/RequestStatStrip';
+import { AttendanceDateRangeControl } from '../components/AttendanceDateRangeControl';
 import {
   RequestFilterPanel,
   countActiveRequestFilters,
@@ -37,10 +38,7 @@ import {
   type RequestFilterField,
   type RequestFilterValues,
 } from '../components/RequestFilterPanel';
-import {
-  AttendanceDateRangeControl,
-  getDefaultRequestDateRange,
-} from '../components/AttendanceDateRangeControl';
+import { getDemoOnDutyDetail, getDemoOnDutyWorkspace } from '../model/demoOnDuty';
 import {
   fetchOnDutyWorkspace,
   fetchOnDutyDetails,
@@ -155,10 +153,9 @@ const OD_SUBMITTED_RANGE: RequestFilterDateRange = {
 };
 
 export function AttendanceOnDutyPage() {
-  const defaultRange = useMemo(() => getDefaultRequestDateRange(), []);
-  // 1. Date Range State (defaults to active 60-day operational backlog window)
-  const [startDate, setStartDate] = useState(defaultRange.startDate);
-  const [endDate, setEndDate] = useState(defaultRange.endDate);
+  // 1. Date Range State (defaults to current month)
+  const [startDate, setStartDate] = useState(getStartOfMonthString());
+  const [endDate, setEndDate] = useState(getEndOfMonthString());
 
   // 2. Filter State
   const [search, setSearch] = useState('');
@@ -296,10 +293,17 @@ export function AttendanceOnDutyPage() {
       };
 
       const live = await fetchOnDutyWorkspace(filter);
-      setItems(live.items);
-      setCounters(live.counters);
-      setTotalCount(live.totalCount);
-      setTotalPages(live.totalPages);
+      // Nothing recorded yet: show sample requests so the workspace can be reviewed.
+      // Local development only: show sample rows when the API has nothing yet.
+      const noLiveData =
+        import.meta.env.DEV &&
+        live.totalCount === 0 &&
+        Object.values(live.counters).every((n) => n === 0);
+      const res = noLiveData ? getDemoOnDutyWorkspace(filter) : live;
+      setItems(res.items);
+      setCounters(res.counters);
+      setTotalCount(res.totalCount);
+      setTotalPages(res.totalPages);
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'Failed to load On-Duty requests');
     } finally {
@@ -335,7 +339,9 @@ export function AttendanceOnDutyPage() {
     setClarificationReply('');
     setDrawerTab('overview');
     try {
-      const data = await fetchOnDutyDetails(id);
+      const data = id.startsWith('od_demo_')
+        ? getDemoOnDutyDetail(id)
+        : await fetchOnDutyDetails(id);
       setDrawerDetail(data);
     } catch {
       // Handled gracefully in drawer
@@ -755,11 +761,25 @@ export function AttendanceOnDutyPage() {
 
   return (
     <Page>
-      {/* 1. Header & Section Tabs */}
-      <PageHeader title="Requests" actions={<AttendanceSectionTabs group="requests" />} />
-      <span className="bezent-sr-only">
-        Attendance › Requests — Review client visits, field duties and other official external work.
-      </span>
+      {/* 1. Header & Actions Strip */}
+      <PageHeader
+        eyebrow="Attendance › Requests"
+        title="Requests"
+        subtitle="Review client visits, field duties and other official external work."
+        actions={
+          <AttendanceDateRangeControl
+            startDate={startDate}
+            endDate={endDate}
+            onChange={(r) => {
+              setStartDate(r.startDate);
+              setEndDate(r.endDate);
+              setPage(1);
+            }}
+          />
+        }
+      />
+
+      <AttendanceSectionTabs group="requests" />
 
       <Stack gap="md">
         {/* 2. Summary counters (same KPI cards as Workforce overview) */}
@@ -806,7 +826,7 @@ export function AttendanceOnDutyPage() {
         />
 
         {/* 3. Search & filter toolbar (Workforce Directory pattern) */}
-        <div className="bezent-directory-toolbar bezent-att-requests-toolbar">
+        <div className="bezent-directory-toolbar">
           <div className="bezent-directory-toolbar__search">
             <SearchInput
               shape="rounded"
@@ -819,16 +839,6 @@ export function AttendanceOnDutyPage() {
           </div>
 
           <div className="bezent-directory-toolbar__actions">
-            <AttendanceDateRangeControl
-              startDate={startDate}
-              endDate={endDate}
-              onChange={(r) => {
-                setStartDate(r.startDate);
-                setEndDate(r.endDate);
-                setPage(1);
-              }}
-            />
-
             <div className="bezent-filter-anchor">
               <Button
                 variant={showAdvancedFilters || totalFilterCount > 0 ? 'secondary' : 'outline'}

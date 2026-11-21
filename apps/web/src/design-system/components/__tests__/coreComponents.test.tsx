@@ -65,6 +65,14 @@ describe('Design System Core Primitives', () => {
       );
       expect(html).toContain('bezent-select-wrapper--width-auto');
       expect(html).toContain('bezent-select-wrapper--sm');
+      expect(html).toContain('bezent-select-wrapper--align-left');
+    });
+
+    it('renders align-right modifier class when align is right', () => {
+      const html = renderToStaticMarkup(
+        <Select width="auto" size="sm" align="right" options={[{ value: '25', label: '25' }]} />,
+      );
+      expect(html).toContain('bezent-select-wrapper--align-right');
     });
   });
 

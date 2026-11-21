@@ -14,21 +14,10 @@ function iso(d: Date): string {
   return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
 }
 
-/** First to last day of the current month. */
+/** First to last day of the current month (the default period on the request pages). */
 export function getMonthRange(): AttendanceDateRange {
   const now = new Date();
   const start = new Date(now.getFullYear(), now.getMonth(), 1);
-  const end = new Date(now.getFullYear(), now.getMonth() + 1, 0);
-  return { startDate: iso(start), endDate: iso(end) };
-}
-
-/**
- * Operational request window covering previous month through current month end (60-day backlog).
- * Ensures pending & recent requests from the previous pay cycle are immediately visible in queues.
- */
-export function getDefaultRequestDateRange(): AttendanceDateRange {
-  const now = new Date();
-  const start = new Date(now.getFullYear(), now.getMonth() - 1, 1);
   const end = new Date(now.getFullYear(), now.getMonth() + 1, 0);
   return { startDate: iso(start), endDate: iso(end) };
 }
@@ -49,14 +38,12 @@ export const AttendanceDateRangeControl: React.FC<AttendanceDateRangeControlProp
   endDate,
   onChange,
 }) => (
-  <div className="bezent-att-date-range-control">
-    <DateRangePicker
-      startDate={startDate}
-      endDate={endDate}
-      placeholder="Select date or range"
-      onChange={(r) => {
-        if (r.startDate && r.endDate) onChange({ startDate: r.startDate, endDate: r.endDate });
-      }}
-    />
-  </div>
+  <DateRangePicker
+    startDate={startDate}
+    endDate={endDate}
+    placeholder="Select date or range"
+    onChange={(r) => {
+      if (r.startDate && r.endDate) onChange({ startDate: r.startDate, endDate: r.endDate });
+    }}
+  />
 );

@@ -51,10 +51,9 @@ import {
   type RequestFilterField,
   type RequestFilterValues,
 } from '../components/RequestFilterPanel';
-import {
-  AttendanceDateRangeControl,
-  getDefaultRequestDateRange,
-} from '../components/AttendanceDateRangeControl';
+import { getDemoCompOffRequests } from '../model/demoOvertimeCompOff';
+import { getMonthRange } from '../components/AttendanceDateRangeControl';
+import { AttendanceDateRangeControl } from '../components/AttendanceDateRangeControl';
 import {
   fetchCompOffOverview,
   fetchCompOffRequests,
@@ -264,7 +263,7 @@ export function AttendanceCompOffPage() {
 
   // ── 4. Filter Bar State (Spec Section 4) ───────────────────────────────────
   const [search, setSearch] = useState('');
-  const [range, setRange] = useState(() => getDefaultRequestDateRange());
+  const [range, setRange] = useState(() => getMonthRange());
   const [statusFilter, setStatusFilter] = useState('all');
   const [sourceFilter, setSourceFilter] = useState('all'); // all | overtime | weekly_off | holiday | manual
   const [departmentFilter, setDepartmentFilter] = useState('all');
@@ -351,7 +350,14 @@ export function AttendanceCompOffPage() {
       ]);
 
       setMetrics(overviewRes);
-      setRequests(requestsRes.items || []);
+      // Nothing recorded yet: show sample requests so the page can be reviewed.
+      // Local development only: show sample rows when the API has nothing yet.
+      const noLiveData =
+        import.meta.env.DEV &&
+        !(requestsRes.items?.length ?? 0) &&
+        !(entitlementsRes.items?.length ?? 0) &&
+        !(handoffsRes.items?.length ?? 0);
+      setRequests(noLiveData ? getDemoCompOffRequests() : requestsRes.items || []);
       setEntitlements(entitlementsRes.items || []);
       setHandoffs(handoffsRes.items || []);
     } catch (err: unknown) {
@@ -821,10 +827,20 @@ export function AttendanceCompOffPage() {
   return (
     <Page maxWidth="default" gap="md">
       {/* ── 1. Page Header (Spec Section 1) ── */}
-      <PageHeader title="Requests" actions={<AttendanceSectionTabs group="requests" />} />
-      <span className="bezent-sr-only">
-        Attendance › Requests — Track comp-off earned, used and expired for each employee.
-      </span>
+      <PageHeader
+        eyebrow="Attendance › Requests"
+        title="Requests"
+        subtitle="Track comp-off earned, used and expired for each employee."
+        actions={
+          <AttendanceDateRangeControl
+            startDate={range.startDate}
+            endDate={range.endDate}
+            onChange={setRange}
+          />
+        }
+      />
+
+      <AttendanceSectionTabs group="requests" />
 
       <Stack gap="md">
         {/* Banner Notification */}
@@ -877,7 +893,7 @@ export function AttendanceCompOffPage() {
         />
 
         {/* ── 4. Filter Bar (Spec Section 4 — Workforce Directory Pattern) ── */}
-        <div className="bezent-directory-toolbar bezent-att-requests-toolbar">
+        <div className="bezent-directory-toolbar">
           <div className="bezent-directory-toolbar__search">
             <SearchInput
               value={search}
@@ -890,12 +906,6 @@ export function AttendanceCompOffPage() {
           </div>
 
           <div className="bezent-directory-toolbar__actions">
-            <AttendanceDateRangeControl
-              startDate={range.startDate}
-              endDate={range.endDate}
-              onChange={setRange}
-            />
-
             <div className="bezent-filter-anchor">
               <Button
                 variant={activeFilterCount > 0 || isFilterPanelOpen ? 'secondary' : 'outline'}

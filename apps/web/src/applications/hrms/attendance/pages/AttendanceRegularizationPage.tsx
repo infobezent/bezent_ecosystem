@@ -30,15 +30,16 @@ import {
 import { BezentIcon } from '../../../../design-system/icons';
 import { AttendanceSectionTabs } from '../components/AttendanceSectionTabs';
 import { RequestStatStrip } from '../components/RequestStatStrip';
-import {
-  AttendanceDateRangeControl,
-  getDefaultRequestDateRange,
-} from '../components/AttendanceDateRangeControl';
+import { AttendanceDateRangeControl } from '../components/AttendanceDateRangeControl';
 import {
   RegularizationFilterPanel,
   countActiveRegularizationFilters,
   type RegularizationFilterState,
 } from '../components/RegularizationFilterPanel';
+import {
+  getDemoRegularizationDetail,
+  getDemoRegularizationWorkspace,
+} from '../model/demoRegularizations';
 import {
   fetchRegularizationWorkspace,
   fetchRegularizationDetails,
@@ -142,10 +143,9 @@ const QUEUE_TABS = [
 ];
 
 export function AttendanceRegularizationPage() {
-  const defaultRange = useMemo(() => getDefaultRequestDateRange(), []);
-  // 1. Date Range State (defaults to active 60-day operational backlog window)
-  const [workdayFrom, setWorkdayFrom] = useState(defaultRange.startDate);
-  const [workdayTo, setWorkdayTo] = useState(defaultRange.endDate);
+  // 1. Date Range State (defaults to current month)
+  const [workdayFrom, setWorkdayFrom] = useState(getStartOfMonthString());
+  const [workdayTo, setWorkdayTo] = useState(getEndOfMonthString());
 
   // 2. Filter State
   const [assignedQueue, setAssignedQueue] = useState<string>('all');
@@ -175,10 +175,8 @@ export function AttendanceRegularizationPage() {
     pendingReview: 0,
     underReview: 0,
     awaitingInfo: 0,
-    approved: 0,
     approvedToday: 0,
     applicationIssues: 0,
-    rejected: 0,
     rejectedToday: 0,
   });
   const [totalCount, setTotalCount] = useState(0);
@@ -271,10 +269,17 @@ export function AttendanceRegularizationPage() {
       };
 
       const live = await fetchRegularizationWorkspace(filter);
-      setItems(live.items);
-      setCounters(live.counters);
-      setTotalCount(live.total);
-      setTotalPages(live.totalPages);
+      // Nothing recorded yet: show sample requests so the workspace can be reviewed.
+      // Local development only: show sample rows when the API has nothing yet.
+      const noLiveData =
+        import.meta.env.DEV &&
+        live.total === 0 &&
+        Object.values(live.counters).every((n) => n === 0);
+      const res = noLiveData ? getDemoRegularizationWorkspace(filter) : live;
+      setItems(res.items);
+      setCounters(res.counters);
+      setTotalCount(res.total);
+      setTotalPages(res.totalPages);
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'Failed to load regularizations');
     } finally {
@@ -309,7 +314,9 @@ export function AttendanceRegularizationPage() {
     setDrawerLoading(true);
     setDecisionNotes('');
     try {
-      const data = await fetchRegularizationDetails(id);
+      const data = id.startsWith('reg_demo_')
+        ? getDemoRegularizationDetail(id)
+        : await fetchRegularizationDetails(id);
       setDrawerDetail(data);
     } catch {
       // Gracefully handled in drawer
@@ -366,17 +373,13 @@ export function AttendanceRegularizationPage() {
   // Counter Click handler
   const handleCounterClick = (targetStatus: string) => {
     setPage(1);
-    // Expand to default active request backlog window if date range was constrained
-    if (workdayFrom > defaultRange.startDate) {
-      setWorkdayFrom(defaultRange.startDate);
-    }
     if (targetStatus === 'application_issues') {
       setApprovalStatus('all');
       setApplicationStatus(applicationStatus === 'failed' ? 'all' : 'failed');
-    } else if (targetStatus === 'approved' || targetStatus === 'approved_today') {
+    } else if (targetStatus === 'approved_today') {
       setApprovalStatus(approvalStatus === 'approved' ? 'all' : 'approved');
       setApplicationStatus('all');
-    } else if (targetStatus === 'rejected' || targetStatus === 'rejected_today') {
+    } else if (targetStatus === 'rejected_today') {
       setApprovalStatus(approvalStatus === 'rejected' ? 'all' : 'rejected');
       setApplicationStatus('all');
     } else {
@@ -399,8 +402,6 @@ export function AttendanceRegularizationPage() {
     setLocationId('all');
     setRelatedException('all');
     setSource('all');
-    setWorkdayFrom(defaultRange.startDate);
-    setWorkdayTo(defaultRange.endDate);
     setPage(1);
   };
 
@@ -620,11 +621,25 @@ export function AttendanceRegularizationPage() {
 
   return (
     <Page>
-      {/* 1. Header & Section Tabs */}
-      <PageHeader title="Requests" actions={<AttendanceSectionTabs group="requests" />} />
-      <span className="bezent-sr-only">
-        Attendance › Requests — Submit, review and manage attendance correction requests.
-      </span>
+      {/* 1. Header & Actions Strip */}
+      <PageHeader
+        eyebrow="Attendance › Requests"
+        title="Requests"
+        subtitle="Submit, review and manage attendance correction requests."
+        actions={
+          <AttendanceDateRangeControl
+            startDate={workdayFrom}
+            endDate={workdayTo}
+            onChange={(r) => {
+              setWorkdayFrom(r.startDate);
+              setWorkdayTo(r.endDate);
+              setPage(1);
+            }}
+          />
+        }
+      />
+
+      <AttendanceSectionTabs group="requests" />
 
       <Stack gap="md">
         {/* 2. Summary counters (same KPI cards as Workforce overview) */}
@@ -650,10 +665,10 @@ export function AttendanceRegularizationPage() {
               onClick: () => handleCounterClick('awaiting_info'),
             },
             {
-              label: 'Approved',
-              value: counters.approved ?? counters.approvedToday,
+              label: 'Approved Today',
+              value: counters.approvedToday,
               tone: 'success',
-              onClick: () => handleCounterClick('approved'),
+              onClick: () => handleCounterClick('approved_today'),
             },
             {
               label: 'Application Issues',
@@ -662,10 +677,10 @@ export function AttendanceRegularizationPage() {
               onClick: () => handleCounterClick('application_issues'),
             },
             {
-              label: 'Rejected',
-              value: counters.rejected ?? counters.rejectedToday,
-              tone: 'neutral',
-              onClick: () => handleCounterClick('rejected'),
+              label: 'Rejected Today',
+              value: counters.rejectedToday,
+              tone: 'danger',
+              onClick: () => handleCounterClick('rejected_today'),
             },
           ]}
         />
@@ -682,7 +697,7 @@ export function AttendanceRegularizationPage() {
         />
 
         {/* 3. Search & filter toolbar (Workforce Directory pattern) */}
-        <div className="bezent-directory-toolbar bezent-att-requests-toolbar">
+        <div className="bezent-directory-toolbar">
           <div className="bezent-directory-toolbar__search">
             <SearchInput
               shape="rounded"
@@ -695,16 +710,6 @@ export function AttendanceRegularizationPage() {
           </div>
 
           <div className="bezent-directory-toolbar__actions">
-            <AttendanceDateRangeControl
-              startDate={workdayFrom}
-              endDate={workdayTo}
-              onChange={(r) => {
-                setWorkdayFrom(r.startDate);
-                setWorkdayTo(r.endDate);
-                setPage(1);
-              }}
-            />
-
             <div className="bezent-filter-anchor">
               <Button
                 variant={showAdvancedFilters || totalFilterCount > 0 ? 'secondary' : 'outline'}

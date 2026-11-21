@@ -44,10 +44,9 @@ import {
 import { BezentIcon } from '../../../../design-system/icons';
 import { AttendanceSectionTabs } from '../components/AttendanceSectionTabs';
 import { RequestStatStrip } from '../components/RequestStatStrip';
-import {
-  AttendanceDateRangeControl,
-  getDefaultRequestDateRange,
-} from '../components/AttendanceDateRangeControl';
+import { getMonthRange } from '../components/AttendanceDateRangeControl';
+import { AttendanceDateRangeControl } from '../components/AttendanceDateRangeControl';
+import { getDemoOvertimeRequests } from '../model/demoOvertimeCompOff';
 import {
   RequestFilterPanel,
   type RequestFilterField,
@@ -222,7 +221,7 @@ const OT_FILTER_DEFAULTS: RequestFilterValues = {
 
 export function AttendanceOvertimePage() {
   // ── 1. Page Header & Period State (Spec Section 1) ──────────────────────────
-  const [range, setRange] = useState(() => getDefaultRequestDateRange());
+  const [range, setRange] = useState(() => getMonthRange());
   const isLockedMonth = useMemo(() => {
     // A period that ends before the current month is treated as locked for payroll
     const now = new Date();
@@ -326,6 +325,28 @@ export function AttendanceOvertimePage() {
         }),
       ]);
 
+      // Nothing recorded yet: show sample requests so the page can be reviewed.
+      // Local development only: show sample rows when the API has nothing yet.
+      const noLiveData =
+        import.meta.env.DEV && !(requestsRes.items?.length ?? 0) && !(requestsRes.meta?.total ?? 0);
+      if (noLiveData) {
+        const q = search.trim().toLowerCase();
+        const demo = getDemoOvertimeRequests().filter((d) => {
+          if (d.workDate < startOfMonth || d.workDate > endOfMonth) return false;
+          if (statusFilter === 'pending' && d.status !== 'pending_approval') return false;
+          if (statusFilter === 'approved' && d.status !== 'approved') return false;
+          if (statusFilter === 'rejected' && d.status !== 'rejected') return false;
+          if (settlementFilter === 'payable' && d.allocatedPayableMinutes <= 0) return false;
+          if (settlementFilter === 'comp_off' && d.allocatedCompOffMinutes <= 0) return false;
+          if (departmentFilter !== 'all' && d.departmentName !== departmentFilter) return false;
+          if (q && !`${d.employeeName} ${d.employeeCode}`.toLowerCase().includes(q)) return false;
+          return true;
+        });
+        setMetrics(null);
+        setItems(demo);
+        setTotalCount(demo.length);
+        return;
+      }
       setMetrics(overviewRes);
       if (policiesRes && policiesRes.length > 0 && policiesRes[0]) {
         setPolicy(policiesRes[0]);
@@ -725,10 +746,23 @@ export function AttendanceOvertimePage() {
   return (
     <Page maxWidth="default" gap="md">
       {/* ── 1. Page Header (Spec Section 1) ── */}
-      <PageHeader title="Requests" actions={<AttendanceSectionTabs group="requests" />} />
-      <span className="bezent-sr-only">
-        Attendance › Requests — Review overtime hours and choose how each record is settled.
-      </span>
+      <PageHeader
+        eyebrow="Attendance › Requests"
+        title="Requests"
+        subtitle="Review overtime hours and choose how each record is settled."
+        actions={
+          <AttendanceDateRangeControl
+            startDate={range.startDate}
+            endDate={range.endDate}
+            onChange={(r) => {
+              setRange(r);
+              setPage(1);
+            }}
+          />
+        }
+      />
+
+      <AttendanceSectionTabs group="requests" />
 
       <Stack gap="md">
         {/* Banner Notification */}
@@ -805,7 +839,7 @@ export function AttendanceOvertimePage() {
         />
 
         {/* ── 3. Filter Bar (Spec Section 3 — Workforce Directory Pattern) ── */}
-        <div className="bezent-directory-toolbar bezent-att-requests-toolbar">
+        <div className="bezent-directory-toolbar">
           <div className="bezent-directory-toolbar__search">
             <SearchInput
               value={search}
@@ -818,15 +852,6 @@ export function AttendanceOvertimePage() {
           </div>
 
           <div className="bezent-directory-toolbar__actions">
-            <AttendanceDateRangeControl
-              startDate={range.startDate}
-              endDate={range.endDate}
-              onChange={(r) => {
-                setRange(r);
-                setPage(1);
-              }}
-            />
-
             <div className="bezent-filter-anchor">
               <Button
                 variant={activeFilterCount > 0 || isFilterPanelOpen ? 'secondary' : 'outline'}
