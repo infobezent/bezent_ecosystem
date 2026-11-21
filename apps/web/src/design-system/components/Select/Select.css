@@ -67,15 +67,15 @@
 }
 
 .bezent-select-box:hover:not(.is-disabled) {
-  border-color: #cbd5e1;
+  border-color: #93c5fd;
   background-color: #fbfcfe;
 }
 
 .bezent-select-box:focus-visible,
 .bezent-select-box.is-active {
   outline: none;
-  border-color: var(--action-blue, #3b82f6);
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.14);
+  border-color: var(--action-blue, #3978f6);
+  box-shadow: 0 0 0 3px rgba(57, 120, 246, 0.14);
 }
 
 /* ── Sizes ── */
@@ -152,7 +152,7 @@
   top: calc(100% + 5px);
   left: 0;
   right: auto;
-  min-width: max(100%, 220px);
+  min-width: max(100%, 200px);
   width: max-content;
   max-width: min(90vw, 360px);
   background: var(--bg-surface, #ffffff);
@@ -170,9 +170,10 @@
 }
 
 .bezent-select-wrapper--width-full .bezent-select-dropdown {
+  width: 100%;
   min-width: 100%;
-  width: max-content;
-  max-width: min(90vw, 360px);
+  right: 0;
+  max-width: 100%;
 }
 
 .bezent-select-wrapper--width-auto .bezent-select-dropdown {
@@ -185,6 +186,17 @@
 }
 
 @keyframes bezentSelectDropIn {
+  from {
+    opacity: 0;
+    transform: translateY(-4px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes bezentSelectFadeIn
   from {
     opacity: 0;
     transform: translateY(-4px) scale(0.98);
@@ -245,7 +257,7 @@
 }
 
 .bezent-select-option.is-selected {
-  background: rgba(37, 99, 235, 0.08);
+  background: var(--pastel-blue, #eff6ff);
   color: var(--blue-600, #2563eb);
 }
 
@@ -302,8 +314,18 @@
   height: 16px;
   min-width: 16px;
   margin-top: 1px;
-  color: var(--action-blue, #2563eb);
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--action-blue, #3978f6);
   flex-shrink: 0;
+}
+
+.bezent-select-option-label {
+  flex: 1;
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .bezent-select-wrapper--sm .bezent-select-option {
