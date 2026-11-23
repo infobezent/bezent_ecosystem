@@ -89,18 +89,22 @@ export const OffboardingKpiCard: React.FC<OffboardingKpiCardProps> = ({
   const effectivePendingClearance =
     pendingClearance !== undefined ? pendingClearance : DEFAULT_PENDING_CLEARANCE;
 
-  // Proportional arc distribution across a 285° span with 26° gaps (viewBox="0 0 60 60", R=21)
-  // Opening is at top-right between 295° and 345°
-  const totalArcSpan = 285;
-  const gap = 26;
-  const numStages = effectiveStages.length || 4;
+  // Proportional arc distribution across a 260° span
+  // Ends right before the exit arrow at 270° (top apex)
+  const totalArcSpan = 260;
+  const activeStages = effectiveStages.filter((s) => (s.count || 0) > 0);
+  const stagesToRender = activeStages.length > 0 ? activeStages : effectiveStages;
+  const numStages = stagesToRender.length;
+  const gap = numStages > 1 ? 6 : 0;
   const totalGaps = (numStages - 1) * gap;
   const availableSpan = Math.max(60, totalArcSpan - totalGaps);
 
-  let currentAngle = 345;
-  const arcs = effectiveStages.map((stage) => {
-    const fraction = effectiveTotal > 0 ? stage.count / effectiveTotal : 1 / numStages;
-    const sweep = Math.max(16, fraction * availableSpan);
+  const startAnchor = 264 - totalArcSpan;
+  let currentAngle = (startAnchor + 360) % 360;
+
+  const arcs = stagesToRender.map((stage) => {
+    const fraction = effectiveTotal > 0 ? (stage.count || 0) / effectiveTotal : 1 / numStages;
+    const sweep = numStages === 1 ? totalArcSpan : Math.max(20, fraction * availableSpan);
     const startAngle = currentAngle;
     const endAngle = currentAngle + sweep;
     currentAngle = endAngle + gap;
@@ -205,14 +209,25 @@ export const OffboardingKpiCard: React.FC<OffboardingKpiCardProps> = ({
             {tooltipText}
           </div>
 
-          {/* SVG Circular Departure Ring (4 Proportional Arcs + Integrated Curved Arrowhead) */}
+          {/* SVG Circular Departure Ring */}
           <svg
             className="bezent-kpi-offboarding-svg bezent-kpi-departure-svg"
             viewBox="0 0 60 60"
             role="img"
             aria-label={`Offboarding stages: ${arcs.map((a) => `${a.name}: ${a.count}`).join(', ')}`}
           >
-            {/* 4 Stage Proportional Arcs */}
+            {/* Subtle base track */}
+            <circle
+              cx={30}
+              cy={30}
+              r={21}
+              stroke="var(--border-subtle, #e2e8f0)"
+              strokeWidth={4.8}
+              fill="none"
+              opacity={0.35}
+            />
+
+            {/* Stage Proportional Arcs */}
             {arcs.map((arc) => (
               <g
                 key={arc.id}
@@ -318,7 +333,7 @@ export const OffboardingKpiCard: React.FC<OffboardingKpiCardProps> = ({
               key={activeHovered ?? 'default'}
               className={`bezent-kpi-departure-icon-wrapper ${iconModifierClass}`}
             >
-              <BezentIcon name={activeIcon} size={15} color="currentColor" />
+              <BezentIcon name={activeIcon} size={16} color="currentColor" />
             </div>
           </div>
         </div>

@@ -55,7 +55,7 @@ export function TopNav({
   onHelp,
 }: TopNavProps) {
   const [profileOpen, setProfileOpen] = useState(false);
-  const brandText = companyName?.trim() || 'Bezent';
+  const brandText = (companyName?.trim() || 'BEZENT').toUpperCase();
 
   return (
     <header className="top-nav">
@@ -64,7 +64,7 @@ export function TopNav({
           {companyLogo ? (
             <img src={companyLogo} alt={brandText} className="top-nav__logo-img" />
           ) : (
-            <img src={bezentMark} alt="Bezent" className="top-nav__logo-img" />
+            <img src={bezentMark} alt="BEZENT" className="top-nav__logo-img" />
           )}
         </div>
         <span className="top-nav__brand-name" aria-label={brandText}>

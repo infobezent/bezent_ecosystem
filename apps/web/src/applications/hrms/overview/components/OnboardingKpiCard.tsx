@@ -123,16 +123,16 @@ export const OnboardingKpiCard: React.FC<OnboardingKpiCardProps> = ({
   const effectiveTotal =
     total !== undefined ? total : effectiveStages.reduce((sum, s) => sum + (s.count || 0), 0);
 
-  // Balanced equal arc distribution across a 285° span with 26° gaps (viewBox="0 0 60 60", R=21)
-  // Mirrors Offboarding geometry: all stage arcs are equally distributed so each color is equally visible
-  const totalArcSpan = 285;
-  const gap = 26;
+  // Balanced equal arc distribution across a 250° span with sleek 6° gaps (viewBox="0 0 60 60", R=21)
+  // Arcs sweep clockwise starting at the top apex (274°) right where the right-pointing arrival arrow enters
+  const totalArcSpan = 250;
+  const gap = 6;
   const numStages = effectiveStages.length || 4;
   const totalGaps = (numStages - 1) * gap;
   const availableSpan = Math.max(60, totalArcSpan - totalGaps);
   const equalSweep = availableSpan / numStages;
 
-  let currentAngle = 345;
+  let currentAngle = 274;
   const arcs = effectiveStages.map((stage, idx) => {
     const sweep = equalSweep;
     const startAngle = currentAngle;
@@ -249,110 +249,118 @@ export const OnboardingKpiCard: React.FC<OnboardingKpiCardProps> = ({
             {tooltipText}
           </div>
 
-          {/* SVG Circular Arrival Ring (Exact Horizontal Mirror of Offboarding) */}
+          {/* SVG Circular Arrival Ring */}
           <svg
             className="bezent-kpi-onboarding-svg bezent-kpi-arrival-svg"
             viewBox="0 0 60 60"
             role="img"
             aria-label={`Onboarding stages: ${arcs.map((a) => `${a.name}: ${a.count}`).join(', ')}`}
           >
-            {/* Mirrored Group across x=30: Creates exact reciprocal balance to Card 5 */}
-            <g transform="translate(60, 0) scale(-1, 1)">
-              {/* 4 Stage Proportional Arcs */}
-              {arcs.map((arc, idx) => {
-                const fallbackStroke = STAGE_FALLBACK_COLORS[idx % STAGE_FALLBACK_COLORS.length];
-                return (
-                  <g
-                    key={arc.id}
-                    className={`bezent-kpi-arrival-group bezent-kpi-onboarding-node--${arc.id} bezent-kpi-onboarding-node--step-${idx} ${
-                      arc.isHovered ? 'is-hovered bezent-kpi-activity-bar--hovered' : ''
-                    } ${hasHover && !arc.isHovered ? 'is-dimmed' : ''}`}
-                    onMouseEnter={() => setInternalHovered(arc.id)}
-                    onMouseOver={() => setInternalHovered(arc.id)}
-                    onPointerEnter={() => setInternalHovered(arc.id)}
-                    onFocus={() => setInternalHovered(arc.id)}
-                    onBlur={() => setInternalHovered(null)}
-                    onClick={(e) => {
+            {/* Subtle base track */}
+            <circle
+              cx={30}
+              cy={30}
+              r={21}
+              stroke="var(--border-subtle, #e2e8f0)"
+              strokeWidth={4.8}
+              fill="none"
+              opacity={0.35}
+            />
+
+            {/* Stage Proportional Arcs sweeping clockwise */}
+            {arcs.map((arc, idx) => {
+              const fallbackStroke = STAGE_FALLBACK_COLORS[idx % STAGE_FALLBACK_COLORS.length];
+              return (
+                <g
+                  key={arc.id}
+                  className={`bezent-kpi-arrival-group bezent-kpi-onboarding-node--${arc.id} bezent-kpi-onboarding-node--step-${idx} ${
+                    arc.isHovered ? 'is-hovered bezent-kpi-activity-bar--hovered' : ''
+                  } ${hasHover && !arc.isHovered ? 'is-dimmed' : ''}`}
+                  onMouseEnter={() => setInternalHovered(arc.id)}
+                  onMouseOver={() => setInternalHovered(arc.id)}
+                  onPointerEnter={() => setInternalHovered(arc.id)}
+                  onFocus={() => setInternalHovered(arc.id)}
+                  onBlur={() => setInternalHovered(null)}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onStageClick?.(arc);
+                    onBarClick?.({ id: arc.id, period: arc.name, count: arc.count });
+                    onClick?.();
+                  }}
+                  tabIndex={0}
+                  role="button"
+                  aria-label={`${arc.name}: ${formatStatus(arc.status)}, ${arc.count} employees`}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault();
                       e.stopPropagation();
                       onStageClick?.(arc);
                       onBarClick?.({ id: arc.id, period: arc.name, count: arc.count });
                       onClick?.();
-                    }}
-                    tabIndex={0}
-                    role="button"
-                    aria-label={`${arc.name}: ${formatStatus(arc.status)}, ${arc.count} employees`}
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter' || e.key === ' ') {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        onStageClick?.(arc);
-                        onBarClick?.({ id: arc.id, period: arc.name, count: arc.count });
-                        onClick?.();
-                      }
-                    }}
-                  >
-                    {/* Wide invisible hit area so hover triggers effortlessly */}
-                    <path d={arc.pathD} strokeWidth={14} stroke="transparent" fill="none" />
+                    }
+                  }}
+                >
+                  {/* Wide invisible hit area so hover triggers effortlessly */}
+                  <path d={arc.pathD} strokeWidth={14} stroke="transparent" fill="none" />
 
-                    {/* Visible sleek curved arc with guaranteed fallback color */}
-                    <path
-                      d={arc.pathD}
-                      stroke={fallbackStroke}
-                      strokeWidth={4.8}
-                      strokeLinecap="round"
-                      className={`bezent-kpi-arrival-arc bezent-kpi-arrival-arc--step-${idx} bezent-kpi-arrival-arc--${arc.id} bezent-kpi-onboarding-arc--${arc.id}`}
-                    />
-                  </g>
-                );
-              })}
+                  {/* Visible sleek curved arc with guaranteed fallback color */}
+                  <path
+                    d={arc.pathD}
+                    stroke={fallbackStroke}
+                    strokeWidth={4.8}
+                    strokeLinecap="round"
+                    className={`bezent-kpi-arrival-arc bezent-kpi-arrival-arc--step-${idx} bezent-kpi-arrival-arc--${arc.id} bezent-kpi-onboarding-arc--${arc.id}`}
+                  />
+                </g>
+              );
+            })}
 
-              {/* Top Horizontal Arrow pointing left (in mirrored coordinates, line x1=31..47, polygon tip at 53.5) */}
-              <g
-                className={`bezent-kpi-arrival-arrow-group bezent-kpi-onboarding-arrow-group ${
-                  isArrowHovered ? 'is-hovered' : ''
-                } ${hasHover && !isArrowHovered ? 'is-dimmed' : ''}`}
-                onMouseEnter={() => setInternalHovered('arrow')}
-                onMouseOver={() => setInternalHovered('arrow')}
-                onPointerEnter={() => setInternalHovered('arrow')}
-                onFocus={() => setInternalHovered('arrow')}
-                onBlur={() => setInternalHovered(null)}
-                onClick={(e) => {
+            {/* Top Horizontal Arrow entering from left and pointing RIGHT → into the circle (Inflow) */}
+            <g
+              className={`bezent-kpi-arrival-arrow-group bezent-kpi-onboarding-arrow-group ${
+                isArrowHovered ? 'is-hovered' : ''
+              } ${hasHover && !isArrowHovered ? 'is-dimmed' : ''}`}
+              onMouseEnter={() => setInternalHovered('arrow')}
+              onMouseOver={() => setInternalHovered('arrow')}
+              onPointerEnter={() => setInternalHovered('arrow')}
+              onFocus={() => setInternalHovered('arrow')}
+              onBlur={() => setInternalHovered(null)}
+              onClick={(e) => {
+                e.stopPropagation();
+                onClick?.();
+              }}
+              tabIndex={0}
+              role="button"
+              aria-label={`New Hires Arrival: ${effectiveTotal} in onboarding`}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault();
                   e.stopPropagation();
                   onClick?.();
-                }}
-                tabIndex={0}
-                role="button"
-                aria-label={`New Hires Arrival: ${effectiveTotal} in onboarding`}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter' || e.key === ' ') {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    onClick?.();
-                  }
-                }}
-              >
-                {/* Wide invisible hit area */}
-                <circle cx={44} cy={9} r={12} fill="transparent" />
+                }
+              }}
+            >
+              {/* Wide invisible hit area */}
+              <circle cx={20} cy={9} r={12} fill="transparent" />
 
-                {/* Horizontal arrival stem */}
-                <line
-                  x1={31}
-                  y1={9}
-                  x2={47}
-                  y2={9}
-                  stroke="#2563eb"
-                  strokeWidth={4.8}
-                  strokeLinecap="round"
-                  className="bezent-kpi-arrival-arrow-stem bezent-kpi-onboarding-arrow-stem"
-                />
+              {/* Horizontal arrival stem */}
+              <line
+                x1={11}
+                y1={9}
+                x2={23}
+                y2={9}
+                stroke="#2563eb"
+                strokeWidth={4.8}
+                strokeLinecap="round"
+                className="bezent-kpi-arrival-arrow-stem bezent-kpi-onboarding-arrow-stem"
+              />
 
-                {/* Sleek, solid horizontal arrowhead pointing towards the left in visual space */}
-                <polygon
-                  points="53.5,9 46.5,5.2 46.5,12.8"
-                  fill="#2563eb"
-                  className="bezent-kpi-arrival-arrowhead bezent-kpi-onboarding-arrowhead"
-                />
-              </g>
+              {/* Sleek, solid horizontal arrowhead pointing towards the right (Inflow) */}
+              <polygon
+                points="29,9 22.5,5.2 22.5,12.8"
+                fill="#2563eb"
+                className="bezent-kpi-arrival-arrowhead bezent-kpi-onboarding-arrowhead"
+              />
             </g>
           </svg>
 
@@ -373,7 +381,7 @@ export const OnboardingKpiCard: React.FC<OnboardingKpiCardProps> = ({
               key={activeHovered ?? 'default'}
               className={`bezent-kpi-arrival-icon-wrapper ${iconModifierClass}`}
             >
-              <BezentIcon name={activeIcon} size={15} color="currentColor" />
+              <BezentIcon name={activeIcon} size={16} color="currentColor" />
             </div>
           </div>
         </div>
