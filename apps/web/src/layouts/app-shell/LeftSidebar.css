@@ -244,6 +244,105 @@
   color: #0369a1 !important;
 }
 
+/* Organization — Indigo */
+.left-sidebar__item.is-active[data-nav-id='organization'] .bezent-nav-icon-box {
+  background: #eef2ff !important;
+}
+.left-sidebar__item.is-active[data-nav-id='organization'] .bezent-material-icon {
+  color: #4f46e5 !important;
+}
+.left-sidebar__item.is-active[data-nav-id='organization'] .left-sidebar__label {
+  color: #4338ca !important;
+}
+
+/* Career Paths — Fuchsia Orchid */
+.left-sidebar__item.is-active[data-nav-id='career'] .bezent-nav-icon-box {
+  background: #fdf4ff !important;
+}
+.left-sidebar__item.is-active[data-nav-id='career'] .bezent-material-icon {
+  color: #c026d3 !important;
+}
+.left-sidebar__item.is-active[data-nav-id='career'] .left-sidebar__label {
+  color: #a21caf !important;
+}
+
+/* Compensation — Emerald Green */
+.left-sidebar__item.is-active[data-nav-id='compensation'] .bezent-nav-icon-box {
+  background: #ecfdf5 !important;
+}
+.left-sidebar__item.is-active[data-nav-id='compensation'] .bezent-material-icon {
+  color: #059669 !important;
+}
+.left-sidebar__item.is-active[data-nav-id='compensation'] .left-sidebar__label {
+  color: #047857 !important;
+}
+
+/* Benefits — Rose Pink */
+.left-sidebar__item.is-active[data-nav-id='benefits'] .bezent-nav-icon-box {
+  background: #fff1f2 !important;
+}
+.left-sidebar__item.is-active[data-nav-id='benefits'] .bezent-material-icon {
+  color: #e11d48 !important;
+}
+.left-sidebar__item.is-active[data-nav-id='benefits'] .left-sidebar__label {
+  color: #be123c !important;
+}
+
+/* Documents — Sky Blue */
+.left-sidebar__item.is-active[data-nav-id='documents'] .bezent-nav-icon-box {
+  background: #f0f9ff !important;
+}
+.left-sidebar__item.is-active[data-nav-id='documents'] .bezent-material-icon {
+  color: #0284c7 !important;
+}
+.left-sidebar__item.is-active[data-nav-id='documents'] .left-sidebar__label {
+  color: #0369a1 !important;
+}
+
+/* Assets — Amber Orange */
+.left-sidebar__item.is-active[data-nav-id='assets'] .bezent-nav-icon-box {
+  background: #fffbeb !important;
+}
+.left-sidebar__item.is-active[data-nav-id='assets'] .bezent-material-icon {
+  color: #d97706 !important;
+}
+.left-sidebar__item.is-active[data-nav-id='assets'] .left-sidebar__label {
+  color: #b45309 !important;
+}
+
+/* Employee Requests — Lavender Violet */
+.left-sidebar__item.is-active[data-nav-id='requests'] .bezent-nav-icon-box {
+  background: #f5f3ff !important;
+}
+.left-sidebar__item.is-active[data-nav-id='requests'] .bezent-material-icon {
+  color: #7c3aed !important;
+}
+.left-sidebar__item.is-active[data-nav-id='requests'] .left-sidebar__label {
+  color: #6d28d9 !important;
+}
+
+/* SOP — Teal */
+.left-sidebar__item.is-active[data-nav-id='sop'] .bezent-nav-icon-box {
+  background: #f0fdfa !important;
+}
+.left-sidebar__item.is-active[data-nav-id='sop'] .bezent-material-icon {
+  color: #0d9488 !important;
+}
+.left-sidebar__item.is-active[data-nav-id='sop'] .left-sidebar__label {
+  color: #0f766e !important;
+}
+
+/* Reports — Royal Blue */
+.left-sidebar__item.is-active[data-nav-id='reports'] .bezent-nav-icon-box {
+  background: #eff6ff !important;
+}
+.left-sidebar__item.is-active[data-nav-id='reports'] .bezent-material-icon {
+  color: #2563eb !important;
+}
+.left-sidebar__item.is-active[data-nav-id='reports'] .left-sidebar__label {
+  color: #1d4ed8 !important;
+}
+
 /* Settings — Neutral Steel */
 .left-sidebar__item.is-active[data-nav-id='settings'] .bezent-nav-icon-box {
   background: #f1f5f9 !important;
@@ -581,6 +680,105 @@
 }
 [data-theme='dark'] .left-sidebar__item.is-active[data-nav-id='shifts'] .left-sidebar__label {
   color: #7dd3fc !important;
+}
+
+/* Organization — Indigo */
+[data-theme='dark'] .left-sidebar__item.is-active[data-nav-id='organization'] .bezent-nav-icon-box {
+  background: rgba(79, 70, 229, 0.22) !important;
+}
+[data-theme='dark'] .left-sidebar__item.is-active[data-nav-id='organization'] .bezent-material-icon {
+  color: #818cf8 !important;
+}
+[data-theme='dark'] .left-sidebar__item.is-active[data-nav-id='organization'] .left-sidebar__label {
+  color: #a5b4fc !important;
+}
+
+/* Career Paths — Fuchsia Orchid */
+[data-theme='dark'] .left-sidebar__item.is-active[data-nav-id='career'] .bezent-nav-icon-box {
+  background: rgba(192, 38, 211, 0.22) !important;
+}
+[data-theme='dark'] .left-sidebar__item.is-active[data-nav-id='career'] .bezent-material-icon {
+  color: #e879f9 !important;
+}
+[data-theme='dark'] .left-sidebar__item.is-active[data-nav-id='career'] .left-sidebar__label {
+  color: #f0abfc !important;
+}
+
+/* Compensation — Emerald Green */
+[data-theme='dark'] .left-sidebar__item.is-active[data-nav-id='compensation'] .bezent-nav-icon-box {
+  background: rgba(16, 185, 129, 0.22) !important;
+}
+[data-theme='dark'] .left-sidebar__item.is-active[data-nav-id='compensation'] .bezent-material-icon {
+  color: #34d399 !important;
+}
+[data-theme='dark'] .left-sidebar__item.is-active[data-nav-id='compensation'] .left-sidebar__label {
+  color: #6ee7b7 !important;
+}
+
+/* Benefits — Rose Pink */
+[data-theme='dark'] .left-sidebar__item.is-active[data-nav-id='benefits'] .bezent-nav-icon-box {
+  background: rgba(225, 29, 72, 0.22) !important;
+}
+[data-theme='dark'] .left-sidebar__item.is-active[data-nav-id='benefits'] .bezent-material-icon {
+  color: #fb7185 !important;
+}
+[data-theme='dark'] .left-sidebar__item.is-active[data-nav-id='benefits'] .left-sidebar__label {
+  color: #fda4af !important;
+}
+
+/* Documents — Sky Blue */
+[data-theme='dark'] .left-sidebar__item.is-active[data-nav-id='documents'] .bezent-nav-icon-box {
+  background: rgba(14, 165, 233, 0.22) !important;
+}
+[data-theme='dark'] .left-sidebar__item.is-active[data-nav-id='documents'] .bezent-material-icon {
+  color: #38bdf8 !important;
+}
+[data-theme='dark'] .left-sidebar__item.is-active[data-nav-id='documents'] .left-sidebar__label {
+  color: #7dd3fc !important;
+}
+
+/* Assets — Amber Orange */
+[data-theme='dark'] .left-sidebar__item.is-active[data-nav-id='assets'] .bezent-nav-icon-box {
+  background: rgba(245, 158, 11, 0.22) !important;
+}
+[data-theme='dark'] .left-sidebar__item.is-active[data-nav-id='assets'] .bezent-material-icon {
+  color: #fbbf24 !important;
+}
+[data-theme='dark'] .left-sidebar__item.is-active[data-nav-id='assets'] .left-sidebar__label {
+  color: #fcd34d !important;
+}
+
+/* Employee Requests — Lavender Violet */
+[data-theme='dark'] .left-sidebar__item.is-active[data-nav-id='requests'] .bezent-nav-icon-box {
+  background: rgba(124, 58, 237, 0.22) !important;
+}
+[data-theme='dark'] .left-sidebar__item.is-active[data-nav-id='requests'] .bezent-material-icon {
+  color: #a78bfa !important;
+}
+[data-theme='dark'] .left-sidebar__item.is-active[data-nav-id='requests'] .left-sidebar__label {
+  color: #c4b5fd !important;
+}
+
+/* SOP — Teal */
+[data-theme='dark'] .left-sidebar__item.is-active[data-nav-id='sop'] .bezent-nav-icon-box {
+  background: rgba(20, 184, 166, 0.22) !important;
+}
+[data-theme='dark'] .left-sidebar__item.is-active[data-nav-id='sop'] .bezent-material-icon {
+  color: #2dd4bf !important;
+}
+[data-theme='dark'] .left-sidebar__item.is-active[data-nav-id='sop'] .left-sidebar__label {
+  color: #5eead4 !important;
+}
+
+/* Reports — Royal Blue */
+[data-theme='dark'] .left-sidebar__item.is-active[data-nav-id='reports'] .bezent-nav-icon-box {
+  background: rgba(37, 99, 235, 0.22) !important;
+}
+[data-theme='dark'] .left-sidebar__item.is-active[data-nav-id='reports'] .bezent-material-icon {
+  color: #60a5fa !important;
+}
+[data-theme='dark'] .left-sidebar__item.is-active[data-nav-id='reports'] .left-sidebar__label {
+  color: #93c5fd !important;
 }
 
 /* Settings — Neutral Steel */
