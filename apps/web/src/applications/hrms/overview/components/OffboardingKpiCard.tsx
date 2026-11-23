@@ -264,7 +264,7 @@ export const OffboardingKpiCard: React.FC<OffboardingKpiCardProps> = ({
                 {/* Visible sleek curved arc */}
                 <path
                   d={arc.pathD}
-                  strokeWidth={3.8}
+                  strokeWidth={4.8}
                   strokeLinecap="round"
                   className={`bezent-kpi-departure-arc bezent-kpi-departure-arc--${arc.id} bezent-kpi-departure-arc--${arc.status}`}
                 />
@@ -303,17 +303,17 @@ export const OffboardingKpiCard: React.FC<OffboardingKpiCardProps> = ({
               <line
                 x1={30}
                 y1={9}
-                x2={44.5}
+                x2={47}
                 y2={9}
                 stroke="#e11d48"
-                strokeWidth={3.2}
+                strokeWidth={4.8}
                 strokeLinecap="round"
                 className="bezent-kpi-departure-arrow-stem bezent-kpi-offboarding-arrow-stem"
               />
 
               {/* Sleek, solid horizontal arrowhead pointing right */}
               <polygon
-                points="49,9 44.5,7 44.5,11"
+                points="53.5,9 46.5,5.2 46.5,12.8"
                 fill="#e11d48"
                 className="bezent-kpi-departure-arrowhead bezent-kpi-offboarding-arrowhead"
               />

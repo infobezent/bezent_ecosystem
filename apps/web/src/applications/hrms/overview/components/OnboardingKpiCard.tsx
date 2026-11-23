@@ -311,7 +311,7 @@ export const OnboardingKpiCard: React.FC<OnboardingKpiCardProps> = ({
                   <path
                     d={arc.pathD}
                     stroke={fallbackStroke}
-                    strokeWidth={3.8}
+                    strokeWidth={4.8}
                     strokeLinecap="round"
                     className={`bezent-kpi-arrival-arc bezent-kpi-arrival-arc--step-${idx} bezent-kpi-arrival-arc--${arc.id} bezent-kpi-onboarding-arc--${arc.id}`}
                   />
@@ -351,17 +351,17 @@ export const OnboardingKpiCard: React.FC<OnboardingKpiCardProps> = ({
               <line
                 x1={30}
                 y1={9}
-                x2={15.5}
+                x2={13}
                 y2={9}
                 stroke="#2563eb"
-                strokeWidth={3.2}
+                strokeWidth={4.8}
                 strokeLinecap="round"
                 className="bezent-kpi-arrival-arrow-stem bezent-kpi-onboarding-arrow-stem"
               />
 
               {/* Sleek, solid horizontal arrowhead pointing LEFT ← */}
               <polygon
-                points="11,9 15.5,7 15.5,11"
+                points="6.5,9 13.5,5.2 13.5,12.8"
                 fill="#2563eb"
                 className="bezent-kpi-arrival-arrowhead bezent-kpi-onboarding-arrowhead"
               />
