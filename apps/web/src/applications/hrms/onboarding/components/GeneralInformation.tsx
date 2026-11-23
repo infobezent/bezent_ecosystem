@@ -16,6 +16,34 @@ import { getGroupsForSection } from '../../settings/administration/forms/types';
 import type { Chapter01GeneralState } from '../types/registration.types';
 import { authorizedFetch } from '../../../../platform/auth';
 import { appConfig } from '../../../../app/config/env';
+import {
+  listEmploymentTypes,
+  fetchProbationPolicy,
+} from '../../settings/workforce/api/workforceSettingsApi';
+
+function addDaysToIsoDate(isoDate: string, days: number): string {
+  if (!isoDate) return '';
+  const parts = isoDate.split('-').map(Number);
+  if (parts.length !== 3 || !parts[0] || !parts[1] || !parts[2]) return isoDate;
+  const d = new Date(Date.UTC(parts[0], parts[1] - 1, parts[2]));
+  d.setUTCDate(d.getUTCDate() + days);
+  return d.toISOString().slice(0, 10);
+}
+
+function getProbationDaysFromPeriod(period: string, defaultDays: number): number {
+  switch (period) {
+    case '3_months':
+      return 90;
+    case '6_months':
+      return 180;
+    case '12_months':
+      return 365;
+    case 'no_probation':
+      return 0;
+    default:
+      return defaultDays;
+  }
+}
 
 export interface MasterOption {
   id: string;
@@ -76,6 +104,57 @@ export function GeneralInformation({
   );
   const [probationPeriod, setProbationPeriod] = useState(data?.probationPeriod ?? '6_months');
   const [noticePeriod, setNoticePeriod] = useState(data?.noticePeriod ?? '30_days');
+
+  // Dynamic workforce settings data (Employment Types & Probation Policy)
+  const [employmentTypesList, setEmploymentTypesList] = useState<{ value: string; label: string }[]>([]);
+  const [defaultProbationDays, setDefaultProbationDays] = useState<number>(90);
+
+  useEffect(() => {
+    let isMounted = true;
+    listEmploymentTypes(true)
+      .then((types) => {
+        if (isMounted && types && types.length > 0) {
+          setEmploymentTypesList(
+            types.map((t) => ({
+              value: t.code,
+              label: t.name,
+            })),
+          );
+        }
+      })
+      .catch(() => {});
+
+    fetchProbationPolicy()
+      .then((pol) => {
+        if (isMounted && pol && typeof pol.defaultProbationDays === 'number') {
+          setDefaultProbationDays(pol.defaultProbationDays);
+          if (!data?.confirmedJoiningDate && joiningDate) {
+            setConfirmedJoiningDate(addDaysToIsoDate(joiningDate, pol.defaultProbationDays));
+          }
+        }
+      })
+      .catch(() => {});
+
+    return () => {
+      isMounted = false;
+    };
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const handleJoiningDateChange = (newDate: string) => {
+    setJoiningDate(newDate);
+    if (mode !== 'edit') {
+      const days = getProbationDaysFromPeriod(probationPeriod, defaultProbationDays);
+      setConfirmedJoiningDate(addDaysToIsoDate(newDate, days));
+    }
+  };
+
+  const handleProbationPeriodChange = (newPeriod: string) => {
+    setProbationPeriod(newPeriod);
+    if (mode !== 'edit' && joiningDate) {
+      const days = getProbationDaysFromPeriod(newPeriod, defaultProbationDays);
+      setConfirmedJoiningDate(addDaysToIsoDate(joiningDate, days));
+    }
+  };
 
   // Registration defaults must be real master records, otherwise the employee is saved without them.
   useEffect(() => {
@@ -366,13 +445,18 @@ export function GeneralInformation({
               value={employmentType}
               onChange={(e) => handleEmploymentTypeChange(e.target.value)}
               options={
-                configuredOptions || [
-                  { value: 'full_time', label: 'Full Time' },
-                  { value: 'part_time', label: 'Part Time' },
-                  { value: 'contract', label: 'Contract (Fixed Term)' },
-                  { value: 'intern', label: 'Intern (Fixed Term)' },
-                  { value: 'other', label: 'Other' },
-                ]
+                configuredOptions ||
+                (employmentTypesList.length > 0
+                  ? (employmentTypesList.some((t) => t.value === employmentType)
+                      ? employmentTypesList
+                      : [{ value: employmentType, label: employmentType }, ...employmentTypesList])
+                  : [
+                      { value: 'full_time', label: 'Full Time' },
+                      { value: 'part_time', label: 'Part Time' },
+                      { value: 'contract', label: 'Contract (Fixed Term)' },
+                      { value: 'intern', label: 'Intern (Fixed Term)' },
+                      { value: 'other', label: 'Other' },
+                    ])
               }
             />
           </RegistrationField>
@@ -613,7 +697,7 @@ export function GeneralInformation({
               id="reg-joining-date"
               type="date"
               value={joiningDate}
-              onChange={(e) => setJoiningDate(e.target.value)}
+              onChange={(e) => handleJoiningDateChange(e.target.value)}
               placeholder={configuredPlaceholder}
             />
           </RegistrationField>
@@ -732,7 +816,7 @@ export function GeneralInformation({
             <Select
               id="reg-probation-period"
               value={probationPeriod}
-              onChange={(e) => setProbationPeriod(e.target.value)}
+              onChange={(e) => handleProbationPeriodChange(e.target.value)}
               options={
                 configuredOptions || [
                   { value: '3_months', label: '3 Months' },

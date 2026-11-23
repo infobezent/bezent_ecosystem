@@ -140,7 +140,7 @@ describe('Workforce Settings Canonical 7 Tabs UI', () => {
   it('WorkforceSettingsSection defines clean text-only primary tabs without icons', () => {
     expect(WORKFORCE_PRIMARY_TABS).toEqual([
       { id: 'setup', label: 'Setup & Hierarchy' },
-      { id: 'forms-onboarding', label: 'Forms & Onboarding' },
+      { id: 'onboarding', label: 'Onboarding' },
       { id: 'lifecycle', label: 'Employee Lifecycle' },
     ]);
   });
@@ -192,7 +192,7 @@ describe('Workforce Settings Canonical 7 Tabs UI', () => {
     const html = renderToStaticMarkup(<FormsOnboardingTab />);
 
     // Page Heading
-    expect(html).toContain('Forms &amp; Onboarding');
+    expect(html).toContain('Onboarding Settings');
 
     // Candidate Intake Form is centralized in Templates / Form Builder
     expect(html).not.toContain('Candidate Intake Form');

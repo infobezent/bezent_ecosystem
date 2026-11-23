@@ -157,7 +157,7 @@ describe('Required Documents Settings & Management UI Components', () => {
     it('renders RequiredDocumentsManagement cleanly embedded in Forms & Onboarding tab', () => {
       const html = renderToStaticMarkup(<FormsOnboardingTab />);
 
-      expect(html).toContain('Forms &amp; Onboarding');
+      expect(html).toContain('Onboarding Settings');
       expect(html).toContain('Required Documents');
       expect(html).toContain('Identity Proof');
       expect(html).toContain('Aadhaar Card / National ID');

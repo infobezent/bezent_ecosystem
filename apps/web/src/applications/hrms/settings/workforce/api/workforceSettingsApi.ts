@@ -114,6 +114,11 @@ export async function deleteEmploymentType(id: string): Promise<boolean> {
   return true;
 }
 
+export async function fetchProbationPolicy(): Promise<WorkforceProbationPolicy> {
+  const res = await authorizedFetch(`${appConfig.apiBaseUrl}/hrms/workforce/settings/probation`);
+  return handleResponse<WorkforceProbationPolicy>(res, 'Failed to load probation policy');
+}
+
 export async function updateProbationPolicy(
   dto: UpdateProbationPolicyDto,
 ): Promise<WorkforceProbationPolicy> {
@@ -134,6 +139,11 @@ export async function updateLifecyclePolicy(
     body: JSON.stringify(dto),
   });
   return handleResponse<WorkforceLifecyclePolicy>(res, 'Failed to update lifecycle policy');
+}
+
+export async function fetchOffboardingPolicy(): Promise<WorkforceOffboardingPolicy> {
+  const res = await authorizedFetch(`${appConfig.apiBaseUrl}/hrms/workforce/settings/offboarding`);
+  return handleResponse<WorkforceOffboardingPolicy>(res, 'Failed to load offboarding policy');
 }
 
 export async function updateOffboardingPolicy(

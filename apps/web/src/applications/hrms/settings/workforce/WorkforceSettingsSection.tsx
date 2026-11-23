@@ -21,7 +21,7 @@ export interface WorkforceSettingsSectionProps {
   initialTab?: WorkforceTabId;
 }
 
-export type WorkforceGroupId = 'setup' | 'forms-onboarding' | 'lifecycle';
+export type WorkforceGroupId = 'setup' | 'onboarding' | 'lifecycle';
 
 export const WORKFORCE_PRIMARY_TABS = [
   {
@@ -29,8 +29,8 @@ export const WORKFORCE_PRIMARY_TABS = [
     label: 'Setup & Hierarchy',
   },
   {
-    id: 'forms-onboarding' as WorkforceGroupId,
-    label: 'Forms & Onboarding',
+    id: 'onboarding' as WorkforceGroupId,
+    label: 'Onboarding',
   },
   {
     id: 'lifecycle' as WorkforceGroupId,
@@ -47,8 +47,8 @@ export const WORKFORCE_SETTINGS_TABS: {
     label: 'Setup & Hierarchy',
   },
   {
-    id: 'forms-onboarding',
-    label: 'Forms & Onboarding',
+    id: 'onboarding',
+    label: 'Onboarding',
   },
   {
     id: 'lifecycle',
@@ -60,11 +60,12 @@ function normalizeGroupId(tab: string | null): WorkforceGroupId {
   if (!tab) return 'setup';
   if (tab === 'setup' || tab === 'general' || tab === 'organization') return 'setup';
   if (
+    tab === 'onboarding' ||
     tab === 'forms-onboarding' ||
     tab === 'registration-forms' ||
     tab === 'onboarding-workflows'
   ) {
-    return 'forms-onboarding';
+    return 'onboarding';
   }
   if (tab === 'lifecycle' || tab === 'probation' || tab === 'offboarding') return 'lifecycle';
   return 'setup';
@@ -168,8 +169,10 @@ export function WorkforceSettingsSection({
         />
       )}
 
-      {/* Category 2: Forms & Onboarding (Smart 2-Column Command Center) */}
-      {activeGroup === 'forms-onboarding' && <FormsOnboardingTab />}
+      {/* Category 2: Onboarding (Smart 2-Column Command Center) */}
+      {(activeGroup === 'onboarding' || (activeGroup as string) === 'forms-onboarding') && (
+        <FormsOnboardingTab />
+      )}
 
       {/* Category 3: Employee Lifecycle (Command Center Cards Feed - Option B) */}
       {activeGroup === 'lifecycle' && (

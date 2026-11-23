@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react';
 import {
   FormField,
   FormGrid,
@@ -24,6 +25,19 @@ import {
   type ActionFormState,
   type ActionTypeDefinition,
 } from '../model/actionCatalog';
+import {
+  listEmploymentTypes,
+  fetchOffboardingPolicy,
+} from '../../settings/workforce/api/workforceSettingsApi';
+
+function addDaysToIsoDate(isoDate: string, days: number): string {
+  if (!isoDate) return '';
+  const parts = isoDate.split('-').map(Number);
+  if (parts.length !== 3 || !parts[0] || !parts[1] || !parts[2]) return isoDate;
+  const d = new Date(Date.UTC(parts[0], parts[1] - 1, parts[2]));
+  d.setUTCDate(d.getUTCDate() + days);
+  return d.toISOString().slice(0, 10);
+}
 
 export interface EmployeeActionFormProps {
   form: ActionFormState;
@@ -63,8 +77,58 @@ export function EmployeeActionForm({
   const definition = getActionDefinition(form.actionType);
   const categories = [...new Set(actionTypes.map((type) => type.category))];
 
-  const setValue = (key: ActionValueKey, value: string) =>
+  const [employmentTypesList, setEmploymentTypesList] = useState<{ value: string; label: string }[]>([]);
+  const [offboardingPolicy, setOffboardingPolicy] = useState<{ confirmedNoticeDays: number; probationNoticeDays: number } | null>(null);
+
+  useEffect(() => {
+    let isMounted = true;
+    listEmploymentTypes(true)
+      .then((types) => {
+        if (isMounted && types && types.length > 0) {
+          setEmploymentTypesList(types.map((t) => ({ value: t.code, label: t.name })));
+        }
+      })
+      .catch(() => {});
+
+    fetchOffboardingPolicy()
+      .then((policy) => {
+        if (isMounted && policy) {
+          setOffboardingPolicy({
+            confirmedNoticeDays: policy.confirmedNoticeDays ?? 30,
+            probationNoticeDays: policy.probationNoticeDays ?? 15,
+          });
+        }
+      })
+      .catch(() => {});
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  const setValue = (key: ActionValueKey, value: string) => {
+    if (
+      key === 'requestDate' &&
+      (form.actionType === 'resignation' || form.actionType === 'termination') &&
+      offboardingPolicy
+    ) {
+      const noticeDays =
+        employee?.employmentStatus === 'probation'
+          ? offboardingPolicy.probationNoticeDays
+          : offboardingPolicy.confirmedNoticeDays;
+      const computedLwd = addDaysToIsoDate(value, noticeDays);
+      onChange({
+        ...form,
+        values: {
+          ...form.values,
+          requestDate: value,
+          lastWorkingDate: form.values.lastWorkingDate ? form.values.lastWorkingDate : computedLwd,
+        },
+      });
+      return;
+    }
     onChange({ ...form, values: { ...form.values, [key]: value } });
+  };
 
   const optionsFor = (field: ActionFieldDefinition) => {
     switch (field.kind) {
@@ -82,7 +146,7 @@ export function EmployeeActionForm({
             label: `${candidate.fullName} (${candidate.employeeNumber})`,
           }));
       case 'employmentType':
-        return EMPLOYMENT_TYPE_OPTIONS;
+        return employmentTypesList.length > 0 ? employmentTypesList : EMPLOYMENT_TYPE_OPTIONS;
       case 'employmentStatus':
         return STATUS_CHANGE_OPTIONS;
       default:

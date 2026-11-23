@@ -92,7 +92,7 @@ export function FormsOnboardingTab() {
   return (
     <div className="bezent-forms-onboarding-page">
       {/* Visually hidden heading for accessibility */}
-      <h2 className="bezent-sr-only">Forms &amp; Onboarding</h2>
+      <h2 className="bezent-sr-only">Onboarding Settings</h2>
 
       {/* 1. Full-Width Sections */}
       {fullWidthSections.map((sec) => (
