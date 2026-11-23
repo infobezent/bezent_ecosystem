@@ -1427,7 +1427,7 @@ export function WorkforceOverviewPage({
                 />
               </div>
               <div className="bezent-wf-filter-pill">
-                <BezentIcon name="branch" size={14} className="bezent-wf-filter-icon" />
+                <BezentIcon name="location" size={14} className="bezent-wf-filter-icon" />
                 <Select
                   size="sm"
                   width="auto"
