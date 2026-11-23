@@ -188,17 +188,17 @@ describe('Workforce Settings Canonical 7 Tabs UI', () => {
     expect(html).toContain('Auto-Reassign Leave Approver');
   });
 
-  it('Tab 2: FormsOnboardingTab renders Phase 1 single-page layout with all 7 configuration sections', () => {
+  it('Tab 2: FormsOnboardingTab renders Phase 1 single-page layout with configuration sections', () => {
     const html = renderToStaticMarkup(<FormsOnboardingTab />);
 
     // Page Heading
     expect(html).toContain('Forms &amp; Onboarding');
 
-    // Section 1: Candidate Intake Form (Full width)
-    expect(html).toContain('Candidate Intake Form');
+    // Candidate Intake Form is centralized in Templates / Form Builder
+    expect(html).not.toContain('Candidate Intake Form');
     expect(html).toContain('bezent-forms-onboarding-card--full');
 
-    // Sections 2-7 in balanced grid
+    // Remaining sections in balanced grid
     expect(html).toContain('Pipeline Stages');
     expect(html).toContain('Checklist Templates');
     expect(html).toContain('Required Documents');

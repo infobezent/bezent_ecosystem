@@ -1,6 +1,5 @@
 import React from 'react';
 import { BezentIcon, type BezentIconName } from '../../../../../design-system/icons';
-import { FormsListPage } from '../../forms/FormsListPage';
 import { PipelineStagesManagement } from './pipeline-stages/PipelineStagesManagement';
 import { ChecklistTemplatesManagement } from './checklist-templates/ChecklistTemplatesManagement';
 import { RequiredDocumentsManagement } from './required-documents/RequiredDocumentsManagement';
@@ -64,17 +63,6 @@ const ONBOARDING_LAYOUT_SECTIONS: SectionConfig[] = [
     fullWidth: true,
   },
   {
-    id: 'candidate-intake',
-    title: 'Candidate Intake Form',
-    description:
-      'Configure candidate pre-hire registration forms, section layouts, and field collection rules.',
-    icon: 'document',
-    placeholderTitle: 'Candidate Intake Form Workspace',
-    placeholderHint:
-      'Space reserved for pre-hire registration forms, section ordering, and field collection controls.',
-    fullWidth: true,
-  },
-  {
     id: 'pipeline-stages',
     title: 'Pipeline Stages',
     description: 'Configure onboarding pipelines for different employee categories.',
@@ -106,7 +94,7 @@ export function FormsOnboardingTab() {
       {/* Visually hidden heading for accessibility */}
       <h2 className="bezent-sr-only">Forms &amp; Onboarding</h2>
 
-      {/* 1. Full-Width Section: Candidate Intake Form */}
+      {/* 1. Full-Width Sections */}
       {fullWidthSections.map((sec) => (
         <section
           key={sec.id}
@@ -125,8 +113,7 @@ export function FormsOnboardingTab() {
                 </h2>
               </div>
             </div>
-            {sec.id !== 'candidate-intake' &&
-              sec.id !== 'employee-conversion' &&
+            {sec.id !== 'employee-conversion' &&
               sec.id !== 'notifications-reminders' &&
               sec.id !== 'general-settings' &&
               sec.id !== 'pipeline-stages' &&
@@ -136,9 +123,7 @@ export function FormsOnboardingTab() {
               )}
           </div>
 
-          {sec.id === 'candidate-intake' ? (
-            <FormsListPage />
-          ) : sec.id === 'pipeline-stages' ? (
+          {sec.id === 'pipeline-stages' ? (
             <PipelineStagesManagement isEmbedded={true} />
           ) : sec.id === 'checklist-templates' ? (
             <ChecklistTemplatesManagement isEmbedded={true} />

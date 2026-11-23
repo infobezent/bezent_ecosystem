@@ -54,7 +54,7 @@ describe('Notifications & Reminders V1 UI Components', () => {
       expect(html).toContain('Future');
     });
 
-    it('renders all four section cards with title, summary, count badge, and action button', () => {
+    it('renders all three section cards with title, summary, count badge, and action button', () => {
       const html = renderToStaticMarkup(<NotificationsRemindersManagement />);
 
       // Card 1: Notification Settings
@@ -66,12 +66,7 @@ describe('Notifications & Reminders V1 UI Components', () => {
       expect(html).toContain('Reminder Rules');
       expect(html).toContain('Automated scheduled reminders, inactivity timeouts');
 
-      // Card 3: Email Templates
-      expect(html).toContain('Email Templates');
-      expect(html).toContain('Branded email notification layouts, invitation messages');
-      expect(html).toContain('Manage');
-
-      // Card 4: Notification History
+      // Card 3: Notification History
       expect(html).toContain('Notification History');
       expect(html).toContain('Comprehensive audit log of sent emails');
       expect(html).toContain('View History');
@@ -290,8 +285,8 @@ describe('Notifications & Reminders V1 UI Components', () => {
       expect(html).toContain('Supported Delivery Channels');
       expect(html).toContain('Notification Settings');
       expect(html).toContain('Reminder Rules');
-      expect(html).toContain('Email Templates');
       expect(html).toContain('Notification History');
+      expect(html).not.toContain('Candidate Intake Form Workspace');
     });
   });
 });

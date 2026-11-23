@@ -211,7 +211,7 @@ describe('Forms & Onboarding General Settings Management UI Components', () => {
       const html = renderToStaticMarkup(<FormsOnboardingTab />);
 
       expect(html).toContain('Forms &amp; Onboarding');
-      expect(html).toContain('Candidate Intake Form');
+      expect(html).not.toContain('Candidate Intake Form');
       expect(html).toContain('Employee Conversion');
       expect(html).toContain('Notifications &amp; Reminders');
       expect(html).toContain('General Settings');

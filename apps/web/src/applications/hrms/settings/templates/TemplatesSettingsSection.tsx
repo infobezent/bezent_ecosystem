@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate, useInRouterContext } from 'react-router-dom';
 import {
   Alert,
   Button,
@@ -29,6 +30,9 @@ export interface TemplatesSettingsSectionProps {
 }
 
 export function TemplatesSettingsSection({ onBack }: TemplatesSettingsSectionProps) {
+  const inRouter = useInRouterContext();
+  const navigate = inRouter ? useNavigate() : undefined;
+
   const [forms, setForms] = useState<FormTemplateItem[]>(DEFAULT_FORMS);
   const [emailTemplates, setEmailTemplates] =
     useState<EmailTemplateItem[]>(DEFAULT_EMAIL_TEMPLATES);
@@ -60,10 +64,11 @@ export function TemplatesSettingsSection({ onBack }: TemplatesSettingsSectionPro
 
   const handleCreateTemplate = (name: string, description: string, typeOrCategory: string) => {
     if (createCategory === 'forms') {
+      const formCode = name.toLowerCase().replace(/[^a-z0-9]+/g, '-');
       const newForm: FormTemplateItem = {
         id: `form-${Date.now()}`,
         name,
-        code: name.toLowerCase().replace(/[^a-z0-9]+/g, '-'),
+        code: formCode,
         description: description || 'Custom employee form template.',
         status: 'draft',
         fieldsCount: 0,
@@ -72,6 +77,9 @@ export function TemplatesSettingsSection({ onBack }: TemplatesSettingsSectionPro
       };
       setForms((prev) => [...prev, newForm]);
       showNotice(`Form "${name}" created in draft mode.`);
+      if (navigate) {
+        navigate(`/hrms/settings/forms/${formCode}`);
+      }
     } else if (createCategory === 'emails') {
       const newEmail: EmailTemplateItem = {
         id: `email-${Date.now()}`,
@@ -381,6 +389,19 @@ export function TemplatesSettingsSection({ onBack }: TemplatesSettingsSectionPro
               <Button variant="secondary" onClick={() => setActiveForm(null)} type="button">
                 Close
               </Button>
+              <Button
+                variant="primary"
+                onClick={() => {
+                  if (navigate) {
+                    navigate(`/hrms/settings/forms/${activeForm.code}`);
+                  }
+                  setActiveForm(null);
+                }}
+                type="button"
+              >
+                <BezentIcon name="edit" size={16} />
+                Open in Form Builder
+              </Button>
             </Inline>
           }
         >
@@ -408,9 +429,9 @@ export function TemplatesSettingsSection({ onBack }: TemplatesSettingsSectionPro
 
             <p>{activeForm.description}</p>
 
-            <Alert variant="info" title="Form Configuration Notice">
+            <Alert variant="info" title="Form Configuration">
               This form is governed by the BEZENT Form Builder Engine. Field attributes,
-              validations, and intake access controls are fully operational.
+              validations, and intake access controls can be visually customized in the Form Builder.
             </Alert>
           </Stack>
         </Modal>

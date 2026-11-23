@@ -32,7 +32,6 @@ import {
 } from '../../../api/notificationSettingsApi';
 import { NotificationSettingsModal } from './NotificationSettingsModal';
 import { ReminderRulesModal } from './ReminderRulesModal';
-import { EmailTemplatesModal } from './EmailTemplatesModal';
 import { NotificationHistoryModal } from './NotificationHistoryModal';
 
 interface NotificationsRemindersManagementProps {
@@ -68,9 +67,7 @@ export function NotificationsRemindersManagement({
   // Modals state
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isRulesOpen, setIsRulesOpen] = useState(false);
-  const [isTemplatesOpen, setIsTemplatesOpen] = useState(false);
   const [isHistoryOpen, setIsHistoryOpen] = useState(false);
-  const [selectedTemplateForEdit, setSelectedTemplateForEdit] = useState<string | null>(null);
 
   const loadAllData = async () => {
     try {
@@ -126,33 +123,6 @@ export function NotificationsRemindersManagement({
 
   const handleEvaluateRules = async () => {
     await evaluateReminderRules();
-    void loadAllData();
-  };
-
-  const handleCreateTemplate = async (tpl: Partial<EmailTemplate>) => {
-    const created = await createEmailTemplate(tpl);
-    setEmailTemplates((prev) => [...prev, created]);
-    void loadAllData();
-    return created;
-  };
-
-  const handleUpdateTemplate = async (id: string, tpl: Partial<EmailTemplate>) => {
-    const updated = await updateEmailTemplate(id, tpl);
-    setEmailTemplates((prev) => prev.map((t) => (t.id === id ? updated : t)));
-    void loadAllData();
-    return updated;
-  };
-
-  const handleDuplicateTemplate = async (id: string) => {
-    const created = await duplicateEmailTemplate(id);
-    setEmailTemplates((prev) => [...prev, created]);
-    void loadAllData();
-    return created;
-  };
-
-  const handleDeleteTemplate = async (id: string) => {
-    await deleteEmailTemplate(id);
-    setEmailTemplates((prev) => prev.filter((t) => t.id !== id));
     void loadAllData();
   };
 
@@ -285,55 +255,7 @@ export function NotificationsRemindersManagement({
           </div>
         </div>
 
-        {/* Tile 3: Email Templates */}
-        <div
-          className="bezent-notifrem-tile bezent-notifrem-card"
-          data-testid="card-email-templates"
-          onClick={() => {
-            setSelectedTemplateForEdit(null);
-            setIsTemplatesOpen(true);
-          }}
-          role="button"
-          tabIndex={0}
-          onKeyDown={(e) => {
-            if (e.key === 'Enter' || e.key === ' ') {
-              setSelectedTemplateForEdit(null);
-              setIsTemplatesOpen(true);
-            }
-          }}
-          title="Manage Email Templates"
-          aria-label="Email Templates"
-        >
-          <div
-            className="bezent-notifrem-tile__icon bezent-notifrem-tile__icon--templates"
-            aria-hidden="true"
-          >
-            <BezentIcon name="document" size={22} />
-          </div>
-
-          <div className="bezent-notifrem-tile__content">
-            <h3 className="bezent-notifrem-card__title bezent-notifrem-tile__title">
-              Email Templates
-            </h3>
-            <span className="bezent-notifrem-card__desc bezent-sr-only">
-              Branded email notification layouts, invitation messages, and contextual dynamic
-              variables panel with test delivery.
-            </span>
-            <span className="bezent-notifrem-card__meta bezent-sr-only">
-              {overview.templateCounts.active} active templates &bull; Variable interpolation
-            </span>
-            <span className="bezent-sr-only">Manage</span>
-          </div>
-
-          <div className="bezent-notifrem-tile__badge bezent-notifrem-tile__badge--templates">
-            <span className="bezent-notifrem-tile__badge-dot" />
-            <span className="bezent-notifrem-tile__badge-text">
-              {overview.templateCounts.total} Templates
-            </span>
-          </div>
-        </div>
-
-        {/* Tile 4: Notification History */}
+        {/* Tile 3: Notification History */}
         <div
           className="bezent-notifrem-tile bezent-notifrem-card"
           data-testid="card-notification-history"
@@ -385,11 +307,6 @@ export function NotificationsRemindersManagement({
           configs={eventConfigs}
           templates={emailTemplates}
           onSave={handleSaveSettings}
-          onPreviewTemplate={(templateId) => {
-            setSelectedTemplateForEdit(templateId);
-            setIsSettingsOpen(false);
-            setIsTemplatesOpen(true);
-          }}
         />
       )}
 
@@ -406,24 +323,7 @@ export function NotificationsRemindersManagement({
         />
       )}
 
-      {/* Modal 3: Email Templates */}
-      {isTemplatesOpen && (
-        <EmailTemplatesModal
-          isOpen={isTemplatesOpen}
-          onClose={() => {
-            setIsTemplatesOpen(false);
-            setSelectedTemplateForEdit(null);
-          }}
-          templates={emailTemplates}
-          onCreateTemplate={handleCreateTemplate}
-          onUpdateTemplate={handleUpdateTemplate}
-          onDuplicateTemplate={handleDuplicateTemplate}
-          onDeleteTemplate={handleDeleteTemplate}
-          initialEditTemplateId={selectedTemplateForEdit}
-        />
-      )}
-
-      {/* Modal 4: Notification History */}
+      {/* Modal 3: Notification History */}
       {isHistoryOpen && (
         <NotificationHistoryModal
           isOpen={isHistoryOpen}
