@@ -318,6 +318,7 @@ function NavItem({
       <button
         type="button"
         className={`left-sidebar__item ${active ? 'is-active' : ''} ${isCurrentPage ? 'is-current-page' : ''}`.trim()}
+        data-nav-id={item.id}
         title={hasFlyout ? undefined : item.label}
         aria-label={item.label}
         aria-current={active || isCurrentPage ? 'page' : undefined}
@@ -374,6 +375,7 @@ function MoreButton({
       <button
         type="button"
         className={`left-sidebar__item ${selected ? 'is-active' : ''}`.trim()}
+        data-nav-id="more"
         data-more-toggle=""
         aria-haspopup="dialog"
         aria-expanded={open}

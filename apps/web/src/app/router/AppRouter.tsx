@@ -123,7 +123,7 @@ export const appRoutes: RouteObject[] = [
       },
       {
         path: '/hrms/settings/forms',
-        element: <FormsListPage />,
+        element: <Navigate to="/hrms/settings?module=templates" replace />,
       },
       {
         path: '/hrms/workforce/employees/:employeeId/edit',

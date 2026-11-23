@@ -55,8 +55,8 @@ export function SubNavFlyout({
     // Center of nav icon inside squircle (pill top is 0, height is 40px, center is at +20px)
     const iconCenterY = btnRect.top + 20;
 
-    // Anchor the flyout so its pointer beak (at 28px from top of header) aligns directly with the icon
-    const BEAK_OFFSET_TOP = 28;
+    // Anchor the flyout so its pointer beak aligns directly with the icon
+    const BEAK_OFFSET_TOP = 20;
     let targetTop = iconCenterY - BEAK_OFFSET_TOP;
 
     // If flyout would run below the bottom bar, shift it up
@@ -73,19 +73,8 @@ export function SubNavFlyout({
     el.style.top = `${Math.round(targetTop)}px`;
 
     // Pointer beak position relative to the flyout
-    const pointerOffset = Math.max(16, Math.min(flyoutHeight - 16, iconCenterY - targetTop));
+    const pointerOffset = Math.max(14, Math.min(flyoutHeight - 14, iconCenterY - targetTop));
     el.style.setProperty('--subnav-pointer-top', `${Math.round(pointerOffset)}px`);
-
-    const header = el.querySelector('.subnav-flyout__header');
-    const headerHeight = header ? header.getBoundingClientRect().height : 54;
-    if (pointerOffset <= headerHeight) {
-      el.style.setProperty(
-        '--subnav-pointer-bg',
-        'var(--subnav-header-bg, var(--nav-selected, #c2e7ff))',
-      );
-    } else {
-      el.style.setProperty('--subnav-pointer-bg', 'var(--floating-surface-bg, #ffffff)');
-    }
   }, [item.id]);
 
   return (
@@ -97,11 +86,6 @@ export function SubNavFlyout({
     >
       <span className="subnav-flyout__bridge" aria-hidden="true" />
       <span className="subnav-flyout__pointer" aria-hidden="true" />
-
-      <div className="subnav-flyout__header">
-        <div className="subnav-flyout__title">{item.flyoutTitle || item.label}</div>
-        {item.subtitle && <div className="subnav-flyout__subtitle">{item.subtitle}</div>}
-      </div>
 
       <div className="subnav-flyout__body">
         {item.subItems?.map((sub) => {

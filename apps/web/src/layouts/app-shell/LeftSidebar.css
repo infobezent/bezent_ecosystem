@@ -115,6 +115,146 @@
   background: var(--nav-selected, #c2e7ff) !important;
 }
 
+/* ── Module Signature KPI Accent Colors (Option A: Tinted Tile + Solid Icon) ── */
+
+/* 1. Dashboard — Royal Blue */
+.left-sidebar__item.is-active[data-nav-id='dashboard'] .bezent-nav-icon-box {
+  background: #e8f2ff !important;
+}
+.left-sidebar__item.is-active[data-nav-id='dashboard'] .bezent-material-icon {
+  color: #2563eb !important;
+}
+.left-sidebar__item.is-active[data-nav-id='dashboard'] .left-sidebar__label {
+  color: #1d4ed8 !important;
+}
+
+/* 2. Attendance — Sunset Orange */
+.left-sidebar__item.is-active[data-nav-id='attendance'] .bezent-nav-icon-box {
+  background: #fff7ed !important;
+}
+.left-sidebar__item.is-active[data-nav-id='attendance'] .bezent-material-icon {
+  color: #ea580c !important;
+}
+.left-sidebar__item.is-active[data-nav-id='attendance'] .left-sidebar__label {
+  color: #c2410c !important;
+}
+
+/* 3. Leave — Teal / Mint */
+.left-sidebar__item.is-active[data-nav-id='leave'] .bezent-nav-icon-box {
+  background: #f0fdfa !important;
+}
+.left-sidebar__item.is-active[data-nav-id='leave'] .bezent-material-icon {
+  color: #0d9488 !important;
+}
+.left-sidebar__item.is-active[data-nav-id='leave'] .left-sidebar__label {
+  color: #0f766e !important;
+}
+
+/* 4. Hiring / Recruitment — Electric Indigo */
+.left-sidebar__item.is-active[data-nav-id='recruitment'] .bezent-nav-icon-box,
+.left-sidebar__item.is-active[data-nav-id='hiring'] .bezent-nav-icon-box {
+  background: #eef2ff !important;
+}
+.left-sidebar__item.is-active[data-nav-id='recruitment'] .bezent-material-icon,
+.left-sidebar__item.is-active[data-nav-id='hiring'] .bezent-material-icon {
+  color: #6366f1 !important;
+}
+.left-sidebar__item.is-active[data-nav-id='recruitment'] .left-sidebar__label,
+.left-sidebar__item.is-active[data-nav-id='hiring'] .left-sidebar__label {
+  color: #4f46e5 !important;
+}
+
+/* 5. Workforce — Warm Amber */
+.left-sidebar__item.is-active[data-nav-id='workforce'] .bezent-nav-icon-box,
+.left-sidebar__item.is-active[data-nav-id='employees'] .bezent-nav-icon-box {
+  background: #fef3c7 !important;
+}
+.left-sidebar__item.is-active[data-nav-id='workforce'] .bezent-material-icon,
+.left-sidebar__item.is-active[data-nav-id='employees'] .bezent-material-icon {
+  color: #d97706 !important;
+}
+.left-sidebar__item.is-active[data-nav-id='workforce'] .left-sidebar__label,
+.left-sidebar__item.is-active[data-nav-id='employees'] .left-sidebar__label {
+  color: #b45309 !important;
+}
+
+/* 6. Payroll — Emerald Green */
+.left-sidebar__item.is-active[data-nav-id='payroll'] .bezent-nav-icon-box {
+  background: #ecfdf5 !important;
+}
+.left-sidebar__item.is-active[data-nav-id='payroll'] .bezent-material-icon {
+  color: #059669 !important;
+}
+.left-sidebar__item.is-active[data-nav-id='payroll'] .left-sidebar__label {
+  color: #047857 !important;
+}
+
+/* 7. Performance — Vibrant Purple */
+.left-sidebar__item.is-active[data-nav-id='performance'] .bezent-nav-icon-box {
+  background: #faf5ff !important;
+}
+.left-sidebar__item.is-active[data-nav-id='performance'] .bezent-material-icon {
+  color: #9333ea !important;
+}
+.left-sidebar__item.is-active[data-nav-id='performance'] .left-sidebar__label {
+  color: #7e22ce !important;
+}
+
+/* 8. Learning — Sky Cyan */
+.left-sidebar__item.is-active[data-nav-id='learning'] .bezent-nav-icon-box {
+  background: #f0f9ff !important;
+}
+.left-sidebar__item.is-active[data-nav-id='learning'] .bezent-material-icon {
+  color: #0284c7 !important;
+}
+.left-sidebar__item.is-active[data-nav-id='learning'] .left-sidebar__label {
+  color: #0369a1 !important;
+}
+
+/* 9. More — Neutral Slate */
+.left-sidebar__item.is-active[data-nav-id='more'] .bezent-nav-icon-box {
+  background: #f1f5f9 !important;
+}
+.left-sidebar__item.is-active[data-nav-id='more'] .bezent-material-icon {
+  color: #475569 !important;
+}
+.left-sidebar__item.is-active[data-nav-id='more'] .left-sidebar__label {
+  color: #334155 !important;
+}
+
+/* Timesheets — Lavender Violet */
+.left-sidebar__item.is-active[data-nav-id='timesheets'] .bezent-nav-icon-box {
+  background: #f5f3ff !important;
+}
+.left-sidebar__item.is-active[data-nav-id='timesheets'] .bezent-material-icon {
+  color: #7c3aed !important;
+}
+.left-sidebar__item.is-active[data-nav-id='timesheets'] .left-sidebar__label {
+  color: #6d28d9 !important;
+}
+
+/* Shifts — Ocean Cyan */
+.left-sidebar__item.is-active[data-nav-id='shifts'] .bezent-nav-icon-box {
+  background: #f0f9ff !important;
+}
+.left-sidebar__item.is-active[data-nav-id='shifts'] .bezent-material-icon {
+  color: #0284c7 !important;
+}
+.left-sidebar__item.is-active[data-nav-id='shifts'] .left-sidebar__label {
+  color: #0369a1 !important;
+}
+
+/* Settings — Neutral Steel */
+.left-sidebar__item.is-active[data-nav-id='settings'] .bezent-nav-icon-box {
+  background: #f1f5f9 !important;
+}
+.left-sidebar__item.is-active[data-nav-id='settings'] .bezent-material-icon {
+  color: #475569 !important;
+}
+.left-sidebar__item.is-active[data-nav-id='settings'] .left-sidebar__label {
+  color: #334155 !important;
+}
+
 /* Inactive hover squircle tile */
 .left-sidebar__item:hover:not(.is-active):not(.is-current-page) .bezent-nav-icon-box {
   background: #e2e6eb !important;
@@ -312,4 +452,144 @@
 [data-theme='dark'] .left-sidebar__badge-dot {
   background: #ef4444;
   box-shadow: 0 0 0 2px #020b1c;
+}
+
+/* ── Dark Mode Module Signature KPI Accent Colors (Option A) ── */
+
+/* 1. Dashboard — Royal Blue */
+[data-theme='dark'] .left-sidebar__item.is-active[data-nav-id='dashboard'] .bezent-nav-icon-box {
+  background: rgba(37, 99, 235, 0.22) !important;
+}
+[data-theme='dark'] .left-sidebar__item.is-active[data-nav-id='dashboard'] .bezent-material-icon {
+  color: #60a5fa !important;
+}
+[data-theme='dark'] .left-sidebar__item.is-active[data-nav-id='dashboard'] .left-sidebar__label {
+  color: #93c5fd !important;
+}
+
+/* 2. Attendance — Sunset Orange */
+[data-theme='dark'] .left-sidebar__item.is-active[data-nav-id='attendance'] .bezent-nav-icon-box {
+  background: rgba(234, 88, 12, 0.22) !important;
+}
+[data-theme='dark'] .left-sidebar__item.is-active[data-nav-id='attendance'] .bezent-material-icon {
+  color: #fb923c !important;
+}
+[data-theme='dark'] .left-sidebar__item.is-active[data-nav-id='attendance'] .left-sidebar__label {
+  color: #fdba74 !important;
+}
+
+/* 3. Leave — Teal / Mint */
+[data-theme='dark'] .left-sidebar__item.is-active[data-nav-id='leave'] .bezent-nav-icon-box {
+  background: rgba(13, 148, 136, 0.22) !important;
+}
+[data-theme='dark'] .left-sidebar__item.is-active[data-nav-id='leave'] .bezent-material-icon {
+  color: #2dd4bf !important;
+}
+[data-theme='dark'] .left-sidebar__item.is-active[data-nav-id='leave'] .left-sidebar__label {
+  color: #5eead4 !important;
+}
+
+/* 4. Hiring / Recruitment — Electric Indigo */
+[data-theme='dark'] .left-sidebar__item.is-active[data-nav-id='recruitment'] .bezent-nav-icon-box,
+[data-theme='dark'] .left-sidebar__item.is-active[data-nav-id='hiring'] .bezent-nav-icon-box {
+  background: rgba(99, 102, 241, 0.22) !important;
+}
+[data-theme='dark'] .left-sidebar__item.is-active[data-nav-id='recruitment'] .bezent-material-icon,
+[data-theme='dark'] .left-sidebar__item.is-active[data-nav-id='hiring'] .bezent-material-icon {
+  color: #a5b4fc !important;
+}
+[data-theme='dark'] .left-sidebar__item.is-active[data-nav-id='recruitment'] .left-sidebar__label,
+[data-theme='dark'] .left-sidebar__item.is-active[data-nav-id='hiring'] .left-sidebar__label {
+  color: #c7d2fe !important;
+}
+
+/* 5. Workforce — Warm Amber */
+[data-theme='dark'] .left-sidebar__item.is-active[data-nav-id='workforce'] .bezent-nav-icon-box,
+[data-theme='dark'] .left-sidebar__item.is-active[data-nav-id='employees'] .bezent-nav-icon-box {
+  background: rgba(217, 119, 6, 0.22) !important;
+}
+[data-theme='dark'] .left-sidebar__item.is-active[data-nav-id='workforce'] .bezent-material-icon,
+[data-theme='dark'] .left-sidebar__item.is-active[data-nav-id='employees'] .bezent-material-icon {
+  color: #fbbf24 !important;
+}
+[data-theme='dark'] .left-sidebar__item.is-active[data-nav-id='workforce'] .left-sidebar__label,
+[data-theme='dark'] .left-sidebar__item.is-active[data-nav-id='employees'] .left-sidebar__label {
+  color: #fde68a !important;
+}
+
+/* 6. Payroll — Emerald Green */
+[data-theme='dark'] .left-sidebar__item.is-active[data-nav-id='payroll'] .bezent-nav-icon-box {
+  background: rgba(5, 150, 105, 0.22) !important;
+}
+[data-theme='dark'] .left-sidebar__item.is-active[data-nav-id='payroll'] .bezent-material-icon {
+  color: #34d399 !important;
+}
+[data-theme='dark'] .left-sidebar__item.is-active[data-nav-id='payroll'] .left-sidebar__label {
+  color: #6ee7b7 !important;
+}
+
+/* 7. Performance — Vibrant Purple */
+[data-theme='dark'] .left-sidebar__item.is-active[data-nav-id='performance'] .bezent-nav-icon-box {
+  background: rgba(147, 51, 234, 0.22) !important;
+}
+[data-theme='dark'] .left-sidebar__item.is-active[data-nav-id='performance'] .bezent-material-icon {
+  color: #c084fc !important;
+}
+[data-theme='dark'] .left-sidebar__item.is-active[data-nav-id='performance'] .left-sidebar__label {
+  color: #d8b4fe !important;
+}
+
+/* 8. Learning — Sky Cyan */
+[data-theme='dark'] .left-sidebar__item.is-active[data-nav-id='learning'] .bezent-nav-icon-box {
+  background: rgba(2, 132, 199, 0.22) !important;
+}
+[data-theme='dark'] .left-sidebar__item.is-active[data-nav-id='learning'] .bezent-material-icon {
+  color: #38bdf8 !important;
+}
+[data-theme='dark'] .left-sidebar__item.is-active[data-nav-id='learning'] .left-sidebar__label {
+  color: #7dd3fc !important;
+}
+
+/* 9. More — Neutral Slate */
+[data-theme='dark'] .left-sidebar__item.is-active[data-nav-id='more'] .bezent-nav-icon-box {
+  background: rgba(71, 85, 105, 0.3) !important;
+}
+[data-theme='dark'] .left-sidebar__item.is-active[data-nav-id='more'] .bezent-material-icon {
+  color: #94a3b8 !important;
+}
+[data-theme='dark'] .left-sidebar__item.is-active[data-nav-id='more'] .left-sidebar__label {
+  color: #cbd5e1 !important;
+}
+
+/* Timesheets — Lavender Violet */
+[data-theme='dark'] .left-sidebar__item.is-active[data-nav-id='timesheets'] .bezent-nav-icon-box {
+  background: rgba(124, 58, 237, 0.22) !important;
+}
+[data-theme='dark'] .left-sidebar__item.is-active[data-nav-id='timesheets'] .bezent-material-icon {
+  color: #a78bfa !important;
+}
+[data-theme='dark'] .left-sidebar__item.is-active[data-nav-id='timesheets'] .left-sidebar__label {
+  color: #c4b5fd !important;
+}
+
+/* Shifts — Ocean Cyan */
+[data-theme='dark'] .left-sidebar__item.is-active[data-nav-id='shifts'] .bezent-nav-icon-box {
+  background: rgba(2, 132, 199, 0.22) !important;
+}
+[data-theme='dark'] .left-sidebar__item.is-active[data-nav-id='shifts'] .bezent-material-icon {
+  color: #38bdf8 !important;
+}
+[data-theme='dark'] .left-sidebar__item.is-active[data-nav-id='shifts'] .left-sidebar__label {
+  color: #7dd3fc !important;
+}
+
+/* Settings — Neutral Steel */
+[data-theme='dark'] .left-sidebar__item.is-active[data-nav-id='settings'] .bezent-nav-icon-box {
+  background: rgba(71, 85, 105, 0.3) !important;
+}
+[data-theme='dark'] .left-sidebar__item.is-active[data-nav-id='settings'] .bezent-material-icon {
+  color: #94a3b8 !important;
+}
+[data-theme='dark'] .left-sidebar__item.is-active[data-nav-id='settings'] .left-sidebar__label {
+  color: #cbd5e1 !important;
 }

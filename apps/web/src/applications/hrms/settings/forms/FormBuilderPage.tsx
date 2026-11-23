@@ -551,9 +551,18 @@ function FormBuilderPageInner({
         <Alert variant="danger" title="Couldn't load this form">
           {error}
         </Alert>
-        <Button variant="secondary" type="button" onClick={loadFormData}>
-          Retry
-        </Button>
+        <Inline gap="sm">
+          <Button
+            variant="secondary"
+            type="button"
+            onClick={() => navigate('/hrms/settings?module=templates')}
+          >
+            Back to Templates
+          </Button>
+          <Button variant="primary" type="button" onClick={loadFormData}>
+            Retry
+          </Button>
+        </Inline>
       </div>
     );
   }
@@ -566,11 +575,11 @@ function FormBuilderPageInner({
           <button
             type="button"
             className="bezent-cif-builder-header__back-btn"
-            onClick={() => navigate('/hrms/settings/forms')}
-            title="Back to Forms"
+            onClick={() => navigate('/hrms/settings?module=templates')}
+            title="Back to Templates"
           >
             <BezentIcon name="arrowLeft" size={16} />
-            <span>{config.formName || 'Form'}</span>
+            <span>{config.formName || 'Back to Templates'}</span>
           </button>
         </div>
 
@@ -634,7 +643,7 @@ function FormBuilderPageInner({
           <button
             type="button"
             className="bezent-cif-close-btn"
-            onClick={() => navigate('/hrms/settings/forms')}
+            onClick={() => navigate('/hrms/settings?module=templates')}
             title="Close"
             aria-label="Close"
           >

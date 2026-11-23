@@ -367,6 +367,10 @@ export const hrmsRoutes: RouteObject[] = [
         path: 'settings/forms/:formKey',
         element: <FormBuilderPage />,
       },
+      {
+        path: 'settings/forms',
+        element: <Navigate to="/hrms/settings?module=templates" replace />,
+      },
       // Organization masters are now owned by Company Administration.
       // These backward-compatible redirects preserve any existing deep links into
       // the old /hrms/settings/organization/* and /hrms/organization/* paths.

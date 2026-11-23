@@ -38,7 +38,6 @@ export function TemplatesSettingsSection({ onBack }: TemplatesSettingsSectionPro
     useState<EmailTemplateItem[]>(DEFAULT_EMAIL_TEMPLATES);
   const [letterFormats, setLetterFormats] = useState<LetterFormatItem[]>(DEFAULT_LETTER_FORMATS);
 
-  const [activeForm, setActiveForm] = useState<FormTemplateItem | null>(null);
   const [activeEmail, setActiveEmail] = useState<EmailTemplateItem | null>(null);
   const [activeLetter, setActiveLetter] = useState<LetterFormatItem | null>(null);
   const [createCategory, setCreateCategory] = useState<TemplateCategory | null>(null);
@@ -195,12 +194,22 @@ export function TemplatesSettingsSection({ onBack }: TemplatesSettingsSectionPro
               <div
                 key={form.id}
                 className="bezent-cif-card"
-                onClick={() => setActiveForm(form)}
+                onClick={() => {
+                  if (navigate) {
+                    navigate(`/hrms/settings/forms/${form.code}`);
+                  }
+                }}
                 role="button"
                 tabIndex={0}
-                onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && setActiveForm(form)}
-                title={`Configure ${form.name}`}
-                aria-label={`Configure ${form.name}`}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    if (navigate) {
+                      navigate(`/hrms/settings/forms/${form.code}`);
+                    }
+                  }
+                }}
+                title={`Open ${form.name} in Form Builder`}
+                aria-label={`Open ${form.name} in Form Builder`}
               >
                 <div className="bezent-cif-card__status-capsule" title={`Status: ${form.status}`}>
                   <span
@@ -376,66 +385,6 @@ export function TemplatesSettingsSection({ onBack }: TemplatesSettingsSectionPro
           showNotice(`Letter format "${updated.name}" updated successfully.`);
         }}
       />
-
-      {/* Form Details Preview Modal */}
-      {activeForm && (
-        <Modal
-          isOpen={Boolean(activeForm)}
-          onClose={() => setActiveForm(null)}
-          title={`Form: ${activeForm.name}`}
-          size="md"
-          footer={
-            <Inline gap="sm" justify="end">
-              <Button variant="secondary" onClick={() => setActiveForm(null)} type="button">
-                Close
-              </Button>
-              <Button
-                variant="primary"
-                onClick={() => {
-                  if (navigate) {
-                    navigate(`/hrms/settings/forms/${activeForm.code}`);
-                  }
-                  setActiveForm(null);
-                }}
-                type="button"
-              >
-                <BezentIcon name="edit" size={16} />
-                Open in Form Builder
-              </Button>
-            </Inline>
-          }
-        >
-          <Stack gap="md">
-            <div className="bezent-template-meta-strip">
-              <div className="bezent-template-meta-item">
-                <span className="bezent-template-meta-label">Status:</span>
-                <span className="bezent-template-meta-val bezent-template-meta-tag">
-                  {activeForm.status}
-                </span>
-              </div>
-              <div className="bezent-template-meta-item">
-                <span className="bezent-template-meta-label">Sections:</span>
-                <span className="bezent-template-meta-val">
-                  {activeForm.sectionsCount} Sections
-                </span>
-              </div>
-              <div className="bezent-template-meta-item">
-                <span className="bezent-template-meta-label">Fields:</span>
-                <span className="bezent-template-meta-val">
-                  {activeForm.fieldsCount} Active Fields
-                </span>
-              </div>
-            </div>
-
-            <p>{activeForm.description}</p>
-
-            <Alert variant="info" title="Form Configuration">
-              This form is governed by the BEZENT Form Builder Engine. Field attributes,
-              validations, and intake access controls can be visually customized in the Form Builder.
-            </Alert>
-          </Stack>
-        </Modal>
-      )}
 
       {/* Create New Template Modal */}
       {createCategory && (
