@@ -92,3 +92,9 @@
     --shell-nav-surface-size: 34px;
   }
 }
+
+@media (max-width: 1150px) {
+  :root {
+    --shell-utility-drawer-width: 320px;
+  }
+}
