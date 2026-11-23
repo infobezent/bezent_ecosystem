@@ -126,8 +126,8 @@ function formatTimelineDate(dateStr: string | null | undefined): string {
     if (isNaN(d.getTime())) return dateStr;
     const now = new Date();
     const diffMs = now.getTime() - d.getTime();
-    const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
-    const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+    const diffHours = Math.floor(Math.abs(diffMs) / (1000 * 60 * 60));
+    const diffDays = Math.floor(Math.abs(diffMs) / (1000 * 60 * 60 * 24));
 
     const timeString = d.toLocaleTimeString('en-US', {
       hour: '2-digit',
