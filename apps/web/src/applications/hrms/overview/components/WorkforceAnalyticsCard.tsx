@@ -691,11 +691,9 @@ export const WorkforceAnalyticsCard: React.FC<WorkforceAnalyticsCardProps> = ({
   const plotW = plotRight - plotLeft;
   const plotH = plotBottom - plotTop;
 
-  // Growth Coordinates
-  const maxGrowthVal = Math.max(
-    6,
-    Math.round(Math.max(...growthSeries.map((d) => Math.max(d.joiners, d.exits)), 1) * 1.3),
-  );
+  // Growth Coordinates: rounded to clean multiple of 4 so gridlines & Y-axis labels are exact clean integers (e.g. 4, 8, 12, 16)
+  const peakGrowth = Math.max(...growthSeries.map((d) => Math.max(d.joiners, d.exits)), 1);
+  const maxGrowthVal = Math.max(8, Math.ceil((peakGrowth * 1.25) / 4) * 4);
 
   const growthPoints = growthSeries.map((pt, idx) => {
     const x = plotLeft + (idx / (growthSeries.length - 1 || 1)) * plotW;

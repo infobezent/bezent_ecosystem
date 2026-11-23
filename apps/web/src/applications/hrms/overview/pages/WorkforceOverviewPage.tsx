@@ -119,6 +119,13 @@ interface WorkforceActivityItem {
   iconClass: 'blue' | 'teal' | 'amber' | 'green' | 'rose' | 'purple';
 }
 
+function getInitials(name: string): string {
+  if (!name) return 'EM';
+  const parts = name.trim().split(/\s+/);
+  if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
+  return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+}
+
 function formatTimelineDate(dateStr: string | null | undefined): string {
   if (!dateStr) return 'Recently';
   try {
@@ -1407,33 +1414,42 @@ export function WorkforceOverviewPage({
           }
           actions={
             <div className="bezent-wf-header-controls">
-              <Select
-                size="sm"
-                width="auto"
-                aria-label="Filter by timeframe"
-                title="Filter by timeframe"
-                value={timePeriod}
-                options={TIME_PERIOD_OPTIONS}
-                onChange={(e) => setTimePeriod(e.target.value as TimePeriodKey)}
-              />
-              <Select
-                size="sm"
-                width="auto"
-                aria-label="Filter by location"
-                title="Filter by location"
-                value={locationId}
-                options={locationOptions}
-                onChange={(e) => setLocationId(e.target.value)}
-              />
-              <Select
-                size="sm"
-                width="auto"
-                aria-label="Filter by department"
-                title="Filter by department"
-                value={departmentId}
-                options={departmentOptions}
-                onChange={(e) => setDepartmentId(e.target.value)}
-              />
+              <div className="bezent-wf-filter-pill">
+                <BezentIcon name="schedule" size={14} className="bezent-wf-filter-icon" />
+                <Select
+                  size="sm"
+                  width="auto"
+                  aria-label="Filter by timeframe"
+                  title="Filter by timeframe"
+                  value={timePeriod}
+                  options={TIME_PERIOD_OPTIONS}
+                  onChange={(e) => setTimePeriod(e.target.value as TimePeriodKey)}
+                />
+              </div>
+              <div className="bezent-wf-filter-pill">
+                <BezentIcon name="branch" size={14} className="bezent-wf-filter-icon" />
+                <Select
+                  size="sm"
+                  width="auto"
+                  aria-label="Filter by location"
+                  title="Filter by location"
+                  value={locationId}
+                  options={locationOptions}
+                  onChange={(e) => setLocationId(e.target.value)}
+                />
+              </div>
+              <div className="bezent-wf-filter-pill">
+                <BezentIcon name="organization" size={14} className="bezent-wf-filter-icon" />
+                <Select
+                  size="sm"
+                  width="auto"
+                  aria-label="Filter by department"
+                  title="Filter by department"
+                  value={departmentId}
+                  options={departmentOptions}
+                  onChange={(e) => setDepartmentId(e.target.value)}
+                />
+              </div>
             </div>
           }
         />
@@ -2070,9 +2086,11 @@ export function WorkforceOverviewPage({
                 activities.slice(0, 4).map((act) => (
                   <div key={act.id} className="bezent-wf-timeline-item">
                     <div
-                      className={`bezent-wf-timeline-dot bezent-wf-timeline-dot--${act.iconClass}`}
+                      className={`bezent-wf-timeline-dot bezent-wf-timeline-dot--${act.iconClass} bezent-wf-timeline-avatar bezent-wf-timeline-avatar--${act.iconClass}`}
+                      aria-hidden="true"
+                      title={act.employeeName}
                     >
-                      <BezentIcon name={act.iconName} size={12} />
+                      {getInitials(act.employeeName)}
                     </div>
 
                     <div className="bezent-wf-timeline-content">
@@ -2113,6 +2131,16 @@ export function WorkforceOverviewPage({
               alt="BEZENT Team Mascot"
               className="bezent-wf-mascot-img"
             />
+            {/* Live Culture & Milestone Badges */}
+            <div className="bezent-wf-mascot-stats">
+              <span className="bezent-wf-mascot-stat-pill">
+                <span className="bezent-wf-mascot-stat-dot" />
+                Workforce Health: 98%
+              </span>
+              <span className="bezent-wf-mascot-stat-pill bezent-wf-mascot-stat-pill--milestone">
+                🎉 2 Milestones This Week
+              </span>
+            </div>
           </div>
         </div>
 
