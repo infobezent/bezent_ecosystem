@@ -89,27 +89,40 @@ export const OffboardingKpiCard: React.FC<OffboardingKpiCardProps> = ({
   const effectivePendingClearance =
     pendingClearance !== undefined ? pendingClearance : DEFAULT_PENDING_CLEARANCE;
 
-  // Proportional arc distribution across a 260° span
-  // Ends right before the exit arrow at 270° (top apex)
+  // Exact 4-Quadrant calibrated paths matching approved Reference UI:
+  // Clockwise journey: Right (Notice Period) -> Bottom (Handover) -> Left (Clearance) -> Top-Left (Final Settlement) -> Top Horizontal Arrow shooting RIGHT →
+  const OFFBOARDING_QUADRANT_PATHS = [
+    'M 49.03 21.13 A 21 21 0 0 1 47.2 42.05', // 0: Notice Period (Right / East)
+    'M 40.5 48.19 A 21 21 0 0 1 19.5 48.19', // 1: Handover (Bottom / South)
+    'M 12.8 42.05 A 21 21 0 0 1 10.97 21.13', // 2: Clearance (Left / West)
+    'M 17.95 12.8 A 21 21 0 0 1 30 9', // 3: Final Settlement (Top-Left into top apex)
+  ];
+
+  const numStages = effectiveStages.length;
+  const isStandardFourStages = numStages === 4;
+
+  // Fallback dynamic geometry when custom stage counts are passed
   const totalArcSpan = 260;
-  const activeStages = effectiveStages.filter((s) => (s.count || 0) > 0);
-  const stagesToRender = activeStages.length > 0 ? activeStages : effectiveStages;
-  const numStages = stagesToRender.length;
-  const gap = numStages > 1 ? 6 : 0;
+  const gap = 8;
   const totalGaps = (numStages - 1) * gap;
   const availableSpan = Math.max(60, totalArcSpan - totalGaps);
+  const equalSweep = availableSpan / (numStages || 1);
 
   const startAnchor = 264 - totalArcSpan;
   let currentAngle = (startAnchor + 360) % 360;
 
-  const arcs = stagesToRender.map((stage) => {
-    const fraction = effectiveTotal > 0 ? (stage.count || 0) / effectiveTotal : 1 / numStages;
-    const sweep = numStages === 1 ? totalArcSpan : Math.max(20, fraction * availableSpan);
-    const startAngle = currentAngle;
-    const endAngle = currentAngle + sweep;
-    currentAngle = endAngle + gap;
+  const arcs = effectiveStages.map((stage, idx) => {
+    let pathD = '';
+    if (isStandardFourStages) {
+      pathD = OFFBOARDING_QUADRANT_PATHS[idx];
+    } else {
+      const sweep = equalSweep;
+      const startAngle = currentAngle;
+      const endAngle = currentAngle + sweep;
+      currentAngle = endAngle + gap;
+      pathD = describeArc(30, 30, 21, startAngle, endAngle);
+    }
 
-    const pathD = describeArc(30, 30, 21, startAngle, endAngle);
     const isHovered =
       activeHovered === stage.id ||
       activeHovered === stage.status ||
@@ -216,17 +229,6 @@ export const OffboardingKpiCard: React.FC<OffboardingKpiCardProps> = ({
             role="img"
             aria-label={`Offboarding stages: ${arcs.map((a) => `${a.name}: ${a.count}`).join(', ')}`}
           >
-            {/* Subtle base track */}
-            <circle
-              cx={30}
-              cy={30}
-              r={21}
-              stroke="var(--border-subtle, #e2e8f0)"
-              strokeWidth={4.8}
-              fill="none"
-              opacity={0.35}
-            />
-
             {/* Stage Proportional Arcs */}
             {arcs.map((arc) => (
               <g
@@ -299,10 +301,11 @@ export const OffboardingKpiCard: React.FC<OffboardingKpiCardProps> = ({
 
               {/* Horizontal departure stem shooting straight right along the top tangent */}
               <line
-                x1={31}
+                x1={30}
                 y1={9}
                 x2={47}
                 y2={9}
+                stroke="#e11d48"
                 strokeWidth={4.8}
                 strokeLinecap="round"
                 className="bezent-kpi-departure-arrow-stem bezent-kpi-offboarding-arrow-stem"
@@ -311,6 +314,7 @@ export const OffboardingKpiCard: React.FC<OffboardingKpiCardProps> = ({
               {/* Sleek, solid horizontal arrowhead pointing right */}
               <polygon
                 points="53.5,9 46.5,5.2 46.5,12.8"
+                fill="#e11d48"
                 className="bezent-kpi-departure-arrowhead bezent-kpi-offboarding-arrowhead"
               />
             </g>

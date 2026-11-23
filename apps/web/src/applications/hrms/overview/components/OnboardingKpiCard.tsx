@@ -123,23 +123,38 @@ export const OnboardingKpiCard: React.FC<OnboardingKpiCardProps> = ({
   const effectiveTotal =
     total !== undefined ? total : effectiveStages.reduce((sum, s) => sum + (s.count || 0), 0);
 
-  // Balanced equal arc distribution across a 250° span with sleek 6° gaps (viewBox="0 0 60 60", R=21)
-  // Arcs sweep clockwise starting at the top apex (274°) right where the right-pointing arrival arrow enters
+  // Exact 4-Quadrant calibrated paths matching approved Reference UI:
+  // Counter-clockwise journey: Left (Documents) -> Bottom (Verification) -> Right (Induction) -> Top-Right (Completed) -> Top Horizontal Arrow shooting LEFT ←
+  const ONBOARDING_QUADRANT_PATHS = [
+    'M 10.97 21.13 A 21 21 0 0 0 12.8 42.05', // 0: Documents (Left / West)
+    'M 19.5 48.19 A 21 21 0 0 0 40.5 48.19', // 1: Verification (Bottom / South)
+    'M 47.2 42.05 A 21 21 0 0 0 49.03 21.13', // 2: Induction / Setup (Right / East)
+    'M 42.05 12.8 A 21 21 0 0 0 30 9', // 3: Completed / Ready (Top-Right into top apex)
+  ];
+
+  const numStages = effectiveStages.length;
+  const isStandardFourStages = numStages === 4;
+
+  // Fallback dynamic geometry when custom stage counts are passed
   const totalArcSpan = 250;
-  const gap = 6;
-  const numStages = effectiveStages.length || 4;
+  const gap = 8;
   const totalGaps = (numStages - 1) * gap;
   const availableSpan = Math.max(60, totalArcSpan - totalGaps);
-  const equalSweep = availableSpan / numStages;
+  const equalSweep = availableSpan / (numStages || 1);
 
   let currentAngle = 274;
   const arcs = effectiveStages.map((stage, idx) => {
-    const sweep = equalSweep;
-    const startAngle = currentAngle;
-    const endAngle = currentAngle + sweep;
-    currentAngle = endAngle + gap;
+    let pathD = '';
+    if (isStandardFourStages) {
+      pathD = ONBOARDING_QUADRANT_PATHS[idx];
+    } else {
+      const sweep = equalSweep;
+      const startAngle = currentAngle;
+      const endAngle = currentAngle + sweep;
+      currentAngle = endAngle + gap;
+      pathD = describeArc(30, 30, 21, startAngle, endAngle);
+    }
 
-    const pathD = describeArc(30, 30, 21, startAngle, endAngle);
     const percent = effectiveTotal > 0 ? Math.round((stage.count / effectiveTotal) * 100) : 0;
     const isHovered =
       activeHovered === stage.id ||
@@ -256,18 +271,7 @@ export const OnboardingKpiCard: React.FC<OnboardingKpiCardProps> = ({
             role="img"
             aria-label={`Onboarding stages: ${arcs.map((a) => `${a.name}: ${a.count}`).join(', ')}`}
           >
-            {/* Subtle base track */}
-            <circle
-              cx={30}
-              cy={30}
-              r={21}
-              stroke="var(--border-subtle, #e2e8f0)"
-              strokeWidth={4.8}
-              fill="none"
-              opacity={0.35}
-            />
-
-            {/* Stage Proportional Arcs sweeping clockwise */}
+            {/* Stage Proportional Arcs */}
             {arcs.map((arc, idx) => {
               const fallbackStroke = STAGE_FALLBACK_COLORS[idx % STAGE_FALLBACK_COLORS.length];
               return (
@@ -315,7 +319,7 @@ export const OnboardingKpiCard: React.FC<OnboardingKpiCardProps> = ({
               );
             })}
 
-            {/* Top Horizontal Arrow entering from left and pointing RIGHT → into the circle (Inflow) */}
+            {/* Top Horizontal Arrow pointing LEFT ← into the circle (Arrival & Inflow) */}
             <g
               className={`bezent-kpi-arrival-arrow-group bezent-kpi-onboarding-arrow-group ${
                 isArrowHovered ? 'is-hovered' : ''
@@ -341,13 +345,13 @@ export const OnboardingKpiCard: React.FC<OnboardingKpiCardProps> = ({
               }}
             >
               {/* Wide invisible hit area */}
-              <circle cx={20} cy={9} r={12} fill="transparent" />
+              <circle cx={18} cy={9} r={12} fill="transparent" />
 
               {/* Horizontal arrival stem */}
               <line
-                x1={11}
+                x1={30}
                 y1={9}
-                x2={23}
+                x2={13}
                 y2={9}
                 stroke="#2563eb"
                 strokeWidth={4.8}
@@ -355,9 +359,9 @@ export const OnboardingKpiCard: React.FC<OnboardingKpiCardProps> = ({
                 className="bezent-kpi-arrival-arrow-stem bezent-kpi-onboarding-arrow-stem"
               />
 
-              {/* Sleek, solid horizontal arrowhead pointing towards the right (Inflow) */}
+              {/* Sleek, solid horizontal arrowhead pointing LEFT ← */}
               <polygon
-                points="29,9 22.5,5.2 22.5,12.8"
+                points="6.5,9 13.5,5.2 13.5,12.8"
                 fill="#2563eb"
                 className="bezent-kpi-arrival-arrowhead bezent-kpi-onboarding-arrowhead"
               />

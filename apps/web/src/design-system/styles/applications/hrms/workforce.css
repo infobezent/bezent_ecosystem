@@ -185,12 +185,12 @@
   background: linear-gradient(180deg, #ffffff 0%, #fafbfe 100%);
   border: none;
   border-radius: 16px;
-  padding: 18px 18px 16px 18px;
+  padding: 14px 16px 12px 16px;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  min-height: 170px;
-  height: 170px;
+  min-height: 142px;
+  height: 142px;
   width: 100%;
   min-width: 0;
   box-sizing: border-box;
@@ -784,12 +784,12 @@
 /* ── Interactive Employees Workforce Ring KPI Card ── */
 .bezent-exec-kpi-card--employees {
   cursor: pointer;
-  padding: 18px 18px 16px 18px;
+  padding: 14px 16px 12px 16px;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  min-height: 170px;
-  height: 170px;
+  min-height: 142px;
+  height: 142px;
   width: 100%;
   min-width: 0;
   box-sizing: border-box;
@@ -1063,12 +1063,12 @@
    ========================================================================== */
 .bezent-exec-kpi-card--onboarding {
   cursor: pointer;
-  padding: 18px 18px 16px 18px;
+  padding: 14px 16px 12px 16px;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  min-height: 170px;
-  height: 170px;
+  min-height: 142px;
+  height: 142px;
   width: 100%;
   min-width: 0;
   box-sizing: border-box;
@@ -1466,11 +1466,11 @@
 }
 
 .bezent-kpi-arrival-icon--default {
-  color: #2563eb;
+  color: var(--text-tertiary, #64748b);
 }
 
 [data-theme='dark'] .bezent-kpi-arrival-icon--default {
-  color: #60a5fa;
+  color: var(--text-secondary, #94a3b8);
 }
 
 .bezent-kpi-arrival-icon--documents {
@@ -1526,12 +1526,12 @@
    ========================================================================== */
 .bezent-exec-kpi-card--transfers {
   cursor: pointer;
-  padding: 18px 18px 16px 18px;
+  padding: 14px 16px 12px 16px;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  min-height: 170px;
-  height: 170px;
+  min-height: 142px;
+  height: 142px;
   width: 100%;
   min-width: 0;
   box-sizing: border-box;
@@ -1866,12 +1866,12 @@
    ========================================================================== */
 .bezent-exec-kpi-card--promotions {
   cursor: pointer;
-  padding: 18px 18px 16px 18px;
+  padding: 14px 16px 12px 16px;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  min-height: 170px;
-  height: 170px;
+  min-height: 142px;
+  height: 142px;
   width: 100%;
   min-width: 0;
   box-sizing: border-box;
@@ -2065,12 +2065,12 @@
    ========================================================================== */
 .bezent-exec-kpi-card--offboarding {
   cursor: pointer;
-  padding: 18px 18px 16px 18px;
+  padding: 14px 16px 12px 16px;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  min-height: 170px;
-  height: 170px;
+  min-height: 142px;
+  height: 142px;
   width: 100%;
   min-width: 0;
   box-sizing: border-box;
@@ -2353,11 +2353,11 @@
 }
 
 .bezent-kpi-departure-icon--default {
-  color: #e11d48;
+  color: var(--text-tertiary, #64748b);
 }
 
 [data-theme='dark'] .bezent-kpi-departure-icon--default {
-  color: #fb7185;
+  color: var(--text-secondary, #94a3b8);
 }
 
 .bezent-kpi-departure-icon--notice {
@@ -2419,12 +2419,12 @@
    ========================================================================== */
 .bezent-exec-kpi-card--records {
   cursor: pointer;
-  padding: 18px 18px 16px 18px;
+  padding: 14px 16px 12px 16px;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  min-height: 170px;
-  height: 170px;
+  min-height: 142px;
+  height: 142px;
   width: 100%;
   min-width: 0;
   box-sizing: border-box;
