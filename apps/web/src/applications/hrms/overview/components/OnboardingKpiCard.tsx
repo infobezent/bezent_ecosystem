@@ -125,11 +125,12 @@ export const OnboardingKpiCard: React.FC<OnboardingKpiCardProps> = ({
 
   // Exact 4-Quadrant calibrated paths matching approved Reference UI:
   // Counter-clockwise journey: Left (Documents) -> Bottom (Verification) -> Right (Induction) -> Top-Right (Completed) -> Top Horizontal Arrow shooting LEFT ←
+  // Segment 2 (Arc 3) extended for balanced visual weight with uniform ~5px gap before shortened arrow (1)
   const ONBOARDING_QUADRANT_PATHS = [
     'M 10.97 21.13 A 21 21 0 0 0 12.8 42.05', // 0: Documents (Left / West)
     'M 19.5 48.19 A 21 21 0 0 0 40.5 48.19', // 1: Verification (Bottom / South)
     'M 47.2 42.05 A 21 21 0 0 0 49.03 21.13', // 2: Induction / Setup (Right / East)
-    'M 42.05 12.8 A 21 21 0 0 0 30 9', // 3: Completed / Ready (Top-Right into top apex)
+    'M 44.05 14.39 A 21 21 0 0 0 31.83 9.08', // 3: Completed / Ready (Top-Right, extended with ~5px gap to arrow tail)
   ];
 
   const numStages = effectiveStages.length;
@@ -347,9 +348,9 @@ export const OnboardingKpiCard: React.FC<OnboardingKpiCardProps> = ({
               {/* Wide invisible hit area */}
               <circle cx={18} cy={9} r={12} fill="transparent" />
 
-              {/* Horizontal arrival stem */}
+              {/* Horizontal arrival stem (decreased length for balanced 5-element symmetry) */}
               <line
-                x1={30}
+                x1={22}
                 y1={9}
                 x2={13}
                 y2={9}
@@ -361,7 +362,7 @@ export const OnboardingKpiCard: React.FC<OnboardingKpiCardProps> = ({
 
               {/* Sleek, solid horizontal arrowhead pointing LEFT ← */}
               <polygon
-                points="6.5,9 13.5,5.2 13.5,12.8"
+                points="7.5,9 13.5,5.2 13.5,12.8"
                 fill="#2563eb"
                 className="bezent-kpi-arrival-arrowhead bezent-kpi-onboarding-arrowhead"
               />

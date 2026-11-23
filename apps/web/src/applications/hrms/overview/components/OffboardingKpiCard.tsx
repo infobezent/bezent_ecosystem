@@ -91,11 +91,12 @@ export const OffboardingKpiCard: React.FC<OffboardingKpiCardProps> = ({
 
   // Exact 4-Quadrant calibrated paths matching approved Reference UI:
   // Clockwise journey: Right (Notice Period) -> Bottom (Handover) -> Left (Clearance) -> Top-Left (Final Settlement) -> Top Horizontal Arrow shooting RIGHT →
+  // Segment 2 (Arc 3) extended for balanced visual weight with uniform ~5px gap before shortened arrow (1)
   const OFFBOARDING_QUADRANT_PATHS = [
     'M 49.03 21.13 A 21 21 0 0 1 47.2 42.05', // 0: Notice Period (Right / East)
     'M 40.5 48.19 A 21 21 0 0 1 19.5 48.19', // 1: Handover (Bottom / South)
     'M 12.8 42.05 A 21 21 0 0 1 10.97 21.13', // 2: Clearance (Left / West)
-    'M 17.95 12.8 A 21 21 0 0 1 30 9', // 3: Final Settlement (Top-Left into top apex)
+    'M 15.95 14.39 A 21 21 0 0 1 28.17 9.08', // 3: Final Settlement (Top-Left, extended with ~5px gap to arrow tail)
   ];
 
   const numStages = effectiveStages.length;
@@ -299,9 +300,9 @@ export const OffboardingKpiCard: React.FC<OffboardingKpiCardProps> = ({
               {/* Wide invisible hit area */}
               <circle cx={44} cy={9} r={12} fill="transparent" />
 
-              {/* Horizontal departure stem shooting straight right along the top tangent */}
+              {/* Horizontal departure stem shooting straight right along the top tangent (decreased length for balanced 5-element symmetry) */}
               <line
-                x1={30}
+                x1={38}
                 y1={9}
                 x2={47}
                 y2={9}
@@ -313,7 +314,7 @@ export const OffboardingKpiCard: React.FC<OffboardingKpiCardProps> = ({
 
               {/* Sleek, solid horizontal arrowhead pointing right */}
               <polygon
-                points="53.5,9 46.5,5.2 46.5,12.8"
+                points="52.5,9 46.5,5.2 46.5,12.8"
                 fill="#e11d48"
                 className="bezent-kpi-departure-arrowhead bezent-kpi-offboarding-arrowhead"
               />
