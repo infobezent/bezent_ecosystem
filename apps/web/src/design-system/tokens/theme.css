@@ -49,7 +49,7 @@
 
   /* Surfaces */
   --bg-app: var(--app-canvas);
-  --bg-workspace-canvas: #eeeeee;
+  --bg-workspace-canvas: #f3f6fa;
   --bg-surface: var(--workspace);
   --bg-surface-secondary: #f0f4f9;
   --bg-card: #ffffff;
