@@ -16,19 +16,36 @@ export { isDatabaseConfigured };
 let pool: mysql.Pool | undefined;
 
 function createPool(): mysql.Pool {
-  const options: mysql.PoolOptions = env.db.url
-    ? { uri: env.db.url }
-    : {
-        host: env.db.host,
-        port: env.db.port,
-        user: env.db.user,
-        password: env.db.password,
-        database: env.db.name,
-        waitForConnections: true,
-        connectionLimit: 10,
-        enableKeepAlive: true,
-        keepAliveInitialDelay: 10000,
+  let options: mysql.PoolOptions;
+
+  if (env.db.url) {
+    try {
+      const parsed = new URL(env.db.url);
+      const isSsl =
+        parsed.searchParams.get('ssl-mode')?.toUpperCase() === 'REQUIRED' ||
+        parsed.searchParams.get('ssl') === 'true' ||
+        parsed.hostname.includes('.aivencloud.com');
+      parsed.searchParams.delete('ssl-mode');
+      options = {
+        uri: parsed.toString(),
+        ...(isSsl ? { ssl: { rejectUnauthorized: false } } : {}),
       };
+    } catch {
+      options = { uri: env.db.url };
+    }
+  } else {
+    options = {
+      host: env.db.host,
+      port: env.db.port,
+      user: env.db.user,
+      password: env.db.password,
+      database: env.db.name,
+      waitForConnections: true,
+      connectionLimit: 10,
+      enableKeepAlive: true,
+      keepAliveInitialDelay: 10000,
+    };
+  }
 
   const poolInstance = mysql.createPool({
     ...options,
@@ -162,13 +179,28 @@ export async function ensureDatabaseConnected(
     }
   }
 
-  const host = env.db.host ?? 'localhost';
-  const port = env.db.port ?? 3306;
-  const dbName = env.db.name ?? 'unknown';
+  let host = env.db.host ?? 'localhost';
+  let port = env.db.port ?? 3306;
+  let dbName = env.db.name ?? 'unknown';
+
+  if (env.db.url) {
+    try {
+      const u = new URL(env.db.url);
+      host = u.hostname || host;
+      port = u.port ? Number(u.port) : port;
+      dbName = u.pathname.replace(/^\//, '') || dbName;
+    } catch {
+      // Keep fallbacks
+    }
+  }
+
+  const isCloudHost = typeof host === 'string' && host.includes('.');
   const diagnostic =
     `Could not connect to MySQL at ${host}:${port} (database: ${dbName}) after ${maxRetries} attempts.\n` +
     `  Reason: ${result.error || 'Connection failed'} (${result.code || 'UNKNOWN'}).\n` +
-    `  Please ensure MySQL Server 8.4 is running on port ${port}. Run 'npm run db:start' to start it.`;
+    (isCloudHost && result.code === 'ENOTFOUND'
+      ? `  Cloud host '${host}' could not be resolved. Please verify the database is active/powered on in your cloud console (e.g. Aiven) and DATABASE_URL in Render is up to date.`
+      : `  Please ensure MySQL Server 8.4 is running on port ${port}. Run 'npm run db:start' to start it.`);
 
   return { ok: false, diagnostic };
 }
