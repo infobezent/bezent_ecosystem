@@ -221,7 +221,9 @@ export function WorkingHoursSection({ value, onChange }: WorkingHoursSectionProp
         );
 
       case 'working_hours.workingDays': {
-        const presetValue = isAlternateSaturday ? 'alt_saturday' : workingDaysToPresetValue(workingDays);
+        const presetValue = isAlternateSaturday
+          ? 'alt_saturday'
+          : workingDaysToPresetValue(workingDays);
         return (
           <RegistrationField
             key={key}
@@ -276,9 +278,7 @@ export function WorkingHoursSection({ value, onChange }: WorkingHoursSectionProp
                       onClick={() => {
                         setIsAlternateSaturday(false);
                         setWorkingDays((prev) =>
-                          prev.includes(day)
-                            ? prev.filter((d) => d !== day)
-                            : [...prev, day],
+                          prev.includes(day) ? prev.filter((d) => d !== day) : [...prev, day],
                         );
                       }}
                     >

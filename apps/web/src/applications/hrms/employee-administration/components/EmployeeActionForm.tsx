@@ -77,8 +77,13 @@ export function EmployeeActionForm({
   const definition = getActionDefinition(form.actionType);
   const categories = [...new Set(actionTypes.map((type) => type.category))];
 
-  const [employmentTypesList, setEmploymentTypesList] = useState<{ value: string; label: string }[]>([]);
-  const [offboardingPolicy, setOffboardingPolicy] = useState<{ confirmedNoticeDays: number; probationNoticeDays: number } | null>(null);
+  const [employmentTypesList, setEmploymentTypesList] = useState<
+    { value: string; label: string }[]
+  >([]);
+  const [offboardingPolicy, setOffboardingPolicy] = useState<{
+    confirmedNoticeDays: number;
+    probationNoticeDays: number;
+  } | null>(null);
 
   useEffect(() => {
     let isMounted = true;

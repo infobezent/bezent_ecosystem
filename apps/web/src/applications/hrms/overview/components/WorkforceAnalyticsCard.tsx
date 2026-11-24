@@ -158,24 +158,108 @@ const FALLBACK_GROWTH_DATA: Record<GrowthTimeFilter, GrowthDataPoint[]> = {
     { label: 'Week 44', joiners: 8, exits: 2, net: 6, beginningHeadcount: 1244, growthRate: 0.5 },
   ],
   monthly: [
-    { label: 'Dec 2025', joiners: 12, exits: 2, net: 10, beginningHeadcount: 1120, growthRate: 0.9 },
-    { label: 'Jan 2026', joiners: 28, exits: 4, net: 24, beginningHeadcount: 1130, growthRate: 2.1 },
-    { label: 'Feb 2026', joiners: 15, exits: 3, net: 12, beginningHeadcount: 1154, growthRate: 1.0 },
-    { label: 'Mar 2026', joiners: 20, exits: 5, net: 15, beginningHeadcount: 1166, growthRate: 1.3 },
-    { label: 'Apr 2026', joiners: 16, exits: 2, net: 14, beginningHeadcount: 1181, growthRate: 1.2 },
-    { label: 'May 2026', joiners: 22, exits: 4, net: 18, beginningHeadcount: 1195, growthRate: 1.5 },
-    { label: 'Jun 2026', joiners: 18, exits: 3, net: 15, beginningHeadcount: 1213, growthRate: 1.2 },
-    { label: 'Jul 2026', joiners: 24, exits: 4, net: 20, beginningHeadcount: 1228, growthRate: 1.6 },
+    {
+      label: 'Dec 2025',
+      joiners: 12,
+      exits: 2,
+      net: 10,
+      beginningHeadcount: 1120,
+      growthRate: 0.9,
+    },
+    {
+      label: 'Jan 2026',
+      joiners: 28,
+      exits: 4,
+      net: 24,
+      beginningHeadcount: 1130,
+      growthRate: 2.1,
+    },
+    {
+      label: 'Feb 2026',
+      joiners: 15,
+      exits: 3,
+      net: 12,
+      beginningHeadcount: 1154,
+      growthRate: 1.0,
+    },
+    {
+      label: 'Mar 2026',
+      joiners: 20,
+      exits: 5,
+      net: 15,
+      beginningHeadcount: 1166,
+      growthRate: 1.3,
+    },
+    {
+      label: 'Apr 2026',
+      joiners: 16,
+      exits: 2,
+      net: 14,
+      beginningHeadcount: 1181,
+      growthRate: 1.2,
+    },
+    {
+      label: 'May 2026',
+      joiners: 22,
+      exits: 4,
+      net: 18,
+      beginningHeadcount: 1195,
+      growthRate: 1.5,
+    },
+    {
+      label: 'Jun 2026',
+      joiners: 18,
+      exits: 3,
+      net: 15,
+      beginningHeadcount: 1213,
+      growthRate: 1.2,
+    },
+    {
+      label: 'Jul 2026',
+      joiners: 24,
+      exits: 4,
+      net: 20,
+      beginningHeadcount: 1228,
+      growthRate: 1.6,
+    },
     { label: 'Aug 2026', joiners: 14, exits: 5, net: 9, beginningHeadcount: 1248, growthRate: 0.7 },
-    { label: 'Sep 2026', joiners: 22, exits: 2, net: 20, beginningHeadcount: 1257, growthRate: 1.6 },
-    { label: 'Oct 2026', joiners: 19, exits: 4, net: 15, beginningHeadcount: 1277, growthRate: 1.2 },
-    { label: 'Nov 2026', joiners: 16, exits: 2, net: 14, beginningHeadcount: 1292, growthRate: 1.1 },
+    {
+      label: 'Sep 2026',
+      joiners: 22,
+      exits: 2,
+      net: 20,
+      beginningHeadcount: 1257,
+      growthRate: 1.6,
+    },
+    {
+      label: 'Oct 2026',
+      joiners: 19,
+      exits: 4,
+      net: 15,
+      beginningHeadcount: 1277,
+      growthRate: 1.2,
+    },
+    {
+      label: 'Nov 2026',
+      joiners: 16,
+      exits: 2,
+      net: 14,
+      beginningHeadcount: 1292,
+      growthRate: 1.1,
+    },
   ],
   yearly: [
     { label: '2022', joiners: 110, exits: 22, net: 88, beginningHeadcount: 762, growthRate: 11.5 },
     { label: '2023', joiners: 140, exits: 28, net: 112, beginningHeadcount: 850, growthRate: 13.2 },
     { label: '2024', joiners: 185, exits: 32, net: 153, beginningHeadcount: 962, growthRate: 15.9 },
-    { label: '2025', joiners: 210, exits: 36, net: 174, beginningHeadcount: 1115, growthRate: 15.6 },
+    {
+      label: '2025',
+      joiners: 210,
+      exits: 36,
+      net: 174,
+      beginningHeadcount: 1115,
+      growthRate: 15.6,
+    },
     { label: '2026', joiners: 113, exits: 20, net: 93, beginningHeadcount: 1289, growthRate: 7.2 },
   ],
 };
@@ -1359,9 +1443,7 @@ export const WorkforceAnalyticsCard: React.FC<WorkforceAnalyticsCardProps> = ({
                   {growthPoints.map((pt, idx) => {
                     const isActive = hoveredPointIdx === idx;
                     const displayLabel =
-                      growthSeries.length > 8
-                        ? pt.data.label.split(' ')[0]
-                        : pt.data.label;
+                      growthSeries.length > 8 ? pt.data.label.split(' ')[0] : pt.data.label;
                     return (
                       <text
                         key={pt.data.label}
@@ -1668,9 +1750,7 @@ export const WorkforceAnalyticsCard: React.FC<WorkforceAnalyticsCardProps> = ({
                   {retentionPoints.map((pt, idx) => {
                     const isActive = hoveredPointIdx === idx;
                     const displayLabel =
-                      growthSeries.length > 8
-                        ? pt.data.label.split(' ')[0]
-                        : pt.data.label;
+                      growthSeries.length > 8 ? pt.data.label.split(' ')[0] : pt.data.label;
                     return (
                       <text
                         key={pt.data.label}

@@ -271,7 +271,9 @@
   background: rgba(255, 255, 255, 0.05);
 }
 
-[data-theme='dark'] .left-sidebar__item:hover:not(.is-active):not(.is-current-page) .bezent-nav-icon-box {
+[data-theme='dark']
+  .left-sidebar__item:hover:not(.is-active):not(.is-current-page)
+  .bezent-nav-icon-box {
   background: rgba(22, 131, 255, 0.12) !important;
 }
 
@@ -313,5 +315,3 @@
   background: #ef4444;
   box-shadow: 0 0 0 2px #020b1c;
 }
-
-

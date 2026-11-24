@@ -643,13 +643,25 @@ export const WorkforceCompositionCard: React.FC<WorkforceCompositionCardProps> =
                 </div>
 
                 <div className="bezent-wf-comp-parity-bar-wrap">
-                  <svg className="bezent-wf-comp-parity-svg" viewBox="0 0 100 8" preserveAspectRatio="none">
+                  <svg
+                    className="bezent-wf-comp-parity-svg"
+                    viewBox="0 0 100 8"
+                    preserveAspectRatio="none"
+                  >
                     <defs>
                       <clipPath id="bezent-wf-comp-parity-clip">
                         <rect x="0" y="0" width="100" height="8" rx="4" ry="4" />
                       </clipPath>
                     </defs>
-                    <rect x="0" y="0" width="100" height="8" rx="4" ry="4" className="bezent-wf-comp-progress-track" />
+                    <rect
+                      x="0"
+                      y="0"
+                      width="100"
+                      height="8"
+                      rx="4"
+                      ry="4"
+                      className="bezent-wf-comp-progress-track"
+                    />
                     <g clipPath="url(#bezent-wf-comp-parity-clip)">
                       {(() => {
                         let curX = 0;
@@ -700,8 +712,12 @@ export const WorkforceCompositionCard: React.FC<WorkforceCompositionCardProps> =
                           <div className="bezent-wf-comp-hero-card__info">
                             <span className="bezent-wf-comp-hero-card__title">{item.name}</span>
                             <div className="bezent-wf-comp-hero-card__metric">
-                              <span className="bezent-wf-comp-hero-card__count">{item.count.toLocaleString()}</span>
-                              <span className="bezent-wf-comp-hero-card__pct">({item.percentage}%)</span>
+                              <span className="bezent-wf-comp-hero-card__count">
+                                {item.count.toLocaleString()}
+                              </span>
+                              <span className="bezent-wf-comp-hero-card__pct">
+                                ({item.percentage}%)
+                              </span>
                             </div>
                           </div>
                         </div>
@@ -719,11 +735,19 @@ export const WorkforceCompositionCard: React.FC<WorkforceCompositionCardProps> =
                         onMouseEnter={() => setHoveredSlice(item.name)}
                         onMouseLeave={() => setHoveredSlice(null)}
                       >
-                        <svg className="bezent-wf-comp-dot" width="8" height="8" viewBox="0 0 8 8" aria-hidden="true">
+                        <svg
+                          className="bezent-wf-comp-dot"
+                          width="8"
+                          height="8"
+                          viewBox="0 0 8 8"
+                          aria-hidden="true"
+                        >
                           <circle cx="4" cy="4" r="4" fill={item.color} />
                         </svg>
                         <span className="bezent-wf-comp-chip__name">{item.name}</span>
-                        <span className="bezent-wf-comp-chip__count">{item.count.toLocaleString()}</span>
+                        <span className="bezent-wf-comp-chip__count">
+                          {item.count.toLocaleString()}
+                        </span>
                         <span className="bezent-wf-comp-chip__pct">({item.percentage}%)</span>
                       </div>
                     ))}
@@ -765,13 +789,26 @@ export const WorkforceCompositionCard: React.FC<WorkforceCompositionCardProps> =
                             <span className="bezent-wf-comp-bar-subtag">{cohortTag}</span>
                           </div>
                           <div className="bezent-wf-comp-bar-metrics">
-                            <span className="bezent-wf-comp-bar-count">{item.count.toLocaleString()}</span>
+                            <span className="bezent-wf-comp-bar-count">
+                              {item.count.toLocaleString()}
+                            </span>
                             <span className="bezent-wf-comp-bar-pct">({item.percentage}%)</span>
                           </div>
                         </div>
                         <div className="bezent-wf-comp-bar-track-wrap">
-                          <svg className="bezent-wf-comp-progress-svg" viewBox="0 0 100 6" preserveAspectRatio="none">
-                            <rect x="0" y="0" width="100" height="6" rx="3" className="bezent-wf-comp-progress-track" />
+                          <svg
+                            className="bezent-wf-comp-progress-svg"
+                            viewBox="0 0 100 6"
+                            preserveAspectRatio="none"
+                          >
+                            <rect
+                              x="0"
+                              y="0"
+                              width="100"
+                              height="6"
+                              rx="3"
+                              className="bezent-wf-comp-progress-track"
+                            />
                             <rect
                               x="0"
                               y="0"
@@ -825,13 +862,28 @@ export const WorkforceCompositionCard: React.FC<WorkforceCompositionCardProps> =
                             <span className="bezent-wf-comp-ladder-title">{item.name}</span>
                             <span className="bezent-wf-comp-ladder-desc">{tierDesc}</span>
                             <div className="bezent-wf-comp-ladder-stats">
-                              <span className="bezent-wf-comp-ladder-count">{item.count.toLocaleString()}</span>
-                              <span className="bezent-wf-comp-ladder-pct">({item.percentage}%)</span>
+                              <span className="bezent-wf-comp-ladder-count">
+                                {item.count.toLocaleString()}
+                              </span>
+                              <span className="bezent-wf-comp-ladder-pct">
+                                ({item.percentage}%)
+                              </span>
                             </div>
                           </div>
                           <div className="bezent-wf-comp-bar-track-wrap">
-                            <svg className="bezent-wf-comp-progress-svg" viewBox="0 0 100 5" preserveAspectRatio="none">
-                              <rect x="0" y="0" width="100" height="5" rx="2.5" className="bezent-wf-comp-progress-track" />
+                            <svg
+                              className="bezent-wf-comp-progress-svg"
+                              viewBox="0 0 100 5"
+                              preserveAspectRatio="none"
+                            >
+                              <rect
+                                x="0"
+                                y="0"
+                                width="100"
+                                height="5"
+                                rx="2.5"
+                                className="bezent-wf-comp-progress-track"
+                              />
                               <rect
                                 x="0"
                                 y="0"
@@ -887,8 +939,19 @@ export const WorkforceCompositionCard: React.FC<WorkforceCompositionCardProps> =
                           </div>
                         </div>
                         <div className="bezent-wf-comp-tenure-bar-slot">
-                          <svg className="bezent-wf-comp-progress-svg" viewBox="0 0 100 5" preserveAspectRatio="none">
-                            <rect x="0" y="0" width="100" height="5" rx="2.5" className="bezent-wf-comp-progress-track" />
+                          <svg
+                            className="bezent-wf-comp-progress-svg"
+                            viewBox="0 0 100 5"
+                            preserveAspectRatio="none"
+                          >
+                            <rect
+                              x="0"
+                              y="0"
+                              width="100"
+                              height="5"
+                              rx="2.5"
+                              className="bezent-wf-comp-progress-track"
+                            />
                             <rect
                               x="0"
                               y="0"
@@ -901,7 +964,9 @@ export const WorkforceCompositionCard: React.FC<WorkforceCompositionCardProps> =
                           </svg>
                         </div>
                         <div className="bezent-wf-comp-tenure-stats">
-                          <span className="bezent-wf-comp-tenure-count">{item.count.toLocaleString()}</span>
+                          <span className="bezent-wf-comp-tenure-count">
+                            {item.count.toLocaleString()}
+                          </span>
                           <span className="bezent-wf-comp-tenure-pct">({item.percentage}%)</span>
                         </div>
                       </div>
@@ -915,7 +980,9 @@ export const WorkforceCompositionCard: React.FC<WorkforceCompositionCardProps> =
             {activeDimension === 'employment_status' && (
               <div className="bezent-wf-comp-detail-panel bezent-wf-comp-status-panel">
                 <div className="bezent-wf-comp-panel-header">
-                  <span className="bezent-wf-comp-panel-subtitle">Operational Workforce Health</span>
+                  <span className="bezent-wf-comp-panel-subtitle">
+                    Operational Workforce Health
+                  </span>
                   <span className="bezent-wf-comp-panel-tag">Live Status</span>
                 </div>
                 <div className="bezent-wf-comp-status-grid">
@@ -951,8 +1018,12 @@ export const WorkforceCompositionCard: React.FC<WorkforceCompositionCardProps> =
                           <span className="bezent-wf-comp-status-card__title">{item.name}</span>
                         </div>
                         <div className="bezent-wf-comp-status-card__bottom">
-                          <span className="bezent-wf-comp-status-card__count">{item.count.toLocaleString()}</span>
-                          <span className="bezent-wf-comp-status-card__pct">({item.percentage}%)</span>
+                          <span className="bezent-wf-comp-status-card__count">
+                            {item.count.toLocaleString()}
+                          </span>
+                          <span className="bezent-wf-comp-status-card__pct">
+                            ({item.percentage}%)
+                          </span>
                         </div>
                         <span className="bezent-wf-comp-status-card__sub">{statusSub}</span>
                       </div>

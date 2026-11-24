@@ -122,9 +122,7 @@ export function AppShell({
     launcher.items.some((i) => i.id === launcher.activeItemId) &&
     !navItems.some((n) => n.id === launcher.activeItemId);
 
-  const hasLauncherOnlyItems = Boolean(
-    launcher?.items && launcher.items.length > 0,
-  );
+  const hasLauncherOnlyItems = Boolean(launcher?.items && launcher.items.length > 0);
 
   return (
     <div

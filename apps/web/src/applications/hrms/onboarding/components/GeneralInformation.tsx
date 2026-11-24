@@ -106,7 +106,9 @@ export function GeneralInformation({
   const [noticePeriod, setNoticePeriod] = useState(data?.noticePeriod ?? '30_days');
 
   // Dynamic workforce settings data (Employment Types & Probation Policy)
-  const [employmentTypesList, setEmploymentTypesList] = useState<{ value: string; label: string }[]>([]);
+  const [employmentTypesList, setEmploymentTypesList] = useState<
+    { value: string; label: string }[]
+  >([]);
   const [defaultProbationDays, setDefaultProbationDays] = useState<number>(90);
 
   useEffect(() => {
@@ -447,9 +449,9 @@ export function GeneralInformation({
               options={
                 configuredOptions ||
                 (employmentTypesList.length > 0
-                  ? (employmentTypesList.some((t) => t.value === employmentType)
-                      ? employmentTypesList
-                      : [{ value: employmentType, label: employmentType }, ...employmentTypesList])
+                  ? employmentTypesList.some((t) => t.value === employmentType)
+                    ? employmentTypesList
+                    : [{ value: employmentType, label: employmentType }, ...employmentTypesList]
                   : [
                       { value: 'full_time', label: 'Full Time' },
                       { value: 'part_time', label: 'Part Time' },

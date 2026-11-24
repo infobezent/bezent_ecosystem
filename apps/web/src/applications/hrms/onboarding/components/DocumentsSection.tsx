@@ -453,16 +453,11 @@ export function DocumentsSection({
                               <IconButton
                                 type="button"
                                 label={
-                                  showAadhaarNumber
-                                    ? 'Hide Aadhaar number'
-                                    : 'Show Aadhaar number'
+                                  showAadhaarNumber ? 'Hide Aadhaar number' : 'Show Aadhaar number'
                                 }
                                 onClick={() => setShowAadhaarNumber((prev) => !prev)}
                               >
-                                <BezentIcon
-                                  name={showAadhaarNumber ? 'eye' : 'lock'}
-                                  size={16}
-                                />
+                                <BezentIcon name={showAadhaarNumber ? 'eye' : 'lock'} size={16} />
                               </IconButton>
                             </Inline>
                           </RegistrationField>

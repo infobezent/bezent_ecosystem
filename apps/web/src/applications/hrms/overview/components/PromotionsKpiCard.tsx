@@ -171,139 +171,139 @@ export const PromotionsKpiCard: React.FC<PromotionsKpiCardProps> = ({
           ) : (
             <>
               <div className="bezent-kpi-ambient-glow bezent-kpi-ambient-glow--purple" />
-          {/* Floating Hover Badge: 100% unclipped, outside-card visibility */}
-          <div
-            className={`bezent-kpi-flow-badge bezent-kpi-promotion-tooltip ${hasHover ? 'is-visible' : ''}`}
-            aria-live="polite"
-          >
-            {tooltipText}
-          </div>
-
-          {/* SVG Ascending Steps ( ▂▃▄ ) + Upward Arrow ( ↗ ) */}
-          <svg
-            className="bezent-kpi-promotions-svg"
-            viewBox="0 0 60 60"
-            role="img"
-            aria-label={`Promotions breakdown: ${steps.map((s) => `${s.label}: ${s.count}`).join(', ')}`}
-          >
-            {/* Ground Baseline (Pill-shaped rounded bar) */}
-            <rect
-              x={4.5}
-              y={50}
-              width={51}
-              height={1.6}
-              rx={0.8}
-              className="bezent-kpi-promotions-baseline"
-            />
-
-            {/* Ascending Steps */}
-            {steps.map((step, _idx) => (
-              <g
-                key={step.id}
-                className={`bezent-kpi-promotion-step bezent-kpi-promotion-step--${step.colorClass} bezent-kpi-promotion-segment--${step.colorClass} ${
-                  step.isHovered ? 'is-hovered' : ''
-                } ${hasHover && !step.isHovered ? 'is-dimmed' : ''}`}
-                onMouseEnter={() => setInternalHovered(step.id)}
-                onMouseOver={() => setInternalHovered(step.id)}
-                onPointerEnter={() => setInternalHovered(step.id)}
-                onFocus={() => setInternalHovered(step.id)}
-                onBlur={() => setInternalHovered(null)}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onTypeClick?.(step);
-                  onClick?.();
-                }}
-                tabIndex={0}
-                role="button"
-                aria-label={`${step.label}: ${step.count} promotions`}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter' || e.key === ' ') {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    onTypeClick?.(step);
-                    onClick?.();
-                  }
-                }}
+              {/* Floating Hover Badge: 100% unclipped, outside-card visibility */}
+              <div
+                className={`bezent-kpi-flow-badge bezent-kpi-promotion-tooltip ${hasHover ? 'is-visible' : ''}`}
+                aria-live="polite"
               >
-                {/* Invisible wide hit area so hover triggers effortlessly */}
-                <rect
-                  x={step.x - 2}
-                  y={step.y - 6}
-                  width={step.width + 4}
-                  height={step.height + 8}
-                  fill="transparent"
-                />
-                {/* Visible rounded pill step */}
-                <rect
-                  x={step.x}
-                  y={step.y}
-                  width={step.width}
-                  height={step.height}
-                  rx={3.5}
-                  ry={3.5}
-                  className={`bezent-kpi-promotion-bar bezent-kpi-promotion-bar--${step.colorClass}`}
-                />
-              </g>
-            ))}
+                {tooltipText}
+              </div>
 
-            {/* Upward Elevation Straight Arrow ( ↗ ) - Floating 10px cleanly ABOVE the steps, zero overlap */}
-            <g
-              className={`bezent-kpi-promotions-arrow-group ${isArrowHovered ? 'is-hovered' : ''} ${
-                hasHover && !isArrowHovered ? 'is-dimmed' : ''
-              }`}
-              onMouseEnter={() => setInternalHovered('arrow')}
-              onMouseOver={() => setInternalHovered('arrow')}
-              onPointerEnter={() => setInternalHovered('arrow')}
-              onFocus={() => setInternalHovered('arrow')}
-              onBlur={() => setInternalHovered(null)}
-              onClick={(e) => {
-                e.stopPropagation();
-                onClick?.();
-              }}
-              tabIndex={0}
-              role="button"
-              aria-label={
-                effectiveProgression
-                  ? `Career Progression: ${effectiveProgression.fromRole} to ${effectiveProgression.toRole}`
-                  : 'Career Progression: no recent role change'
-              }
-              onKeyDown={(e) => {
-                if (e.key === 'Enter' || e.key === ' ') {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  onClick?.();
-                }
-              }}
-            >
-              {/* Stationary Fat Hit Area: Guarantees zero hover flicker */}
-              <line
-                x1={6}
-                y1={30}
-                x2={52}
-                y2={4}
-                strokeWidth={14}
-                stroke="transparent"
-                strokeLinecap="round"
-              />
+              {/* SVG Ascending Steps ( ▂▃▄ ) + Upward Arrow ( ↗ ) */}
+              <svg
+                className="bezent-kpi-promotions-svg"
+                viewBox="0 0 60 60"
+                role="img"
+                aria-label={`Promotions breakdown: ${steps.map((s) => `${s.label}: ${s.count}`).join(', ')}`}
+              >
+                {/* Ground Baseline (Pill-shaped rounded bar) */}
+                <rect
+                  x={4.5}
+                  y={50}
+                  width={51}
+                  height={1.6}
+                  rx={0.8}
+                  className="bezent-kpi-promotions-baseline"
+                />
 
-              {/* Visual Arrow Layer (floating parallel 10px above the staircase steps, zero overlap) */}
-              <g className="bezent-kpi-promotions-arrow-visual">
-                {/* Arrow Shaft: straight bold elevation line */}
-                <line
-                  x1={8}
-                  y1={28}
-                  x2={45}
-                  y2={6.9}
-                  className="bezent-kpi-promotions-arrow-shaft"
-                />
-                {/* Arrowhead: crisp symmetrical dart pointer meeting the shaft notch */}
-                <polygon
-                  points="49.5,4.4 44.0,3.3 44.8,7.0 47.6,9.5"
-                  className="bezent-kpi-promotions-arrowhead"
-                />
-              </g>
-            </g>
-          </svg>
+                {/* Ascending Steps */}
+                {steps.map((step, _idx) => (
+                  <g
+                    key={step.id}
+                    className={`bezent-kpi-promotion-step bezent-kpi-promotion-step--${step.colorClass} bezent-kpi-promotion-segment--${step.colorClass} ${
+                      step.isHovered ? 'is-hovered' : ''
+                    } ${hasHover && !step.isHovered ? 'is-dimmed' : ''}`}
+                    onMouseEnter={() => setInternalHovered(step.id)}
+                    onMouseOver={() => setInternalHovered(step.id)}
+                    onPointerEnter={() => setInternalHovered(step.id)}
+                    onFocus={() => setInternalHovered(step.id)}
+                    onBlur={() => setInternalHovered(null)}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onTypeClick?.(step);
+                      onClick?.();
+                    }}
+                    tabIndex={0}
+                    role="button"
+                    aria-label={`${step.label}: ${step.count} promotions`}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        onTypeClick?.(step);
+                        onClick?.();
+                      }
+                    }}
+                  >
+                    {/* Invisible wide hit area so hover triggers effortlessly */}
+                    <rect
+                      x={step.x - 2}
+                      y={step.y - 6}
+                      width={step.width + 4}
+                      height={step.height + 8}
+                      fill="transparent"
+                    />
+                    {/* Visible rounded pill step */}
+                    <rect
+                      x={step.x}
+                      y={step.y}
+                      width={step.width}
+                      height={step.height}
+                      rx={3.5}
+                      ry={3.5}
+                      className={`bezent-kpi-promotion-bar bezent-kpi-promotion-bar--${step.colorClass}`}
+                    />
+                  </g>
+                ))}
+
+                {/* Upward Elevation Straight Arrow ( ↗ ) - Floating 10px cleanly ABOVE the steps, zero overlap */}
+                <g
+                  className={`bezent-kpi-promotions-arrow-group ${isArrowHovered ? 'is-hovered' : ''} ${
+                    hasHover && !isArrowHovered ? 'is-dimmed' : ''
+                  }`}
+                  onMouseEnter={() => setInternalHovered('arrow')}
+                  onMouseOver={() => setInternalHovered('arrow')}
+                  onPointerEnter={() => setInternalHovered('arrow')}
+                  onFocus={() => setInternalHovered('arrow')}
+                  onBlur={() => setInternalHovered(null)}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onClick?.();
+                  }}
+                  tabIndex={0}
+                  role="button"
+                  aria-label={
+                    effectiveProgression
+                      ? `Career Progression: ${effectiveProgression.fromRole} to ${effectiveProgression.toRole}`
+                      : 'Career Progression: no recent role change'
+                  }
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      onClick?.();
+                    }
+                  }}
+                >
+                  {/* Stationary Fat Hit Area: Guarantees zero hover flicker */}
+                  <line
+                    x1={6}
+                    y1={30}
+                    x2={52}
+                    y2={4}
+                    strokeWidth={14}
+                    stroke="transparent"
+                    strokeLinecap="round"
+                  />
+
+                  {/* Visual Arrow Layer (floating parallel 10px above the staircase steps, zero overlap) */}
+                  <g className="bezent-kpi-promotions-arrow-visual">
+                    {/* Arrow Shaft: straight bold elevation line */}
+                    <line
+                      x1={8}
+                      y1={28}
+                      x2={45}
+                      y2={6.9}
+                      className="bezent-kpi-promotions-arrow-shaft"
+                    />
+                    {/* Arrowhead: crisp symmetrical dart pointer meeting the shaft notch */}
+                    <polygon
+                      points="49.5,4.4 44.0,3.3 44.8,7.0 47.6,9.5"
+                      className="bezent-kpi-promotions-arrowhead"
+                    />
+                  </g>
+                </g>
+              </svg>
             </>
           )}
         </div>
