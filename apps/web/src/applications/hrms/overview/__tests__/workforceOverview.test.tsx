@@ -107,9 +107,7 @@ describe('Workforce Overview Page', () => {
     );
 
     expect(html).toContain('Employee Lifecycle');
-    expect(html).toContain(
-      'Track workforce progression through hiring, onboarding, probation, confirmation, and alumni stages.',
-    );
+    expect(html).toContain('Total in Pipeline');
     expect(html).toContain('bezent-wf-lifecycle-box');
   });
 
@@ -122,7 +120,7 @@ describe('Workforce Overview Page', () => {
 
     expect(html).toContain('HR Action Center');
     expect(html).toContain('bezent-wf-action-card');
-    expect(html).toContain('Pending reviews');
+    expect(html).toContain('All Caught Up');
   });
 
   it('renders Tier 7: Recent Workforce Activity vertical timeline cleanly', () => {

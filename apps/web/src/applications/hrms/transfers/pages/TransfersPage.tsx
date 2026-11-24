@@ -2,8 +2,6 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Alert,
-  Button,
-  Grid,
   IconButton,
   Inline,
   Page,
@@ -19,7 +17,6 @@ import {
   type ActionStatusCounts,
   type EmployeeActionListItem,
   type EmployeeActionStatus,
-  type EmployeeActionType,
   type OrganizationMasters,
   type PaginationMetadata,
 } from '../../employee-administration/api/employeeAdministrationApi';
@@ -31,6 +28,7 @@ import {
 import { NewEmployeeActionModal } from '../../employee-administration/components/NewEmployeeActionModal';
 import { EmployeeActionDetailModal } from '../../employee-administration/components/EmployeeActionDetailModal';
 import { employeeProfilePath } from '../../employees/model/employeeModel';
+import { WorkforceInfoPopover } from '../../components/WorkforceInfoPopover';
 import {
   TransfersFilterPanel,
   type TransfersFilterState,
@@ -333,35 +331,18 @@ export function TransfersPage({
 
   return (
     <Page maxWidth="full" className="bezent-page" gap="md">
-      {/* 1. Page Header */}
+      {/* 1. Page Header (Clean title with Info Popover) */}
       <PageHeader
-        title={title}
-        eyebrow="HRMS · Workforce"
-        subtitle={subtitle}
-        actions={
-          <Inline gap="sm" align="center">
-            <Button
-              variant="outline"
-              size="md"
-              leftIcon={<BezentIcon name="download" size={16} />}
-              onClick={handleExportCsv}
-              disabled={exporting}
-              aria-label="Export transfers to CSV"
-            >
-              {exporting ? 'Exporting…' : 'Export'}
-            </Button>
-            <Button
-              variant="primary"
-              size="md"
-              leftIcon={<BezentIcon name="plus" size={16} />}
-              onClick={() => setIsNewModalOpen(true)}
-              aria-label="Initiate new transfer"
-            >
-              Initiate Transfer
-            </Button>
-          </Inline>
+        title={
+          <div className="bezent-wf-title-row">
+            <h1 className="bezent-page-header__title">{title}</h1>
+            <WorkforceInfoPopover label={title} tooltip={subtitle} />
+          </div>
         }
       />
+      <span className="sr-only" hidden>
+        {subtitle}
+      </span>
 
       {/* Success banner if an action was applied or cancelled */}
       {successMessage && (
@@ -495,6 +476,7 @@ export function TransfersPage({
               variant="ghost"
               tooltipDirection="down"
               onClick={handleExportCsv}
+              disabled={exporting}
             >
               <BezentIcon name="download" size={18} />
             </IconButton>

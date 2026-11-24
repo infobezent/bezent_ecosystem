@@ -7,3 +7,4 @@ export * from './RecordsKpiCard';
 export * from './WorkforceComplianceKpiCard';
 export * from './WorkforceAnalyticsCard';
 export * from './WorkforceCompositionCard';
+export * from './WorkforceInfoPopover';

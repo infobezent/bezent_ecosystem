@@ -1,9 +1,8 @@
 import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import {
   Page,
   PageHeader,
-  ProgressBar,
   Modal,
   Button,
   Select,
@@ -24,6 +23,7 @@ import {
   RecordsKpiCard,
   WorkforceAnalyticsCard,
   WorkforceCompositionCard,
+  WorkforceInfoPopover,
 } from '../components';
 import raccoonEmployeesImg from '../../../../assets/raccoon_employees.png';
 import { fetchEmployees, type EmployeeRecord } from '../../employees/api/employeesApi';
@@ -47,6 +47,7 @@ import {
 export interface WorkforceOverviewPageProps {
   title?: string;
   subtitle?: string;
+  loading?: boolean;
 }
 
 interface OverviewKPIData {
@@ -121,9 +122,12 @@ interface WorkforceActivityItem {
 
 function getInitials(name: string): string {
   if (!name) return 'EM';
-  const parts = name.trim().split(/\s+/);
-  if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
-  return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+  const parts = name.trim().split(/\s+/).filter(Boolean);
+  if (parts.length === 0) return 'EM';
+  if (parts.length === 1 && parts[0]) return parts[0].slice(0, 2).toUpperCase();
+  const first = parts[0]?.[0] ?? '';
+  const last = parts[parts.length - 1]?.[0] ?? '';
+  return (first + last).toUpperCase() || 'EM';
 }
 
 function formatTimelineDate(dateStr: string | null | undefined): string {
@@ -213,10 +217,19 @@ function getDateRangeForPeriod(period: TimePeriodKey): { from: string; to: strin
 export function WorkforceOverviewPage({
   title = 'Workforce Overview',
   subtitle = 'Organization-wide workforce dashboard',
+  loading: controlledLoading,
 }: WorkforceOverviewPageProps) {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [showHelp, setShowHelp] = useState(false);
-  const [loading, setLoading] = useState(true);
+  const [internalLoading, setInternalLoading] = useState(true);
+  const queryLoading = searchParams.get('loading') === 'true' ? true : undefined;
+  const loading =
+    controlledLoading !== undefined
+      ? controlledLoading
+      : queryLoading !== undefined
+        ? queryLoading
+        : internalLoading;
 
   // ── Global Filters (Time Period / Location / Department) ──
   const [timePeriod, setTimePeriod] = useState<TimePeriodKey>('last_6_months');
@@ -470,7 +483,7 @@ export function WorkforceOverviewPage({
 
   useEffect(() => {
     let active = true;
-    setLoading(true);
+    setInternalLoading(true);
 
     // Structural scope (Location/Department) applies to every fetch below —
     // it narrows "which employees" regardless of metric shape. The selected
@@ -694,8 +707,6 @@ export function WorkforceOverviewPage({
       // ── Promotions Breakdown: real aggregates for the 'job_changes' category ──
       if (promotionActionsRes.status === 'fulfilled') {
         const { data: jobChangeActions, pagination } = promotionActionsRes.value;
-        const pendingByCategory =
-          pendingActionsRes.status === 'fulfilled' ? pendingActionsRes.value.counts : null;
 
         const desigChange = jobChangeActions.filter(
           (a) => a.actionType === 'designation_change',
@@ -1377,7 +1388,7 @@ export function WorkforceOverviewPage({
       activityList.sort((a, b) => new Date(b.dateTime).getTime() - new Date(a.dateTime).getTime());
       setActivities(activityList.slice(0, 8));
 
-      setLoading(false);
+      setInternalLoading(false);
     });
 
     return () => {
@@ -1392,16 +1403,32 @@ export function WorkforceOverviewPage({
         <PageHeader
           title={
             <div className="bezent-wf-title-row">
-              <h1 className="bezent-page-header__title">{title}</h1>
+              <h1 className="bezent-page-header__title">
+                {loading ? (
+                  <>
+                    <span className="bezent-sr-only">{title}</span>
+                    <span className="bezent-wf-skeleton-shimmer bezent-wf-skeleton-page-title" />
+                  </>
+                ) : (
+                  title
+                )}
+              </h1>
               <div className="bezent-wf-help-trigger">
                 <button
                   type="button"
-                  className="bezent-wf-help-btn"
+                  className={`bezent-wf-help-btn ${loading ? 'bezent-wf-help-btn--loading' : ''}`}
                   aria-label="Workforce Overview Information"
                   onClick={() => setShowHelp((prev) => !prev)}
                   onBlur={() => setShowHelp(false)}
                 >
-                  ?
+                  {loading ? (
+                    <>
+                      <span className="bezent-sr-only">?</span>
+                      <span className="bezent-wf-skeleton-shimmer bezent-wf-skeleton-help-dot" />
+                    </>
+                  ) : (
+                    '?'
+                  )}
                 </button>
                 <div
                   className={`bezent-wf-help-popover ${showHelp ? 'bezent-wf-help-popover--visible' : ''}`}
@@ -1414,42 +1441,81 @@ export function WorkforceOverviewPage({
           }
           actions={
             <div className="bezent-wf-header-controls">
-              <div className="bezent-wf-filter-pill">
-                <BezentIcon name="schedule" size={14} className="bezent-wf-filter-icon" />
-                <Select
-                  size="sm"
-                  width="auto"
-                  aria-label="Filter by timeframe"
-                  title="Filter by timeframe"
-                  value={timePeriod}
-                  options={TIME_PERIOD_OPTIONS}
-                  onChange={(e) => setTimePeriod(e.target.value as TimePeriodKey)}
-                />
-              </div>
-              <div className="bezent-wf-filter-pill">
-                <BezentIcon name="location" size={14} className="bezent-wf-filter-icon" />
-                <Select
-                  size="sm"
-                  width="auto"
-                  aria-label="Filter by location"
-                  title="Filter by location"
-                  value={locationId}
-                  options={locationOptions}
-                  onChange={(e) => setLocationId(e.target.value)}
-                />
-              </div>
-              <div className="bezent-wf-filter-pill">
-                <BezentIcon name="organization" size={14} className="bezent-wf-filter-icon" />
-                <Select
-                  size="sm"
-                  width="auto"
-                  aria-label="Filter by department"
-                  title="Filter by department"
-                  value={departmentId}
-                  options={departmentOptions}
-                  onChange={(e) => setDepartmentId(e.target.value)}
-                />
-              </div>
+              {loading ? (
+                <>
+                  <div className="bezent-sr-only">
+                    <Select
+                      size="sm"
+                      width="auto"
+                      aria-label="Filter by timeframe"
+                      title="Filter by timeframe"
+                      value={timePeriod}
+                      options={TIME_PERIOD_OPTIONS}
+                      onChange={(e) => setTimePeriod(e.target.value as TimePeriodKey)}
+                    />
+                    <Select
+                      size="sm"
+                      width="auto"
+                      aria-label="Filter by location"
+                      title="Filter by location"
+                      value={locationId}
+                      options={locationOptions}
+                      onChange={(e) => setLocationId(e.target.value)}
+                    />
+                    <Select
+                      size="sm"
+                      width="auto"
+                      aria-label="Filter by department"
+                      title="Filter by department"
+                      value={departmentId}
+                      options={departmentOptions}
+                      onChange={(e) => setDepartmentId(e.target.value)}
+                    />
+                  </div>
+                  <span className="bezent-wf-skeleton-shimmer bezent-wf-skeleton-filter-pill" />
+                  <span className="bezent-wf-skeleton-shimmer bezent-wf-skeleton-filter-pill bezent-wf-skeleton-filter-pill--sm" />
+                  <span className="bezent-wf-skeleton-shimmer bezent-wf-skeleton-filter-pill bezent-wf-skeleton-filter-pill--lg" />
+                </>
+              ) : (
+                <>
+                  <div className="bezent-wf-filter-pill">
+                    <BezentIcon name="schedule" size={14} className="bezent-wf-filter-icon" />
+                    <Select
+                      size="sm"
+                      width="auto"
+                      aria-label="Filter by timeframe"
+                      title="Filter by timeframe"
+                      value={timePeriod}
+                      options={TIME_PERIOD_OPTIONS}
+                      onChange={(e) => setTimePeriod(e.target.value as TimePeriodKey)}
+                    />
+                  </div>
+                  <div className="bezent-wf-filter-pill">
+                    <BezentIcon name="location" size={14} className="bezent-wf-filter-icon" />
+                    <Select
+                      size="sm"
+                      width="auto"
+                      aria-label="Filter by location"
+                      title="Filter by location"
+                      value={locationId}
+                      options={locationOptions}
+                      onChange={(e) => setLocationId(e.target.value)}
+                    />
+                  </div>
+                  <div className="bezent-wf-filter-pill">
+                    <BezentIcon name="organization" size={14} className="bezent-wf-filter-icon" />
+                    <Select
+                      size="sm"
+                      width="auto"
+                      aria-label="Filter by department"
+                      title="Filter by department"
+                      value={departmentId}
+                      options={departmentOptions}
+                      onChange={(e) => setDepartmentId(e.target.value)}
+                    />
+                  </div>
+                </>
+              )}
             </div>
           }
         />
@@ -1561,15 +1627,30 @@ export function WorkforceOverviewPage({
           >
             <div className="bezent-wf-planning-card__top">
               <div className="bezent-wf-planning-card__header-left">
-                <div className="bezent-wf-planning-card__icon" aria-hidden="true">
-                  <BezentIcon name="schedule" size={18} />
+                <div
+                  className={`bezent-wf-planning-card__icon ${
+                    loading ? 'bezent-wf-skeleton-icon-badge' : ''
+                  }`}
+                  aria-hidden="true"
+                >
+                  {loading ? null : <BezentIcon name="schedule" size={18} />}
                 </div>
-                <div>
-                  <h3 className="bezent-wf-planning-card__title">Workforce Planning</h3>
-                  <p className="bezent-wf-planning-card__desc">
-                    Capacity &amp; staffing projection
-                  </p>
-                </div>
+                <h3 className="bezent-wf-planning-card__title">
+                  {loading ? (
+                    <>
+                      <span className="bezent-sr-only">Workforce Planning</span>
+                      <span className="bezent-wf-skeleton-shimmer bezent-wf-skeleton-title" />
+                    </>
+                  ) : (
+                    <>
+                      <span>Workforce Planning</span>
+                      <WorkforceInfoPopover
+                        label="Workforce Planning"
+                        tooltip="Capacity vs. planned budget and staffing deficit projections"
+                      />
+                    </>
+                  )}
+                </h3>
               </div>
               <button
                 type="button"
@@ -1583,35 +1664,24 @@ export function WorkforceOverviewPage({
                 }
                 title="View full workforce planning breakdown in drawer"
               >
-                <span>View Details</span>
-                <BezentIcon name="chevronRight" size={14} />
+                {loading ? (
+                  <span className="bezent-wf-skeleton-shimmer bezent-wf-skeleton-control-btn" />
+                ) : (
+                  <>
+                    <span>View Details</span>
+                    <BezentIcon name="chevronRight" size={14} />
+                  </>
+                )}
               </button>
             </div>
 
-            {/* Workforce Planning Content Body */}
+            {/* Workforce Planning Content Body (Idea 2: Radial Capacity Gauge & Staffing Matrix) */}
             <div className="bezent-wf-planning-body">
-              {/* Primary Section: Current Workforce, Planned Workforce, Workforce Capacity (%) */}
-              <div className="bezent-wf-plan-primary">
-                <div className="bezent-wf-plan-stats-row">
-                  <div className="bezent-wf-plan-stat">
-                    <span className="bezent-wf-plan-stat-label">Current Workforce</span>
-                    <span className="bezent-wf-plan-stat-val">{kpiData.totalEmployees}</span>
-                  </div>
-                  <div className="bezent-wf-plan-stat">
-                    <span className="bezent-wf-plan-stat-label">Planned Workforce</span>
-                    <span className="bezent-wf-plan-stat-val">{approvedHeadcount}</span>
-                  </div>
-                  <div className="bezent-wf-plan-stat">
-                    <span className="bezent-wf-plan-stat-label">Workforce Capacity</span>
-                    <span className="bezent-wf-plan-stat-val bezent-wf-plan-stat-val--blue">
-                      {capacityUtilizationPct}%
-                    </span>
-                  </div>
-                </div>
-
-                {/* Simple Horizontal Progress Bar */}
+              {/* Primary Split: Radial Capacity Gauge on Left, Staffing Matrix on Right */}
+              <div className="bezent-wf-plan-gauge-split">
+                {/* Left: Semi-Circular Radial Capacity Gauge */}
                 <div
-                  className="bezent-wf-plan-progress-wrap"
+                  className="bezent-wf-plan-gauge-col"
                   onClick={() =>
                     openDrawer(
                       'planning',
@@ -1621,32 +1691,146 @@ export function WorkforceOverviewPage({
                   }
                   title={`Workforce Capacity: ${capacityUtilizationPct}% Filled (${kpiData.totalEmployees} of ${approvedHeadcount} Active). Staffing gap: ${headcountGap}. Click to view details.`}
                 >
-                  <ProgressBar
-                    value={capacityUtilizationPct}
-                    max={100}
-                    size="sm"
-                    variant="primary"
-                  />
+                  <div className="bezent-wf-plan-gauge-wrap">
+                    <svg viewBox="0 0 100 58" className="bezent-wf-plan-gauge-svg">
+                      <defs>
+                        <linearGradient
+                          id="bezent-wf-plan-teal-grad"
+                          x1="0%"
+                          y1="0%"
+                          x2="100%"
+                          y2="0%"
+                        >
+                          <stop offset="0%" stopColor="#0d9488" />
+                          <stop offset="100%" stopColor="#06b6d4" />
+                        </linearGradient>
+                      </defs>
+                      <path
+                        d="M 10 50 A 40 40 0 0 1 90 50"
+                        fill="none"
+                        stroke="#e2e8f0"
+                        strokeWidth="10"
+                        strokeLinecap="round"
+                        className="bezent-wf-plan-gauge-track"
+                      />
+                      <path
+                        d="M 10 50 A 40 40 0 0 1 90 50"
+                        fill="none"
+                        stroke="url(#bezent-wf-plan-teal-grad)"
+                        strokeWidth="10"
+                        strokeLinecap="round"
+                        strokeDasharray="125.66"
+                        strokeDashoffset={
+                          loading
+                            ? 125.66
+                            : 125.66 -
+                              (Math.min(Math.max(capacityUtilizationPct, 0), 100) / 100) * 125.66
+                        }
+                        className="bezent-wf-plan-gauge-fill"
+                      />
+                    </svg>
+                    <div className="bezent-wf-plan-gauge-center">
+                      {loading ? (
+                        <span className="bezent-wf-skeleton-shimmer bezent-wf-skeleton-gauge-val" />
+                      ) : (
+                        <>
+                          <span className="bezent-wf-plan-gauge-val">
+                            {capacityUtilizationPct}%
+                          </span>
+                          <span className="bezent-wf-plan-gauge-tag">Optimal</span>
+                        </>
+                      )}
+                    </div>
+                  </div>
+                  <div className="bezent-wf-plan-gauge-meta">
+                    <span className="bezent-wf-plan-gauge-label">
+                      {loading ? (
+                        <>
+                          <span className="bezent-sr-only">Workforce Capacity</span>
+                          <span className="bezent-wf-skeleton-shimmer bezent-wf-skeleton-label" />
+                        </>
+                      ) : (
+                        'Workforce Capacity'
+                      )}
+                    </span>
+                    {loading ? (
+                      <span className="bezent-wf-skeleton-shimmer bezent-wf-skeleton-inline-ratio" />
+                    ) : (
+                      <span className="bezent-wf-plan-gauge-ratio">
+                        {kpiData.totalEmployees} / {approvedHeadcount} Filled
+                      </span>
+                    )}
+                  </div>
                 </div>
 
-                <div className="bezent-wf-plan-capacity-meta">
-                  <span className="bezent-wf-plan-gap-text">
-                    {Math.abs(headcountGap)} positions{' '}
-                    {headcountGap <= 0 ? 'deficit to budget' : 'surplus'}
-                  </span>
-                  <span className="bezent-wf-plan-ratio-text">
-                    {kpiData.totalEmployees} / {approvedHeadcount} Filled
-                  </span>
+                {/* Right: 3 Stacked Target Strips */}
+                <div className="bezent-wf-plan-matrix-col">
+                  <div className="bezent-wf-plan-strip">
+                    <span className="bezent-wf-plan-strip-label">
+                      {loading ? (
+                        <>
+                          <span className="bezent-sr-only">Planned Workforce</span>
+                          <span className="bezent-wf-skeleton-shimmer bezent-wf-skeleton-label" />
+                        </>
+                      ) : (
+                        'Planned Workforce'
+                      )}
+                    </span>
+                    {loading ? (
+                      <span className="bezent-wf-skeleton-shimmer bezent-wf-skeleton-strip-val" />
+                    ) : (
+                      <span className="bezent-wf-plan-strip-val">{approvedHeadcount}</span>
+                    )}
+                  </div>
+                  <div className="bezent-wf-plan-strip">
+                    <span className="bezent-wf-plan-strip-label">
+                      {loading ? (
+                        <>
+                          <span className="bezent-sr-only">Current Workforce</span>
+                          <span className="bezent-wf-skeleton-shimmer bezent-wf-skeleton-label" />
+                        </>
+                      ) : (
+                        'Current Workforce'
+                      )}
+                    </span>
+                    {loading ? (
+                      <span className="bezent-wf-skeleton-shimmer bezent-wf-skeleton-strip-val" />
+                    ) : (
+                      <span className="bezent-wf-plan-strip-val bezent-wf-plan-strip-val--highlight">
+                        {kpiData.totalEmployees}
+                      </span>
+                    )}
+                  </div>
+                  <div className="bezent-wf-plan-strip">
+                    <span className="bezent-wf-plan-strip-label">
+                      {loading ? (
+                        <>
+                          <span className="bezent-sr-only">Staffing Deficit</span>
+                          <span className="bezent-wf-skeleton-shimmer bezent-wf-skeleton-label" />
+                        </>
+                      ) : (
+                        'Staffing Deficit'
+                      )}
+                    </span>
+                    {loading ? (
+                      <span className="bezent-wf-skeleton-shimmer bezent-wf-skeleton-strip-val" />
+                    ) : (
+                      <span className="bezent-wf-plan-strip-val bezent-wf-plan-strip-val--status">
+                        {Math.abs(headcountGap)}{' '}
+                        {headcountGap <= 0 ? 'deficit to budget' : 'surplus'}
+                      </span>
+                    )}
+                  </div>
                 </div>
               </div>
 
               <div className="bezent-wf-plan-divider" />
 
-              {/* Secondary Section: Hiring Demand, Expected Exits */}
+              {/* Secondary Section: Hiring Demand & Expected Exits */}
               <div className="bezent-wf-plan-secondary">
                 <button
                   type="button"
-                  className="bezent-wf-plan-sec-stat"
+                  className="bezent-wf-plan-sec-card bezent-wf-plan-sec-card--amber"
                   onClick={() =>
                     openDrawer(
                       'hiring',
@@ -1656,21 +1840,40 @@ export function WorkforceOverviewPage({
                   }
                   title={`Hiring Demand: ${openPositionsCount} open positions required to satisfy departmental deficit. Click to view openings.`}
                 >
-                  <span className="bezent-wf-plan-stat-label">Hiring Demand</span>
-                  <div className="bezent-wf-plan-sec-stat-main">
-                    <span className="bezent-wf-plan-stat-val bezent-wf-plan-stat-val--amber">
-                      {openPositionsCount}
+                  <div className="bezent-wf-plan-sec-card__header">
+                    <span className="bezent-wf-plan-sec-card__label">
+                      {loading ? (
+                        <>
+                          <span className="bezent-sr-only">Hiring Demand</span>
+                          <span className="bezent-wf-skeleton-shimmer bezent-wf-skeleton-label-sm" />
+                        </>
+                      ) : (
+                        'Hiring Demand'
+                      )}
                     </span>
-                    <span className="bezent-wf-plan-sec-pill bezent-wf-plan-sec-pill--amber">
-                      Open Roles
-                    </span>
+                    {loading ? (
+                      <span className="bezent-wf-skeleton-shimmer bezent-wf-skeleton-badge-val" />
+                    ) : (
+                      <span className="bezent-wf-plan-sec-pill bezent-wf-plan-sec-pill--amber">
+                        Open Roles
+                      </span>
+                    )}
                   </div>
-                  <span className="bezent-wf-plan-sec-hint">Active hiring requisitions</span>
+                  <div className="bezent-wf-plan-sec-card__body">
+                    {loading ? (
+                      <span className="bezent-wf-skeleton-shimmer bezent-wf-skeleton-sec-val-wide" />
+                    ) : (
+                      <>
+                        <span className="bezent-wf-plan-sec-card__val">{openPositionsCount}</span>
+                        <span className="bezent-wf-plan-sec-card__unit">Requisitions</span>
+                      </>
+                    )}
+                  </div>
                 </button>
 
                 <button
                   type="button"
-                  className="bezent-wf-plan-sec-stat"
+                  className="bezent-wf-plan-sec-card bezent-wf-plan-sec-card--blue"
                   onClick={() =>
                     openDrawer(
                       'exits',
@@ -1680,20 +1883,41 @@ export function WorkforceOverviewPage({
                   }
                   title={`Expected Exits: ${expectedExits} departures scheduled or in notice period. Click to view offboarding.`}
                 >
-                  <span className="bezent-wf-plan-stat-label">Expected Exits</span>
-                  <div className="bezent-wf-plan-sec-stat-main">
-                    <span className="bezent-wf-plan-stat-val">{expectedExits}</span>
-                    <span className="bezent-wf-plan-sec-pill bezent-wf-plan-sec-pill--blue">
-                      Notice
+                  <div className="bezent-wf-plan-sec-card__header">
+                    <span className="bezent-wf-plan-sec-card__label">
+                      {loading ? (
+                        <>
+                          <span className="bezent-sr-only">Expected Exits</span>
+                          <span className="bezent-wf-skeleton-shimmer bezent-wf-skeleton-label-sm" />
+                        </>
+                      ) : (
+                        'Expected Exits'
+                      )}
                     </span>
+                    {loading ? (
+                      <span className="bezent-wf-skeleton-shimmer bezent-wf-skeleton-badge-val" />
+                    ) : (
+                      <span className="bezent-wf-plan-sec-pill bezent-wf-plan-sec-pill--blue">
+                        Notice
+                      </span>
+                    )}
                   </div>
-                  <span className="bezent-wf-plan-sec-hint">Notice period scheduled</span>
+                  <div className="bezent-wf-plan-sec-card__body">
+                    {loading ? (
+                      <span className="bezent-wf-skeleton-shimmer bezent-wf-skeleton-sec-val-wide" />
+                    ) : (
+                      <>
+                        <span className="bezent-wf-plan-sec-card__val">{expectedExits}</span>
+                        <span className="bezent-wf-plan-sec-card__unit">Departures</span>
+                      </>
+                    )}
+                  </div>
                 </button>
               </div>
             </div>
           </div>
 
-          {/* Card 2: Workforce Alerts (50% Width) */}
+          {/* Card 2: Workforce Alerts (Idea 2: Severity Matrix & Triage Progress) */}
           <div
             className="bezent-wf-alerts-card"
             role="region"
@@ -1702,65 +1926,107 @@ export function WorkforceOverviewPage({
             <div className="bezent-wf-planning-card__top">
               <div className="bezent-wf-planning-card__header-left">
                 <div
-                  className="bezent-wf-planning-card__icon bezent-wf-planning-card__icon--rose"
+                  className={`bezent-wf-planning-card__icon bezent-wf-planning-card__icon--amber ${
+                    loading ? 'bezent-wf-skeleton-icon-badge' : ''
+                  }`}
                   aria-hidden="true"
                 >
-                  <BezentIcon name="alertTriangle" size={18} />
+                  {loading ? null : <BezentIcon name="warning" size={18} />}
                 </div>
-                <div>
-                  <h3 className="bezent-wf-planning-card__title">Workforce Alerts</h3>
-                  <p className="bezent-wf-planning-card__desc">
-                    Actionable compliance &amp; workforce flags
-                  </p>
-                </div>
+                <h3 className="bezent-wf-planning-card__title">
+                  {loading ? (
+                    <>
+                      <span className="bezent-sr-only">Workforce Alerts</span>
+                      <span className="bezent-wf-skeleton-shimmer bezent-wf-skeleton-title" />
+                    </>
+                  ) : (
+                    <>
+                      <span>Workforce Alerts</span>
+                      <WorkforceInfoPopover
+                        label="Workforce Alerts"
+                        tooltip="Actionable compliance flags, expiring documents, and pending reviews"
+                      />
+                    </>
+                  )}
+                </h3>
               </div>
-              <span className="bezent-wf-clean-alert-badge bezent-wf-clean-alert-badge--rose">
-                {
-                  [
-                    recordsBreakdown.expiringCount,
-                    kpiData.probationEmployees,
-                    regularizationItems.length,
-                  ].filter((c) => c > 0).length
-                }{' '}
-                Actionable
-              </span>
+              {loading ? (
+                <span className="bezent-wf-skeleton-shimmer bezent-wf-skeleton-badge-pill" />
+              ) : (
+                <span className="bezent-wf-clean-alert-badge bezent-wf-clean-alert-badge--amber">
+                  {
+                    [
+                      recordsBreakdown.expiringCount,
+                      kpiData.probationEmployees,
+                      regularizationItems.length,
+                    ].filter((c) => c > 0).length
+                  }{' '}
+                  Actionable
+                </span>
+              )}
             </div>
 
-            {/* 3 Alerts List: Clean horizontal rows with subtle separators */}
-            <div className="bezent-wf-alerts-clean-list">
-              {/* Alert 1: Documents Expiring */}
-              <button
-                type="button"
-                className="bezent-wf-clean-alert-row"
-                onClick={() =>
-                  openDrawer(
-                    'documents',
-                    'Documents Expiring Soon',
-                    'Employee identity, statutory compliance, and certification documents expiring within 30 days.',
-                  )
-                }
-                title={`${recordsBreakdown.expiringCount} employee document(s) expiring within the next 30 days. Click to view details.`}
-              >
-                <div className="bezent-wf-clean-alert-left">
-                  <div className="bezent-wf-clean-alert-icon bezent-wf-clean-alert-icon--amber">
-                    <BezentIcon name="documents" size={16} />
-                  </div>
-                  <div className="bezent-wf-clean-alert-text">
-                    <h4 className="bezent-wf-clean-alert-title">Documents Expiring</h4>
-                    <span className="bezent-wf-clean-alert-desc">
-                      ID &amp; compliance credentials expiring within 30 days
-                    </span>
-                  </div>
-                </div>
-                <div className="bezent-wf-clean-alert-right">
-                  <span className="bezent-wf-clean-alert-badge bezent-wf-clean-alert-badge--amber">
-                    {recordsBreakdown.expiringCount} Expiring
+            {/* Severity Status Strip */}
+            <div className="bezent-wf-alert-severity-strip">
+              <div className="bezent-wf-alert-severity-col">
+                <span className="bezent-wf-alert-severity-label">
+                  {loading ? (
+                    <span className="bezent-wf-skeleton-shimmer bezent-wf-skeleton-label-sm" />
+                  ) : (
+                    'Critical'
+                  )}
+                </span>
+                {loading ? (
+                  <span className="bezent-wf-skeleton-shimmer bezent-wf-skeleton-severity-val" />
+                ) : (
+                  <span className="bezent-wf-alert-severity-val">0</span>
+                )}
+              </div>
+              <div className="bezent-wf-alert-severity-col bezent-wf-alert-severity-col--middle">
+                <span className="bezent-wf-alert-severity-label bezent-wf-alert-severity-label--amber">
+                  {loading ? (
+                    <span className="bezent-wf-skeleton-shimmer bezent-wf-skeleton-label-sm" />
+                  ) : (
+                    'Action Due'
+                  )}
+                </span>
+                {loading ? (
+                  <span className="bezent-wf-skeleton-shimmer bezent-wf-skeleton-severity-val" />
+                ) : (
+                  <span className="bezent-wf-alert-severity-val bezent-wf-alert-severity-val--amber">
+                    {recordsBreakdown.expiringCount +
+                      kpiData.probationEmployees +
+                      regularizationItems.length}
                   </span>
-                  <BezentIcon name="chevronRight" size={14} />
-                </div>
-              </button>
+                )}
+              </div>
+              <div className="bezent-wf-alert-severity-col">
+                <span className="bezent-wf-alert-severity-label bezent-wf-alert-severity-label--emerald">
+                  {loading ? (
+                    <span className="bezent-wf-skeleton-shimmer bezent-wf-skeleton-label-sm" />
+                  ) : (
+                    'Cleared'
+                  )}
+                </span>
+                {loading ? (
+                  <span className="bezent-wf-skeleton-shimmer bezent-wf-skeleton-severity-val" />
+                ) : (
+                  <span className="bezent-wf-alert-severity-val bezent-wf-alert-severity-val--emerald">
+                    {3 -
+                      [
+                        recordsBreakdown.expiringCount,
+                        kpiData.probationEmployees,
+                        regularizationItems.length,
+                      ].filter((c) => c > 0).length}{' '}
+                    Items
+                  </span>
+                )}
+              </div>
+            </div>
 
-              {/* Alert 2: Probation Reviews Due */}
+            {/* 3 Alerts List: Clean single-line rows with severity indicator dots */}
+            <div className="bezent-wf-alerts-clean-list">
+              {/* Alert 1: Probation Reviews Due */}
               <button
                 type="button"
                 className="bezent-wf-clean-alert-row"
@@ -1774,21 +2040,75 @@ export function WorkforceOverviewPage({
                 title={`${kpiData.probationEmployees} employee(s) currently on probation. Click to view details.`}
               >
                 <div className="bezent-wf-clean-alert-left">
-                  <div className="bezent-wf-clean-alert-icon bezent-wf-clean-alert-icon--purple">
-                    <BezentIcon name="employees" size={16} />
-                  </div>
-                  <div className="bezent-wf-clean-alert-text">
-                    <h4 className="bezent-wf-clean-alert-title">Probation Reviews Due</h4>
-                    <span className="bezent-wf-clean-alert-desc">
-                      Confirmation assessment milestone pending
-                    </span>
-                  </div>
+                  <span
+                    className={`bezent-wf-alert-dot ${loading ? 'bezent-wf-alert-dot--neutral' : kpiData.probationEmployees > 0 ? 'bezent-wf-alert-dot--amber bezent-wf-alert-dot--pulse' : 'bezent-wf-alert-dot--emerald'}`}
+                  />
+                  <h4 className="bezent-wf-clean-alert-title">
+                    {loading ? (
+                      <>
+                        <span className="bezent-sr-only">Probation Reviews Due</span>
+                        <span className="bezent-wf-skeleton-shimmer bezent-wf-skeleton-label" />
+                      </>
+                    ) : (
+                      'Probation Reviews Due'
+                    )}
+                  </h4>
                 </div>
                 <div className="bezent-wf-clean-alert-right">
-                  <span className="bezent-wf-clean-alert-badge bezent-wf-clean-alert-badge--purple">
-                    {kpiData.probationEmployees} Due
-                  </span>
-                  <BezentIcon name="chevronRight" size={14} />
+                  {loading ? (
+                    <span className="bezent-wf-skeleton-shimmer bezent-wf-skeleton-badge-pill" />
+                  ) : kpiData.probationEmployees > 0 ? (
+                    <span className="bezent-wf-clean-alert-badge bezent-wf-clean-alert-badge--amber">
+                      Review {kpiData.probationEmployees} ↗
+                    </span>
+                  ) : (
+                    <span className="bezent-wf-clean-alert-badge bezent-wf-clean-alert-badge--emerald">
+                      Cleared ✓
+                    </span>
+                  )}
+                </div>
+              </button>
+
+              {/* Alert 2: Documents Expiring */}
+              <button
+                type="button"
+                className="bezent-wf-clean-alert-row"
+                onClick={() =>
+                  openDrawer(
+                    'documents',
+                    'Documents Expiring Soon',
+                    'Employee identity, statutory compliance, and certification documents expiring within 30 days.',
+                  )
+                }
+                title={`${recordsBreakdown.expiringCount} employee document(s) expiring within the next 30 days. Click to view details.`}
+              >
+                <div className="bezent-wf-clean-alert-left">
+                  <span
+                    className={`bezent-wf-alert-dot ${loading ? 'bezent-wf-alert-dot--neutral' : recordsBreakdown.expiringCount > 0 ? 'bezent-wf-alert-dot--amber' : 'bezent-wf-alert-dot--emerald'}`}
+                  />
+                  <h4 className="bezent-wf-clean-alert-title">
+                    {loading ? (
+                      <>
+                        <span className="bezent-sr-only">Documents Expiring</span>
+                        <span className="bezent-wf-skeleton-shimmer bezent-wf-skeleton-label" />
+                      </>
+                    ) : (
+                      'Documents Expiring'
+                    )}
+                  </h4>
+                </div>
+                <div className="bezent-wf-clean-alert-right">
+                  {loading ? (
+                    <span className="bezent-wf-skeleton-shimmer bezent-wf-skeleton-badge-pill" />
+                  ) : recordsBreakdown.expiringCount > 0 ? (
+                    <span className="bezent-wf-clean-alert-badge bezent-wf-clean-alert-badge--amber">
+                      {recordsBreakdown.expiringCount} Expiring ↗
+                    </span>
+                  ) : (
+                    <span className="bezent-wf-clean-alert-badge bezent-wf-clean-alert-badge--emerald">
+                      Cleared ✓
+                    </span>
+                  )}
                 </div>
               </button>
 
@@ -1806,21 +2126,32 @@ export function WorkforceOverviewPage({
                 title={`${regularizationItems.length} attendance exception(s) pending review. Click to view details.`}
               >
                 <div className="bezent-wf-clean-alert-left">
-                  <div className="bezent-wf-clean-alert-icon bezent-wf-clean-alert-icon--rose">
-                    <BezentIcon name="schedule" size={16} />
-                  </div>
-                  <div className="bezent-wf-clean-alert-text">
-                    <h4 className="bezent-wf-clean-alert-title">Attendance Exceptions</h4>
-                    <span className="bezent-wf-clean-alert-desc">
-                      Missed punch regularization requests requiring review
-                    </span>
-                  </div>
+                  <span
+                    className={`bezent-wf-alert-dot ${loading ? 'bezent-wf-alert-dot--neutral' : regularizationItems.length > 0 ? 'bezent-wf-alert-dot--rose' : 'bezent-wf-alert-dot--emerald'}`}
+                  />
+                  <h4 className="bezent-wf-clean-alert-title">
+                    {loading ? (
+                      <>
+                        <span className="bezent-sr-only">Attendance Exceptions</span>
+                        <span className="bezent-wf-skeleton-shimmer bezent-wf-skeleton-label" />
+                      </>
+                    ) : (
+                      'Attendance Exceptions'
+                    )}
+                  </h4>
                 </div>
                 <div className="bezent-wf-clean-alert-right">
-                  <span className="bezent-wf-clean-alert-badge bezent-wf-clean-alert-badge--rose">
-                    {regularizationItems.length} Pending
-                  </span>
-                  <BezentIcon name="chevronRight" size={14} />
+                  {loading ? (
+                    <span className="bezent-wf-skeleton-shimmer bezent-wf-skeleton-badge-pill" />
+                  ) : regularizationItems.length > 0 ? (
+                    <span className="bezent-wf-clean-alert-badge bezent-wf-clean-alert-badge--rose">
+                      {regularizationItems.length} Pending ↗
+                    </span>
+                  ) : (
+                    <span className="bezent-wf-clean-alert-badge bezent-wf-clean-alert-badge--emerald">
+                      Cleared ✓
+                    </span>
+                  )}
                 </div>
               </button>
             </div>
@@ -1831,24 +2162,45 @@ export function WorkforceOverviewPage({
         <div className="bezent-wf-mega-card bezent-wf-lifecycle-box">
           <div className="bezent-wf-mega-header">
             <div className="bezent-wf-mega-title-group">
-              <div className="bezent-wf-mega-icon bezent-wf-mega-icon--purple">
-                <BezentIcon name="schedule" size={18} />
+              <div
+                className={`bezent-wf-mega-icon ${loading ? 'bezent-wf-skeleton-icon-badge' : ''}`}
+                aria-hidden="true"
+              >
+                {loading ? null : <BezentIcon name="schedule" size={18} />}
               </div>
-              <div className="bezent-wf-mega-headings">
-                <h3 className="bezent-wf-mega-title">Employee Lifecycle</h3>
-                <p className="bezent-wf-mega-subtitle">
-                  Track workforce progression through hiring, onboarding, probation, confirmation,
-                  and alumni stages.
-                </p>
-              </div>
+              <h3 className="bezent-wf-mega-title">
+                {loading ? (
+                  <>
+                    <span className="bezent-sr-only">Employee Lifecycle</span>
+                    <span className="bezent-wf-skeleton-shimmer bezent-wf-skeleton-title" />
+                  </>
+                ) : (
+                  <>
+                    <span>Employee Lifecycle</span>
+                    <WorkforceInfoPopover
+                      label="Employee Lifecycle"
+                      tooltip="End-to-end talent progression across hiring, onboarding, probation, active, and alumni stages"
+                    />
+                  </>
+                )}
+              </h3>
             </div>
             <button
               type="button"
               className="bezent-wf-mega-link"
               onClick={() => navigate('/hrms/workforce/onboarding')}
             >
-              <span>{totalLifecycleVolume} Total in Pipeline</span>
-              <BezentIcon name="chevronRight" size={14} />
+              {loading ? (
+                <>
+                  <span className="bezent-sr-only">Total in Pipeline</span>
+                  <span className="bezent-wf-skeleton-shimmer bezent-wf-skeleton-badge-pill" />
+                </>
+              ) : (
+                <>
+                  <span>{totalLifecycleVolume} Total in Pipeline</span>
+                  <BezentIcon name="chevronRight" size={14} />
+                </>
+              )}
             </button>
           </div>
 
@@ -1971,14 +2323,35 @@ export function WorkforceOverviewPage({
                   className={`bezent-wf-pillar bezent-wf-pillar--${idx} bezent-wf-pillar--${stg.iconClass} bezent-wf-chevron-item`}
                   onClick={() => navigate(stg.path)}
                 >
-                  <div className="bezent-wf-pillar-icon bezent-wf-chevron-icon">
-                    <BezentIcon name={stg.iconName as BezentIconName} size={18} />
+                  <div
+                    className={`bezent-wf-pillar-icon bezent-wf-chevron-icon ${
+                      loading ? 'bezent-wf-skeleton-pillar-icon' : ''
+                    }`}
+                  >
+                    {loading ? null : (
+                      <BezentIcon name={stg.iconName as BezentIconName} size={18} />
+                    )}
                   </div>
-                  <span className="bezent-wf-pillar-count bezent-wf-chevron-num">{stg.count}</span>
-                  <span className="bezent-wf-pillar-label bezent-wf-chevron-label">{stg.name}</span>
-                  <span className="bezent-wf-pillar-volume bezent-wf-chevron-pct">
-                    {stg.percentage}% volume
-                  </span>
+                  {loading ? (
+                    <>
+                      <span className="bezent-wf-skeleton-shimmer bezent-wf-skeleton-pillar-count" />
+                      <span className="bezent-sr-only">{stg.name}</span>
+                      <span className="bezent-wf-skeleton-shimmer bezent-wf-skeleton-label-sm" />
+                      <span className="bezent-wf-skeleton-shimmer bezent-wf-skeleton-pillar-pct" />
+                    </>
+                  ) : (
+                    <>
+                      <span className="bezent-wf-pillar-count bezent-wf-chevron-num">
+                        {stg.count}
+                      </span>
+                      <span className="bezent-wf-pillar-label bezent-wf-chevron-label">
+                        {stg.name}
+                      </span>
+                      <span className="bezent-wf-pillar-volume bezent-wf-chevron-pct">
+                        {stg.percentage}% volume
+                      </span>
+                    </>
+                  )}
                 </div>
               ))}
             </div>
@@ -1991,29 +2364,64 @@ export function WorkforceOverviewPage({
           <div className="bezent-wf-mega-card bezent-wf-action-card">
             <div className="bezent-wf-mega-header">
               <div className="bezent-wf-mega-title-group">
-                <div className="bezent-wf-mega-icon bezent-wf-mega-icon--amber">
-                  <BezentIcon name="approvals" size={18} />
+                <div
+                  className={`bezent-wf-mega-icon bezent-wf-mega-icon--amber ${
+                    loading ? 'bezent-wf-skeleton-icon-badge' : ''
+                  }`}
+                >
+                  {loading ? null : <BezentIcon name="approvals" size={18} />}
                 </div>
-                <div className="bezent-wf-mega-headings">
-                  <h3 className="bezent-wf-mega-title">HR Action Center</h3>
-                  <p className="bezent-wf-mega-subtitle">
-                    {hrActionItems.length > 0
-                      ? `${hrActionItems.reduce((sum, i) => sum + i.count, 0)} pending items`
-                      : 'Pending reviews'}
-                  </p>
-                </div>
+                <h3 className="bezent-wf-mega-title">
+                  {loading ? (
+                    <>
+                      <span className="bezent-sr-only">HR Action Center</span>
+                      <span className="bezent-wf-skeleton-shimmer bezent-wf-skeleton-title" />
+                    </>
+                  ) : (
+                    <>
+                      <span>HR Action Center</span>
+                      <WorkforceInfoPopover
+                        label="HR Action Center"
+                        tooltip="High-priority pending approvals, verifications, and review tasks"
+                      />
+                    </>
+                  )}
+                </h3>
               </div>
               <button
                 type="button"
                 className="bezent-wf-mega-link"
                 onClick={() => navigate('/hrms/workforce/approvals')}
               >
-                <span>View All</span>
-                <BezentIcon name="chevronRight" size={12} />
+                {loading ? (
+                  <span className="bezent-wf-skeleton-shimmer bezent-wf-skeleton-control-btn" />
+                ) : (
+                  <>
+                    <span>View All</span>
+                    <BezentIcon name="chevronRight" size={12} />
+                  </>
+                )}
               </button>
             </div>
 
-            {hrActionItems.length > 0 ? (
+            {loading ? (
+              <div
+                className="bezent-wf-action-list"
+                aria-busy="true"
+                aria-label="Loading HR action items"
+              >
+                <span className="bezent-sr-only">All Caught Up</span>
+                {[1, 2, 3].map((i) => (
+                  <div key={i} className="bezent-wf-action-skeleton-row">
+                    <div className="bezent-wf-action-item__left">
+                      <div className="bezent-wf-skeleton-shimmer bezent-wf-action-skeleton-icon" />
+                      <div className="bezent-wf-skeleton-shimmer bezent-wf-action-skeleton-name" />
+                    </div>
+                    <div className="bezent-wf-skeleton-shimmer bezent-wf-action-skeleton-pill" />
+                  </div>
+                ))}
+              </div>
+            ) : hrActionItems.length > 0 ? (
               <div className="bezent-wf-action-list">
                 {hrActionItems.map((item) => (
                   <button
@@ -2029,10 +2437,7 @@ export function WorkforceOverviewPage({
                       >
                         <BezentIcon name={item.iconName} size={16} />
                       </div>
-                      <div className="bezent-wf-action-item__text">
-                        <h4 className="bezent-wf-action-name">{item.name}</h4>
-                        <span className="bezent-wf-action-desc">{item.description}</span>
-                      </div>
+                      <h4 className="bezent-wf-action-name">{item.name}</h4>
                     </div>
 
                     <div className="bezent-wf-action-item__right">
@@ -2061,28 +2466,66 @@ export function WorkforceOverviewPage({
           <div className="bezent-wf-mega-card bezent-wf-timeline-card">
             <div className="bezent-wf-mega-header">
               <div className="bezent-wf-mega-title-group">
-                <div className="bezent-wf-mega-icon">
-                  <BezentIcon name="schedule" size={18} />
+                <div
+                  className={`bezent-wf-mega-icon ${
+                    loading ? 'bezent-wf-skeleton-icon-badge' : ''
+                  }`}
+                >
+                  {loading ? null : <BezentIcon name="schedule" size={18} />}
                 </div>
-                <div className="bezent-wf-mega-headings">
-                  <h3 className="bezent-wf-mega-title">Recent Workforce Activity</h3>
-                  <p className="bezent-wf-mega-subtitle">Latest updates</p>
-                </div>
+                <h3 className="bezent-wf-mega-title">
+                  {loading ? (
+                    <>
+                      <span className="bezent-sr-only">Recent Workforce Activity</span>
+                      <span className="bezent-wf-skeleton-shimmer bezent-wf-skeleton-title" />
+                    </>
+                  ) : (
+                    <>
+                      <span>Recent Workforce Activity</span>
+                      <WorkforceInfoPopover
+                        label="Recent Workforce Activity"
+                        tooltip="Live chronological timeline of joiners, role changes, and workforce updates"
+                      />
+                    </>
+                  )}
+                </h3>
               </div>
               <button
                 type="button"
                 className="bezent-wf-mega-link"
                 onClick={() => navigate('/hrms/workforce/employees')}
               >
-                <span>View All</span>
-                <BezentIcon name="chevronRight" size={12} />
+                {loading ? (
+                  <span className="bezent-wf-skeleton-shimmer bezent-wf-skeleton-control-btn" />
+                ) : (
+                  <>
+                    <span>View All</span>
+                    <BezentIcon name="chevronRight" size={12} />
+                  </>
+                )}
               </button>
             </div>
 
             <div className="bezent-wf-timeline-wrap">
               <div className="bezent-wf-timeline-track-line" />
 
-              {activities.length > 0 ? (
+              {loading ? (
+                <div
+                  className="bezent-wf-timeline-skeleton"
+                  aria-busy="true"
+                  aria-label="Loading recent activity"
+                >
+                  {[1, 2, 3, 4].map((i) => (
+                    <div key={i} className="bezent-wf-timeline-skeleton-item">
+                      <div className="bezent-wf-skeleton-shimmer bezent-wf-timeline-skeleton-avatar" />
+                      <div className="bezent-wf-timeline-skeleton-content">
+                        <div className="bezent-wf-skeleton-shimmer bezent-wf-timeline-skeleton-title" />
+                        <div className="bezent-wf-skeleton-shimmer bezent-wf-timeline-skeleton-date" />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : activities.length > 0 ? (
                 activities.slice(0, 4).map((act) => (
                   <div key={act.id} className="bezent-wf-timeline-item">
                     <div
@@ -2125,21 +2568,40 @@ export function WorkforceOverviewPage({
 
           {/* Column 3: Culture / Mascot Card */}
           <div className="bezent-wf-mascot-card">
-            <div className="bezent-wf-speech-bubble">A great team builds great things!</div>
-            <img
-              src={raccoonEmployeesImg}
-              alt="BEZENT Team Mascot"
-              className="bezent-wf-mascot-img"
-            />
+            <div className="bezent-wf-speech-bubble">
+              {loading ? (
+                <span className="bezent-wf-skeleton-shimmer bezent-wf-skeleton-bubble" />
+              ) : (
+                'A great team builds great things!'
+              )}
+            </div>
+            {loading ? (
+              <span className="bezent-wf-skeleton-shimmer bezent-wf-skeleton-mascot" />
+            ) : (
+              <img
+                src={raccoonEmployeesImg}
+                alt="BEZENT Team Mascot"
+                className="bezent-wf-mascot-img"
+              />
+            )}
             {/* Live Culture & Milestone Badges */}
             <div className="bezent-wf-mascot-stats">
-              <span className="bezent-wf-mascot-stat-pill">
-                <span className="bezent-wf-mascot-stat-dot" />
-                Workforce Health: 98%
-              </span>
-              <span className="bezent-wf-mascot-stat-pill bezent-wf-mascot-stat-pill--milestone">
-                🎉 2 Milestones This Week
-              </span>
+              {loading ? (
+                <>
+                  <span className="bezent-wf-skeleton-shimmer bezent-wf-skeleton-mascot-pill" />
+                  <span className="bezent-wf-skeleton-shimmer bezent-wf-skeleton-mascot-pill" />
+                </>
+              ) : (
+                <>
+                  <span className="bezent-wf-mascot-stat-pill">
+                    <span className="bezent-wf-mascot-stat-dot" />
+                    Workforce Health: 98%
+                  </span>
+                  <span className="bezent-wf-mascot-stat-pill bezent-wf-mascot-stat-pill--milestone">
+                    🎉 2 Milestones This Week
+                  </span>
+                </>
+              )}
             </div>
           </div>
         </div>

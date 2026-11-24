@@ -136,12 +136,20 @@ export const PromotionsKpiCard: React.FC<PromotionsKpiCardProps> = ({
       onClick={onClick}
       role="region"
       aria-label="Total Promotions"
-      title="Total Promotions"
     >
       <div className="bezent-kpi-promotions-layout">
         {/* Left Section: Small Heading at Top, Large Primary Number Below */}
         <div className="bezent-kpi-promotions-left">
-          <div className="bezent-kpi-promotions-heading">Promotions</div>
+          <div className="bezent-kpi-promotions-heading">
+            {loading ? (
+              <>
+                <span className="bezent-sr-only">Promotions</span>
+                <span className="bezent-wf-skeleton-shimmer bezent-wf-skeleton-kpi-heading" />
+              </>
+            ) : (
+              'Promotions'
+            )}
+          </div>
           <div className="bezent-kpi-promotions-value">
             {loading ? (
               <span className="bezent-kpi-value-skeleton" aria-hidden="true" />
@@ -158,7 +166,11 @@ export const PromotionsKpiCard: React.FC<PromotionsKpiCardProps> = ({
           onPointerLeave={() => setInternalHovered(null)}
           aria-label="Ascending career steps progression"
         >
-          <div className="bezent-kpi-ambient-glow bezent-kpi-ambient-glow--purple" />
+          {loading ? (
+            <span className="bezent-wf-skeleton-shimmer bezent-wf-skeleton-kpi-graphic--rect" />
+          ) : (
+            <>
+              <div className="bezent-kpi-ambient-glow bezent-kpi-ambient-glow--purple" />
           {/* Floating Hover Badge: 100% unclipped, outside-card visibility */}
           <div
             className={`bezent-kpi-flow-badge bezent-kpi-promotion-tooltip ${hasHover ? 'is-visible' : ''}`}
@@ -292,6 +304,8 @@ export const PromotionsKpiCard: React.FC<PromotionsKpiCardProps> = ({
               </g>
             </g>
           </svg>
+            </>
+          )}
         </div>
       </div>
 

@@ -5,6 +5,7 @@ import {
   FormField,
   Input,
   Button,
+  IconButton,
   Badge,
   Card,
   CardTitle,
@@ -125,6 +126,7 @@ export function DocumentsSection({
 
   const [internalDocs, setInternalDocs] = useState<DocumentItemState[]>(defaultDocuments);
   const [internalExperienced, setInternalExperienced] = useState(true);
+  const [showAadhaarNumber, setShowAadhaarNumber] = useState(false);
   const [internalPhoto, setInternalPhoto] = useState<PassportPhotoState>({
     file: null,
     fileName: '',
@@ -430,22 +432,63 @@ export function DocumentsSection({
                           <RegistrationField
                             fieldKey="documents.aadhaarNumber"
                             value={doc.docNumber}
+                            helperText="12-digit UIDAI number (Confidential & Masked)"
+                            error={
+                              doc.docNumber && doc.docNumber.length !== 12
+                                ? 'Aadhaar must be exactly 12 numeric digits'
+                                : undefined
+                            }
+                          >
+                            <Inline gap="xs" align="center">
+                              <Input
+                                type={showAadhaarNumber ? 'text' : 'password'}
+                                placeholder="Enter 12-digit Aadhaar"
+                                maxLength={12}
+                                value={doc.docNumber}
+                                onChange={(e) => {
+                                  const digitsOnly = e.target.value.replace(/\D/g, '').slice(0, 12);
+                                  handleUpdateDocField(doc.id, 'docNumber', digitsOnly);
+                                }}
+                              />
+                              <IconButton
+                                type="button"
+                                label={
+                                  showAadhaarNumber
+                                    ? 'Hide Aadhaar number'
+                                    : 'Show Aadhaar number'
+                                }
+                                onClick={() => setShowAadhaarNumber((prev) => !prev)}
+                              >
+                                <BezentIcon
+                                  name={showAadhaarNumber ? 'eye' : 'lock'}
+                                  size={16}
+                                />
+                              </IconButton>
+                            </Inline>
+                          </RegistrationField>
+                        ) : doc.id === 'documents.panFile' && panNumberField?.enabled ? (
+                          <RegistrationField
+                            fieldKey="documents.panNumber"
+                            value={doc.docNumber}
+                            helperText="Standard 10-character format: 5 letters, 4 digits, 1 letter"
+                            error={
+                              doc.docNumber &&
+                              !/^[A-Z]{5}[0-9]{4}[A-Z]$/.test(doc.docNumber.trim().toUpperCase())
+                                ? 'Valid 10-character PAN format required (e.g. ABCDE1234F)'
+                                : undefined
+                            }
                           >
                             <Input
                               type="text"
+                              placeholder="e.g. ABCDE1234F"
+                              maxLength={10}
                               value={doc.docNumber}
                               onChange={(e) =>
-                                handleUpdateDocField(doc.id, 'docNumber', e.target.value)
-                              }
-                            />
-                          </RegistrationField>
-                        ) : doc.id === 'documents.panFile' && panNumberField?.enabled ? (
-                          <RegistrationField fieldKey="documents.panNumber" value={doc.docNumber}>
-                            <Input
-                              type="text"
-                              value={doc.docNumber}
-                              onChange={(e) =>
-                                handleUpdateDocField(doc.id, 'docNumber', e.target.value)
+                                handleUpdateDocField(
+                                  doc.id,
+                                  'docNumber',
+                                  e.target.value.toUpperCase().slice(0, 10),
+                                )
                               }
                             />
                           </RegistrationField>

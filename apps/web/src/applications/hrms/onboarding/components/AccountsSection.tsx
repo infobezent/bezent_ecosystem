@@ -6,10 +6,12 @@ import {
   Select,
   Checkbox,
   Button,
+  IconButton,
   Card,
   Inline,
   Stack,
 } from '../../../../design-system/components';
+import { BezentIcon } from '../../../../design-system/icons';
 
 import { RegistrationField, useRegistrationConfig } from '../registration/registrationConfig';
 import type { RegistrationFieldConfig } from '../../settings/api/registrationSettingsApi';
@@ -136,6 +138,8 @@ export function AccountsSection({ value, onChange, grades }: AccountsSectionProp
 
   // Local-only UI state (never part of the persisted record).
   const [isBankNameEditable, setIsBankNameEditable] = useState(false);
+  const [showAccountNumber, setShowAccountNumber] = useState(false);
+  const [showReAccountNumber, setShowReAccountNumber] = useState(false);
 
   const updateBankAccount = (patch: Partial<BankAccount>) => {
     onChange?.({
@@ -314,14 +318,24 @@ export function AccountsSection({ value, onChange, grades }: AccountsSectionProp
             value={accountNumber}
             htmlFor="acc-account-number"
             span={span}
+            helperText="Confidential · Stored securely and masked in API outputs"
           >
-            <Input
-              id="acc-account-number"
-              type="text"
-              placeholder="Enter bank account number"
-              value={accountNumber}
-              onChange={(e) => updateBankAccount({ accountNumber: e.target.value })}
-            />
+            <Inline gap="xs" align="center">
+              <Input
+                id="acc-account-number"
+                type={showAccountNumber ? 'text' : 'password'}
+                placeholder="Enter bank account number"
+                value={accountNumber}
+                onChange={(e) => updateBankAccount({ accountNumber: e.target.value })}
+              />
+              <IconButton
+                type="button"
+                label={showAccountNumber ? 'Hide account number' : 'Show account number'}
+                onClick={() => setShowAccountNumber((prev) => !prev)}
+              >
+                <BezentIcon name={showAccountNumber ? 'eye' : 'lock'} size={16} />
+              </IconButton>
+            </Inline>
           </RegistrationField>
         );
 
@@ -334,14 +348,35 @@ export function AccountsSection({ value, onChange, grades }: AccountsSectionProp
             htmlFor="acc-re-account-number"
             span={span}
             error={accountMismatchError || undefined}
+            helperText={
+              accountMismatchError
+                ? undefined
+                : 'Confidential · Manual re-entry required for verification'
+            }
           >
-            <Input
-              id="acc-re-account-number"
-              type="text"
-              placeholder="Re-enter bank account number"
-              value={reAccountNumber}
-              onChange={(e) => updateBankAccount({ reEnterAccountNumber: e.target.value })}
-            />
+            <Inline gap="xs" align="center">
+              <Input
+                id="acc-re-account-number"
+                type={showReAccountNumber ? 'text' : 'password'}
+                placeholder="Re-enter bank account number"
+                value={reAccountNumber}
+                onPaste={(e) => {
+                  e.preventDefault();
+                }}
+                onChange={(e) => updateBankAccount({ reEnterAccountNumber: e.target.value })}
+              />
+              <IconButton
+                type="button"
+                label={
+                  showReAccountNumber
+                    ? 'Hide re-entered account number'
+                    : 'Show re-entered account number'
+                }
+                onClick={() => setShowReAccountNumber((prev) => !prev)}
+              >
+                <BezentIcon name={showReAccountNumber ? 'eye' : 'lock'} size={16} />
+              </IconButton>
+            </Inline>
           </RegistrationField>
         );
 

@@ -2,8 +2,6 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Alert,
-  Button,
-  Grid,
   IconButton,
   Inline,
   Page,
@@ -19,7 +17,6 @@ import {
   type ActionStatusCounts,
   type EmployeeActionListItem,
   type EmployeeActionStatus,
-  type EmployeeActionType,
   type OrganizationMasters,
   type PaginationMetadata,
 } from '../../employee-administration/api/employeeAdministrationApi';
@@ -31,6 +28,7 @@ import {
 import { NewEmployeeActionModal } from '../../employee-administration/components/NewEmployeeActionModal';
 import { EmployeeActionDetailModal } from '../../employee-administration/components/EmployeeActionDetailModal';
 import { employeeProfilePath } from '../../employees/model/employeeModel';
+import { WorkforceInfoPopover } from '../../components/WorkforceInfoPopover';
 import {
   OffboardingFilterPanel,
   type OffboardingFilterState,
@@ -321,7 +319,14 @@ export function OffboardingPage({
   return (
     <Page maxWidth="full" className="bezent-page" gap="md">
       {/* 1. Page Header */}
-      <PageHeader title={title} />
+      <PageHeader
+        title={
+          <div className="bezent-wf-title-row">
+            <h1 className="bezent-page-header__title">{title}</h1>
+            <WorkforceInfoPopover label={title} tooltip={subtitle} />
+          </div>
+        }
+      />
       <span className="sr-only" hidden>
         {subtitle}
       </span>
@@ -458,6 +463,7 @@ export function OffboardingPage({
               variant="ghost"
               tooltipDirection="down"
               onClick={handleExportCsv}
+              disabled={exporting}
             >
               <BezentIcon name="download" size={18} />
             </IconButton>

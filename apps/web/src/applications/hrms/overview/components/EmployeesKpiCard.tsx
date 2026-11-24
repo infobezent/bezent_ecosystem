@@ -174,12 +174,20 @@ export const EmployeesKpiCard: React.FC<EmployeesKpiCardProps> = ({
       onClick={onClick}
       role="region"
       aria-label="Total Employees"
-      title="Total Employees"
     >
       <div className="bezent-kpi-employees-layout">
         {/* Left Section: Small Heading at Top, Large Primary Number Below */}
         <div className="bezent-kpi-employees-left">
-          <div className="bezent-kpi-employees-heading">Employees</div>
+          <div className="bezent-kpi-employees-heading">
+            {loading ? (
+              <>
+                <span className="bezent-sr-only">Employees</span>
+                <span className="bezent-wf-skeleton-shimmer bezent-wf-skeleton-kpi-heading" />
+              </>
+            ) : (
+              'Employees'
+            )}
+          </div>
           <div className="bezent-kpi-employees-value">
             {loading ? (
               <span className="bezent-kpi-value-skeleton" aria-hidden="true" />
@@ -196,146 +204,148 @@ export const EmployeesKpiCard: React.FC<EmployeesKpiCardProps> = ({
           onPointerLeave={() => setHoveredId(null)}
           aria-label="Employee status distribution ring"
         >
-          <div className="bezent-kpi-ambient-glow bezent-kpi-ambient-glow--emerald" />
+          {loading ? (
+            <>
+              <div className="bezent-sr-only">
+                <span className="bezent-kpi-ring-segment--loading" />
+              </div>
+              <span className="bezent-wf-skeleton-shimmer bezent-wf-skeleton-kpi-graphic" />
+            </>
+          ) : (
+            <>
+              <div className="bezent-kpi-ambient-glow bezent-kpi-ambient-glow--emerald" />
 
-          {/* Floating Hover Badge: 100% visible, outside-card clipping resolved */}
-          <div
-            className={`bezent-kpi-flow-badge bezent-kpi-employees-tooltip ${hasHover ? 'is-visible' : ''}`}
-            aria-live="polite"
-          >
-            {tooltipText}
-          </div>
+              {/* Floating Hover Badge: 100% visible, outside-card clipping resolved */}
+              <div
+                className={`bezent-kpi-flow-badge bezent-kpi-employees-tooltip ${hasHover ? 'is-visible' : ''}`}
+                aria-live="polite"
+              >
+                {tooltipText}
+              </div>
 
-          <svg
-            className="bezent-kpi-ring-svg"
-            viewBox="0 0 78 78"
-            role="img"
-            aria-label="Workforce status distribution ring"
-          >
-            {loading ? (
-              /* Active emerald ring with breathing pulse during loading — consistent with Cards 2-6 */
-              <circle
-                cx={cx}
-                cy={cy}
-                r={radius}
-                strokeWidth={strokeWidth}
-                className="bezent-kpi-ring-segment bezent-kpi-ring-segment--active bezent-kpi-ring-segment--loading"
-              />
-            ) : sumCounts <= 0 ? (
-              /* Clean empty track ring when total workforce is 0 */
-              <circle
-                cx={cx}
-                cy={cy}
-                r={radius}
-                strokeWidth={strokeWidth}
-                className="bezent-kpi-ring-empty-track"
-              />
-            ) : singleSegment ? (
-              /* Single category takes 100% of the ring */
-              <circle
-                cx={cx}
-                cy={cy}
-                r={radius}
-                strokeWidth={strokeWidth}
-                className={`bezent-kpi-ring-segment bezent-kpi-ring-segment--${singleSegment.cssModifier} ${
-                  hoveredId === singleSegment.id ? 'bezent-kpi-ring-segment--hovered' : ''
-                }`}
-                onMouseEnter={() => setHoveredId(singleSegment.id)}
-                onMouseOver={() => setHoveredId(singleSegment.id)}
-                onPointerEnter={() => setHoveredId(singleSegment.id)}
-                onPointerOver={() => setHoveredId(singleSegment.id)}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onSegmentClick?.(singleSegment.id, singleSegment.queryStatus);
-                  onClick?.();
-                }}
-                tabIndex={0}
-                role="button"
-                aria-label={`${singleSegment.label}: ${singleSegment.count.toLocaleString()} employees`}
-                onFocus={() => setHoveredId(singleSegment.id)}
-                onBlur={() => setHoveredId(null)}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter' || e.key === ' ') {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    onSegmentClick?.(singleSegment.id, singleSegment.queryStatus);
-                    onClick?.();
-                  }
-                }}
-              />
-            ) : (
-              /* Multi-segment proportional circular ring */
-              computedArcs.map((arc) => {
-                if (!arc.isVisible) return null;
-                const isHovered = hoveredId === arc.id;
-
-                return (
-                  <path
-                    key={arc.id}
-                    d={arc.pathD}
+              <svg
+                className="bezent-kpi-ring-svg"
+                viewBox="0 0 78 78"
+                role="img"
+                aria-label="Workforce status distribution ring"
+              >
+                {sumCounts <= 0 ? (
+                  /* Clean empty track ring when total workforce is 0 */
+                  <circle
+                    cx={cx}
+                    cy={cy}
+                    r={radius}
                     strokeWidth={strokeWidth}
-                    className={`bezent-kpi-ring-segment bezent-kpi-ring-segment--${arc.cssModifier} ${
-                      isHovered ? 'bezent-kpi-ring-segment--hovered' : ''
-                    } ${hasHover && !isHovered ? 'bezent-kpi-ring-segment--dimmed' : ''}`}
-                    onMouseEnter={() => setHoveredId(arc.id)}
-                    onMouseOver={() => setHoveredId(arc.id)}
-                    onPointerEnter={() => setHoveredId(arc.id)}
-                    onPointerOver={() => setHoveredId(arc.id)}
+                    className="bezent-kpi-ring-empty-track"
+                  />
+                ) : singleSegment ? (
+                  /* Single category takes 100% of the ring */
+                  <circle
+                    cx={cx}
+                    cy={cy}
+                    r={radius}
+                    strokeWidth={strokeWidth}
+                    className={`bezent-kpi-ring-segment bezent-kpi-ring-segment--${singleSegment.cssModifier} ${
+                      hoveredId === singleSegment.id ? 'bezent-kpi-ring-segment--hovered' : ''
+                    }`}
+                    onMouseEnter={() => setHoveredId(singleSegment.id)}
+                    onMouseOver={() => setHoveredId(singleSegment.id)}
+                    onPointerEnter={() => setHoveredId(singleSegment.id)}
+                    onPointerOver={() => setHoveredId(singleSegment.id)}
                     onClick={(e) => {
                       e.stopPropagation();
-                      onSegmentClick?.(arc.id, arc.queryStatus);
+                      onSegmentClick?.(singleSegment.id, singleSegment.queryStatus);
                       onClick?.();
                     }}
                     tabIndex={0}
                     role="button"
-                    aria-label={`${arc.label}: ${arc.count.toLocaleString()} employees`}
-                    onFocus={() => setHoveredId(arc.id)}
+                    aria-label={`${singleSegment.label}: ${singleSegment.count.toLocaleString()} employees`}
+                    onFocus={() => setHoveredId(singleSegment.id)}
                     onBlur={() => setHoveredId(null)}
                     onKeyDown={(e) => {
                       if (e.key === 'Enter' || e.key === ' ') {
                         e.preventDefault();
                         e.stopPropagation();
-                        onSegmentClick?.(arc.id, arc.queryStatus);
+                        onSegmentClick?.(singleSegment.id, singleSegment.queryStatus);
                         onClick?.();
                       }
                     }}
                   />
-                );
-              })
-            )}
-          </svg>
+                ) : (
+                  /* Multi-segment proportional circular ring */
+                  computedArcs.map((arc) => {
+                    if (!arc.isVisible) return null;
+                    const isHovered = hoveredId === arc.id;
 
-          {/* Ring Center: Dynamic Employee Icon with Crossfade */}
-          <div
-            className={`bezent-kpi-ring-center ${isCenterHovered ? 'is-hovered' : ''}`}
-            aria-live="polite"
-            onMouseEnter={() => setHoveredId('center')}
-            onMouseOver={() => setHoveredId('center')}
-            onPointerEnter={() => setHoveredId('center')}
-            onFocus={() => setHoveredId('center')}
-            onBlur={() => setHoveredId(null)}
-            tabIndex={0}
-            role="button"
-            aria-label={`Workforce: ${effectiveTotal.toLocaleString()} total`}
-            onClick={(e) => {
-              e.stopPropagation();
-              onClick?.();
-            }}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter' || e.key === ' ') {
-                e.preventDefault();
-                e.stopPropagation();
-                onClick?.();
-              }
-            }}
-          >
-            <div
-              key={hoveredId ?? 'default'}
-              className={`bezent-kpi-ring-icon-wrapper ${iconModifierClass}`}
-            >
-              <BezentIcon name={activeIcon} size={16} color="currentColor" />
-            </div>
-          </div>
+                    return (
+                      <path
+                        key={arc.id}
+                        d={arc.pathD}
+                        strokeWidth={strokeWidth}
+                        className={`bezent-kpi-ring-segment bezent-kpi-ring-segment--${arc.cssModifier} ${
+                          isHovered ? 'bezent-kpi-ring-segment--hovered' : ''
+                        } ${hasHover && !isHovered ? 'bezent-kpi-ring-segment--dimmed' : ''}`}
+                        onMouseEnter={() => setHoveredId(arc.id)}
+                        onMouseOver={() => setHoveredId(arc.id)}
+                        onPointerEnter={() => setHoveredId(arc.id)}
+                        onPointerOver={() => setHoveredId(arc.id)}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onSegmentClick?.(arc.id, arc.queryStatus);
+                          onClick?.();
+                        }}
+                        tabIndex={0}
+                        role="button"
+                        aria-label={`${arc.label}: ${arc.count.toLocaleString()} employees`}
+                        onFocus={() => setHoveredId(arc.id)}
+                        onBlur={() => setHoveredId(null)}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter' || e.key === ' ') {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            onSegmentClick?.(arc.id, arc.queryStatus);
+                            onClick?.();
+                          }
+                        }}
+                      />
+                    );
+                  })
+                )}
+              </svg>
+
+              {/* Ring Center: Dynamic Employee Icon with Crossfade */}
+              <div
+                className={`bezent-kpi-ring-center ${isCenterHovered ? 'is-hovered' : ''}`}
+                aria-live="polite"
+                onMouseEnter={() => setHoveredId('center')}
+                onMouseOver={() => setHoveredId('center')}
+                onPointerEnter={() => setHoveredId('center')}
+                onFocus={() => setHoveredId('center')}
+                onBlur={() => setHoveredId(null)}
+                tabIndex={0}
+                role="button"
+                aria-label={`Workforce: ${effectiveTotal.toLocaleString()} total`}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onClick?.();
+                }}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    onClick?.();
+                  }
+                }}
+              >
+                <div
+                  key={hoveredId ?? 'default'}
+                  className={`bezent-kpi-ring-icon-wrapper ${iconModifierClass}`}
+                >
+                  <BezentIcon name={activeIcon} size={16} color="currentColor" />
+                </div>
+              </div>
+            </>
+          )}
         </div>
       </div>
 

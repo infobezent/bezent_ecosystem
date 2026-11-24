@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-  Button,
   IconButton,
   Inline,
   Page,
@@ -24,6 +23,7 @@ import {
 import { employeeProfilePath } from '../../employees/model/employeeModel';
 import { CATEGORY_LABELS, STATUS_LABELS } from '../../documents/model/documentModel';
 import { DocumentDetailModal } from '../../documents/components/DocumentDetail';
+import { WorkforceInfoPopover } from '../../components/WorkforceInfoPopover';
 import { RecordsFolderView } from '../components/RecordsFolderView';
 import {
   RecordsFilterPanel,
@@ -216,35 +216,20 @@ export function RecordsPage({
 
   return (
     <Page maxWidth="full" gap="md" className="bezent-page">
-      {/* 1. Page Header */}
+      {/* 1. Page Header (Clean title with Info Popover) */}
       <PageHeader
-        eyebrow="HRMS · Workforce"
-        title={title}
-        subtitle={subtitle}
-        actions={
-          <Inline gap="sm" align="center">
-            <Button
-              variant="outline"
-              size="md"
-              leftIcon={<BezentIcon name="download" size={16} />}
-              onClick={handleExport}
-              disabled={listState.documents.length === 0}
-            >
-              Export
-            </Button>
-            <Button
-              variant="primary"
-              size="md"
-              leftIcon={<BezentIcon name="plus" size={16} />}
-              onClick={() => setIsUploadModalOpen(true)}
-            >
-              Upload Record
-            </Button>
-          </Inline>
+        title={
+          <div className="bezent-wf-title-row">
+            <h1 className="bezent-page-header__title">{title}</h1>
+            <WorkforceInfoPopover label={title} tooltip={subtitle} />
+          </div>
         }
       />
+      <span className="sr-only" hidden>
+        {subtitle}
+      </span>
 
-      {/* 3. Search & Filter Toolbar matching Employee Directory */}
+      {/* 2. Compact Search & Action Toolbar */}
       <Toolbar
         left={
           <Inline align="center" gap="sm">
@@ -263,23 +248,29 @@ export function RecordsPage({
               />
             </div>
 
-            {/* Filter Toggle Button */}
+            {/* Filter Toggle Button (Icon-only) */}
             <div className="bezent-filter-anchor">
-              <Button
-                variant={activeFiltersCount > 0 || isFilterPanelOpen ? 'secondary' : 'outline'}
-                size="md"
-                shape="rounded"
-                className={activeFiltersCount > 0 ? 'bezent-btn--filters-active' : ''}
-                leftIcon={<BezentIcon name="filter" size={16} />}
+              <IconButton
+                label={
+                  activeFiltersCount > 0 ? `Filters (${activeFiltersCount} active)` : 'Filters'
+                }
+                variant={activeFiltersCount > 0 || isFilterPanelOpen ? 'solid' : 'ghost'}
+                active={isFilterPanelOpen || activeFiltersCount > 0}
+                tooltipDirection="down"
                 onClick={() => setIsFilterPanelOpen((prev) => !prev)}
                 aria-expanded={isFilterPanelOpen}
-                aria-label="Filter records"
+                aria-label={
+                  activeFiltersCount > 0 ? `Filters (${activeFiltersCount} active)` : 'Filters'
+                }
+                className={activeFiltersCount > 0 ? 'bezent-btn--filters-active' : ''}
               >
-                <span>Filters</span>
+                <BezentIcon name="filter" size={16} />
                 {activeFiltersCount > 0 && (
-                  <span className="bezent-btn__filter-count">{activeFiltersCount}</span>
+                  <span className="bezent-btn__filter-count bezent-btn__filter-count--icon-btn">
+                    {activeFiltersCount}
+                  </span>
                 )}
-              </Button>
+              </IconButton>
 
               <RecordsFilterPanel
                 isOpen={isFilterPanelOpen}
@@ -292,34 +283,37 @@ export function RecordsPage({
               />
             </div>
 
-            {/* Reset Button */}
-            <Button
-              variant="outline"
-              size="md"
-              shape="rounded"
-              leftIcon={<BezentIcon name="reset" size={16} />}
+            {/* Reset Button (Icon-only) */}
+            <IconButton
+              label="Reset filters"
+              variant="ghost"
+              tooltipDirection="down"
               onClick={handleClearAllFilters}
               disabled={!isFiltered}
+              aria-label="Reset filters"
             >
-              Reset
-            </Button>
-          </Inline>
-        }
-        right={
-          <Inline align="center" gap="xs">
+              <BezentIcon name="reset" size={16} />
+            </IconButton>
+
+            {/* Export Button (Icon-only) */}
             <IconButton
               label="Export"
               variant="ghost"
               tooltipDirection="down"
               onClick={handleExport}
+              disabled={listState.documents.length === 0}
+              aria-label="Export records"
             >
               <BezentIcon name="download" size={18} />
             </IconButton>
+
+            {/* Upload Record Button (Icon-only) */}
             <IconButton
               label="Upload Record"
               variant="solid"
               tooltipDirection="down"
               onClick={() => setIsUploadModalOpen(true)}
+              aria-label="Upload Record"
             >
               <BezentIcon name="add" size={18} />
             </IconButton>

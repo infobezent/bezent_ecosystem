@@ -365,15 +365,17 @@ export const Select = forwardRef<HTMLSelectElement, SelectProps>(function Select
                     onClick={() => handleSelect(opt)}
                     onMouseEnter={() => setHighlightedIndex(idx)}
                   >
-                    <span className="bezent-select-option-check" aria-hidden="true">
-                      {isSelected && <BezentIcon name="check" size={13} color="currentColor" />}
-                    </span>
                     <div className="bezent-select-option-content">
                       <span className="bezent-select-option-label">{opt.label}</span>
                       {opt.description && (
                         <span className="bezent-select-option-desc">{opt.description}</span>
                       )}
                     </div>
+                    {isSelected && (
+                      <span className="bezent-select-option-check" aria-hidden="true">
+                        <BezentIcon name="check" size={13} color="currentColor" />
+                      </span>
+                    )}
                   </li>
                 );
               })

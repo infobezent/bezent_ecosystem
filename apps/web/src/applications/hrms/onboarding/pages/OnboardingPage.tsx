@@ -7,14 +7,12 @@ import {
   Button,
   Card,
   CardBody,
-  Divider,
   EmptyState,
   Grid,
   IconButton,
   Inline,
   Input,
   Label,
-  LoadingState,
   Modal,
   Page,
   PageHeader,
@@ -31,6 +29,7 @@ import {
   type BadgeVariant,
 } from '../../../../design-system/components';
 import { BezentIcon } from '../../../../design-system/icons';
+import { WorkforceInfoPopover } from '../../components/WorkforceInfoPopover';
 import { employmentTypeLabel, getAvatarColor } from '../../employees/model/employeeModel';
 import {
   fetchOrganizationMasters,
@@ -462,7 +461,17 @@ export function OnboardingPage({ title = 'Onboarding', onAddNewHire }: Onboardin
       <div className="employees-directory-page onboarding-directory-page">
         <Stack gap="lg">
           {/* 1. Page Header */}
-          <PageHeader title={title} />
+          <PageHeader
+            title={
+              <div className="bezent-wf-title-row">
+                <h1 className="bezent-page-header__title">{title}</h1>
+                <WorkforceInfoPopover
+                  label={title}
+                  tooltip="Manage new hires from pre-joining through employee creation."
+                />
+              </div>
+            }
+          />
           <span className="sr-only" hidden>
             Manage new hires from pre-joining through employee creation.
           </span>

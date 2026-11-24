@@ -7,6 +7,8 @@ import {
   Select,
   Checkbox,
   Stack,
+  Button,
+  Inline,
 } from '../../../../design-system/components';
 
 import { RegistrationField, useRegistrationConfig } from '../registration/registrationConfig';
@@ -30,19 +32,36 @@ const SHIFT_PRESETS: Record<string, { startTime: string; endTime: string; breakM
 
 const WORKING_DAYS_5 = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
 const WORKING_DAYS_6 = [...WORKING_DAYS_5, 'Saturday'];
+const WORKING_DAYS_4 = ['Monday', 'Tuesday', 'Wednesday', 'Thursday'];
+const ALL_DAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
 
 function workingDaysToPresetValue(days: string[]): string {
-  return days.length >= 6 ? '6_days' : '5_days';
-}
-
-function presetValueToWorkingDays(preset: string): string[] {
-  return preset === '6_days' ? WORKING_DAYS_6 : WORKING_DAYS_5;
+  if (days.length === 6 && !days.includes('Sunday')) return '6_days';
+  if (
+    days.length === 5 &&
+    days.includes('Monday') &&
+    days.includes('Friday') &&
+    !days.includes('Saturday') &&
+    !days.includes('Sunday')
+  ) {
+    return '5_days';
+  }
+  if (
+    days.length === 4 &&
+    days.includes('Monday') &&
+    days.includes('Thursday') &&
+    !days.includes('Friday')
+  ) {
+    return '4_days';
+  }
+  return 'custom';
 }
 
 export function WorkingHoursSection({ value, onChange }: WorkingHoursSectionProps = {}) {
   const [workSchedule, setWorkSchedule] = useState(value?.workSchedule ?? 'general');
   const [workingCalendar] = useState(value?.workingCalendar ?? '');
   const [workingDays, setWorkingDays] = useState<string[]>(value?.workingDays ?? WORKING_DAYS_5);
+  const [isAlternateSaturday, setIsAlternateSaturday] = useState(false);
   const [startTime, setStartTime] = useState(value?.startTime ?? '09:00');
   const [endTime, setEndTime] = useState(value?.endTime ?? '18:00');
   const [breakMinutes, setBreakMinutes] = useState(value?.breakMinutes ?? 30);
@@ -202,7 +221,7 @@ export function WorkingHoursSection({ value, onChange }: WorkingHoursSectionProp
         );
 
       case 'working_hours.workingDays': {
-        const presetValue = workingDaysToPresetValue(workingDays);
+        const presetValue = isAlternateSaturday ? 'alt_saturday' : workingDaysToPresetValue(workingDays);
         return (
           <RegistrationField
             key={key}
@@ -210,18 +229,65 @@ export function WorkingHoursSection({ value, onChange }: WorkingHoursSectionProp
             value={presetValue}
             htmlFor="reg-working-hours-working-days"
             span={span}
+            helperText={
+              isAlternateSaturday
+                ? 'Alternate Saturday Rule: 1st & 3rd Saturday Working · 2nd & 4th Saturday Off'
+                : `${workingDays.length} working days active (${workingDays.map((d) => d.slice(0, 3)).join(', ') || 'None'})`
+            }
           >
-            <Select
-              id="reg-working-hours-working-days"
-              value={presetValue}
-              onChange={(e) => setWorkingDays(presetValueToWorkingDays(e.target.value))}
-              options={
-                configuredOptions || [
-                  { value: '5_days', label: '5 Days (Monday - Friday)' },
-                  { value: '6_days', label: '6 Days (Monday - Saturday)' },
-                ]
-              }
-            />
+            <Stack gap="sm">
+              <Select
+                id="reg-working-hours-working-days"
+                value={presetValue}
+                onChange={(e) => {
+                  const val = e.target.value;
+                  if (val === 'alt_saturday') {
+                    setIsAlternateSaturday(true);
+                    setWorkingDays(WORKING_DAYS_6);
+                  } else {
+                    setIsAlternateSaturday(false);
+                    if (val === '5_days') setWorkingDays(WORKING_DAYS_5);
+                    else if (val === '6_days') setWorkingDays(WORKING_DAYS_6);
+                    else if (val === '4_days') setWorkingDays(WORKING_DAYS_4);
+                  }
+                }}
+                options={
+                  configuredOptions || [
+                    { value: '5_days', label: '5 Days (Monday - Friday)' },
+                    { value: '6_days', label: '6 Days (Monday - Saturday)' },
+                    {
+                      value: 'alt_saturday',
+                      label: '5.5 Days (Alternate Sat Off: 1st & 3rd Working, 2nd & 4th Off)',
+                    },
+                    { value: '4_days', label: '4 Days (Monday - Thursday)' },
+                    { value: 'custom', label: 'Custom Working Days (Select Below)' },
+                  ]
+                }
+              />
+              <Inline gap="xs" wrap>
+                {ALL_DAYS.map((day) => {
+                  const isChecked = workingDays.includes(day);
+                  return (
+                    <Button
+                      key={day}
+                      type="button"
+                      size="sm"
+                      variant={isChecked ? 'primary' : 'secondary'}
+                      onClick={() => {
+                        setIsAlternateSaturday(false);
+                        setWorkingDays((prev) =>
+                          prev.includes(day)
+                            ? prev.filter((d) => d !== day)
+                            : [...prev, day],
+                        );
+                      }}
+                    >
+                      {day.slice(0, 3)}
+                    </Button>
+                  );
+                })}
+              </Inline>
+            </Stack>
           </RegistrationField>
         );
       }

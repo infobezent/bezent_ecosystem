@@ -136,12 +136,20 @@ export const RecordsKpiCard: React.FC<RecordsKpiCardProps> = ({
       onClick={onClick}
       role="region"
       aria-label="Workforce Compliance and Records"
-      title="Workforce Compliance, Records and Document Management"
     >
       <div className="bezent-kpi-records-layout">
         {/* Left Section: Small Heading at Top, Large Primary Number Below */}
         <div className="bezent-kpi-records-left">
-          <div className="bezent-kpi-records-heading">Records</div>
+          <div className="bezent-kpi-records-heading">
+            {loading ? (
+              <>
+                <span className="bezent-sr-only">Records</span>
+                <span className="bezent-wf-skeleton-shimmer bezent-wf-skeleton-kpi-heading" />
+              </>
+            ) : (
+              'Records'
+            )}
+          </div>
           <div className="bezent-kpi-records-value">
             {loading ? (
               <span className="bezent-kpi-value-skeleton" aria-hidden="true" />
@@ -158,7 +166,11 @@ export const RecordsKpiCard: React.FC<RecordsKpiCardProps> = ({
           onPointerLeave={() => setInternalHovered(null)}
           aria-label="File folders stack breakdown"
         >
-          <div className="bezent-kpi-ambient-glow bezent-kpi-ambient-glow--amber" />
+          {loading ? (
+            <span className="bezent-wf-skeleton-shimmer bezent-wf-skeleton-kpi-graphic--rect" />
+          ) : (
+            <>
+              <div className="bezent-kpi-ambient-glow bezent-kpi-ambient-glow--amber" />
           {/* Floating Hover Badge: 100% unclipped, outside-card visibility */}
           <div
             className={`bezent-kpi-flow-badge bezent-kpi-records-tooltip ${hasHover ? 'is-visible' : ''}`}
@@ -167,7 +179,7 @@ export const RecordsKpiCard: React.FC<RecordsKpiCardProps> = ({
             {tooltipText}
           </div>
 
-          {/* SVG Flat Vector Folder Stack (Simple, Premium, User-Friendly) */}
+          {/* SVG Flat 2D Executive Folder + Status Index Tabs + Document Sheet */}
           <svg
             className="bezent-kpi-records-svg"
             viewBox="0 0 60 60"
@@ -175,37 +187,33 @@ export const RecordsKpiCard: React.FC<RecordsKpiCardProps> = ({
             aria-label={`Records: ${folders.map((f) => `${f.name}: ${f.count}`).join(', ')}`}
           >
             <defs>
-              {/* Folder Back Plate Path: rounded top-left tab, smooth slope */}
-              <path
-                id="bezent-kpi-folder-back-shape"
-                d="M 0 3.5 C 0 1.6 1.6 0 3.5 0 L 14 0 C 15.8 0 17 1 18.2 2.5 L 19.5 4 C 20.3 5 21.2 5.5 22.8 5.5 L 31.5 5.5 C 33.4 5.5 35 7.1 35 9 L 35 29 C 35 30.7 33.7 32 32 32 L 3 32 C 1.3 32 0 30.7 0 29 Z"
-              />
-              {/* Folder Top Rim Highlight */}
-              <path
-                id="bezent-kpi-folder-back-rim"
-                d="M 3.5 1 L 13.8 1 C 15.4 1 16.5 1.8 17.5 3 L 18.8 4.6 C 19.8 5.8 21 6.5 22.8 6.5 L 31.5 6.5"
-              />
-              {/* Front Pocket Flap: scooped profile covering bottom 60% */}
-              <path
-                id="bezent-kpi-folder-front-shape"
-                d="M 0 14 C 0 12.5 1.2 11.2 2.8 11.2 L 13 11.2 C 14.5 11.2 15.6 12 16.6 13.2 L 18 14.8 C 19 16 20.2 16.8 22 16.8 L 32.2 16.8 C 33.8 16.8 35 18 35 19.6 L 35 29 C 35 30.7 33.7 32 32 32 L 3 32 C 1.3 32 0 30.7 0 29 Z"
-              />
-              {/* Front Pocket Top Rim Highlight */}
-              <path
-                id="bezent-kpi-folder-front-rim"
-                d="M 3 12.2 L 12.8 12.2 C 14.2 12.2 15.2 12.9 16.1 14 L 17.4 15.5 C 18.4 16.7 19.7 17.5 21.8 17.5 L 32 17.5"
-              />
+              {/* Folder Back Plate Gradient */}
+              <linearGradient id="bezent-kpi-folder-back-grad" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stopColor="#047857" />
+                <stop offset="100%" stopColor="#065f46" />
+              </linearGradient>
+              {/* Folder Front Pocket Gradient */}
+              <linearGradient id="bezent-kpi-folder-front-grad" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stopColor="#10b981" />
+                <stop offset="100%" stopColor="#059669" />
+              </linearGradient>
             </defs>
 
-            {/* Subtle Ground Contact Shadow */}
-            <ellipse cx={29} cy={53} rx={23} ry={3} className="bezent-kpi-folder-ground-shadow" />
+            {/* Folder Base Back Cover */}
+            <rect
+              x={8}
+              y={15}
+              width={44}
+              height={36}
+              rx={4}
+              className="bezent-kpi-folder-back-base"
+            />
 
-            {/* ── Folder 1 (Back, Top-Left): Expired Records (Coral Orange) ── */}
+            {/* ── Tab 1: Expired Records (Coral Red) ── */}
             <g
               className={`bezent-kpi-folder-item bezent-kpi-folder-item--expired ${
                 activeHovered === 'expired' ? 'is-hovered' : ''
               } ${hasHover && activeHovered !== 'expired' ? 'is-dimmed' : ''}`}
-              transform="translate(6, 6)"
               onMouseEnter={() => setInternalHovered('expired')}
               onMouseOver={() => setInternalHovered('expired')}
               onPointerEnter={() => setInternalHovered('expired')}
@@ -228,61 +236,23 @@ export const RecordsKpiCard: React.FC<RecordsKpiCardProps> = ({
                 }
               }}
             >
-              {/* Stationary Fat Hit Area: Guarantees zero hover flicker */}
-              <rect x={0} y={0} width={35} height={32} fill="transparent" />
-
-              <g className="bezent-kpi-folder-visual">
-                <use href="#bezent-kpi-folder-back-shape" className="folder-back" />
-                <use href="#bezent-kpi-folder-back-rim" className="bezent-kpi-folder-rim" />
-
-                {/* 📄 Document Paper Sheet: Tucked inside, peeks out smoothly on hover */}
-                <g className="bezent-kpi-folder-paper-sheet bezent-kpi-folder-sheet-peek">
-                  <rect
-                    x={6.5}
-                    y={11.5}
-                    width={22}
-                    height={17}
-                    rx={2}
-                    className="bezent-kpi-folder-doc-paper doc-card"
-                  />
-                  <rect x={9} y={14} width={7} height={1.6} rx={0.8} className="doc-badge" />
-                  <rect
-                    x={9}
-                    y={17.2}
-                    width={17}
-                    height={1.1}
-                    rx={0.55}
-                    className="bezent-kpi-folder-doc-line"
-                  />
-                  <rect
-                    x={9}
-                    y={19.7}
-                    width={13}
-                    height={1.1}
-                    rx={0.55}
-                    className="bezent-kpi-folder-doc-line--muted"
-                  />
-                  <rect
-                    x={9}
-                    y={22.2}
-                    width={15}
-                    height={1.1}
-                    rx={0.55}
-                    className="bezent-kpi-folder-doc-line--muted"
-                  />
-                </g>
-
-                <use href="#bezent-kpi-folder-front-shape" className="folder-front" />
-                <use href="#bezent-kpi-folder-front-rim" className="bezent-kpi-folder-rim" />
+              {/* Stationary Fat Hit Area */}
+              <rect x={8} y={7} width={11} height={19} fill="transparent" />
+              <g className="bezent-kpi-folder-tab-visual bezent-kpi-folder-tab-visual--expired">
+                {/* Tab top */}
+                <path
+                  d="M 9.5 15 L 9.5 11.5 C 9.5 10.1 10.6 9 12 9 L 16.5 9 C 17.9 9 19 10.1 19 11.5 L 19 15 Z"
+                  className="bezent-kpi-folder-tab bezent-kpi-folder-tab--expired"
+                />
+                <circle cx={14.2} cy={12} r={1.2} fill="#ffffff" opacity={0.9} />
               </g>
             </g>
 
-            {/* ── Folder 2 (Mid-Back): Expiring Soon (Sky Blue) ── */}
+            {/* ── Tab 2: Expiring Soon (< 30 days) (Amber) ── */}
             <g
               className={`bezent-kpi-folder-item bezent-kpi-folder-item--expiring ${
                 activeHovered === 'expiring' ? 'is-hovered' : ''
               } ${hasHover && activeHovered !== 'expiring' ? 'is-dimmed' : ''}`}
-              transform="translate(9.5, 9.5)"
               onMouseEnter={() => setInternalHovered('expiring')}
               onMouseOver={() => setInternalHovered('expiring')}
               onPointerEnter={() => setInternalHovered('expiring')}
@@ -305,134 +275,21 @@ export const RecordsKpiCard: React.FC<RecordsKpiCardProps> = ({
                 }
               }}
             >
-              <rect x={0} y={0} width={35} height={32} fill="transparent" />
-
-              <g className="bezent-kpi-folder-visual">
-                <use href="#bezent-kpi-folder-back-shape" className="folder-back" />
-                <use href="#bezent-kpi-folder-back-rim" className="bezent-kpi-folder-rim" />
-
-                <g className="bezent-kpi-folder-paper-sheet bezent-kpi-folder-sheet-peek">
-                  <rect
-                    x={6.5}
-                    y={11.5}
-                    width={22}
-                    height={17}
-                    rx={2}
-                    className="bezent-kpi-folder-doc-paper doc-card"
-                  />
-                  <rect x={9} y={14} width={7} height={1.6} rx={0.8} className="doc-badge" />
-                  <rect
-                    x={9}
-                    y={17.2}
-                    width={17}
-                    height={1.1}
-                    rx={0.55}
-                    className="bezent-kpi-folder-doc-line"
-                  />
-                  <rect
-                    x={9}
-                    y={19.7}
-                    width={13}
-                    height={1.1}
-                    rx={0.55}
-                    className="bezent-kpi-folder-doc-line--muted"
-                  />
-                  <rect
-                    x={9}
-                    y={22.2}
-                    width={15}
-                    height={1.1}
-                    rx={0.55}
-                    className="bezent-kpi-folder-doc-line--muted"
-                  />
-                </g>
-
-                <use href="#bezent-kpi-folder-front-shape" className="folder-front" />
-                <use href="#bezent-kpi-folder-front-rim" className="bezent-kpi-folder-rim" />
+              <rect x={19} y={7} width={11} height={19} fill="transparent" />
+              <g className="bezent-kpi-folder-tab-visual bezent-kpi-folder-tab-visual--expiring">
+                <path
+                  d="M 20 15 L 20 11.5 C 20 10.1 21.1 9 22.5 9 L 27 9 C 28.4 9 29.5 10.1 29.5 11.5 L 29.5 15 Z"
+                  className="bezent-kpi-folder-tab bezent-kpi-folder-tab--expiring"
+                />
+                <circle cx={24.7} cy={12} r={1.2} fill="#ffffff" opacity={0.9} />
               </g>
             </g>
 
-            {/* ── Folder 3 (Mid-Front): Verified Records (Fresh Green) ── */}
-            <g
-              className={`bezent-kpi-folder-item bezent-kpi-folder-item--verified ${
-                activeHovered === 'verified' ? 'is-hovered' : ''
-              } ${hasHover && activeHovered !== 'verified' ? 'is-dimmed' : ''}`}
-              transform="translate(13, 13)"
-              onMouseEnter={() => setInternalHovered('verified')}
-              onMouseOver={() => setInternalHovered('verified')}
-              onPointerEnter={() => setInternalHovered('verified')}
-              onFocus={() => setInternalHovered('verified')}
-              onBlur={() => setInternalHovered(null)}
-              onClick={(e) => {
-                e.stopPropagation();
-                onFolderClick?.(verifiedFolder);
-                onClick?.();
-              }}
-              tabIndex={0}
-              role="button"
-              aria-label={`Verified Records: ${effectiveVerified} records`}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter' || e.key === ' ') {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  onFolderClick?.(verifiedFolder);
-                  onClick?.();
-                }
-              }}
-            >
-              <rect x={0} y={0} width={35} height={32} fill="transparent" />
-
-              <g className="bezent-kpi-folder-visual">
-                <use href="#bezent-kpi-folder-back-shape" className="folder-back" />
-                <use href="#bezent-kpi-folder-back-rim" className="bezent-kpi-folder-rim" />
-
-                <g className="bezent-kpi-folder-paper-sheet bezent-kpi-folder-sheet-peek">
-                  <rect
-                    x={6.5}
-                    y={11.5}
-                    width={22}
-                    height={17}
-                    rx={2}
-                    className="bezent-kpi-folder-doc-paper doc-card"
-                  />
-                  <rect x={9} y={14} width={7} height={1.6} rx={0.8} className="doc-badge" />
-                  <rect
-                    x={9}
-                    y={17.2}
-                    width={17}
-                    height={1.1}
-                    rx={0.55}
-                    className="bezent-kpi-folder-doc-line"
-                  />
-                  <rect
-                    x={9}
-                    y={19.7}
-                    width={13}
-                    height={1.1}
-                    rx={0.55}
-                    className="bezent-kpi-folder-doc-line--muted"
-                  />
-                  <rect
-                    x={9}
-                    y={22.2}
-                    width={15}
-                    height={1.1}
-                    rx={0.55}
-                    className="bezent-kpi-folder-doc-line--muted"
-                  />
-                </g>
-
-                <use href="#bezent-kpi-folder-front-shape" className="folder-front" />
-                <use href="#bezent-kpi-folder-front-rim" className="bezent-kpi-folder-rim" />
-              </g>
-            </g>
-
-            {/* ── Folder 4 (Front, Bottom-Right): Pending Verification (Sunny Yellow) ── */}
+            {/* ── Tab 3: Pending Verification (Sky Blue) ── */}
             <g
               className={`bezent-kpi-folder-item bezent-kpi-folder-item--pending ${
                 activeHovered === 'pending' ? 'is-hovered' : ''
               } ${hasHover && activeHovered !== 'pending' ? 'is-dimmed' : ''}`}
-              transform="translate(16.5, 16.5)"
               onMouseEnter={() => setInternalHovered('pending')}
               onMouseOver={() => setInternalHovered('pending')}
               onPointerEnter={() => setInternalHovered('pending')}
@@ -455,53 +312,137 @@ export const RecordsKpiCard: React.FC<RecordsKpiCardProps> = ({
                 }
               }}
             >
-              <rect x={0} y={0} width={35} height={32} fill="transparent" />
-
-              <g className="bezent-kpi-folder-visual">
-                <use href="#bezent-kpi-folder-back-shape" className="folder-back" />
-                <use href="#bezent-kpi-folder-back-rim" className="bezent-kpi-folder-rim" />
-
-                <g className="bezent-kpi-folder-paper-sheet bezent-kpi-folder-sheet-peek">
-                  <rect
-                    x={6.5}
-                    y={11.5}
-                    width={22}
-                    height={17}
-                    rx={2}
-                    className="bezent-kpi-folder-doc-paper doc-card"
-                  />
-                  <rect x={9} y={14} width={7} height={1.6} rx={0.8} className="doc-badge" />
-                  <rect
-                    x={9}
-                    y={17.2}
-                    width={17}
-                    height={1.1}
-                    rx={0.55}
-                    className="bezent-kpi-folder-doc-line"
-                  />
-                  <rect
-                    x={9}
-                    y={19.7}
-                    width={13}
-                    height={1.1}
-                    rx={0.55}
-                    className="bezent-kpi-folder-doc-line--muted"
-                  />
-                  <rect
-                    x={9}
-                    y={22.2}
-                    width={15}
-                    height={1.1}
-                    rx={0.55}
-                    className="bezent-kpi-folder-doc-line--muted"
-                  />
-                </g>
-
-                <use href="#bezent-kpi-folder-front-shape" className="folder-front" />
-                <use href="#bezent-kpi-folder-front-rim" className="bezent-kpi-folder-rim" />
+              <rect x={29.5} y={7} width={11} height={19} fill="transparent" />
+              <g className="bezent-kpi-folder-tab-visual bezent-kpi-folder-tab-visual--pending">
+                <path
+                  d="M 30.5 15 L 30.5 11.5 C 30.5 10.1 31.6 9 33 9 L 37.5 9 C 38.9 9 40 10.1 40 11.5 L 40 15 Z"
+                  className="bezent-kpi-folder-tab bezent-kpi-folder-tab--pending"
+                />
+                <circle cx={35.2} cy={12} r={1.2} fill="#ffffff" opacity={0.9} />
               </g>
             </g>
+
+            {/* ── Tab 4 & Primary Verified Records (Emerald Green) ── */}
+            <g
+              className={`bezent-kpi-folder-item bezent-kpi-folder-item--verified ${
+                activeHovered === 'verified' ? 'is-hovered' : ''
+              } ${hasHover && activeHovered !== 'verified' ? 'is-dimmed' : ''}`}
+              onMouseEnter={() => setInternalHovered('verified')}
+              onMouseOver={() => setInternalHovered('verified')}
+              onPointerEnter={() => setInternalHovered('verified')}
+              onFocus={() => setInternalHovered('verified')}
+              onBlur={() => setInternalHovered(null)}
+              onClick={(e) => {
+                e.stopPropagation();
+                onFolderClick?.(verifiedFolder);
+                onClick?.();
+              }}
+              tabIndex={0}
+              role="button"
+              aria-label={`Verified Records: ${effectiveVerified} records`}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  onFolderClick?.(verifiedFolder);
+                  onClick?.();
+                }
+              }}
+            >
+              <rect x={40} y={7} width={12} height={19} fill="transparent" />
+              <g className="bezent-kpi-folder-tab-visual bezent-kpi-folder-tab-visual--verified">
+                <path
+                  d="M 41 15 L 41 11.5 C 41 10.1 42.1 9 43.5 9 L 48 9 C 49.4 9 50.5 10.1 50.5 11.5 L 50.5 15 Z"
+                  className="bezent-kpi-folder-tab bezent-kpi-folder-tab--verified"
+                />
+                <path
+                  d="M 44.2 12 L 45.2 13 L 47.2 11"
+                  fill="none"
+                  stroke="#ffffff"
+                  strokeWidth="0.9"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </g>
+            </g>
+
+            {/* 📄 Document Paper Sheet: Always visible like Image 4, lifts smoothly on interaction */}
+            <g
+              className={`bezent-kpi-folder-paper-sheet bezent-kpi-folder-sheet-peek ${
+                activeHovered ? `is-${activeHovered} is-lifted` : ''
+              }`}
+            >
+              <rect
+                x={11}
+                y={11}
+                width={38}
+                height={28}
+                rx={2.5}
+                className="bezent-kpi-folder-doc-paper doc-card"
+              />
+              <rect x={14} y={14} width={11} height={2.2} rx={1} className="doc-badge" />
+              <rect x={40} y={14} width={6} height={2.2} rx={1} className="doc-chip" />
+              <rect
+                x={14}
+                y={18.5}
+                width={32}
+                height={1.2}
+                rx={0.6}
+                className="bezent-kpi-folder-doc-line"
+              />
+              <rect
+                x={14}
+                y={21.5}
+                width={25}
+                height={1.2}
+                rx={0.6}
+                className="bezent-kpi-folder-doc-line--muted"
+              />
+              <rect
+                x={14}
+                y={24.5}
+                width={18}
+                height={1.2}
+                rx={0.6}
+                className="bezent-kpi-folder-doc-line--muted"
+              />
+            </g>
+
+            {/* ── Front Pocket Cover (Scooped Executive Cut) ── */}
+            <path
+              d="M 8 28.5 C 8 26.8 9.2 25.5 10.8 25.5 L 21 25.5 C 23.2 25.5 24.6 27 27 27 L 33 27 C 35.4 27 36.8 25.5 39 25.5 L 49.2 25.5 C 50.8 25.5 52 26.8 52 28.5 L 52 47.5 C 52 49.4 50.4 51 48.5 51 L 11.5 51 C 9.6 51 8 49.4 8 47.5 Z"
+              className="bezent-kpi-folder-front-pocket"
+            />
+            {/* Pocket Top Rim Highlight */}
+            <path
+              d="M 10.8 26 L 21 26 C 23 26 24.4 27.5 27 27.5 L 33 27.5 C 35.6 27.5 37 26 39 26 L 49.2 26"
+              className="bezent-kpi-folder-front-rim"
+            />
+
+            {/* ── Executive Circular Verified Seal Badge (Center) ── */}
+            <g
+              className="bezent-kpi-folder-seal"
+              onClick={(e) => {
+                e.stopPropagation();
+                onFolderClick?.(verifiedFolder);
+                onClick?.();
+              }}
+              role="presentation"
+            >
+              <circle cx={30} cy={39} r={6.5} className="bezent-kpi-folder-seal-bg" />
+              <circle cx={30} cy={39} r={5} className="bezent-kpi-folder-seal-inner" />
+              <path
+                d="M 28 39 L 29.4 40.4 L 32.5 37.3"
+                fill="none"
+                stroke="#ffffff"
+                strokeWidth="1.3"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </g>
           </svg>
+            </>
+          )}
         </div>
       </div>
 

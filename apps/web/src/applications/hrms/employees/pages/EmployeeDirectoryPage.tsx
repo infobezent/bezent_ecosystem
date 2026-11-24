@@ -1,14 +1,10 @@
 import { useCallback, useEffect, useMemo, useState, useTransition } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import {
-  Alert,
-  Button,
   IconButton,
   Inline,
-  Modal,
   Page,
   PageHeader,
-  Stack,
   Toolbar,
 } from '../../../../design-system/components';
 import { BezentIcon } from '../../../../design-system/icons';
@@ -26,6 +22,7 @@ import {
   EMPTY_FILTER_STATE,
   countActiveFilters,
 } from '../components/EmployeeFilterPanel';
+import { WorkforceInfoPopover } from '../../components/WorkforceInfoPopover';
 import {
   fetchOrganizationMasters,
   type OrganizationMasters,
@@ -508,7 +505,17 @@ export function EmployeeDirectoryPage() {
   return (
     <Page maxWidth="full" gap="md" className="employees-directory-page">
       {/* 1. Page Header */}
-      <PageHeader title="Employee Directory" />
+      <PageHeader
+        title={
+          <div className="bezent-wf-title-row">
+            <h1 className="bezent-page-header__title">Employee Directory</h1>
+            <WorkforceInfoPopover
+              label="Employee Directory"
+              tooltip="Manage and explore your workforce directory"
+            />
+          </div>
+        }
+      />
       <span className="sr-only" hidden>
         Manage and explore your workforce directory
       </span>

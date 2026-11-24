@@ -155,12 +155,20 @@ export const TransfersKpiCard: React.FC<TransfersKpiCardProps> = ({
       onClick={onClick}
       role="region"
       aria-label="Total Transfers"
-      title="Total Transfers"
     >
       <div className="bezent-kpi-transfers-layout">
         {/* Left Section: Small Heading at Top, Large Primary Number Below */}
         <div className="bezent-kpi-transfers-left">
-          <div className="bezent-kpi-transfers-heading">Transfers</div>
+          <div className="bezent-kpi-transfers-heading">
+            {loading ? (
+              <>
+                <span className="bezent-sr-only">Transfers</span>
+                <span className="bezent-wf-skeleton-shimmer bezent-wf-skeleton-kpi-heading" />
+              </>
+            ) : (
+              'Transfers'
+            )}
+          </div>
           <div className="bezent-kpi-transfers-value">
             {loading ? (
               <span className="bezent-kpi-value-skeleton" aria-hidden="true" />
@@ -177,136 +185,142 @@ export const TransfersKpiCard: React.FC<TransfersKpiCardProps> = ({
           onPointerLeave={() => setInternalHovered(null)}
           aria-label="Transfers circular flow loop"
         >
-          <div className="bezent-kpi-ambient-glow bezent-kpi-ambient-glow--amber" />
-          {/* Floating Hover Badge: 100% visible, outside-card clipping resolved */}
-          <div
-            className={`bezent-kpi-flow-badge bezent-kpi-transfer-tooltip ${hasHover ? 'is-visible' : ''}`}
-            aria-live="polite"
-          >
-            {tooltipText}
-          </div>
+          {loading ? (
+            <span className="bezent-wf-skeleton-shimmer bezent-wf-skeleton-kpi-graphic" />
+          ) : (
+            <>
+              <div className="bezent-kpi-ambient-glow bezent-kpi-ambient-glow--amber" />
+              {/* Floating Hover Badge: 100% visible, outside-card clipping resolved */}
+              <div
+                className={`bezent-kpi-flow-badge bezent-kpi-transfer-tooltip ${hasHover ? 'is-visible' : ''}`}
+                aria-live="polite"
+              >
+                {tooltipText}
+              </div>
 
-          {/* SVG Circular Flow Loop with 2 curved arrows */}
-          <svg
-            className="bezent-kpi-flow-svg bezent-kpi-transfer-svg"
-            viewBox="0 0 60 60"
-            role="img"
-            aria-label="Approved and Pending transfer flow"
-          >
-            {/* Top / Approved Curved Arrow (Green #16A36A) */}
-            <g
-              className={`bezent-kpi-flow-group bezent-kpi-flow-group--out bezent-kpi-flow-group--approved bezent-kpi-transfer-node--from ${
-                isTopHovered ? 'is-hovered' : ''
-              } ${hasHover && !isTopHovered ? 'is-dimmed' : ''}`}
-              onMouseEnter={() => setInternalHovered('approved')}
-              onMouseOver={() => setInternalHovered('approved')}
-              onPointerEnter={() => setInternalHovered('approved')}
-              onFocus={() => setInternalHovered('approved')}
-              onBlur={() => setInternalHovered(null)}
-              onClick={(e) => {
-                e.stopPropagation();
-                onNodeClick?.('approved');
-                onClick?.();
-              }}
-              tabIndex={0}
-              role="button"
-              aria-label={`Approved Transfers: ${effectiveApproved}`}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter' || e.key === ' ') {
-                  e.preventDefault();
+              {/* SVG Circular Flow Loop with 2 curved arrows */}
+              <svg
+                className="bezent-kpi-flow-svg bezent-kpi-transfer-svg"
+                viewBox="0 0 60 60"
+                role="img"
+                aria-label="Approved and Pending transfer flow"
+              >
+                {/* Top / Approved Curved Arrow (Green #16A36A) */}
+                <g
+                  className={`bezent-kpi-flow-group bezent-kpi-flow-group--out bezent-kpi-flow-group--approved bezent-kpi-transfer-node--from ${
+                    isTopHovered ? 'is-hovered' : ''
+                  } ${hasHover && !isTopHovered ? 'is-dimmed' : ''}`}
+                  onMouseEnter={() => setInternalHovered('approved')}
+                  onMouseOver={() => setInternalHovered('approved')}
+                  onPointerEnter={() => setInternalHovered('approved')}
+                  onFocus={() => setInternalHovered('approved')}
+                  onBlur={() => setInternalHovered(null)}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onNodeClick?.('approved');
+                    onClick?.();
+                  }}
+                  tabIndex={0}
+                  role="button"
+                  aria-label={`Approved Transfers: ${effectiveApproved}`}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      onNodeClick?.('approved');
+                      onClick?.();
+                    }
+                  }}
+                >
+                  {/* Transparent fat hit area to guarantee effortless hover anywhere near top arc */}
+                  <path
+                    d="M 11.5 23.5 A 20 20 0 0 1 48.5 23.5"
+                    strokeWidth={14}
+                    stroke="transparent"
+                    fill="none"
+                  />
+                  <path
+                    d="M 11.5 23.5 A 20 20 0 0 1 48.5 23.5"
+                    strokeWidth={4.8}
+                    className="bezent-kpi-flow-arc bezent-kpi-flow-arc--out bezent-kpi-flow-arc--approved"
+                  />
+                  <polygon
+                    points="48.5,28.5 44.5,23.5 52.5,23.5"
+                    className="bezent-kpi-flow-arrowhead bezent-kpi-flow-arrowhead--out bezent-kpi-flow-arrowhead--approved"
+                  />
+                </g>
+
+                {/* Bottom / Pending Curved Arrow (Amber #E5A43B) */}
+                <g
+                  className={`bezent-kpi-flow-group bezent-kpi-flow-group--in bezent-kpi-flow-group--pending bezent-kpi-transfer-node--to ${
+                    isBottomHovered ? 'is-hovered' : ''
+                  } ${hasHover && !isBottomHovered ? 'is-dimmed' : ''}`}
+                  onMouseEnter={() => setInternalHovered('pending')}
+                  onMouseOver={() => setInternalHovered('pending')}
+                  onPointerEnter={() => setInternalHovered('pending')}
+                  onFocus={() => setInternalHovered('pending')}
+                  onBlur={() => setInternalHovered(null)}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onNodeClick?.('pending');
+                    onClick?.();
+                  }}
+                  tabIndex={0}
+                  role="button"
+                  aria-label={`Pending Transfers: ${effectivePending}`}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      onNodeClick?.('pending');
+                      onClick?.();
+                    }
+                  }}
+                >
+                  {/* Transparent fat hit area to guarantee effortless hover anywhere near bottom arc */}
+                  <path
+                    d="M 48.5 36.5 A 20 20 0 0 1 11.5 36.5"
+                    strokeWidth={14}
+                    stroke="transparent"
+                    fill="none"
+                  />
+                  <path
+                    d="M 48.5 36.5 A 20 20 0 0 1 11.5 36.5"
+                    strokeWidth={4.8}
+                    className="bezent-kpi-flow-arc bezent-kpi-flow-arc--in bezent-kpi-flow-arc--pending"
+                  />
+                  <polygon
+                    points="11.5,31.5 7.5,36.5 15.5,36.5"
+                    className="bezent-kpi-flow-arrowhead bezent-kpi-flow-arrowhead--in bezent-kpi-flow-arrowhead--pending"
+                  />
+                </g>
+              </svg>
+
+              {/* Center Dynamic Icon with Crossfade */}
+              <div
+                className={`bezent-kpi-flow-center bezent-kpi-transfer-node--center ${
+                  isCenterHovered ? 'is-hovered' : ''
+                }`}
+                aria-live="polite"
+                onMouseEnter={() => setInternalHovered('center')}
+                onPointerEnter={() => setInternalHovered('center')}
+                onFocus={() => setInternalHovered('center')}
+                onBlur={() => setInternalHovered(null)}
+                onClick={(e) => {
                   e.stopPropagation();
-                  onNodeClick?.('approved');
+                  onNodeClick?.('center');
                   onClick?.();
-                }
-              }}
-            >
-              {/* Transparent fat hit area to guarantee effortless hover anywhere near top arc */}
-              <path
-                d="M 11.5 23.5 A 20 20 0 0 1 48.5 23.5"
-                strokeWidth={14}
-                stroke="transparent"
-                fill="none"
-              />
-              <path
-                d="M 11.5 23.5 A 20 20 0 0 1 48.5 23.5"
-                strokeWidth={4.8}
-                className="bezent-kpi-flow-arc bezent-kpi-flow-arc--out bezent-kpi-flow-arc--approved"
-              />
-              <polygon
-                points="48.5,28.5 44.5,23.5 52.5,23.5"
-                className="bezent-kpi-flow-arrowhead bezent-kpi-flow-arrowhead--out bezent-kpi-flow-arrowhead--approved"
-              />
-            </g>
-
-            {/* Bottom / Pending Curved Arrow (Amber #E5A43B) */}
-            <g
-              className={`bezent-kpi-flow-group bezent-kpi-flow-group--in bezent-kpi-flow-group--pending bezent-kpi-transfer-node--to ${
-                isBottomHovered ? 'is-hovered' : ''
-              } ${hasHover && !isBottomHovered ? 'is-dimmed' : ''}`}
-              onMouseEnter={() => setInternalHovered('pending')}
-              onMouseOver={() => setInternalHovered('pending')}
-              onPointerEnter={() => setInternalHovered('pending')}
-              onFocus={() => setInternalHovered('pending')}
-              onBlur={() => setInternalHovered(null)}
-              onClick={(e) => {
-                e.stopPropagation();
-                onNodeClick?.('pending');
-                onClick?.();
-              }}
-              tabIndex={0}
-              role="button"
-              aria-label={`Pending Transfers: ${effectivePending}`}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter' || e.key === ' ') {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  onNodeClick?.('pending');
-                  onClick?.();
-                }
-              }}
-            >
-              {/* Transparent fat hit area to guarantee effortless hover anywhere near bottom arc */}
-              <path
-                d="M 48.5 36.5 A 20 20 0 0 1 11.5 36.5"
-                strokeWidth={14}
-                stroke="transparent"
-                fill="none"
-              />
-              <path
-                d="M 48.5 36.5 A 20 20 0 0 1 11.5 36.5"
-                strokeWidth={4.8}
-                className="bezent-kpi-flow-arc bezent-kpi-flow-arc--in bezent-kpi-flow-arc--pending"
-              />
-              <polygon
-                points="11.5,31.5 7.5,36.5 15.5,36.5"
-                className="bezent-kpi-flow-arrowhead bezent-kpi-flow-arrowhead--in bezent-kpi-flow-arrowhead--pending"
-              />
-            </g>
-          </svg>
-
-          {/* Center Dynamic Icon with Crossfade */}
-          <div
-            className={`bezent-kpi-flow-center bezent-kpi-transfer-node--center ${
-              isCenterHovered ? 'is-hovered' : ''
-            }`}
-            aria-live="polite"
-            onMouseEnter={() => setInternalHovered('center')}
-            onPointerEnter={() => setInternalHovered('center')}
-            onFocus={() => setInternalHovered('center')}
-            onBlur={() => setInternalHovered(null)}
-            onClick={(e) => {
-              e.stopPropagation();
-              onNodeClick?.('center');
-              onClick?.();
-            }}
-          >
-            <div
-              key={activeHovered ?? 'default'}
-              className={`bezent-kpi-flow-icon-wrapper ${iconModifierClass}`}
-            >
-              <BezentIcon name={activeIcon} size={15} color="currentColor" />
-            </div>
-          </div>
+                }}
+              >
+                <div
+                  key={activeHovered ?? 'default'}
+                  className={`bezent-kpi-flow-icon-wrapper ${iconModifierClass}`}
+                >
+                  <BezentIcon name={activeIcon} size={15} color="currentColor" />
+                </div>
+              </div>
+            </>
+          )}
         </div>
       </div>
 
