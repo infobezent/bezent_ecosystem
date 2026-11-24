@@ -2,6 +2,7 @@ import React, { useState, useId, useMemo } from 'react';
 import { BezentIcon } from '../../../../design-system/icons';
 import { Select, type SelectOption, Button } from '../../../../design-system/components';
 import type { EmployeeRecord } from '../../employees/api/employeesApi';
+import { WorkforceInfoPopover } from './WorkforceInfoPopover';
 
 export type AnalyticsView = 'distribution' | 'growth' | 'retention';
 export type DistributionDimension = 'department' | 'branch' | 'employment_type' | 'job_level';
@@ -158,28 +159,76 @@ const FALLBACK_GROWTH_DATA: Record<GrowthTimeFilter, GrowthDataPoint[]> = {
   ],
   monthly: [
     {
+      label: 'Dec 2025',
+      joiners: 12,
+      exits: 2,
+      net: 10,
+      beginningHeadcount: 1120,
+      growthRate: 0.9,
+    },
+    {
+      label: 'Jan 2026',
+      joiners: 28,
+      exits: 4,
+      net: 24,
+      beginningHeadcount: 1130,
+      growthRate: 2.1,
+    },
+    {
+      label: 'Feb 2026',
+      joiners: 15,
+      exits: 3,
+      net: 12,
+      beginningHeadcount: 1154,
+      growthRate: 1.0,
+    },
+    {
+      label: 'Mar 2026',
+      joiners: 20,
+      exits: 5,
+      net: 15,
+      beginningHeadcount: 1166,
+      growthRate: 1.3,
+    },
+    {
+      label: 'Apr 2026',
+      joiners: 16,
+      exits: 2,
+      net: 14,
+      beginningHeadcount: 1181,
+      growthRate: 1.2,
+    },
+    {
+      label: 'May 2026',
+      joiners: 22,
+      exits: 4,
+      net: 18,
+      beginningHeadcount: 1195,
+      growthRate: 1.5,
+    },
+    {
       label: 'Jun 2026',
       joiners: 18,
       exits: 3,
       net: 15,
-      beginningHeadcount: 1180,
-      growthRate: 1.3,
+      beginningHeadcount: 1213,
+      growthRate: 1.2,
     },
     {
       label: 'Jul 2026',
       joiners: 24,
       exits: 4,
       net: 20,
-      beginningHeadcount: 1195,
-      growthRate: 1.7,
+      beginningHeadcount: 1228,
+      growthRate: 1.6,
     },
-    { label: 'Aug 2026', joiners: 14, exits: 5, net: 9, beginningHeadcount: 1215, growthRate: 0.7 },
+    { label: 'Aug 2026', joiners: 14, exits: 5, net: 9, beginningHeadcount: 1248, growthRate: 0.7 },
     {
       label: 'Sep 2026',
       joiners: 22,
       exits: 2,
       net: 20,
-      beginningHeadcount: 1224,
+      beginningHeadcount: 1257,
       growthRate: 1.6,
     },
     {
@@ -187,7 +236,7 @@ const FALLBACK_GROWTH_DATA: Record<GrowthTimeFilter, GrowthDataPoint[]> = {
       joiners: 19,
       exits: 4,
       net: 15,
-      beginningHeadcount: 1244,
+      beginningHeadcount: 1277,
       growthRate: 1.2,
     },
     {
@@ -195,11 +244,12 @@ const FALLBACK_GROWTH_DATA: Record<GrowthTimeFilter, GrowthDataPoint[]> = {
       joiners: 16,
       exits: 2,
       net: 14,
-      beginningHeadcount: 1259,
+      beginningHeadcount: 1292,
       growthRate: 1.1,
     },
   ],
   yearly: [
+    { label: '2022', joiners: 110, exits: 22, net: 88, beginningHeadcount: 762, growthRate: 11.5 },
     { label: '2023', joiners: 140, exits: 28, net: 112, beginningHeadcount: 850, growthRate: 13.2 },
     { label: '2024', joiners: 185, exits: 32, net: 153, beginningHeadcount: 962, growthRate: 15.9 },
     {
@@ -217,6 +267,12 @@ const FALLBACK_GROWTH_DATA: Record<GrowthTimeFilter, GrowthDataPoint[]> = {
 // Fallback retention series
 const FALLBACK_RETENTION_DATA: Record<RetentionTimeFilter, RetentionDataPoint[]> = {
   monthly: [
+    { label: 'Dec 2025', retentionRate: 95.0, attritionRate: 5.0, retained: 1110, separated: 5 },
+    { label: 'Jan 2026', retentionRate: 94.2, attritionRate: 5.8, retained: 1125, separated: 6 },
+    { label: 'Feb 2026', retentionRate: 95.5, attritionRate: 4.5, retained: 1140, separated: 4 },
+    { label: 'Mar 2026', retentionRate: 96.0, attritionRate: 4.0, retained: 1155, separated: 4 },
+    { label: 'Apr 2026', retentionRate: 94.8, attritionRate: 5.2, retained: 1165, separated: 5 },
+    { label: 'May 2026', retentionRate: 95.2, attritionRate: 4.8, retained: 1170, separated: 4 },
     { label: 'Jun 2026', retentionRate: 95.8, attritionRate: 4.2, retained: 1177, separated: 3 },
     { label: 'Jul 2026', retentionRate: 94.6, attritionRate: 5.4, retained: 1191, separated: 4 },
     { label: 'Aug 2026', retentionRate: 93.9, attritionRate: 6.1, retained: 1210, separated: 5 },
@@ -231,6 +287,8 @@ const FALLBACK_RETENTION_DATA: Record<RetentionTimeFilter, RetentionDataPoint[]>
     { label: 'Q4 2026', retentionRate: 94.2, attritionRate: 5.8, retained: 1257, separated: 6 },
   ],
   yearly: [
+    { label: '2022', retentionRate: 93.8, attritionRate: 6.2, retained: 714, separated: 48 },
+    { label: '2023', retentionRate: 94.1, attritionRate: 5.9, retained: 820, separated: 40 },
     { label: '2024', retentionRate: 94.5, attritionRate: 5.5, retained: 930, separated: 32 },
     { label: '2025', retentionRate: 95.2, attritionRate: 4.8, retained: 1079, separated: 36 },
     { label: '2026', retentionRate: 94.2, attritionRate: 5.8, retained: 1269, separated: 20 },
@@ -340,6 +398,9 @@ export const WorkforceAnalyticsCard: React.FC<WorkforceAnalyticsCardProps> = ({
   // Hover states
   const [hoveredSlice, setHoveredSlice] = useState<string | null>(null);
   const [hoveredPointIdx, setHoveredPointIdx] = useState<number | null>(null);
+
+  // Chart display type: 'bar' (Option A - Grouped Bars, default) | 'line' (Smooth Spline)
+  const [chartType, setChartType] = useState<'bar' | 'line'>('bar');
 
   // SVG Unique IDs
   const gradJoinersId = useId();
@@ -477,23 +538,48 @@ export const WorkforceAnalyticsCard: React.FC<WorkforceAnalyticsCardProps> = ({
     const curYear = now.getFullYear();
 
     if (activeGrowthPeriod === 'monthly') {
-      const months = ['Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov'];
-      return months.map((m, idx) => {
-        const monthNum = idx + 6; // 6 to 11 (Jun to Nov)
+      // Last 12 months dynamically
+      const monthsData: { label: string; year: number; month: number }[] = [];
+      const monthNames = [
+        'Jan',
+        'Feb',
+        'Mar',
+        'Apr',
+        'May',
+        'Jun',
+        'Jul',
+        'Aug',
+        'Sep',
+        'Oct',
+        'Nov',
+        'Dec',
+      ];
+      for (let i = 11; i >= 0; i--) {
+        const d = new Date(curYear, now.getMonth() - i, 1);
+        const y = d.getFullYear();
+        const mIdx = d.getMonth();
+        monthsData.push({
+          label: `${monthNames[mIdx]} ${y}`,
+          year: y,
+          month: mIdx + 1,
+        });
+      }
+
+      return monthsData.map((mObj, idx) => {
         const joiners = employees.filter((e) => {
           if (!e.joiningDate) return false;
           const d = new Date(e.joiningDate);
-          return d.getFullYear() === curYear && d.getMonth() + 1 === monthNum;
+          return d.getFullYear() === mObj.year && d.getMonth() + 1 === mObj.month;
         }).length;
 
         const exits = employees.filter((e) => {
           if (!e.lastWorkingDate) return false;
           const d = new Date(e.lastWorkingDate);
-          return d.getFullYear() === curYear && d.getMonth() + 1 === monthNum;
+          return d.getFullYear() === mObj.year && d.getMonth() + 1 === mObj.month;
         }).length;
 
         const net = joiners - exits;
-        const beginningHeadcount = Math.max(1, employees.length - (months.length - idx) * 2);
+        const beginningHeadcount = Math.max(1, employees.length - (monthsData.length - idx) * 2);
         const growthRate =
           beginningHeadcount > 0
             ? Number(((net / beginningHeadcount) * 100).toFixed(1))
@@ -502,7 +588,7 @@ export const WorkforceAnalyticsCard: React.FC<WorkforceAnalyticsCardProps> = ({
               : 0;
 
         return {
-          label: `${m} ${curYear}`,
+          label: mObj.label,
           joiners,
           exits,
           net,
@@ -513,7 +599,8 @@ export const WorkforceAnalyticsCard: React.FC<WorkforceAnalyticsCardProps> = ({
     }
 
     if (activeGrowthPeriod === 'yearly') {
-      const years = [curYear - 3, curYear - 2, curYear - 1, curYear];
+      // Last 5 years
+      const years = [curYear - 4, curYear - 3, curYear - 2, curYear - 1, curYear];
       return years.map((yr, idx) => {
         const joiners = employees.filter((e) => {
           if (!e.joiningDate) return false;
@@ -583,6 +670,17 @@ export const WorkforceAnalyticsCard: React.FC<WorkforceAnalyticsCardProps> = ({
     });
   }, [employees, isDataEmpty, activeGrowthPeriod]);
 
+  // Executive summary totals for Option A
+  const totalGrowthJoiners = useMemo(
+    () => growthSeries.reduce((acc, curr) => acc + curr.joiners, 0),
+    [growthSeries],
+  );
+  const totalGrowthExits = useMemo(
+    () => growthSeries.reduce((acc, curr) => acc + curr.exits, 0),
+    [growthSeries],
+  );
+  const totalGrowthNet = totalGrowthJoiners - totalGrowthExits;
+
   // ─────────────────────────────────────────────────────────────
   // 3. Process Retention Data (Live Records or Fallback)
   // ─────────────────────────────────────────────────────────────
@@ -592,16 +690,41 @@ export const WorkforceAnalyticsCard: React.FC<WorkforceAnalyticsCardProps> = ({
       return FALLBACK_RETENTION_DATA[activeRetentionPeriod];
     }
 
-    const curYear = new Date().getFullYear();
+    const now = new Date();
+    const curYear = now.getFullYear();
 
     if (activeRetentionPeriod === 'monthly') {
-      const months = ['Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov'];
-      return months.map((m, idx) => {
-        const monthNum = idx + 6;
+      const monthsData: { label: string; year: number; month: number }[] = [];
+      const monthNames = [
+        'Jan',
+        'Feb',
+        'Mar',
+        'Apr',
+        'May',
+        'Jun',
+        'Jul',
+        'Aug',
+        'Sep',
+        'Oct',
+        'Nov',
+        'Dec',
+      ];
+      for (let i = 11; i >= 0; i--) {
+        const d = new Date(curYear, now.getMonth() - i, 1);
+        const y = d.getFullYear();
+        const mIdx = d.getMonth();
+        monthsData.push({
+          label: `${monthNames[mIdx]} ${y}`,
+          year: y,
+          month: mIdx + 1,
+        });
+      }
+
+      return monthsData.map((mObj) => {
         const separated = employees.filter((e) => {
           if (!e.lastWorkingDate) return false;
           const d = new Date(e.lastWorkingDate);
-          return d.getFullYear() === curYear && d.getMonth() + 1 === monthNum;
+          return d.getFullYear() === mObj.year && d.getMonth() + 1 === mObj.month;
         }).length;
 
         const totalActive = Math.max(1, employees.length);
@@ -616,7 +739,7 @@ export const WorkforceAnalyticsCard: React.FC<WorkforceAnalyticsCardProps> = ({
         );
 
         return {
-          label: `${m} ${curYear}`,
+          label: mObj.label,
           retentionRate: separated === 0 ? 100 : retentionRate,
           attritionRate,
           retained,
@@ -650,8 +773,8 @@ export const WorkforceAnalyticsCard: React.FC<WorkforceAnalyticsCardProps> = ({
       });
     }
 
-    // Yearly
-    const years = [curYear - 2, curYear - 1, curYear];
+    // Yearly: Last 5 years
+    const years = [curYear - 4, curYear - 3, curYear - 2, curYear - 1, curYear];
     return years.map((yr) => {
       const separated = employees.filter((e) => {
         if (!e.lastWorkingDate) return false;
@@ -691,14 +814,16 @@ export const WorkforceAnalyticsCard: React.FC<WorkforceAnalyticsCardProps> = ({
   const plotW = plotRight - plotLeft;
   const plotH = plotBottom - plotTop;
 
-  // Growth Coordinates
-  const maxGrowthVal = Math.max(
-    6,
-    Math.round(Math.max(...growthSeries.map((d) => Math.max(d.joiners, d.exits)), 1) * 1.3),
-  );
+  // Growth Coordinates: rounded to clean multiple of 4 so gridlines & Y-axis labels are exact clean integers (e.g. 4, 8, 12, 16)
+  const peakGrowth = Math.max(...growthSeries.map((d) => Math.max(d.joiners, d.exits)), 1);
+  const maxGrowthVal = Math.max(8, Math.ceil((peakGrowth * 1.25) / 4) * 4);
 
   const growthPoints = growthSeries.map((pt, idx) => {
-    const x = plotLeft + (idx / (growthSeries.length - 1 || 1)) * plotW;
+    const slotW = plotW / Math.max(1, growthSeries.length);
+    const x =
+      chartType === 'bar'
+        ? plotLeft + (idx + 0.5) * slotW
+        : plotLeft + (idx / (growthSeries.length - 1 || 1)) * plotW;
     const yJoiners = plotBottom - (pt.joiners / maxGrowthVal) * plotH;
     const yExits = plotBottom - (pt.exits / maxGrowthVal) * plotH;
     return {
@@ -774,66 +899,107 @@ export const WorkforceAnalyticsCard: React.FC<WorkforceAnalyticsCardProps> = ({
       {/* ── 1. Top Header Row (Title on Left, Dropdown Controls on Right) ── */}
       <div className="bezent-wf-analytics-card__top">
         <div className="bezent-wf-analytics-card__header-left">
-          <div className="bezent-wf-analytics-card__icon" aria-hidden="true">
-            <BezentIcon name="reports" size={19} />
+          <div
+            className={`bezent-wf-analytics-card__icon ${
+              loading ? 'bezent-wf-skeleton-icon-badge' : ''
+            }`}
+            aria-hidden="true"
+          >
+            {loading ? null : <BezentIcon name="reports" size={19} />}
           </div>
-          <h3 className="bezent-wf-analytics-card__title">Workforce Analytics</h3>
+          <h3 className="bezent-wf-analytics-card__title">
+            {loading ? (
+              <>
+                <span className="bezent-sr-only">Workforce Analytics</span>
+                <span className="bezent-wf-skeleton-shimmer bezent-wf-skeleton-title" />
+              </>
+            ) : (
+              <>
+                <span>Workforce Analytics</span>
+                <WorkforceInfoPopover
+                  label="Workforce Analytics"
+                  tooltip="Headcount growth, joiners, exits, and retention rates across time periods"
+                />
+              </>
+            )}
+          </h3>
         </div>
 
         {/* Two-Dropdown Controls moved directly to Header Right */}
         <div className="bezent-wf-analytics-dropdowns-row">
-          {/* Dropdown 1: Analytics Category */}
-          <div className="bezent-wf-analytics-select-wrap">
-            <Select
-              size="sm"
-              width="auto"
-              aria-label="Analytics Category"
-              value={activeCategory}
-              options={CATEGORY_OPTIONS}
-              onChange={(e) => handleCategoryChange(e.target.value as AnalyticsView)}
-            />
-          </div>
+          {loading ? (
+            <>
+              <div className="bezent-sr-only">
+                <Select
+                  size="sm"
+                  width="auto"
+                  aria-label="Analytics Category"
+                  value={activeCategory}
+                  options={CATEGORY_OPTIONS}
+                  onChange={(e) => handleCategoryChange(e.target.value as AnalyticsView)}
+                />
+              </div>
+              <span className="bezent-wf-skeleton-shimmer bezent-wf-skeleton-control-btn" />
+              <span className="bezent-wf-skeleton-shimmer bezent-wf-skeleton-control-btn" />
+            </>
+          ) : (
+            <>
+              {/* Dropdown 1: Analytics Category */}
+              <div className="bezent-wf-analytics-select-wrap">
+                <Select
+                  size="sm"
+                  width="auto"
+                  aria-label="Analytics Category"
+                  value={activeCategory}
+                  options={CATEGORY_OPTIONS}
+                  onChange={(e) => handleCategoryChange(e.target.value as AnalyticsView)}
+                />
+              </div>
 
-          {/* Dropdown 2: Dynamic Filter (Changes by Analytics Category) */}
-          {activeCategory === 'distribution' && (
-            <div className="bezent-wf-analytics-select-wrap">
-              <Select
-                size="sm"
-                width="auto"
-                aria-label="Distribution By"
-                value={activeDistributionBy}
-                options={DISTRIBUTION_BY_OPTIONS}
-                onChange={(e) =>
-                  handleDistributionByChange(e.target.value as DistributionDimension)
-                }
-              />
-            </div>
-          )}
+              {/* Dropdown 2: Dynamic Filter (Changes by Analytics Category) */}
+              {activeCategory === 'distribution' && (
+                <div className="bezent-wf-analytics-select-wrap">
+                  <Select
+                    size="sm"
+                    width="auto"
+                    aria-label="Distribution By"
+                    value={activeDistributionBy}
+                    options={DISTRIBUTION_BY_OPTIONS}
+                    onChange={(e) =>
+                      handleDistributionByChange(e.target.value as DistributionDimension)
+                    }
+                  />
+                </div>
+              )}
 
-          {activeCategory === 'growth' && (
-            <div className="bezent-wf-analytics-select-wrap">
-              <Select
-                size="sm"
-                width="auto"
-                aria-label="Time Period"
-                value={activeGrowthPeriod}
-                options={GROWTH_PERIOD_OPTIONS}
-                onChange={(e) => handleGrowthPeriodChange(e.target.value as GrowthTimeFilter)}
-              />
-            </div>
-          )}
+              {activeCategory === 'growth' && (
+                <div className="bezent-wf-analytics-select-wrap">
+                  <Select
+                    size="sm"
+                    width="auto"
+                    aria-label="Time Period"
+                    value={activeGrowthPeriod}
+                    options={GROWTH_PERIOD_OPTIONS}
+                    onChange={(e) => handleGrowthPeriodChange(e.target.value as GrowthTimeFilter)}
+                  />
+                </div>
+              )}
 
-          {activeCategory === 'retention' && (
-            <div className="bezent-wf-analytics-select-wrap">
-              <Select
-                size="sm"
-                width="auto"
-                aria-label="Time Period"
-                value={activeRetentionPeriod}
-                options={RETENTION_PERIOD_OPTIONS}
-                onChange={(e) => handleRetentionPeriodChange(e.target.value as RetentionTimeFilter)}
-              />
-            </div>
+              {activeCategory === 'retention' && (
+                <div className="bezent-wf-analytics-select-wrap">
+                  <Select
+                    size="sm"
+                    width="auto"
+                    aria-label="Time Period"
+                    value={activeRetentionPeriod}
+                    options={RETENTION_PERIOD_OPTIONS}
+                    onChange={(e) =>
+                      handleRetentionPeriodChange(e.target.value as RetentionTimeFilter)
+                    }
+                  />
+                </div>
+              )}
+            </>
           )}
         </div>
       </div>
@@ -977,15 +1143,93 @@ export const WorkforceAnalyticsCard: React.FC<WorkforceAnalyticsCardProps> = ({
              ───────────────────────────────────────────────────────────── */}
             {activeCategory === 'growth' && (
               <div className="bezent-wf-analytics-chart-container">
-                {/* Legend Row */}
-                <div className="bezent-wf-analytics-chart-legend">
-                  <div className="bezent-wf-chart-legend-item">
-                    <span className="bezent-wf-legend-dot bezent-wf-legend-dot--emerald" />
-                    <span className="bezent-wf-chart-legend-text">Joiners</span>
+                {/* Header Row: Summary Ribbon on Left + View Switcher & Legend on Right */}
+                <div className="bezent-wf-analytics-chart-header-row">
+                  {/* Executive Summary Ribbon */}
+                  <div className="bezent-wf-chart-summary-ribbon">
+                    <div className="bezent-wf-summary-stat bezent-wf-summary-stat--joiners">
+                      <span className="bezent-wf-summary-label">Joined</span>
+                      <span className="bezent-wf-summary-value">+{totalGrowthJoiners}</span>
+                    </div>
+                    <div className="bezent-wf-summary-divider" />
+                    <div className="bezent-wf-summary-stat bezent-wf-summary-stat--exits">
+                      <span className="bezent-wf-summary-label">Exits</span>
+                      <span className="bezent-wf-summary-value">-{totalGrowthExits}</span>
+                    </div>
+                    <div className="bezent-wf-summary-divider" />
+                    <div className="bezent-wf-summary-stat bezent-wf-summary-stat--net">
+                      <span className="bezent-wf-summary-label">Net Growth</span>
+                      <span className="bezent-wf-summary-value">
+                        {totalGrowthNet >= 0 ? `+${totalGrowthNet}` : totalGrowthNet}
+                      </span>
+                    </div>
                   </div>
-                  <div className="bezent-wf-chart-legend-item">
-                    <span className="bezent-wf-legend-dot bezent-wf-legend-dot--slate" />
-                    <span className="bezent-wf-chart-legend-text">Exits</span>
+
+                  {/* Header Controls: Legend & View Switcher */}
+                  <div className="bezent-wf-chart-header-controls">
+                    {/* Legend */}
+                    <div className="bezent-wf-analytics-chart-legend">
+                      <div className="bezent-wf-chart-legend-item">
+                        <span className="bezent-wf-legend-dot bezent-wf-legend-dot--emerald" />
+                        <span className="bezent-wf-chart-legend-text">Joiners</span>
+                      </div>
+                      <div className="bezent-wf-chart-legend-item">
+                        <span className="bezent-wf-legend-dot bezent-wf-legend-dot--rose" />
+                        <span className="bezent-wf-chart-legend-text">Exits</span>
+                      </div>
+                    </div>
+
+                    {/* View Switcher: [ Bars ] [ Line ] */}
+                    <div
+                      className="bezent-wf-chart-type-toggle"
+                      role="tablist"
+                      aria-label="Chart view mode"
+                    >
+                      <button
+                        type="button"
+                        role="tab"
+                        aria-selected={chartType === 'bar'}
+                        className={`bezent-wf-chart-toggle-btn ${chartType === 'bar' ? 'bezent-wf-chart-toggle-btn--active' : ''}`}
+                        onClick={() => setChartType('bar')}
+                        title="Grouped Bars View"
+                      >
+                        <svg
+                          width="12"
+                          height="12"
+                          viewBox="0 0 16 16"
+                          fill="currentColor"
+                          aria-hidden="true"
+                        >
+                          <rect x="2" y="7" width="3" height="8" rx="1" />
+                          <rect x="7" y="2" width="3" height="13" rx="1" />
+                          <rect x="12" y="5" width="3" height="10" rx="1" />
+                        </svg>
+                        <span>Bars</span>
+                      </button>
+                      <button
+                        type="button"
+                        role="tab"
+                        aria-selected={chartType === 'line'}
+                        className={`bezent-wf-chart-toggle-btn ${chartType === 'line' ? 'bezent-wf-chart-toggle-btn--active' : ''}`}
+                        onClick={() => setChartType('line')}
+                        title="Trend Line View"
+                      >
+                        <svg
+                          width="12"
+                          height="12"
+                          viewBox="0 0 16 16"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          aria-hidden="true"
+                        >
+                          <polyline points="2 12 6 7 10 10 14 3" />
+                        </svg>
+                        <span>Line</span>
+                      </button>
+                    </div>
                   </div>
                 </div>
 
@@ -1018,9 +1262,19 @@ export const WorkforceAnalyticsCard: React.FC<WorkforceAnalyticsCardProps> = ({
                       <stop offset="100%" stopColor="#0d9488" stopOpacity="0.0" />
                     </linearGradient>
                     <linearGradient id={gradExitsId} x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor="#cbd5e1" stopOpacity="0.14" />
-                      <stop offset="85%" stopColor="#cbd5e1" stopOpacity="0.02" />
-                      <stop offset="100%" stopColor="#cbd5e1" stopOpacity="0.0" />
+                      <stop offset="0%" stopColor="#f43f5e" stopOpacity="0.18" />
+                      <stop offset="85%" stopColor="#f43f5e" stopOpacity="0.02" />
+                      <stop offset="100%" stopColor="#f43f5e" stopOpacity="0.0" />
+                    </linearGradient>
+
+                    {/* Option A: Grouped Bar Gradients */}
+                    <linearGradient id="wf-grad-bar-joiners" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stopColor="#14b8a6" />
+                      <stop offset="100%" stopColor="#0d9488" />
+                    </linearGradient>
+                    <linearGradient id="wf-grad-bar-exits" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stopColor="#f43f5e" />
+                      <stop offset="100%" stopColor="#e11d48" />
                     </linearGradient>
                     <filter
                       id="wf-analytics-dot-shadow"
@@ -1035,21 +1289,6 @@ export const WorkforceAnalyticsCard: React.FC<WorkforceAnalyticsCardProps> = ({
                         stdDeviation="2.5"
                         floodColor="#0f172a"
                         floodOpacity="0.18"
-                      />
-                    </filter>
-                    <filter
-                      id="wf-analytics-tooltip-shadow"
-                      x="-15%"
-                      y="-15%"
-                      width="130%"
-                      height="140%"
-                    >
-                      <feDropShadow
-                        dx="0"
-                        dy="8"
-                        stdDeviation="7"
-                        floodColor="#0f172a"
-                        floodOpacity="0.22"
                       />
                     </filter>
                   </defs>
@@ -1097,24 +1336,96 @@ export const WorkforceAnalyticsCard: React.FC<WorkforceAnalyticsCardProps> = ({
                     0
                   </text>
 
-                  {/* Joiners Area & Smooth Spline Line */}
-                  {pathJoinersArea && <path d={pathJoinersArea} fill={`url(#${gradJoinersId})`} />}
-                  {pathJoinersLine && (
-                    <path d={pathJoinersLine} className="bezent-wf-series-line--joiners" />
+                  {/* ── MODE 1: OPTION A GROUPED BARS (Default) ── */}
+                  {chartType === 'bar' && (
+                    <g
+                      className={`bezent-wf-bars-group ${hoveredPointIdx !== null ? 'bezent-wf-bars-group--has-hover' : ''}`}
+                    >
+                      {/* Side-by-Side Grouped Bars (Joiners + Exits) - Clean with Zero Background Clutter */}
+                      {growthPoints.map((pt, idx) => {
+                        const slotW = plotW / Math.max(1, growthPoints.length);
+                        const barW = Math.min(18, Math.max(10, slotW * 0.22));
+                        const barGap = 3;
+                        const hJoiners = (pt.data.joiners / maxGrowthVal) * plotH;
+                        const hExits = (pt.data.exits / maxGrowthVal) * plotH;
+                        const displayHJoiners = pt.data.joiners > 0 ? Math.max(4, hJoiners) : 0;
+                        const displayHExits = pt.data.exits > 0 ? Math.max(4, hExits) : 0;
+                        const xJoiners = pt.x - barW - barGap / 2;
+                        const xExits = pt.x + barGap / 2;
+                        const yJoiners = plotBottom - displayHJoiners;
+                        const yExits = plotBottom - displayHExits;
+                        const isHovered = hoveredPointIdx === idx;
+
+                        return (
+                          <g
+                            key={`bar-grp-${pt.data.label}-${idx}`}
+                            className={`bezent-wf-bar-pair ${isHovered ? 'bezent-wf-bar-pair--active' : ''}`}
+                          >
+                            {/* Joiners Bar */}
+                            {displayHJoiners > 0 && (
+                              <rect
+                                x={xJoiners}
+                                y={yJoiners}
+                                width={barW}
+                                height={displayHJoiners}
+                                rx={3.5}
+                                fill="url(#wf-grad-bar-joiners)"
+                                className={`bezent-wf-bar--joiners ${isHovered ? 'bezent-wf-bar--active' : ''}`}
+                              />
+                            )}
+
+                            {/* Exits Bar */}
+                            {displayHExits > 0 && (
+                              <rect
+                                x={xExits}
+                                y={yExits}
+                                width={barW}
+                                height={displayHExits}
+                                rx={3.5}
+                                fill="url(#wf-grad-bar-exits)"
+                                className={`bezent-wf-bar--exits ${isHovered ? 'bezent-wf-bar--active' : ''}`}
+                              />
+                            )}
+                          </g>
+                        );
+                      })}
+                    </g>
                   )}
 
-                  {/* Exits Area & Smooth Spline Line */}
-                  {pathExitsArea && <path d={pathExitsArea} fill={`url(#${gradExitsId})`} />}
-                  {pathExitsLine && (
-                    <path d={pathExitsLine} className="bezent-wf-series-line--exits" />
+                  {/* ── MODE 2: SMOOTH SPLINE LINE VIEW ── */}
+                  {chartType === 'line' && (
+                    <>
+                      {/* Joiners Area & Smooth Spline Line */}
+                      {pathJoinersArea && (
+                        <path d={pathJoinersArea} fill={`url(#${gradJoinersId})`} />
+                      )}
+                      {pathJoinersLine && (
+                        <path d={pathJoinersLine} className="bezent-wf-series-line--joiners" />
+                      )}
+
+                      {/* Exits Area & Smooth Spline Line */}
+                      {pathExitsArea && <path d={pathExitsArea} fill={`url(#${gradExitsId})`} />}
+                      {pathExitsLine && (
+                        <path d={pathExitsLine} className="bezent-wf-series-line--exits" />
+                      )}
+                    </>
                   )}
 
                   {/* Interactive Date Hit Columns (seamless column hover detection) */}
                   {growthPoints.map((pt, idx) => {
-                    const prevPt = growthPoints[idx - 1];
-                    const nextPt = growthPoints[idx + 1];
-                    const leftEdge = prevPt ? (prevPt.x + pt.x) / 2 : plotLeft;
-                    const rightEdge = nextPt ? (pt.x + nextPt.x) / 2 : plotRight;
+                    const slotW = plotW / Math.max(1, growthPoints.length);
+                    const leftEdge =
+                      chartType === 'bar'
+                        ? plotLeft + idx * slotW
+                        : idx > 0
+                          ? (growthPoints[idx - 1]!.x + pt.x) / 2
+                          : plotLeft;
+                    const rightEdge =
+                      chartType === 'bar'
+                        ? plotLeft + (idx + 1) * slotW
+                        : idx < growthPoints.length - 1
+                          ? (pt.x + growthPoints[idx + 1]!.x) / 2
+                          : plotRight;
                     return (
                       <rect
                         key={`hit-${pt.data.label}-${idx}`}
@@ -1131,6 +1442,8 @@ export const WorkforceAnalyticsCard: React.FC<WorkforceAnalyticsCardProps> = ({
                   {/* X-axis Labels */}
                   {growthPoints.map((pt, idx) => {
                     const isActive = hoveredPointIdx === idx;
+                    const displayLabel =
+                      growthSeries.length > 8 ? pt.data.label.split(' ')[0] : pt.data.label;
                     return (
                       <text
                         key={pt.data.label}
@@ -1139,7 +1452,7 @@ export const WorkforceAnalyticsCard: React.FC<WorkforceAnalyticsCardProps> = ({
                         textAnchor="middle"
                         className={`bezent-wf-trend-axis-label ${isActive ? 'bezent-wf-trend-axis-label--active' : ''}`}
                       >
-                        {pt.data.label}
+                        {displayLabel}
                       </text>
                     );
                   })}
@@ -1147,50 +1460,57 @@ export const WorkforceAnalyticsCard: React.FC<WorkforceAnalyticsCardProps> = ({
                   {/* Active Hover Crosshair, Dots & Tooltip Card */}
                   {activeGrowthHover && (
                     <g className="bezent-wf-trend-active-group">
-                      {/* Vertical Dashed Guide line */}
-                      <line
-                        x1={activeGrowthHover.x}
-                        y1={plotTop}
-                        x2={activeGrowthHover.x}
-                        y2={plotBottom}
-                        strokeDasharray="3 3"
-                        className="bezent-wf-trend-guide-line"
-                      />
+                      {/* Vertical Dashed Guide line (Line mode only) */}
+                      {chartType === 'line' && (
+                        <line
+                          x1={activeGrowthHover.x}
+                          y1={plotTop}
+                          x2={activeGrowthHover.x}
+                          y2={plotBottom}
+                          strokeDasharray="3 3"
+                          className="bezent-wf-trend-guide-line"
+                        />
+                      )}
 
-                      {/* Primary Marker: White Ring + Drop Shadow + Teal Center (Image 1 reference) */}
-                      <circle
-                        cx={activeGrowthHover.x}
-                        cy={activeGrowthHover.yJoiners}
-                        r={6.5}
-                        fill="#ffffff"
-                        filter="url(#wf-analytics-dot-shadow)"
-                      />
-                      <circle
-                        cx={activeGrowthHover.x}
-                        cy={activeGrowthHover.yJoiners}
-                        r={3.2}
-                        fill="#0d9488"
-                      />
+                      {/* Line Markers (shown in Line Mode) */}
+                      {chartType === 'line' && (
+                        <>
+                          {/* Primary Marker: White Ring + Drop Shadow + Teal Center */}
+                          <circle
+                            cx={activeGrowthHover.x}
+                            cy={activeGrowthHover.yJoiners}
+                            r={6.5}
+                            fill="#ffffff"
+                            filter="url(#wf-analytics-dot-shadow)"
+                          />
+                          <circle
+                            cx={activeGrowthHover.x}
+                            cy={activeGrowthHover.yJoiners}
+                            r={3.2}
+                            fill="#0d9488"
+                          />
 
-                      {/* Exit Marker: Secondary Dot (only when exits > 0 and distinct) */}
-                      {activeGrowthHover.data.exits > 0 &&
-                        Math.abs(activeGrowthHover.yExits - activeGrowthHover.yJoiners) > 4 && (
-                          <>
-                            <circle
-                              cx={activeGrowthHover.x}
-                              cy={activeGrowthHover.yExits}
-                              r={5.5}
-                              fill="#ffffff"
-                              filter="url(#wf-analytics-dot-shadow)"
-                            />
-                            <circle
-                              cx={activeGrowthHover.x}
-                              cy={activeGrowthHover.yExits}
-                              r={2.8}
-                              fill="#94a3b8"
-                            />
-                          </>
-                        )}
+                          {/* Exit Marker: Secondary Dot (only when exits > 0 and distinct) */}
+                          {activeGrowthHover.data.exits > 0 &&
+                            Math.abs(activeGrowthHover.yExits - activeGrowthHover.yJoiners) > 4 && (
+                              <>
+                                <circle
+                                  cx={activeGrowthHover.x}
+                                  cy={activeGrowthHover.yExits}
+                                  r={5.5}
+                                  fill="#ffffff"
+                                  filter="url(#wf-analytics-dot-shadow)"
+                                />
+                                <circle
+                                  cx={activeGrowthHover.x}
+                                  cy={activeGrowthHover.yExits}
+                                  r={2.8}
+                                  fill="#f43f5e"
+                                />
+                              </>
+                            )}
+                        </>
+                      )}
 
                       {/* Modern Floating Tooltip Card (Matching Image 1 reference) */}
                       {(() => {
@@ -1212,7 +1532,7 @@ export const WorkforceAnalyticsCard: React.FC<WorkforceAnalyticsCardProps> = ({
                         return (
                           <g
                             transform={`translate(${tipX.toFixed(1)}, ${tipY.toFixed(1)})`}
-                            filter="url(#wf-analytics-tooltip-shadow)"
+                            className="bezent-wf-trend-tooltip-group"
                           >
                             <rect
                               width={tipW}
@@ -1245,7 +1565,7 @@ export const WorkforceAnalyticsCard: React.FC<WorkforceAnalyticsCardProps> = ({
                             </text>
 
                             {/* Exits Row */}
-                            <circle cx={19} cy={61} r={3} fill="#94a3b8" />
+                            <circle cx={19} cy={61} r={3} fill="#f43f5e" />
                             <text x={28} y={65} className="bezent-wf-trend-tooltip-name">
                               Exits
                             </text>
@@ -1253,7 +1573,7 @@ export const WorkforceAnalyticsCard: React.FC<WorkforceAnalyticsCardProps> = ({
                               x={tipW - 14}
                               y={65}
                               textAnchor="end"
-                              className="bezent-wf-trend-tooltip-val-sec"
+                              className="bezent-wf-trend-tooltip-val-rose"
                             >
                               -{activeGrowthHover.data.exits}
                             </text>
@@ -1347,21 +1667,6 @@ export const WorkforceAnalyticsCard: React.FC<WorkforceAnalyticsCardProps> = ({
                         floodOpacity="0.18"
                       />
                     </filter>
-                    <filter
-                      id="wf-analytics-tooltip-shadow"
-                      x="-15%"
-                      y="-15%"
-                      width="130%"
-                      height="140%"
-                    >
-                      <feDropShadow
-                        dx="0"
-                        dy="8"
-                        stdDeviation="7"
-                        floodColor="#0f172a"
-                        floodOpacity="0.22"
-                      />
-                    </filter>
                   </defs>
 
                   {/* Y-Axis Grid Lines & Labels */}
@@ -1444,6 +1749,8 @@ export const WorkforceAnalyticsCard: React.FC<WorkforceAnalyticsCardProps> = ({
                   {/* X-axis Labels */}
                   {retentionPoints.map((pt, idx) => {
                     const isActive = hoveredPointIdx === idx;
+                    const displayLabel =
+                      growthSeries.length > 8 ? pt.data.label.split(' ')[0] : pt.data.label;
                     return (
                       <text
                         key={pt.data.label}
@@ -1452,7 +1759,7 @@ export const WorkforceAnalyticsCard: React.FC<WorkforceAnalyticsCardProps> = ({
                         textAnchor="middle"
                         className={`bezent-wf-trend-axis-label ${isActive ? 'bezent-wf-trend-axis-label--active' : ''}`}
                       >
-                        {pt.data.label}
+                        {displayLabel}
                       </text>
                     );
                   })}
@@ -1523,7 +1830,7 @@ export const WorkforceAnalyticsCard: React.FC<WorkforceAnalyticsCardProps> = ({
                         return (
                           <g
                             transform={`translate(${tipX.toFixed(1)}, ${tipY.toFixed(1)})`}
-                            filter="url(#wf-analytics-tooltip-shadow)"
+                            className="bezent-wf-trend-tooltip-group"
                           >
                             <rect
                               width={tipW}

@@ -13,7 +13,6 @@ import {
   Inline,
   Input,
   Label,
-  LoadingState,
   Modal,
   Page,
   PageHeader,
@@ -30,6 +29,7 @@ import {
   type BadgeVariant,
 } from '../../../../design-system/components';
 import { BezentIcon } from '../../../../design-system/icons';
+import { WorkforceInfoPopover } from '../../components/WorkforceInfoPopover';
 import { employmentTypeLabel, getAvatarColor } from '../../employees/model/employeeModel';
 import {
   fetchOrganizationMasters,
@@ -462,9 +462,19 @@ export function OnboardingPage({ title = 'Onboarding', onAddNewHire }: Onboardin
         <Stack gap="lg">
           {/* 1. Page Header */}
           <PageHeader
-            title={title}
-            subtitle="Manage new hires from pre-joining through employee creation."
+            title={
+              <div className="bezent-wf-title-row">
+                <h1 className="bezent-page-header__title">{title}</h1>
+                <WorkforceInfoPopover
+                  label={title}
+                  tooltip="Manage new hires from pre-joining through employee creation."
+                />
+              </div>
+            }
           />
+          <span className="sr-only" hidden>
+            Manage new hires from pre-joining through employee creation.
+          </span>
 
           {/* Feedback alerts */}
           {successMessage && (
@@ -496,23 +506,25 @@ export function OnboardingPage({ title = 'Onboarding', onAddNewHire }: Onboardin
                   />
                 </div>
 
-                {/* Filter Toggle Button */}
+                {/* Filter Toggle Button (Icon-only) */}
                 <div className="bezent-filter-anchor">
-                  <Button
-                    variant={appliedCount > 0 || isFilterPanelOpen ? 'secondary' : 'outline'}
-                    size="md"
-                    shape="rounded"
-                    className={appliedCount > 0 ? 'bezent-btn--filters-active' : ''}
-                    leftIcon={<BezentIcon name="filter" size={16} />}
+                  <IconButton
+                    label={appliedCount > 0 ? `Filters (${appliedCount} active)` : 'Filters'}
+                    variant={appliedCount > 0 || isFilterPanelOpen ? 'solid' : 'ghost'}
+                    active={isFilterPanelOpen || appliedCount > 0}
+                    tooltipDirection="down"
                     onClick={() => setIsFilterPanelOpen((prev) => !prev)}
                     aria-expanded={isFilterPanelOpen}
-                    aria-label="Filters"
+                    aria-label={appliedCount > 0 ? `Filters (${appliedCount} active)` : 'Filters'}
+                    className={appliedCount > 0 ? 'bezent-btn--filters-active' : ''}
                   >
-                    <span>Filters</span>
+                    <BezentIcon name="filter" size={16} />
                     {appliedCount > 0 && (
-                      <span className="bezent-btn__filter-count">{appliedCount}</span>
+                      <span className="bezent-btn__filter-count bezent-btn__filter-count--icon-btn">
+                        {appliedCount}
+                      </span>
                     )}
-                  </Button>
+                  </IconButton>
 
                   <OnboardingFilterPanel
                     isOpen={isFilterPanelOpen}
@@ -526,17 +538,17 @@ export function OnboardingPage({ title = 'Onboarding', onAddNewHire }: Onboardin
                   />
                 </div>
 
-                {/* Reset Button */}
-                <Button
-                  variant="outline"
-                  size="md"
-                  shape="rounded"
-                  leftIcon={<BezentIcon name="reset" size={16} />}
+                {/* Reset Button (Icon-only) */}
+                <IconButton
+                  label="Reset filters"
+                  variant="ghost"
+                  tooltipDirection="down"
                   onClick={handleResetFilters}
                   disabled={!hasActiveFilters}
+                  aria-label="Reset filters"
                 >
-                  Reset
-                </Button>
+                  <BezentIcon name="reset" size={16} />
+                </IconButton>
 
                 {/* View Mode Toggle: List vs Grid */}
                 <div
@@ -584,7 +596,7 @@ export function OnboardingPage({ title = 'Onboarding', onAddNewHire }: Onboardin
                         onClick={() => handleTabChange(tab.id)}
                       >
                         <span>{tab.label}</span>
-                        {tab.count !== undefined && tab.count > 0 && (
+                        {tab.count !== undefined && (
                           <span className="bezent-filter-tab-count">{tab.count}</span>
                         )}
                       </button>
@@ -811,62 +823,50 @@ export function OnboardingPage({ title = 'Onboarding', onAddNewHire }: Onboardin
                                 />
                                 <Stack gap="none">
                                   <span className="bezent-table-meta-title">{item.fullName}</span>
-                                  <span className="bezent-table-meta-subtitle">
+                                  <span
+                                    className="bezent-table-meta-subtitle"
+                                    title={item.email || undefined}
+                                  >
                                     {item.email || '—'}
                                   </span>
                                 </Stack>
                               </Inline>
-                              <div
-                                className="bezent-table-action-menu"
-                                onClick={(e) => e.stopPropagation()}
-                              >
-                                <button
-                                  type="button"
-                                  className={`bezent-table-action-btn ${isMenuOpen ? 'is-active' : ''}`}
-                                  aria-label={`Actions for ${item.fullName}`}
+                              <div className="bezent-table-row-actions">
+                                <IconButton
+                                  label={
+                                    isCompleted
+                                      ? 'View Profile'
+                                      : item.stage === 'preboarding'
+                                        ? 'Start Registration'
+                                        : 'Continue Registration'
+                                  }
+                                  variant="ghost"
+                                  tooltipDirection="left"
                                   onClick={(e) => {
                                     e.stopPropagation();
-                                    toggleMenu(item.id);
+                                    handleRowAction(item);
                                   }}
+                                  aria-label={
+                                    isCompleted
+                                      ? `View profile of ${item.fullName}`
+                                      : `${item.stage === 'preboarding' ? 'Start' : 'Continue'} registration for ${item.fullName}`
+                                  }
                                 >
-                                  <BezentIcon name="more" size={18} />
-                                </button>
-                                {isMenuOpen && (
-                                  <div className="bezent-table-action-menu__dropdown" role="menu">
-                                    <button
-                                      type="button"
-                                      role="menuitem"
-                                      className="bezent-table-action-menu__item"
-                                      onClick={() => {
-                                        toggleMenu(item.id);
-                                        handleRowAction(item);
-                                      }}
-                                    >
-                                      <BezentIcon
-                                        name={isCompleted ? 'employees' : 'edit'}
-                                        size={16}
-                                      />
-                                      {isCompleted
-                                        ? 'View Profile'
-                                        : item.stage === 'preboarding'
-                                          ? 'Start Registration'
-                                          : 'Continue Registration'}
-                                    </button>
-                                    {!isCompleted && item.status === 'active' && (
-                                      <button
-                                        type="button"
-                                        role="menuitem"
-                                        className="bezent-table-action-menu__item"
-                                        onClick={() => {
-                                          toggleMenu(item.id);
-                                          openTransitionModal(item);
-                                        }}
-                                      >
-                                        <BezentIcon name="arrowRight" size={16} />
-                                        Transition Stage
-                                      </button>
-                                    )}
-                                  </div>
+                                  <BezentIcon name={isCompleted ? 'eye' : 'edit'} size={16} />
+                                </IconButton>
+                                {!isCompleted && item.status === 'active' && (
+                                  <IconButton
+                                    label="Transition Stage"
+                                    variant="ghost"
+                                    tooltipDirection="left"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      openTransitionModal(item);
+                                    }}
+                                    aria-label={`Transition stage for ${item.fullName}`}
+                                  >
+                                    <BezentIcon name="arrowRight" size={16} />
+                                  </IconButton>
                                 )}
                               </div>
                             </Inline>
@@ -958,7 +958,14 @@ export function OnboardingPage({ title = 'Onboarding', onAddNewHire }: Onboardin
                                   >
                                     {item.fullName}
                                   </button>
-                                  <span className="bezent-table-meta-subtitle">
+                                  <span
+                                    className="bezent-table-meta-subtitle"
+                                    title={
+                                      item.email
+                                        ? `${item.email}${item.designationName ? ` • ${item.designationName}` : ''}`
+                                        : undefined
+                                    }
+                                  >
                                     {item.email || '—'}
                                     {item.designationName ? ` • ${item.designationName}` : ''}
                                   </span>
@@ -988,61 +995,44 @@ export function OnboardingPage({ title = 'Onboarding', onAddNewHire }: Onboardin
                               </span>
                             </TableCell>
 
-                            {/* Actions (dropdown menu) */}
+                            {/* Actions */}
                             <TableCell className="bezent-table-col--actions">
-                              <div className="bezent-table-action-menu">
-                                <button
-                                  type="button"
-                                  className={`bezent-table-action-btn ${isMenuOpen ? 'is-active' : ''}`}
-                                  aria-label={`Actions for ${item.fullName}`}
-                                  aria-expanded={isMenuOpen}
+                              <div className="bezent-table-row-actions">
+                                <IconButton
+                                  label={
+                                    isCompleted
+                                      ? 'View Profile'
+                                      : item.stage === 'preboarding'
+                                        ? 'Start Registration'
+                                        : 'Continue Registration'
+                                  }
+                                  variant="ghost"
+                                  tooltipDirection="left"
                                   onClick={(e) => {
                                     e.stopPropagation();
-                                    toggleMenu(item.id);
+                                    handleRowAction(item);
                                   }}
+                                  aria-label={
+                                    isCompleted
+                                      ? `View profile of ${item.fullName}`
+                                      : `${item.stage === 'preboarding' ? 'Start' : 'Continue'} registration for ${item.fullName}`
+                                  }
                                 >
-                                  <BezentIcon name="more" size={18} />
-                                </button>
-
-                                {isMenuOpen && (
-                                  <div
-                                    className={`bezent-table-action-menu__dropdown ${isNearBottom ? 'bezent-table-action-menu__dropdown--upwards' : ''}`}
-                                    role="menu"
+                                  <BezentIcon name={isCompleted ? 'eye' : 'edit'} size={16} />
+                                </IconButton>
+                                {!isCompleted && item.status === 'active' && (
+                                  <IconButton
+                                    label="Transition Stage"
+                                    variant="ghost"
+                                    tooltipDirection="left"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      openTransitionModal(item);
+                                    }}
+                                    aria-label={`Transition stage for ${item.fullName}`}
                                   >
-                                    <button
-                                      type="button"
-                                      role="menuitem"
-                                      className="bezent-table-action-menu__item"
-                                      onClick={() => {
-                                        toggleMenu(item.id);
-                                        handleRowAction(item);
-                                      }}
-                                    >
-                                      <BezentIcon
-                                        name={isCompleted ? 'employees' : 'edit'}
-                                        size={16}
-                                      />
-                                      {isCompleted
-                                        ? 'View Profile'
-                                        : item.stage === 'preboarding'
-                                          ? 'Start Registration'
-                                          : 'Continue Registration'}
-                                    </button>
-                                    {!isCompleted && item.status === 'active' && (
-                                      <button
-                                        type="button"
-                                        role="menuitem"
-                                        className="bezent-table-action-menu__item"
-                                        onClick={() => {
-                                          toggleMenu(item.id);
-                                          openTransitionModal(item);
-                                        }}
-                                      >
-                                        <BezentIcon name="arrowRight" size={16} />
-                                        Transition Stage
-                                      </button>
-                                    )}
-                                  </div>
+                                    <BezentIcon name="arrowRight" size={16} />
+                                  </IconButton>
                                 )}
                               </div>
                             </TableCell>

@@ -45,10 +45,10 @@ describe('BEZENT Icon System — Google Material Symbols Outlined (ADR-015)', ()
     const activeHtml = renderToStaticMarkup(<BezentNavIcon name="dashboard" active={true} />);
 
     expect(normalHtml).toContain('bezent-nav-icon-box is-default');
-    expect(normalHtml).toContain('>dashboard</span>');
+    expect(normalHtml).toContain('>space_dashboard</span>');
 
     expect(activeHtml).toContain('bezent-nav-icon-box is-selected');
-    expect(activeHtml).toContain('>dashboard</span>');
+    expect(activeHtml).toContain('>space_dashboard</span>');
   });
 
   it('Dashboard navigation item follows canonical states without special-case logic', () => {
@@ -57,21 +57,21 @@ describe('BEZENT Icon System — Google Material Symbols Outlined (ADR-015)', ()
       <BezentNavIcon name="dashboard" active={false} hovered={false} />,
     );
     expect(normal).toContain('bezent-nav-icon-box is-default');
-    expect(normal).toContain('>dashboard</span>');
+    expect(normal).toContain('>space_dashboard</span>');
 
     // 2. Hover state
     const hovered = renderToStaticMarkup(
       <BezentNavIcon name="dashboard" active={false} hovered={true} />,
     );
     expect(hovered).toContain('bezent-nav-icon-box is-hovered');
-    expect(hovered).toContain('>dashboard</span>');
+    expect(hovered).toContain('>space_dashboard</span>');
 
     // 3. Selected state
     const selected = renderToStaticMarkup(
       <BezentNavIcon name="dashboard" active={true} hovered={false} />,
     );
     expect(selected).toContain('bezent-nav-icon-box is-selected');
-    expect(selected).toContain('>dashboard</span>');
+    expect(selected).toContain('>space_dashboard</span>');
   });
 
   it('Dashboard to Onboarding navigation transition switches state cleanly without geometry distortion', () => {
@@ -79,7 +79,7 @@ describe('BEZENT Icon System — Google Material Symbols Outlined (ADR-015)', ()
     const onbInactive = renderToStaticMarkup(<BezentNavIcon name="onboarding" active={false} />);
 
     expect(dashActive).toContain('is-selected');
-    expect(dashActive).toContain('>dashboard</span>');
+    expect(dashActive).toContain('>space_dashboard</span>');
     expect(onbInactive).toContain('is-default');
     expect(onbInactive).toContain('>person_add</span>');
 
@@ -87,7 +87,7 @@ describe('BEZENT Icon System — Google Material Symbols Outlined (ADR-015)', ()
     const onbActive = renderToStaticMarkup(<BezentNavIcon name="onboarding" active={true} />);
 
     expect(dashInactive).toContain('is-default');
-    expect(dashInactive).toContain('>dashboard</span>');
+    expect(dashInactive).toContain('>space_dashboard</span>');
     expect(onbActive).toContain('is-selected');
     expect(onbActive).toContain('>person_add</span>');
   });
@@ -96,11 +96,11 @@ describe('BEZENT Icon System — Google Material Symbols Outlined (ADR-015)', ()
     const navExpectations: Record<string, string> = {
       employees: 'group',
       onboarding: 'person_add',
-      dashboard: 'dashboard',
-      attendance: 'co_present',
+      dashboard: 'space_dashboard',
+      attendance: 'fingerprint',
       timesheets: 'pending_actions',
-      performance: 'trending_up',
-      leave: 'event_busy',
+      performance: 'insights',
+      leave: 'beach_access',
       more: 'more_horiz',
     };
 

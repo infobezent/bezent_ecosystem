@@ -89,23 +89,41 @@ export const OffboardingKpiCard: React.FC<OffboardingKpiCardProps> = ({
   const effectivePendingClearance =
     pendingClearance !== undefined ? pendingClearance : DEFAULT_PENDING_CLEARANCE;
 
-  // Proportional arc distribution across a 285° span with 26° gaps (viewBox="0 0 60 60", R=21)
-  // Opening is at top-right between 295° and 345°
-  const totalArcSpan = 285;
-  const gap = 26;
-  const numStages = effectiveStages.length || 4;
+  // Exact 4-Quadrant calibrated paths matching approved Reference UI:
+  // Clockwise journey: Right (Notice Period) -> Bottom (Handover) -> Left (Clearance) -> Top-Left (Final Settlement) -> Top Horizontal Arrow shooting RIGHT →
+  // Segment 2 (Arc 3) extended for balanced visual weight with uniform ~5px gap before shortened arrow (1)
+  const OFFBOARDING_QUADRANT_PATHS = [
+    'M 49.03 21.13 A 21 21 0 0 1 47.2 42.05', // 0: Notice Period (Right / East)
+    'M 40.5 48.19 A 21 21 0 0 1 19.5 48.19', // 1: Handover (Bottom / South)
+    'M 12.8 42.05 A 21 21 0 0 1 10.97 21.13', // 2: Clearance (Left / West)
+    'M 15.95 14.39 A 21 21 0 0 1 28.17 9.08', // 3: Final Settlement (Top-Left, extended with ~5px gap to arrow tail)
+  ];
+
+  const numStages = effectiveStages.length;
+  const isStandardFourStages = numStages === 4;
+
+  // Fallback dynamic geometry when custom stage counts are passed
+  const totalArcSpan = 260;
+  const gap = 8;
   const totalGaps = (numStages - 1) * gap;
   const availableSpan = Math.max(60, totalArcSpan - totalGaps);
+  const equalSweep = availableSpan / (numStages || 1);
 
-  let currentAngle = 345;
-  const arcs = effectiveStages.map((stage) => {
-    const fraction = effectiveTotal > 0 ? stage.count / effectiveTotal : 1 / numStages;
-    const sweep = Math.max(16, fraction * availableSpan);
-    const startAngle = currentAngle;
-    const endAngle = currentAngle + sweep;
-    currentAngle = endAngle + gap;
+  const startAnchor = 264 - totalArcSpan;
+  let currentAngle = (startAnchor + 360) % 360;
 
-    const pathD = describeArc(30, 30, 21, startAngle, endAngle);
+  const arcs = effectiveStages.map((stage, idx) => {
+    let pathD = '';
+    if (isStandardFourStages) {
+      pathD = OFFBOARDING_QUADRANT_PATHS[idx] ?? '';
+    } else {
+      const sweep = equalSweep;
+      const startAngle = currentAngle;
+      const endAngle = currentAngle + sweep;
+      currentAngle = endAngle + gap;
+      pathD = describeArc(30, 30, 21, startAngle, endAngle);
+    }
+
     const isHovered =
       activeHovered === stage.id ||
       activeHovered === stage.status ||
@@ -174,12 +192,20 @@ export const OffboardingKpiCard: React.FC<OffboardingKpiCardProps> = ({
       onClick={onClick}
       role="region"
       aria-label="Employees in Offboarding"
-      title="Employees in Offboarding"
     >
       <div className="bezent-kpi-offboarding-layout">
         {/* Left Section: Small Heading at Top, Large Primary Number Below */}
         <div className="bezent-kpi-offboarding-left">
-          <div className="bezent-kpi-offboarding-heading">Offboarding</div>
+          <div className="bezent-kpi-offboarding-heading">
+            {loading ? (
+              <>
+                <span className="bezent-sr-only">Offboarding</span>
+                <span className="bezent-wf-skeleton-shimmer bezent-wf-skeleton-kpi-heading" />
+              </>
+            ) : (
+              'Offboarding'
+            )}
+          </div>
           <div className="bezent-kpi-offboarding-value">
             {loading ? (
               <span className="bezent-kpi-value-skeleton" aria-hidden="true" />
@@ -196,131 +222,139 @@ export const OffboardingKpiCard: React.FC<OffboardingKpiCardProps> = ({
           onPointerLeave={() => setInternalHovered(null)}
           aria-label="Circular departure ring with exit vector"
         >
-          <div className="bezent-kpi-ambient-glow bezent-kpi-ambient-glow--red" />
-          {/* Floating Hover Badge: 100% unclipped, outside-card visibility */}
-          <div
-            className={`bezent-kpi-flow-badge bezent-kpi-offboarding-tooltip ${hasHover ? 'is-visible' : ''}`}
-            aria-live="polite"
-          >
-            {tooltipText}
-          </div>
+          {loading ? (
+            <span className="bezent-wf-skeleton-shimmer bezent-wf-skeleton-kpi-graphic" />
+          ) : (
+            <>
+              <div className="bezent-kpi-ambient-glow bezent-kpi-ambient-glow--red" />
+              {/* Floating Hover Badge: 100% unclipped, outside-card visibility */}
+              <div
+                className={`bezent-kpi-flow-badge bezent-kpi-offboarding-tooltip ${hasHover ? 'is-visible' : ''}`}
+                aria-live="polite"
+              >
+                {tooltipText}
+              </div>
 
-          {/* SVG Circular Departure Ring (4 Proportional Arcs + Integrated Curved Arrowhead) */}
-          <svg
-            className="bezent-kpi-offboarding-svg bezent-kpi-departure-svg"
-            viewBox="0 0 60 60"
-            role="img"
-            aria-label={`Offboarding stages: ${arcs.map((a) => `${a.name}: ${a.count}`).join(', ')}`}
-          >
-            {/* 4 Stage Proportional Arcs */}
-            {arcs.map((arc) => (
-              <g
-                key={arc.id}
-                className={`bezent-kpi-departure-group bezent-kpi-offboarding-node--${arc.id} bezent-kpi-offboarding-segment--${arc.status} ${
-                  arc.isHovered ? 'is-hovered' : ''
-                } ${hasHover && !arc.isHovered ? 'is-dimmed' : ''}`}
-                onMouseEnter={() => setInternalHovered(arc.id)}
-                onMouseOver={() => setInternalHovered(arc.id)}
-                onPointerEnter={() => setInternalHovered(arc.id)}
-                onFocus={() => setInternalHovered(arc.id)}
+              {/* SVG Circular Departure Ring */}
+              <svg
+                className="bezent-kpi-offboarding-svg bezent-kpi-departure-svg"
+                viewBox="0 0 60 60"
+                role="img"
+                aria-label={`Offboarding stages: ${arcs.map((a) => `${a.name}: ${a.count}`).join(', ')}`}
+              >
+                {/* Stage Proportional Arcs */}
+                {arcs.map((arc) => (
+                  <g
+                    key={arc.id}
+                    className={`bezent-kpi-departure-group bezent-kpi-offboarding-node--${arc.id} bezent-kpi-offboarding-segment--${arc.status} ${
+                      arc.isHovered ? 'is-hovered' : ''
+                    } ${hasHover && !arc.isHovered ? 'is-dimmed' : ''}`}
+                    onMouseEnter={() => setInternalHovered(arc.id)}
+                    onMouseOver={() => setInternalHovered(arc.id)}
+                    onPointerEnter={() => setInternalHovered(arc.id)}
+                    onFocus={() => setInternalHovered(arc.id)}
+                    onBlur={() => setInternalHovered(null)}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onStageClick?.(arc);
+                      onClick?.();
+                    }}
+                    tabIndex={0}
+                    role="button"
+                    aria-label={`${arc.name}: ${formatStatus(arc.status)}, ${arc.count} employees`}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        onStageClick?.(arc);
+                        onClick?.();
+                      }
+                    }}
+                  >
+                    {/* Wide invisible hit area so hover triggers effortlessly */}
+                    <path d={arc.pathD} strokeWidth={14} stroke="transparent" fill="none" />
+
+                    {/* Visible sleek curved arc */}
+                    <path
+                      d={arc.pathD}
+                      strokeWidth={4.8}
+                      strokeLinecap="round"
+                      className={`bezent-kpi-departure-arc bezent-kpi-departure-arc--${arc.id} bezent-kpi-departure-arc--${arc.status}`}
+                    />
+                  </g>
+                ))}
+
+                {/* Top Horizontal Exit Arrow → (Stem + Arrowhead pointing right at 12 o'clock apex) */}
+                <g
+                  className={`bezent-kpi-departure-arrow-group bezent-kpi-offboarding-arrow-group ${
+                    isArrowHovered ? 'is-hovered' : ''
+                  } ${hasHover && !isArrowHovered ? 'is-dimmed' : ''}`}
+                  onMouseEnter={() => setInternalHovered('arrow')}
+                  onMouseOver={() => setInternalHovered('arrow')}
+                  onPointerEnter={() => setInternalHovered('arrow')}
+                  onFocus={() => setInternalHovered('arrow')}
+                  onBlur={() => setInternalHovered(null)}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onClick?.();
+                  }}
+                  tabIndex={0}
+                  role="button"
+                  aria-label={`Pending Exit Clearance: ${effectivePendingClearance}`}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      onClick?.();
+                    }
+                  }}
+                >
+                  {/* Wide invisible hit area */}
+                  <circle cx={44} cy={9} r={12} fill="transparent" />
+
+                  {/* Horizontal departure stem extending outward towards the right */}
+                  <line
+                    x1={37}
+                    y1={9}
+                    x2={49}
+                    y2={9}
+                    stroke="#e11d48"
+                    strokeWidth={4.8}
+                    strokeLinecap="round"
+                    className="bezent-kpi-departure-arrow-stem bezent-kpi-offboarding-arrow-stem"
+                  />
+
+                  {/* Sleek, solid horizontal arrowhead pointing right outside the ring boundary */}
+                  <polygon
+                    points="55.5,9 48.5,5.2 48.5,12.8"
+                    fill="#e11d48"
+                    className="bezent-kpi-departure-arrowhead bezent-kpi-offboarding-arrowhead"
+                  />
+                </g>
+              </svg>
+
+              {/* Dynamic Center Icon Hub */}
+              <div
+                className={`bezent-kpi-departure-center ${isCenterHovered ? 'is-hovered' : ''}`}
+                aria-live="polite"
+                onMouseEnter={() => setInternalHovered('center')}
+                onPointerEnter={() => setInternalHovered('center')}
+                onFocus={() => setInternalHovered('center')}
                 onBlur={() => setInternalHovered(null)}
                 onClick={(e) => {
                   e.stopPropagation();
-                  onStageClick?.(arc);
                   onClick?.();
-                }}
-                tabIndex={0}
-                role="button"
-                aria-label={`${arc.name}: ${formatStatus(arc.status)}, ${arc.count} employees`}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter' || e.key === ' ') {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    onStageClick?.(arc);
-                    onClick?.();
-                  }
                 }}
               >
-                {/* Wide invisible hit area so hover triggers effortlessly */}
-                <path d={arc.pathD} strokeWidth={14} stroke="transparent" fill="none" />
-
-                {/* Visible sleek curved arc */}
-                <path
-                  d={arc.pathD}
-                  strokeWidth={4.8}
-                  strokeLinecap="round"
-                  className={`bezent-kpi-departure-arc bezent-kpi-departure-arc--${arc.id} bezent-kpi-departure-arc--${arc.status}`}
-                />
-              </g>
-            ))}
-
-            {/* Top Horizontal Exit Arrow → (Stem + Arrowhead pointing right at 12 o'clock apex) */}
-            <g
-              className={`bezent-kpi-departure-arrow-group bezent-kpi-offboarding-arrow-group ${
-                isArrowHovered ? 'is-hovered' : ''
-              } ${hasHover && !isArrowHovered ? 'is-dimmed' : ''}`}
-              onMouseEnter={() => setInternalHovered('arrow')}
-              onMouseOver={() => setInternalHovered('arrow')}
-              onPointerEnter={() => setInternalHovered('arrow')}
-              onFocus={() => setInternalHovered('arrow')}
-              onBlur={() => setInternalHovered(null)}
-              onClick={(e) => {
-                e.stopPropagation();
-                onClick?.();
-              }}
-              tabIndex={0}
-              role="button"
-              aria-label={`Pending Exit Clearance: ${effectivePendingClearance}`}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter' || e.key === ' ') {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  onClick?.();
-                }
-              }}
-            >
-              {/* Wide invisible hit area */}
-              <circle cx={44} cy={9} r={12} fill="transparent" />
-
-              {/* Horizontal departure stem shooting straight right along the top tangent */}
-              <line
-                x1={31}
-                y1={9}
-                x2={47}
-                y2={9}
-                strokeWidth={4.8}
-                strokeLinecap="round"
-                className="bezent-kpi-departure-arrow-stem bezent-kpi-offboarding-arrow-stem"
-              />
-
-              {/* Sleek, solid horizontal arrowhead pointing right */}
-              <polygon
-                points="53.5,9 46.5,5.2 46.5,12.8"
-                className="bezent-kpi-departure-arrowhead bezent-kpi-offboarding-arrowhead"
-              />
-            </g>
-          </svg>
-
-          {/* Dynamic Center Icon Hub */}
-          <div
-            className={`bezent-kpi-departure-center ${isCenterHovered ? 'is-hovered' : ''}`}
-            aria-live="polite"
-            onMouseEnter={() => setInternalHovered('center')}
-            onPointerEnter={() => setInternalHovered('center')}
-            onFocus={() => setInternalHovered('center')}
-            onBlur={() => setInternalHovered(null)}
-            onClick={(e) => {
-              e.stopPropagation();
-              onClick?.();
-            }}
-          >
-            <div
-              key={activeHovered ?? 'default'}
-              className={`bezent-kpi-departure-icon-wrapper ${iconModifierClass}`}
-            >
-              <BezentIcon name={activeIcon} size={15} color="currentColor" />
-            </div>
-          </div>
+                <div
+                  key={activeHovered ?? 'default'}
+                  className={`bezent-kpi-departure-icon-wrapper ${iconModifierClass}`}
+                >
+                  <BezentIcon name={activeIcon} size={16} color="currentColor" />
+                </div>
+              </div>
+            </>
+          )}
         </div>
       </div>
 

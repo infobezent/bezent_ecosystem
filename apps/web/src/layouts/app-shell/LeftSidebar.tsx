@@ -35,12 +35,12 @@ export function canItemOpenFlyout(item: ShellNavItem): boolean {
 
 /**
  * Canonical layout tokens from design-system/tokens/layout.css:
- * --shell-nav-item-height: 68px
- * --shell-nav-item-gap: 2px
+ * --shell-nav-item-height: 58px
+ * --shell-nav-item-gap: 6px
  */
-const NAV_ITEM_HEIGHT = 68;
-const NAV_ITEM_GAP = 2;
-const NAV_LIST_PADDING_BOTTOM = 8;
+const NAV_ITEM_HEIGHT = 58;
+const NAV_ITEM_GAP = 6;
+const NAV_LIST_PADDING_BOTTOM = 12;
 
 function getRequiredHeight(count: number): number {
   if (count <= 0) return 0;
@@ -206,10 +206,14 @@ export function LeftSidebar({
 
   // If the active item is in overflow, More indicates active selection
   const isActiveItemInOverflow = Boolean(
-    activeId && !visibleItems.some((item) => item.id === activeId),
+    activeId &&
+    activeId !== 'settings' &&
+    items.some((item) => item.id === activeId) &&
+    !visibleItems.some((item) => item.id === activeId),
   );
   const isMoreButtonActive =
-    activeRailItem === 'more' || (!isMoreOpen && (Boolean(more?.active) || isActiveItemInOverflow));
+    activeRailItem === 'more' ||
+    (!isMoreOpen && activeId !== 'settings' && (Boolean(more?.active) || isActiveItemInOverflow));
 
   const onKeyDown = (e: KeyboardEvent) => {
     if (e.key === 'Escape' && flyoutParentId) closeNow();
@@ -314,6 +318,7 @@ function NavItem({
       <button
         type="button"
         className={`left-sidebar__item ${active ? 'is-active' : ''} ${isCurrentPage ? 'is-current-page' : ''}`.trim()}
+        data-nav-id={item.id}
         title={hasFlyout ? undefined : item.label}
         aria-label={item.label}
         aria-current={active || isCurrentPage ? 'page' : undefined}
@@ -370,6 +375,7 @@ function MoreButton({
       <button
         type="button"
         className={`left-sidebar__item ${selected ? 'is-active' : ''}`.trim()}
+        data-nav-id="more"
         data-more-toggle=""
         aria-haspopup="dialog"
         aria-expanded={open}

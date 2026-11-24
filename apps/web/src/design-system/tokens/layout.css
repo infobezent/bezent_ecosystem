@@ -14,20 +14,20 @@
 :root {
   --shell-topbar-height: 50px;
   --shell-sidebar-width: 92px;
-  --shell-right-rail-width: 46px;
+  --shell-right-rail-width: 52px;
   --shell-bottom-bar-height: 28px;
   --shell-utility-drawer-width: 370px;
   --shell-ai-panel-width: 340px;
 
   /* Left-nav item geometry — old `SIDEBAR_NAV_TOKENS` (Phase 0B.5). */
   --shell-nav-item-width: 86px;
-  --shell-nav-item-height: 68px;
-  --shell-nav-item-gap: 2px;
+  --shell-nav-item-height: 58px;
+  --shell-nav-item-gap: 6px;
   --shell-nav-label-max-width: 86px;
   --shell-nav-label-area-height: 24px;
   --shell-nav-label-size: var(--font-size-sm, 12px);
-  --shell-nav-surface-size: 40px;
-  --shell-subnav-flyout-width: 250px;
+  --shell-nav-surface-size: 36px;
+  --shell-subnav-flyout-width: 212px;
   --shell-launcher-width: 710px;
 
   /*
@@ -67,10 +67,12 @@
  */
 @media (max-width: 1536px), (max-height: 860px) {
   :root {
-    --shell-sidebar-width: 80px;
-    --shell-nav-item-width: 74px;
-    --shell-nav-item-height: 62px;
-    --shell-nav-label-max-width: 74px;
+    --shell-sidebar-width: 88px;
+    --shell-right-rail-width: 52px;
+    --shell-nav-item-width: 82px;
+    --shell-nav-item-height: 58px;
+    --shell-nav-item-gap: 6px;
+    --shell-nav-label-max-width: 82px;
     --shell-nav-label-area-height: 22px;
     --shell-nav-label-size: 11px;
     --shell-nav-surface-size: 36px;
@@ -79,12 +81,20 @@
 
 @media (max-width: 1280px), (max-height: 720px) {
   :root {
-    --shell-sidebar-width: 72px;
-    --shell-nav-item-width: 66px;
-    --shell-nav-item-height: 54px;
-    --shell-nav-label-max-width: 66px;
+    --shell-sidebar-width: 84px;
+    --shell-right-rail-width: 52px;
+    --shell-nav-item-width: 78px;
+    --shell-nav-item-height: 56px;
+    --shell-nav-item-gap: 6px;
+    --shell-nav-label-max-width: 78px;
     --shell-nav-label-area-height: 20px;
-    --shell-nav-label-size: 10.5px;
-    --shell-nav-surface-size: 32px;
+    --shell-nav-label-size: 11px;
+    --shell-nav-surface-size: 34px;
+  }
+}
+
+@media (max-width: 1150px) {
+  :root {
+    --shell-utility-drawer-width: 320px;
   }
 }

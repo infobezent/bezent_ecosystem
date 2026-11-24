@@ -120,9 +120,9 @@ export function EmployeeProfilePage() {
     };
   }, [employeeId, reloadKey]);
 
-  // Fetch Employment history when tab is 'history'
+  // Fetch Employment history
   useEffect(() => {
-    if (!employeeId || activeTab !== 'history') return;
+    if (!employeeId) return;
     let active = true;
     setHistory((prev) => ({ ...prev, status: 'loading', error: null }));
 
@@ -140,11 +140,11 @@ export function EmployeeProfilePage() {
     return () => {
       active = false;
     };
-  }, [employeeId, activeTab, reloadKey]);
+  }, [employeeId, reloadKey]);
 
-  // Fetch Documents when tab is 'documents'
+  // Fetch Documents
   useEffect(() => {
-    if (!employeeId || activeTab !== 'documents') return;
+    if (!employeeId) return;
     let active = true;
     setDocumentsState((prev) => ({ ...prev, status: 'loading', error: null }));
 
@@ -164,7 +164,19 @@ export function EmployeeProfilePage() {
     return () => {
       active = false;
     };
-  }, [employeeId, activeTab, reloadKey]);
+  }, [employeeId, reloadKey]);
+
+  // Deep-link auto scroll if tab query param or hash is specified
+  useEffect(() => {
+    if (state.status !== 'ready') return;
+    const targetId = requestedTab ? `sec-${requestedTab}` : window.location.hash.slice(1);
+    if (targetId) {
+      const el = document.getElementById(targetId);
+      if (el) {
+        el.scrollIntoView({ behavior: 'smooth' });
+      }
+    }
+  }, [state.status, requestedTab]);
 
   const backToDirectory = () => {
     navigate(EMPLOYEES_PATH);
@@ -218,6 +230,7 @@ export function EmployeeProfilePage() {
           onNavigateWorkflow={(path) => navigate(path)}
           onEditProfile={handleStartEdit}
           canEdit={canEdit}
+          onReload={reload}
           avatarId={
             selectedAvatarId ??
             getEmployeeAvatarId(state.profile.employee.id || state.profile.employee.employeeNumber)

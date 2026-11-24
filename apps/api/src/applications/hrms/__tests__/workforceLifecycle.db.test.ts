@@ -284,7 +284,7 @@ describe('Workforce lifecycle (end to end)', () => {
   it('9. Overview numbers equal the database and move with each action', async () => {
     // the headline total equals the number of rows the directory actually lists
     const total = await hrms.get('/api/v1/hrms/employees').query({ pageSize: 100 });
-    expect(total.body.pagination.totalItems).toBe(total.body.data.length);
+    expect(total.body.data.length).toBe(Math.min(total.body.pagination.totalItems, 100));
 
     const pendingBefore = await hrms
       .get('/api/v1/hrms/employee-actions')

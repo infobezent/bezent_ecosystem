@@ -13,8 +13,9 @@ import {
   defaultRegistrationConfiguration,
   resolvedFormOf,
 } from './registrationConfigFixture';
-import { FormCanvas } from '../../settings/administration/forms/FormCanvas';
-import { FieldProperties } from '../../settings/administration/forms/FieldProperties';
+import { BuilderFormCanvas } from '../../settings/forms/builder/BuilderFormCanvas';
+import { BuilderPropertiesPanel } from '../../settings/forms/builder/BuilderPropertiesPanel';
+import type { CandidateIntakeConfig } from '../../settings/api/formsApi';
 import {
   INITIAL_REGISTRATION_DATA,
   toReviewSectionData,
@@ -243,85 +244,52 @@ describe('Chapter 01 (Personal Information) Form Editor ↔ Runtime Alignment', 
     expect(payload.details?.personal?.addressCity).toBe('Coimbatore');
   });
 
-  it('honestly represents Profile Photo as a protected system control on FormCanvas', () => {
+  // Note: the admin FormEditorPage/FormCanvas/FieldProperties builder (and its
+  // decorative, non-backend "Profile Photo" control and chapter-position
+  // panel) has been retired in favor of a single unified builder
+  // (BuilderFormCanvas/BuilderPropertiesPanel under settings/forms/builder).
+  // These two tests carry forward the one guarantee that matters for runtime
+  // trust — protected fields render honestly, with no fake editable input —
+  // against the surviving builder.
+
+  it('honestly represents Employee ID as a protected system-assigned field on BuilderFormCanvas without a fake input', () => {
     const resolved = resolvedFormOf(defaultRegistrationConfiguration);
     const html = renderToStaticMarkup(
-      <FormCanvas
+      <BuilderFormCanvas
+        formTitle="Employee Registration"
+        formDescription="Employee registration and intake form configuration."
         sections={resolved.sections}
-        activeSectionKey="personal"
+        selectedSectionKey="general"
         selectedFieldKey={null}
+        onSelectSection={vi.fn()}
         onSelectField={vi.fn()}
+        onReorderSections={vi.fn()}
+        onDeleteSection={vi.fn()}
+        onReorderFields={vi.fn()}
+        onMoveFieldToSection={vi.fn()}
+        onRenameGroup={vi.fn()}
+        onOpenManageSections={vi.fn()}
+        onDuplicateField={vi.fn()}
         onDeleteField={vi.fn()}
-      />,
-    );
-
-    expect(html).toContain('Profile Photo');
-    expect(html).toContain('System Control');
-    expect(html).toContain('JPG / PNG • Max 5 MB');
-    expect(html).toContain('Upload Photo');
-  });
-
-  it('honestly represents Employee ID as a protected system-assigned control on FormCanvas without fake inputs', () => {
-    const resolved = resolvedFormOf(defaultRegistrationConfiguration);
-    const html = renderToStaticMarkup(
-      <FormCanvas
-        sections={resolved.sections}
-        activeSectionKey="general"
-        selectedFieldKey={null}
-        onSelectField={vi.fn()}
-        onDeleteField={vi.fn()}
+        onOpenAddField={vi.fn()}
+        onOpenAddSection={vi.fn()}
       />,
     );
 
     expect(html).toContain('Employee ID');
     expect(html).toContain('System Assigned');
-    expect(html).toContain('Generated automatically');
+    expect(html).not.toContain('Auto-number');
     expect(html).not.toContain('placeholder="EMP2026001"');
   });
 
-  it('protects specialized system controls from deletion and type modification in FieldProperties', () => {
-    // 1. Profile Photo properties
-    const photoControl = {
-      key: 'personal.profilePhoto',
-      label: 'Profile Photo',
-      type: 'file_upload' as const,
-      origin: 'system' as const,
-      protected: true,
-      protectedReason: 'Profile photo is a protected system control for employee identification.',
-      configurable: false,
-      enabled: true,
-      required: false,
-      order: 0,
-      width: 'full' as const,
-      description: 'JPG / PNG • Max 5 MB',
-      config: { maxSizeMb: 5, placeholder: 'JPG / PNG • Max 5 MB' },
-      defaults: { label: 'Profile Photo', enabled: true, required: false, width: 'full' as const },
-      overridden: false,
-    };
-
-    const photoHtml = renderToStaticMarkup(
-      <FieldProperties
-        field={photoControl}
-        selectedEntity="field"
-        onUpdateField={vi.fn()}
-        onDeleteField={vi.fn()}
-      />,
-    );
-    expect(photoHtml).toContain('System Control');
-    expect(photoHtml).toContain('File Upload');
-    expect(photoHtml).toContain('Protected');
-    expect(photoHtml).not.toContain('System Field');
-    expect(photoHtml).toContain('readonly=""');
-    expect(photoHtml).not.toContain('Delete Custom Field');
-
-    // 2. Employee ID properties
+  it('treats Employee ID as locked and explains why in BuilderPropertiesPanel', () => {
     const employeeIdField = {
       key: 'general.employeeId',
       label: 'Employee ID',
-      type: 'text' as const,
+      type: 'single_line' as const,
       origin: 'system' as const,
       protected: true,
-      protectedReason: 'Employee ID is unique identifier',
+      protectedReason: 'System-assigned unique employee number.',
       configurable: false,
       enabled: true,
       required: true,
@@ -333,49 +301,35 @@ describe('Chapter 01 (Personal Information) Form Editor ↔ Runtime Alignment', 
       overridden: false,
     };
 
-    const empIdHtml = renderToStaticMarkup(
-      <FieldProperties
-        field={employeeIdField}
-        selectedEntity="field"
-        onUpdateField={vi.fn()}
-        onDeleteField={vi.fn()}
-      />,
-    );
-    expect(empIdHtml).toContain('System Assigned');
-    expect(empIdHtml).toContain('Protected System Field');
-    expect(empIdHtml).toContain('readonly=""');
-    expect(empIdHtml).not.toContain('Delete Custom Field');
-    expect(empIdHtml).toContain('Protected');
-  });
-
-  it('cleans up Chapter Settings by removing Move Up/Down buttons and showing compact order', () => {
-    const activeSec = {
-      key: 'personal',
-      label: 'Personal Information',
-      order: 2,
-      origin: 'system' as const,
-      configurable: true,
-      fields: [],
+    const formConfig: CandidateIntakeConfig = {
+      formName: 'Employee Registration',
+      formDescription: 'Employee registration and intake form configuration.',
+      hrManualEntryEnabled: true,
+      candidateSelfServiceEnabled: true,
+      allowSaveDraft: true,
+      candidateEditingAfterSubmission: false,
+      status: 'draft',
+      publishedVersion: 0,
     };
 
     const html = renderToStaticMarkup(
-      <FieldProperties
-        field={null}
-        activeSection={activeSec}
-        sectionTitle="Personal Information"
-        sectionOrderIndex={1}
-        totalSections={10}
-        selectedEntity="chapter"
+      <BuilderPropertiesPanel
+        selectedField={employeeIdField}
+        selectedSection={null}
+        allSections={[]}
+        formConfig={formConfig}
+        onUpdateFormConfig={vi.fn()}
+        onUpdateSection={vi.fn()}
         onUpdateField={vi.fn()}
-        onDeleteField={vi.fn()}
+        onUpdateFieldRules={vi.fn()}
+        onUpdateFieldPermission={vi.fn()}
+        onUpdateFieldValidation={vi.fn()}
+        onDeselect={vi.fn()}
       />,
     );
 
-    expect(html).toContain('Position 02 of 10');
-    expect(html).toContain('Reorder chapters from Form Structure');
-    expect(html).not.toContain('Move Up');
-    expect(html).not.toContain('Move Down');
-    expect(html).toContain('Key');
-    expect(html).toContain('Protection');
+    expect(html).toContain('Employee ID');
+    expect(html).toContain('Protected System Field');
+    expect(html).toContain(employeeIdField.protectedReason);
   });
 });

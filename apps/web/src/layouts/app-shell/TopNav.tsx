@@ -1,6 +1,6 @@
 import { useState, type ReactNode } from 'react';
 import { BezentIcon } from '../../design-system/icons';
-import { Avatar, IconButton, Badge, BezentWordmark } from '../../design-system/components';
+import { Avatar, IconButton, Badge } from '../../design-system/components';
 import { ProfileMenu } from './ProfileMenu';
 import bezentMark from '../../assets/bezent-mark.png';
 import './TopNav.css';
@@ -12,6 +12,10 @@ export interface TopNavProps {
   userPhoto?: string;
   userRole?: string;
   notificationCount?: number;
+  /** Custom logo URL of the tenant / purchasing company. Falls back to bezentMark. */
+  companyLogo?: string | null;
+  /** Custom name of the tenant / purchasing company. Falls back to 'bezent'. */
+  companyName?: string | null;
   /** Global Search (or any replacement), supplied by the host. */
   search?: ReactNode;
   /** Notifications panel (rendered by the host) and its open state / toggle. */
@@ -29,6 +33,7 @@ export interface TopNavProps {
 /**
  * Global top navigation: branding, search area, utility controls, profile.
  * Replicates the clean Google Workspace / Gmail top navigation pattern with BEZENT contents.
+ * Supports enterprise white-labeling / purchasing company logo and name branding.
  */
 export function TopNav({
   userInitials,
@@ -37,6 +42,8 @@ export function TopNav({
   userPhoto,
   userRole = 'Member',
   notificationCount,
+  companyLogo,
+  companyName,
   search,
   notificationsPanel,
   notificationsOpen,
@@ -48,15 +55,20 @@ export function TopNav({
   onHelp,
 }: TopNavProps) {
   const [profileOpen, setProfileOpen] = useState(false);
+  const brandText = (companyName?.trim() || 'BEZENT').toUpperCase();
 
   return (
     <header className="top-nav">
       <div className="top-nav__brand">
         <div className="top-nav__logo" aria-hidden="true">
-          <img src={bezentMark} alt="" className="top-nav__logo-img" />
+          {companyLogo ? (
+            <img src={companyLogo} alt={brandText} className="top-nav__logo-img" />
+          ) : (
+            <img src={bezentMark} alt="BEZENT" className="top-nav__logo-img" />
+          )}
         </div>
-        <span className="top-nav__wordmark" aria-label="bezent">
-          <BezentWordmark height={20} className="top-nav__wordmark-svg" />
+        <span className="top-nav__brand-name" aria-label={brandText}>
+          {brandText}
         </span>
       </div>
 

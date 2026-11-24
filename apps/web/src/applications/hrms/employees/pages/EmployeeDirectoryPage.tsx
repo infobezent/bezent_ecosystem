@@ -1,14 +1,10 @@
 import { useCallback, useEffect, useMemo, useState, useTransition } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import {
-  Alert,
-  Button,
   IconButton,
   Inline,
-  Modal,
   Page,
   PageHeader,
-  Stack,
   Toolbar,
 } from '../../../../design-system/components';
 import { BezentIcon } from '../../../../design-system/icons';
@@ -18,6 +14,7 @@ import {
   type EmploymentType,
   type EmploymentStatus,
   type PaginationMetadata,
+  type EmployeeStatusCounts,
 } from '../api/employeesApi';
 import {
   EmployeeFilterPanel,
@@ -25,6 +22,7 @@ import {
   EMPTY_FILTER_STATE,
   countActiveFilters,
 } from '../components/EmployeeFilterPanel';
+import { WorkforceInfoPopover } from '../../components/WorkforceInfoPopover';
 import {
   fetchOrganizationMasters,
   type OrganizationMasters,
@@ -50,6 +48,7 @@ interface DirectoryState {
   status: 'loading' | 'error' | 'ready';
   employees: EmployeeRecord[];
   pagination: PaginationMetadata | null;
+  statusCounts?: EmployeeStatusCounts | null;
   error: string | null;
 }
 
@@ -203,14 +202,17 @@ export function EmployeeDirectoryPage() {
     setPage(1);
   };
 
-  // Status tabs matching recruitment candidate directory
-  const statusTabs: Array<{ id: string; label: string }> = [
-    { id: 'all', label: 'All Employees' },
-    { id: 'active', label: 'Active' },
-    { id: 'probation', label: 'Probation' },
-    { id: 'pending_activation', label: 'Pending Activation' },
-    { id: 'inactive', label: 'Separated' },
-  ];
+  // Masters
+  const [masters, setMasters] = useState<OrganizationMasters | null>(null);
+
+  // Directory records
+  const [directory, setDirectory] = useState<DirectoryState>({
+    status: 'loading',
+    employees: [],
+    pagination: null,
+    statusCounts: null,
+    error: null,
+  });
 
   const getTabStatus = (tabId: string): EmploymentStatus | undefined => {
     if (tabId === 'active') return 'active';
@@ -231,16 +233,21 @@ export function EmployeeDirectoryPage() {
     setPage(1);
   };
 
-  // Masters
-  const [masters, setMasters] = useState<OrganizationMasters | null>(null);
-
-  // Directory records
-  const [directory, setDirectory] = useState<DirectoryState>({
-    status: 'loading',
-    employees: [],
-    pagination: null,
-    error: null,
-  });
+  // Status tabs matching recruitment candidate directory with live status counts
+  const statusTabs = useMemo<Array<{ id: string; label: string; count?: number }>>(
+    () => [
+      { id: 'all', label: 'All', count: directory.statusCounts?.all },
+      { id: 'active', label: 'Active', count: directory.statusCounts?.active },
+      { id: 'probation', label: 'Probation', count: directory.statusCounts?.probation },
+      {
+        id: 'pending_activation',
+        label: 'Pending',
+        count: directory.statusCounts?.pending_activation,
+      },
+      { id: 'inactive', label: 'Separated', count: directory.statusCounts?.inactive },
+    ],
+    [directory.statusCounts],
+  );
 
   // Import dialog state (synced with URL query parameter for standalone popup)
   const [searchParams, setSearchParams] = useSearchParams();
@@ -380,6 +387,7 @@ export function EmployeeDirectoryPage() {
             status: 'ready',
             employees: res.data,
             pagination: res.pagination,
+            statusCounts: res.statusCounts ?? null,
             error: null,
           });
         })
@@ -497,7 +505,17 @@ export function EmployeeDirectoryPage() {
   return (
     <Page maxWidth="full" gap="md" className="employees-directory-page">
       {/* 1. Page Header */}
-      <PageHeader title="Employee Directory" />
+      <PageHeader
+        title={
+          <div className="bezent-wf-title-row">
+            <h1 className="bezent-page-header__title">Employee Directory</h1>
+            <WorkforceInfoPopover
+              label="Employee Directory"
+              tooltip="Manage and explore your workforce directory"
+            />
+          </div>
+        }
+      />
       <span className="sr-only" hidden>
         Manage and explore your workforce directory
       </span>
@@ -519,23 +537,25 @@ export function EmployeeDirectoryPage() {
               />
             </div>
 
-            {/* Filter Toggle Button */}
+            {/* Filter Toggle Button (Icon-only) */}
             <div className="bezent-filter-anchor">
-              <Button
-                variant={appliedCount > 0 || isFilterPanelOpen ? 'secondary' : 'outline'}
-                size="md"
-                shape="rounded"
-                className={appliedCount > 0 ? 'bezent-btn--filters-active' : ''}
-                leftIcon={<BezentIcon name="filter" size={16} />}
+              <IconButton
+                label={appliedCount > 0 ? `Filters (${appliedCount} active)` : 'Filters'}
+                variant={appliedCount > 0 || isFilterPanelOpen ? 'solid' : 'ghost'}
+                active={isFilterPanelOpen || appliedCount > 0}
+                tooltipDirection="down"
                 onClick={() => setIsFilterPanelOpen((prev) => !prev)}
                 aria-expanded={isFilterPanelOpen}
-                aria-label="Filters"
+                aria-label={appliedCount > 0 ? `Filters (${appliedCount} active)` : 'Filters'}
+                className={appliedCount > 0 ? 'bezent-btn--filters-active' : ''}
               >
-                <span>Filters</span>
+                <BezentIcon name="filter" size={16} />
                 {appliedCount > 0 && (
-                  <span className="bezent-btn__filter-count">{appliedCount}</span>
+                  <span className="bezent-btn__filter-count bezent-btn__filter-count--icon-btn">
+                    {appliedCount}
+                  </span>
                 )}
-              </Button>
+              </IconButton>
 
               <EmployeeFilterPanel
                 isOpen={isFilterPanelOpen}
@@ -549,17 +569,17 @@ export function EmployeeDirectoryPage() {
               />
             </div>
 
-            {/* Reset Button */}
-            <Button
-              variant="outline"
-              size="md"
-              shape="rounded"
-              leftIcon={<BezentIcon name="reset" size={16} />}
+            {/* Reset Button (Icon-only) */}
+            <IconButton
+              label="Reset filters"
+              variant="ghost"
+              tooltipDirection="down"
               onClick={handleResetFilters}
               disabled={!hasActiveFilters}
+              aria-label="Reset filters"
             >
-              Reset
-            </Button>
+              <BezentIcon name="reset" size={16} />
+            </IconButton>
 
             {/* View Mode Toggle: List vs Grid */}
             <div
@@ -604,7 +624,10 @@ export function EmployeeDirectoryPage() {
                   className={`bezent-filter-tab ${activeStatusTab === tab.id ? 'is-active' : ''}`}
                   onClick={() => handleStatusTabChange(tab.id)}
                 >
-                  {tab.label}
+                  <span>{tab.label}</span>
+                  {tab.count !== undefined && (
+                    <span className="bezent-filter-tab-count">{tab.count}</span>
+                  )}
                 </button>
               ))}
             </div>
@@ -639,7 +662,7 @@ export function EmployeeDirectoryPage() {
               label="Add Employee"
               variant="solid"
               tooltipDirection="down"
-              onClick={() => navigate('/hrms/workforce/onboarding')}
+              onClick={() => navigate('/hrms/workforce/onboarding/registration')}
             >
               <BezentIcon name="add" size={18} />
             </IconButton>

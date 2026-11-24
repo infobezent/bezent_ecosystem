@@ -21,6 +21,7 @@ export interface RightRailProps {
   notificationsOpen?: boolean;
   onNotificationsToggle?: () => void;
   onAccountSettings?: () => void;
+  isSettingsActive?: boolean;
 }
 
 /**
@@ -40,6 +41,7 @@ export function RightRail({
   onAI,
   onQuickCreate,
   onAccountSettings,
+  isSettingsActive,
 }: RightRailProps) {
   const [aiHovered, setAiHovered] = useState(false);
   const [createHovered, setCreateHovered] = useState(false);
@@ -151,7 +153,7 @@ export function RightRail({
               <div className="right-rail__anchor">
                 <button
                   type="button"
-                  className="bezent-right-rail-btn"
+                  className={`bezent-right-rail-btn ${isSettingsActive ? 'is-active' : ''}`.trim()}
                   aria-label="Settings"
                   title="Settings"
                   onClick={onAccountSettings}
@@ -161,7 +163,11 @@ export function RightRail({
                   <BezentIcon
                     name="settings"
                     size={20}
-                    color="var(--right-rail-icon-default, #444746)"
+                    color={
+                      isSettingsActive
+                        ? 'var(--right-rail-icon-active, #041e49)'
+                        : 'var(--right-rail-icon-default, #444746)'
+                    }
                     strokeWidth={1.8}
                   />
                 </button>

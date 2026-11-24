@@ -56,9 +56,18 @@ export interface PaginationMetadata {
   totalPages: number;
 }
 
+export interface EmployeeStatusCounts {
+  all: number;
+  active: number;
+  probation: number;
+  pending_activation: number;
+  inactive: number;
+}
+
 export interface EmployeeListResponse {
   data: EmployeeRecord[];
   pagination: PaginationMetadata;
+  statusCounts?: EmployeeStatusCounts;
 }
 
 export interface ListEmployeesQuery {

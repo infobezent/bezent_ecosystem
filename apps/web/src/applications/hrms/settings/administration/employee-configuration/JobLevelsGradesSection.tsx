@@ -357,92 +357,123 @@ export function JobLevelsGradesSection({
   return (
     <Page maxWidth="default">
       <Stack gap="lg">
-        {/* Navigation Breadcrumb Toolbar */}
-        <Toolbar
-          left={
-            onBack ? (
+        {/* Navigation Back (if onBack provided) */}
+        {onBack && (
+          <Toolbar
+            left={
               <Button variant="secondary" type="button" onClick={onBack}>
                 <BezentIcon name="chevronLeft" size={16} />
                 Back to Settings
               </Button>
-            ) : undefined
-          }
-          right={
-            <Inline gap="xs" align="center">
-              <span>Settings</span>
-              <span>/</span>
-              <span>Organization</span>
-              <span>/</span>
-              <strong>Job Levels / Grades</strong>
-            </Inline>
-          }
-        />
+            }
+          />
+        )}
 
         {/* Page Header */}
         <PageHeader
           title="Job Levels & Grades"
-          subtitle="Manage company-wide organizational seniority tiers and employment classification grades."
+          subtitle={
+            <span className="bezent-sr-only">
+              Manage company-wide organizational seniority tiers and employment classification
+              grades.
+            </span>
+          }
         />
 
-        {/* Master Switcher Tabs */}
-        <Tabs
-          variant="pills"
-          items={[
-            {
-              id: 'job-levels',
-              label: 'Job Levels',
-              count: jobLevels.length,
-            },
-            {
-              id: 'grades',
-              label: 'Grades',
-              count: grades.length,
-            },
-          ]}
-          activeId={activeMaster}
-          onChange={(id) => setActiveMaster(id as 'job-levels' | 'grades')}
-        />
+        {/* Unified Single Row: Master Switcher Tabs (Left) + Search & Filter & Add (Right) */}
+        <div className="bezent-settings-search-filter-wrapper">
+          <Tabs
+            variant="pills"
+            items={[
+              {
+                id: 'job-levels',
+                label: 'Job Levels',
+                count: jobLevels.length,
+              },
+              {
+                id: 'grades',
+                label: 'Grades',
+                count: grades.length,
+              },
+            ]}
+            activeId={activeMaster}
+            onChange={(id) => setActiveMaster(id as 'job-levels' | 'grades')}
+          />
+
+          <div className="bezent-settings-search-input-box">
+            {activeMaster === 'job-levels' ? (
+              <>
+                <SearchInput
+                  id="jl-search"
+                  placeholder="Search by name or code..."
+                  value={searchJl}
+                  onChange={(e) => setSearchJl(e.target.value)}
+                />
+                <Select
+                  id="jl-status-filter"
+                  value={statusFilterJl}
+                  onChange={(e) =>
+                    setStatusFilterJl(e.target.value as 'all' | 'active' | 'inactive')
+                  }
+                  options={statusOptions}
+                />
+                {canManage && (
+                  <Button
+                    variant="primary"
+                    size="sm"
+                    className="bezent-settings-add-btn"
+                    type="button"
+                    onClick={handleOpenCreateJl}
+                    id="add-job-level-btn"
+                    aria-label="Add Job Level"
+                    title="Add Job Level"
+                  >
+                    <BezentIcon name="add" size={16} />
+                    <span className="bezent-sr-only">Add Job Level</span>
+                  </Button>
+                )}
+              </>
+            ) : (
+              <>
+                <SearchInput
+                  id="grd-search"
+                  placeholder="Search by name or code..."
+                  value={searchGrd}
+                  onChange={(e) => setSearchGrd(e.target.value)}
+                />
+                <Select
+                  id="grd-status-filter"
+                  value={statusFilterGrd}
+                  onChange={(e) =>
+                    setStatusFilterGrd(e.target.value as 'all' | 'active' | 'inactive')
+                  }
+                  options={statusOptions}
+                />
+                {canManage && (
+                  <Button
+                    variant="primary"
+                    size="sm"
+                    className="bezent-settings-add-btn"
+                    type="button"
+                    onClick={handleOpenCreateGrd}
+                    id="add-grade-btn"
+                    aria-label="Add Grade"
+                    title="Add Grade"
+                  >
+                    <BezentIcon name="add" size={16} />
+                    <span className="bezent-sr-only">Add Grade</span>
+                  </Button>
+                )}
+              </>
+            )}
+          </div>
+        </div>
 
         {/* ==================================================== */}
         {/* VIEW 1: JOB LEVELS MASTER                            */}
         {/* ==================================================== */}
         {activeMaster === 'job-levels' && (
           <Stack gap="md">
-            {/* Filter & Action Toolbar */}
-            <Toolbar
-              left={
-                <Inline gap="md" align="center">
-                  <SearchInput
-                    id="jl-search"
-                    placeholder="Search by name or code..."
-                    value={searchJl}
-                    onChange={(e) => setSearchJl(e.target.value)}
-                  />
-                  <Select
-                    id="jl-status-filter"
-                    value={statusFilterJl}
-                    onChange={(e) =>
-                      setStatusFilterJl(e.target.value as 'all' | 'active' | 'inactive')
-                    }
-                    options={statusOptions}
-                  />
-                </Inline>
-              }
-              right={
-                canManage ? (
-                  <Button
-                    variant="primary"
-                    type="button"
-                    onClick={handleOpenCreateJl}
-                    id="add-job-level-btn"
-                  >
-                    <BezentIcon name="add" size={16} />
-                    Add Job Level
-                  </Button>
-                ) : undefined
-              }
-            />
-
             {/* Error Message */}
             {errorJl && (
               <Alert variant="error">
@@ -462,6 +493,7 @@ export function JobLevelsGradesSection({
                   <LoadingState label="Loading job levels..." />
                 ) : jobLevels.length === 0 ? (
                   <EmptyState
+                    size="compact"
                     title="No Job Levels Found"
                     description={
                       searchJl || statusFilterJl !== 'all'
@@ -515,32 +547,43 @@ export function JobLevelsGradesSection({
                                 <>
                                   <Button
                                     variant="secondary"
+                                    size="sm"
+                                    className="bezent-settings-row-action-btn"
                                     type="button"
                                     onClick={() => handleOpenEditJl(jl)}
                                     title="Edit Job Level"
+                                    aria-label={`Edit ${jl.name}`}
                                   >
                                     <BezentIcon name="edit" size={14} />
-                                    Edit
+                                    <span className="bezent-sr-only">Edit</span>
                                   </Button>
                                   {jl.status === 'active' ? (
                                     <Button
                                       variant="secondary"
+                                      size="sm"
+                                      className="bezent-settings-row-action-btn bezent-settings-row-action-btn--danger"
                                       type="button"
                                       onClick={() =>
                                         setDeactivatingTarget({ type: 'job-level', item: jl })
                                       }
                                       title="Deactivate Job Level"
+                                      aria-label={`Deactivate ${jl.name}`}
                                     >
-                                      Deactivate
+                                      <BezentIcon name="block" size={14} />
+                                      <span className="bezent-sr-only">Deactivate</span>
                                     </Button>
                                   ) : (
                                     <Button
                                       variant="secondary"
+                                      size="sm"
+                                      className="bezent-settings-row-action-btn bezent-settings-row-action-btn--success"
                                       type="button"
                                       onClick={() => handleReactivate('job-level', jl.id)}
                                       title="Reactivate Job Level"
+                                      aria-label={`Reactivate ${jl.name}`}
                                     >
-                                      Reactivate
+                                      <BezentIcon name="check" size={14} />
+                                      <span className="bezent-sr-only">Reactivate</span>
                                     </Button>
                                   )}
                                 </>
@@ -562,41 +605,6 @@ export function JobLevelsGradesSection({
         {/* ==================================================== */}
         {activeMaster === 'grades' && (
           <Stack gap="md">
-            {/* Filter & Action Toolbar */}
-            <Toolbar
-              left={
-                <Inline gap="md" align="center">
-                  <SearchInput
-                    id="grd-search"
-                    placeholder="Search by name or code..."
-                    value={searchGrd}
-                    onChange={(e) => setSearchGrd(e.target.value)}
-                  />
-                  <Select
-                    id="grd-status-filter"
-                    value={statusFilterGrd}
-                    onChange={(e) =>
-                      setStatusFilterGrd(e.target.value as 'all' | 'active' | 'inactive')
-                    }
-                    options={statusOptions}
-                  />
-                </Inline>
-              }
-              right={
-                canManage ? (
-                  <Button
-                    variant="primary"
-                    type="button"
-                    onClick={handleOpenCreateGrd}
-                    id="add-grade-btn"
-                  >
-                    <BezentIcon name="add" size={16} />
-                    Add Grade
-                  </Button>
-                ) : undefined
-              }
-            />
-
             {/* Error Message */}
             {errorGrd && (
               <Alert variant="error">
@@ -616,6 +624,7 @@ export function JobLevelsGradesSection({
                   <LoadingState label="Loading grades..." />
                 ) : grades.length === 0 ? (
                   <EmptyState
+                    size="compact"
                     title="No Grades Found"
                     description={
                       searchGrd || statusFilterGrd !== 'all'
@@ -669,32 +678,43 @@ export function JobLevelsGradesSection({
                                 <>
                                   <Button
                                     variant="secondary"
+                                    size="sm"
+                                    className="bezent-settings-row-action-btn"
                                     type="button"
                                     onClick={() => handleOpenEditGrd(g)}
                                     title="Edit Grade"
+                                    aria-label={`Edit ${g.name}`}
                                   >
                                     <BezentIcon name="edit" size={14} />
-                                    Edit
+                                    <span className="bezent-sr-only">Edit</span>
                                   </Button>
                                   {g.status === 'active' ? (
                                     <Button
                                       variant="secondary"
+                                      size="sm"
+                                      className="bezent-settings-row-action-btn bezent-settings-row-action-btn--danger"
                                       type="button"
                                       onClick={() =>
                                         setDeactivatingTarget({ type: 'grade', item: g })
                                       }
                                       title="Deactivate Grade"
+                                      aria-label={`Deactivate ${g.name}`}
                                     >
-                                      Deactivate
+                                      <BezentIcon name="block" size={14} />
+                                      <span className="bezent-sr-only">Deactivate</span>
                                     </Button>
                                   ) : (
                                     <Button
                                       variant="secondary"
+                                      size="sm"
+                                      className="bezent-settings-row-action-btn bezent-settings-row-action-btn--success"
                                       type="button"
                                       onClick={() => handleReactivate('grade', g.id)}
                                       title="Reactivate Grade"
+                                      aria-label={`Reactivate ${g.name}`}
                                     >
-                                      Reactivate
+                                      <BezentIcon name="check" size={14} />
+                                      <span className="bezent-sr-only">Reactivate</span>
                                     </Button>
                                   )}
                                 </>

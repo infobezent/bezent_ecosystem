@@ -20,6 +20,8 @@ export type SelectSize = 'sm' | 'md' | 'lg';
 export interface SelectOption {
   value: string | number;
   label: string;
+  triggerLabel?: string;
+  description?: string;
   disabled?: boolean;
 }
 
@@ -65,11 +67,15 @@ function extractOptions(children: ReactNode): SelectOption[] {
           value?: string | number;
           children?: ReactNode;
           disabled?: boolean;
+          'data-trigger-label'?: string;
+          'data-description'?: string;
         };
         const labelText = getTextFromReactNode(childProps.children);
         extracted.push({
           value: childProps.value !== undefined ? childProps.value : labelText,
           label: labelText || String(childProps.value ?? ''),
+          triggerLabel: childProps['data-trigger-label'],
+          description: childProps['data-description'],
           disabled: childProps.disabled,
         });
       } else if (child.type === 'optgroup') {
@@ -322,11 +328,11 @@ export const Select = forwardRef<HTMLSelectElement, SelectProps>(function Select
             !selectedOption || selectedOption.value === '' ? 'is-placeholder' : ''
           }`}
         >
-          {selectedOption && selectedOption.label ? selectedOption.label : placeholder}
+          {selectedOption ? selectedOption.triggerLabel || selectedOption.label : placeholder}
         </span>
 
         <span className={`bezent-select-arrow ${isOpen ? 'is-open' : ''}`} aria-hidden="true">
-          <BezentIcon name="chevronDown" size={14} color="currentColor" />
+          <BezentIcon name="chevronDown" size={13} color="currentColor" />
         </span>
       </div>
 
@@ -359,10 +365,17 @@ export const Select = forwardRef<HTMLSelectElement, SelectProps>(function Select
                     onClick={() => handleSelect(opt)}
                     onMouseEnter={() => setHighlightedIndex(idx)}
                   >
-                    <span className="bezent-select-option-check" aria-hidden="true">
-                      {isSelected && <BezentIcon name="check" size={14} color="currentColor" />}
-                    </span>
-                    <span className="bezent-select-option-label">{opt.label}</span>
+                    <div className="bezent-select-option-content">
+                      <span className="bezent-select-option-label">{opt.label}</span>
+                      {opt.description && (
+                        <span className="bezent-select-option-desc">{opt.description}</span>
+                      )}
+                    </div>
+                    {isSelected && (
+                      <span className="bezent-select-option-check" aria-hidden="true">
+                        <BezentIcon name="check" size={13} color="currentColor" />
+                      </span>
+                    )}
                   </li>
                 );
               })

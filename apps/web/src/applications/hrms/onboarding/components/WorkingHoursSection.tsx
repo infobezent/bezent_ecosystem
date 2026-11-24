@@ -1,122 +1,20 @@
-import { useState, useMemo } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import {
+  Card,
   FormSection,
   FormGrid,
-  FormField,
   Input,
   Select,
-  Button,
-  Card,
-  CardTitle,
-  Divider,
+  Checkbox,
   Stack,
+  Button,
   Inline,
-  Grid,
-} from '../../../../design-system';
+} from '../../../../design-system/components';
 
-interface ShiftPreset {
-  name: string;
-  startTime: string;
-  endTime: string;
-  breakMins: number;
-  lunchMins: number;
-  days: string[];
-}
-
-const SHIFT_PRESETS: Record<string, ShiftPreset> = {
-  'General Shift (9:00 AM - 6:00 PM)': {
-    name: 'General Shift (9:00 AM - 6:00 PM)',
-    startTime: '09:00',
-    endTime: '18:00',
-    breakMins: 30,
-    lunchMins: 60,
-    days: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'],
-  },
-  'Morning Shift (7:00 AM - 4:00 PM)': {
-    name: 'Morning Shift (7:00 AM - 4:00 PM)',
-    startTime: '07:00',
-    endTime: '16:00',
-    breakMins: 30,
-    lunchMins: 60,
-    days: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'],
-  },
-  'Evening Shift (2:00 PM - 11:00 PM)': {
-    name: 'Evening Shift (2:00 PM - 11:00 PM)',
-    startTime: '14:00',
-    endTime: '23:00',
-    breakMins: 30,
-    lunchMins: 60,
-    days: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'],
-  },
-  'Night Shift (10:00 PM - 7:00 AM)': {
-    name: 'Night Shift (10:00 PM - 7:00 AM)',
-    startTime: '22:00',
-    endTime: '07:00',
-    breakMins: 30,
-    lunchMins: 60,
-    days: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'],
-  },
-};
-
-const ALL_DAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
-
-const CALENDAR_OPTIONS = [
-  { value: 'Standard India General Calendar 2026', label: 'Standard India General Calendar 2026' },
-  { value: 'US East Coast Shift Calendar 2026', label: 'US East Coast Shift Calendar 2026' },
-  { value: '24/7 Operations Shift Calendar', label: '24/7 Operations Shift Calendar' },
-  { value: 'Other', label: 'Other / Add New' },
-];
-
-const SHIFT_OPTIONS = [
-  {
-    value: 'General Shift (9:00 AM - 6:00 PM)',
-    label: 'General Shift (9:00 AM - 6:00 PM)',
-  },
-  {
-    value: 'Morning Shift (7:00 AM - 4:00 PM)',
-    label: 'Morning Shift (7:00 AM - 4:00 PM)',
-  },
-  {
-    value: 'Evening Shift (2:00 PM - 11:00 PM)',
-    label: 'Evening Shift (2:00 PM - 11:00 PM)',
-  },
-  {
-    value: 'Night Shift (10:00 PM - 7:00 AM)',
-    label: 'Night Shift (10:00 PM - 7:00 AM)',
-  },
-  { value: 'Other', label: 'Other / Add New' },
-];
-
-const BREAK_OPTIONS = [
-  { value: '15', label: '15 mins' },
-  { value: '30', label: '30 mins' },
-  { value: '45', label: '45 mins' },
-  { value: '60', label: '60 mins' },
-];
-
-const LUNCH_OPTIONS = [
-  { value: '30', label: '30 mins' },
-  { value: '45', label: '45 mins' },
-  { value: '60', label: '60 mins (1 Hour)' },
-  { value: '90', label: '90 mins' },
-];
-
-const TIMEZONE_OPTIONS = [
-  {
-    value: '(UTC+05:30) India Standard Time (IST)',
-    label: '(UTC+05:30) India Standard Time (IST)',
-  },
-  { value: '(UTC+00:00) London (GMT/BST)', label: '(UTC+00:00) London (GMT/BST)' },
-  {
-    value: '(UTC-05:00) Eastern Time (US & Canada)',
-    label: '(UTC-05:00) Eastern Time (US & Canada)',
-  },
-  {
-    value: '(UTC+08:00) Singapore Standard Time (SGT)',
-    label: '(UTC+08:00) Singapore Standard Time (SGT)',
-  },
-];
-
+import { RegistrationField, useRegistrationConfig } from '../registration/registrationConfig';
+import type { RegistrationFieldConfig } from '../../settings/api/registrationSettingsApi';
+import type { ResolvedFormField } from '../../settings/api/formsApi';
+import { getGroupsForSection } from '../../settings/administration/forms/types';
 import type { Chapter08WorkingHoursState } from '../types/registration.types';
 
 export interface WorkingHoursSectionProps {
@@ -124,290 +22,319 @@ export interface WorkingHoursSectionProps {
   onChange?: (updated: Chapter08WorkingHoursState) => void;
 }
 
-export function WorkingHoursSection({
-  value: _value,
-  onChange: _onChange,
-}: WorkingHoursSectionProps = {}) {
-  // A. WORK SCHEDULE STATE
-  const [workingCalendar, setWorkingCalendar] = useState('Standard India General Calendar 2026');
-  const [customWorkingCalendar, setCustomWorkingCalendar] = useState('');
-  const [workSchedule, setWorkSchedule] = useState('General Shift (9:00 AM - 6:00 PM)');
-  const [customWorkSchedule, setCustomWorkSchedule] = useState('');
-  const [workingDays, setWorkingDays] = useState<string[]>([
-    'Monday',
-    'Tuesday',
-    'Wednesday',
-    'Thursday',
-    'Friday',
+const SHIFT_PRESETS: Record<string, { startTime: string; endTime: string; breakMinutes: number }> =
+  {
+    general: { startTime: '09:00', endTime: '18:00', breakMinutes: 30 },
+    morning: { startTime: '07:00', endTime: '16:00', breakMinutes: 30 },
+    evening: { startTime: '14:00', endTime: '23:00', breakMinutes: 30 },
+    night: { startTime: '22:00', endTime: '07:00', breakMinutes: 30 },
+  };
+
+const WORKING_DAYS_5 = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
+const WORKING_DAYS_6 = [...WORKING_DAYS_5, 'Saturday'];
+const WORKING_DAYS_4 = ['Monday', 'Tuesday', 'Wednesday', 'Thursday'];
+const ALL_DAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+
+function workingDaysToPresetValue(days: string[]): string {
+  if (days.length === 6 && !days.includes('Sunday')) return '6_days';
+  if (
+    days.length === 5 &&
+    days.includes('Monday') &&
+    days.includes('Friday') &&
+    !days.includes('Saturday') &&
+    !days.includes('Sunday')
+  ) {
+    return '5_days';
+  }
+  if (
+    days.length === 4 &&
+    days.includes('Monday') &&
+    days.includes('Thursday') &&
+    !days.includes('Friday')
+  ) {
+    return '4_days';
+  }
+  return 'custom';
+}
+
+export function WorkingHoursSection({ value, onChange }: WorkingHoursSectionProps = {}) {
+  const [workSchedule, setWorkSchedule] = useState(value?.workSchedule ?? 'general');
+  const [workingCalendar] = useState(value?.workingCalendar ?? '');
+  const [workingDays, setWorkingDays] = useState<string[]>(value?.workingDays ?? WORKING_DAYS_5);
+  const [isAlternateSaturday, setIsAlternateSaturday] = useState(false);
+  const [startTime, setStartTime] = useState(value?.startTime ?? '09:00');
+  const [endTime, setEndTime] = useState(value?.endTime ?? '18:00');
+  const [breakMinutes, setBreakMinutes] = useState(value?.breakMinutes ?? 30);
+  const [lunchMinutes] = useState(value?.lunchMinutes ?? 0);
+  const [timeZone] = useState(value?.timeZone ?? '');
+
+  // Catalog fields with no slot in Chapter08WorkingHoursState (e.g. overtimeEligible).
+  const [customValues, setCustomValues] = useState<Record<string, unknown>>({});
+
+  const handleShiftPresetChange = (preset: string) => {
+    setWorkSchedule(preset);
+    const defaults = SHIFT_PRESETS[preset];
+    if (defaults) {
+      setStartTime(defaults.startTime);
+      setEndTime(defaults.endTime);
+      setBreakMinutes(defaults.breakMinutes);
+    }
+  };
+
+  // Sync state back to centralized store
+  const isFirstRender = useRef(true);
+  useEffect(() => {
+    if (isFirstRender.current) {
+      isFirstRender.current = false;
+      return;
+    }
+    const updated: Chapter08WorkingHoursState = {
+      workSchedule,
+      workingCalendar,
+      workingDays,
+      startTime,
+      endTime,
+      breakMinutes,
+      lunchMinutes,
+      timeZone,
+    };
+
+    if (value && JSON.stringify(updated) === JSON.stringify(value)) {
+      return;
+    }
+
+    onChange?.(updated);
+  }, [
+    workSchedule,
+    workingCalendar,
+    workingDays,
+    startTime,
+    endTime,
+    breakMinutes,
+    lunchMinutes,
+    timeZone,
+    value,
+    onChange,
   ]);
 
-  // B. TIME CONFIGURATION STATE
-  const [startTime, setStartTime] = useState('09:00');
-  const [endTime, setEndTime] = useState('18:00');
-  const [breakMins, setBreakMins] = useState(30);
-  const [lunchMins, setLunchMins] = useState(60);
+  const config = useRegistrationConfig();
 
-  // D. EMPLOYEE ASSIGNMENT STATE
-  const [assignedEmployee] = useState('Arun Kumar (EMP2026001)');
-  const [assignedCalendar, setAssignedCalendar] = useState('Standard India General Calendar 2026');
-  const [assignedSchedule, setAssignedSchedule] = useState('General Shift (9:00 AM - 6:00 PM)');
-  const [timeZone, setTimeZone] = useState('(UTC+05:30) India Standard Time (IST)');
+  const workingHoursFields = useMemo(() => {
+    const fields = config.fields.filter((f) => f.section === 'working_hours' && f.enabled);
+    return [...fields].sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
+  }, [config.fields]);
 
-  // AUTOMATION: Handle Shift Preset Change
-  const handleShiftChange = (scheduleName: string) => {
-    setWorkSchedule(scheduleName);
-    setAssignedSchedule(scheduleName);
+  const groups = useMemo(() => {
+    return getGroupsForSection(
+      'working_hours',
+      workingHoursFields as unknown as ResolvedFormField[],
+      config.metadata,
+    );
+  }, [workingHoursFields, config.metadata]);
 
-    if (scheduleName === 'Other') return;
+  const renderField = (field: RegistrationFieldConfig) => {
+    const { key, width, config: fConfig } = field;
+    const span = width === 'full' ? 'full' : undefined;
+    const configuredOptions = Array.isArray(fConfig?.options)
+      ? (fConfig.options as Array<{ value: string; label: string }>)
+      : undefined;
 
-    const preset = SHIFT_PRESETS[scheduleName];
-    if (preset) {
-      setStartTime(preset.startTime);
-      setEndTime(preset.endTime);
-      setBreakMins(preset.breakMins);
-      setLunchMins(preset.lunchMins);
-      setWorkingDays(preset.days);
-    }
-  };
+    switch (key) {
+      case 'working_hours.shiftPreset':
+        return (
+          <RegistrationField
+            key={key}
+            fieldKey={key}
+            value={workSchedule}
+            htmlFor="reg-working-hours-shift-preset"
+            span={span}
+          >
+            <Select
+              id="reg-working-hours-shift-preset"
+              value={workSchedule}
+              onChange={(e) => handleShiftPresetChange(e.target.value)}
+              options={
+                configuredOptions || [
+                  { value: 'general', label: 'General Shift (9:00 AM - 6:00 PM)' },
+                  { value: 'morning', label: 'Morning Shift (7:00 AM - 4:00 PM)' },
+                  { value: 'evening', label: 'Evening Shift (2:00 PM - 11:00 PM)' },
+                  { value: 'night', label: 'Night Shift (10:00 PM - 7:00 AM)' },
+                ]
+              }
+            />
+          </RegistrationField>
+        );
 
-  const toggleDay = (day: string) => {
-    if (workingDays.includes(day)) {
-      setWorkingDays(workingDays.filter((d) => d !== day));
-    } else {
-      setWorkingDays([...workingDays, day]);
-    }
-  };
+      case 'working_hours.startTime':
+        return (
+          <RegistrationField
+            key={key}
+            fieldKey={key}
+            value={startTime}
+            htmlFor="reg-working-hours-start-time"
+            span={span}
+          >
+            <Input
+              id="reg-working-hours-start-time"
+              type="time"
+              value={startTime}
+              onChange={(e) => setStartTime(e.target.value)}
+            />
+          </RegistrationField>
+        );
 
-  // AUTOMATED WORKING HOURS CALCULATION
-  const calculatedHours = useMemo(() => {
-    const [startH, startM] = startTime.split(':').map(Number);
-    const [endH, endM] = endTime.split(':').map(Number);
+      case 'working_hours.endTime':
+        return (
+          <RegistrationField
+            key={key}
+            fieldKey={key}
+            value={endTime}
+            htmlFor="reg-working-hours-end-time"
+            span={span}
+          >
+            <Input
+              id="reg-working-hours-end-time"
+              type="time"
+              value={endTime}
+              onChange={(e) => setEndTime(e.target.value)}
+            />
+          </RegistrationField>
+        );
 
-    if (isNaN(startH!) || isNaN(startM!) || isNaN(endH!) || isNaN(endM!)) {
-      return { totalGross: '8.0', totalNet: '8.0', nonWork: '1.5' };
-    }
+      case 'working_hours.breakDuration':
+        return (
+          <RegistrationField
+            key={key}
+            fieldKey={key}
+            value={breakMinutes}
+            htmlFor="reg-working-hours-break-duration"
+            span={span}
+          >
+            <Input
+              id="reg-working-hours-break-duration"
+              type="number"
+              min={0}
+              value={String(breakMinutes)}
+              onChange={(e) => setBreakMinutes(Number(e.target.value) || 0)}
+            />
+          </RegistrationField>
+        );
 
-    const startTotalMins = startH! * 60 + startM!;
-    let endTotalMins = endH! * 60 + endM!;
-
-    if (endTotalMins < startTotalMins) {
-      endTotalMins += 24 * 60; // Overnight shift
-    }
-
-    const grossMins = endTotalMins - startTotalMins;
-    const nonWorkMins = breakMins + lunchMins;
-    const netMins = Math.max(0, grossMins - nonWorkMins);
-
-    return {
-      totalGross: (grossMins / 60).toFixed(1),
-      totalNet: (netMins / 60).toFixed(1),
-      nonWork: (nonWorkMins / 60).toFixed(1),
-    };
-  }, [startTime, endTime, breakMins, lunchMins]);
-
-  return (
-    <Stack gap="xl">
-      {/* A. WORK SCHEDULE */}
-      <Card padding="lg">
-        <FormSection title="Work Schedule & Calendar">
-          <FormGrid columns={2} layout="horizontal" labelWidth="md">
-            {/* 1. Working Time Calendar */}
-            <FormField label="Working Calendar" required>
-              <Stack gap="xs">
-                <Select
-                  options={CALENDAR_OPTIONS}
-                  value={workingCalendar}
-                  onChange={(e) => {
-                    setWorkingCalendar(e.target.value);
-                    setAssignedCalendar(e.target.value);
-                  }}
-                />
-                {workingCalendar === 'Other' && (
-                  <Input
-                    type="text"
-                    placeholder="Enter Custom Working Time Calendar"
-                    value={customWorkingCalendar}
-                    onChange={(e) => setCustomWorkingCalendar(e.target.value)}
-                  />
-                )}
-              </Stack>
-            </FormField>
-
-            {/* 2. Work Schedule Shift */}
-            <FormField label="Work Schedule" required>
-              <Stack gap="xs">
-                <Select
-                  options={SHIFT_OPTIONS}
-                  value={workSchedule}
-                  onChange={(e) => handleShiftChange(e.target.value)}
-                />
-                {workSchedule === 'Other' && (
-                  <Input
-                    type="text"
-                    placeholder="Enter Custom Work Schedule"
-                    value={customWorkSchedule}
-                    onChange={(e) => setCustomWorkSchedule(e.target.value)}
-                  />
-                )}
-              </Stack>
-            </FormField>
-
-            {/* 3. Working Days */}
-            <FormField label="Working Days" required span="full">
+      case 'working_hours.workingDays': {
+        const presetValue = isAlternateSaturday
+          ? 'alt_saturday'
+          : workingDaysToPresetValue(workingDays);
+        return (
+          <RegistrationField
+            key={key}
+            fieldKey={key}
+            value={presetValue}
+            htmlFor="reg-working-hours-working-days"
+            span={span}
+            helperText={
+              isAlternateSaturday
+                ? 'Alternate Saturday Rule: 1st & 3rd Saturday Working · 2nd & 4th Saturday Off'
+                : `${workingDays.length} working days active (${workingDays.map((d) => d.slice(0, 3)).join(', ') || 'None'})`
+            }
+          >
+            <Stack gap="sm">
+              <Select
+                id="reg-working-hours-working-days"
+                value={presetValue}
+                onChange={(e) => {
+                  const val = e.target.value;
+                  if (val === 'alt_saturday') {
+                    setIsAlternateSaturday(true);
+                    setWorkingDays(WORKING_DAYS_6);
+                  } else {
+                    setIsAlternateSaturday(false);
+                    if (val === '5_days') setWorkingDays(WORKING_DAYS_5);
+                    else if (val === '6_days') setWorkingDays(WORKING_DAYS_6);
+                    else if (val === '4_days') setWorkingDays(WORKING_DAYS_4);
+                  }
+                }}
+                options={
+                  configuredOptions || [
+                    { value: '5_days', label: '5 Days (Monday - Friday)' },
+                    { value: '6_days', label: '6 Days (Monday - Saturday)' },
+                    {
+                      value: 'alt_saturday',
+                      label: '5.5 Days (Alternate Sat Off: 1st & 3rd Working, 2nd & 4th Off)',
+                    },
+                    { value: '4_days', label: '4 Days (Monday - Thursday)' },
+                    { value: 'custom', label: 'Custom Working Days (Select Below)' },
+                  ]
+                }
+              />
               <Inline gap="xs" wrap>
                 {ALL_DAYS.map((day) => {
-                  const isSelected = workingDays.includes(day);
+                  const isChecked = workingDays.includes(day);
                   return (
                     <Button
                       key={day}
                       type="button"
-                      variant={isSelected ? 'primary' : 'secondary'}
                       size="sm"
-                      onClick={() => toggleDay(day)}
+                      variant={isChecked ? 'primary' : 'secondary'}
+                      onClick={() => {
+                        setIsAlternateSaturday(false);
+                        setWorkingDays((prev) =>
+                          prev.includes(day) ? prev.filter((d) => d !== day) : [...prev, day],
+                        );
+                      }}
                     >
-                      {day}
+                      {day.slice(0, 3)}
                     </Button>
                   );
                 })}
               </Inline>
-            </FormField>
-          </FormGrid>
-        </FormSection>
-      </Card>
+            </Stack>
+          </RegistrationField>
+        );
+      }
 
-      {/* B. TIME CONFIGURATION */}
-      <Card padding="lg">
-        <FormSection title="Time Configuration & Breaks">
-          <FormGrid columns={2} layout="horizontal" labelWidth="md">
-            {/* 1. Start Time */}
-            <FormField label="Start Time">
-              <Input type="time" value={startTime} onChange={(e) => setStartTime(e.target.value)} />
-            </FormField>
+      case 'working_hours.overtimeEligible': {
+        const checked = Boolean(customValues[key]);
+        return (
+          <RegistrationField
+            key={key}
+            fieldKey={key}
+            value={checked}
+            htmlFor="reg-working-hours-overtime-eligible"
+            hideLabel
+            span={span}
+          >
+            <Checkbox
+              id="reg-working-hours-overtime-eligible"
+              label={field.label}
+              checked={checked}
+              onChange={(e) => setCustomValues((prev) => ({ ...prev, [key]: e.target.checked }))}
+            />
+          </RegistrationField>
+        );
+      }
 
-            {/* 2. End Time */}
-            <FormField label="End Time">
-              <Input type="time" value={endTime} onChange={(e) => setEndTime(e.target.value)} />
-            </FormField>
+      default:
+        return null;
+    }
+  };
 
-            {/* 3. Break */}
-            <FormField label="Break Duration">
-              <Select
-                options={BREAK_OPTIONS}
-                value={String(breakMins)}
-                onChange={(e) => setBreakMins(Number(e.target.value))}
-              />
-            </FormField>
+  return (
+    <Stack gap="xl">
+      {groups.map((group) => {
+        if (group.fields.length === 0) return null;
 
-            {/* 4. Lunch */}
-            <FormField label="Lunch Duration">
-              <Select
-                options={LUNCH_OPTIONS}
-                value={String(lunchMins)}
-                onChange={(e) => setLunchMins(Number(e.target.value))}
-              />
-            </FormField>
-
-            {/* 5. Standard Working Hours (Net) */}
-            <FormField
-              label="Daily Net Hours"
-              span="full"
-              helperText={`Gross: ${calculatedHours.totalGross} hrs • Non-work: ${calculatedHours.nonWork} hrs`}
-            >
-              <Input type="text" value={`${calculatedHours.totalNet} Hours / Day`} readOnly />
-            </FormField>
-          </FormGrid>
-        </FormSection>
-      </Card>
-
-      {/* C. CALENDAR & HOLIDAYS + D. EMPLOYEE ASSIGNMENT */}
-      <Card padding="lg">
-        <FormSection title="Holidays & Employee Shift Linking">
-          <Grid columns={2} gap="lg">
-            {/* C. CALENDAR & HOLIDAYS */}
-            <Card variant="flat">
-              <Stack gap="md">
-                <CardTitle>Assigned Standard Holidays (2026)</CardTitle>
-                <Stack gap="xs">
-                  <Inline gap="xs" align="center">
-                    <span className="bezent-label--md">Jan 26, 2026</span>
-                    <span className="bezent-card__desc">— Republic Day (National Holiday)</span>
-                  </Inline>
-                  <Inline gap="xs" align="center">
-                    <span className="bezent-label--md">May 01, 2026</span>
-                    <span className="bezent-card__desc">— May Day (Public Holiday)</span>
-                  </Inline>
-                  <Inline gap="xs" align="center">
-                    <span className="bezent-label--md">Aug 15, 2026</span>
-                    <span className="bezent-card__desc">— Independence Day (National Holiday)</span>
-                  </Inline>
-                  <Inline gap="xs" align="center">
-                    <span className="bezent-label--md">Oct 02, 2026</span>
-                    <span className="bezent-card__desc">— Gandhi Jayanti (National Holiday)</span>
-                  </Inline>
-                  <Inline gap="xs" align="center">
-                    <span className="bezent-label--md">Nov 08, 2026</span>
-                    <span className="bezent-card__desc">— Diwali / Deepavali (Festival)</span>
-                  </Inline>
-                  <Inline gap="xs" align="center">
-                    <span className="bezent-label--md">Dec 25, 2026</span>
-                    <span className="bezent-card__desc">— Christmas (Festival)</span>
-                  </Inline>
-                </Stack>
-
-                <Divider />
-
-                <CardTitle>Company Closures</CardTitle>
-                <Stack gap="xs">
-                  <Inline gap="xs" align="center">
-                    <span className="bezent-label--md">Dec 31, 2026</span>
-                    <span className="bezent-card__desc">— Annual Corporate Strategy Closure</span>
-                  </Inline>
-                </Stack>
-              </Stack>
-            </Card>
-
-            {/* D. EMPLOYEE ASSIGNMENT */}
-            <Card variant="flat">
-              <Stack gap="md">
-                <CardTitle>Employee Shift & Timezone Linking</CardTitle>
-                <FormGrid columns={1} layout="horizontal" labelWidth="md">
-                  {/* 1. Employee / Worker */}
-                  <FormField label="Employee Link">
-                    <Input type="text" value={assignedEmployee} readOnly />
-                  </FormField>
-
-                  {/* 2. Assigned Work Calendar */}
-                  <FormField label="Assigned Calendar">
-                    <Select
-                      options={CALENDAR_OPTIONS.filter((c) => c.value !== 'Other')}
-                      value={assignedCalendar}
-                      onChange={(e) => setAssignedCalendar(e.target.value)}
-                    />
-                  </FormField>
-
-                  {/* 3. Assigned Work Schedule */}
-                  <FormField label="Assigned Schedule">
-                    <Select
-                      options={SHIFT_OPTIONS.filter((s) => s.value !== 'Other')}
-                      value={assignedSchedule}
-                      onChange={(e) => setAssignedSchedule(e.target.value)}
-                    />
-                  </FormField>
-
-                  {/* 4. Time Zone */}
-                  <FormField label="Time Zone">
-                    <Select
-                      options={TIMEZONE_OPTIONS}
-                      value={timeZone}
-                      onChange={(e) => setTimeZone(e.target.value)}
-                    />
-                  </FormField>
-                </FormGrid>
-              </Stack>
-            </Card>
-          </Grid>
-        </FormSection>
-      </Card>
+        return (
+          <Card key={group.key} padding="lg">
+            <FormSection title={group.title}>
+              <FormGrid columns={2} layout="horizontal" labelWidth="md">
+                {group.fields.map((field) =>
+                  renderField(field as unknown as RegistrationFieldConfig),
+                )}
+              </FormGrid>
+            </FormSection>
+          </Card>
+        );
+      })}
     </Stack>
   );
 }

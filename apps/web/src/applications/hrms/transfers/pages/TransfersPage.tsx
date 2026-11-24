@@ -2,8 +2,6 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Alert,
-  Button,
-  Grid,
   IconButton,
   Inline,
   Page,
@@ -19,7 +17,6 @@ import {
   type ActionStatusCounts,
   type EmployeeActionListItem,
   type EmployeeActionStatus,
-  type EmployeeActionType,
   type OrganizationMasters,
   type PaginationMetadata,
 } from '../../employee-administration/api/employeeAdministrationApi';
@@ -31,6 +28,7 @@ import {
 import { NewEmployeeActionModal } from '../../employee-administration/components/NewEmployeeActionModal';
 import { EmployeeActionDetailModal } from '../../employee-administration/components/EmployeeActionDetailModal';
 import { employeeProfilePath } from '../../employees/model/employeeModel';
+import { WorkforceInfoPopover } from '../../components/WorkforceInfoPopover';
 import {
   TransfersFilterPanel,
   type TransfersFilterState,
@@ -38,7 +36,6 @@ import {
   countActiveTransfersFilters,
 } from '../components/TransfersFilterPanel';
 import { TransfersTable } from '../components/TransfersTable';
-import { DEMO_TRANSFERS } from '../model/demoTransfers';
 
 const PAGE_SIZE_OPTIONS = [10, 25, 50, 100] as const;
 type PageSizeOption = (typeof PAGE_SIZE_OPTIONS)[number];
@@ -176,95 +173,27 @@ export function TransfersPage({
       })
         .then((res) => {
           if (!active) return;
-          if (res.data.length > 0) {
-            setItems(res.data);
-            setPagination(res.pagination);
-            if (res.statusCounts) {
-              setStatusCounts(res.statusCounts);
-            }
+          setItems(res.data || []);
+          setPagination(res.pagination || null);
+          if (res.statusCounts) {
+            setStatusCounts(res.statusCounts);
           } else {
-            // Populate with rich realistic demo transfers when empty
-            let filteredDemo = [...DEMO_TRANSFERS];
-            if (activeStatusTab !== 'all') {
-              if (activeStatusTab === 'upcoming') {
-                filteredDemo = filteredDemo.filter(
-                  (item) => item.status === 'pending' && item.effectiveDate > today,
-                );
-              } else {
-                filteredDemo = filteredDemo.filter((item) => item.status === activeStatusTab);
-              }
-            }
-            if (search.trim()) {
-              const q = search.toLowerCase();
-              filteredDemo = filteredDemo.filter(
-                (item) =>
-                  item.employeeName.toLowerCase().includes(q) ||
-                  item.employeeNumber.toLowerCase().includes(q) ||
-                  item.reason.toLowerCase().includes(q),
-              );
-            }
-            if (appliedFilters.actionType) {
-              filteredDemo = filteredDemo.filter(
-                (item) => item.actionType === appliedFilters.actionType,
-              );
-            }
-
-            setItems(filteredDemo);
-            setPagination({
-              page: 1,
-              pageSize,
-              totalItems: filteredDemo.length,
-              totalPages: Math.ceil(filteredDemo.length / pageSize) || 1,
-            });
             setStatusCounts({
-              all: DEMO_TRANSFERS.length,
-              pending: DEMO_TRANSFERS.filter((t) => t.status === 'pending').length,
-              upcoming: DEMO_TRANSFERS.filter(
-                (t) => t.status === 'pending' && t.effectiveDate > today,
-              ).length,
-              applied: DEMO_TRANSFERS.filter((t) => t.status === 'applied').length,
-              cancelled: DEMO_TRANSFERS.filter((t) => t.status === 'cancelled').length,
+              all: res.data?.length ?? 0,
+              pending: 0,
+              upcoming: 0,
+              applied: 0,
+              cancelled: 0,
             });
           }
           setLoading(false);
         })
-        .catch(() => {
+        .catch((err) => {
           if (!active) return;
-          // Fallback to demo data
-          let filteredDemo = [...DEMO_TRANSFERS];
-          if (activeStatusTab !== 'all') {
-            if (activeStatusTab === 'upcoming') {
-              filteredDemo = filteredDemo.filter(
-                (item) => item.status === 'pending' && item.effectiveDate > today,
-              );
-            } else {
-              filteredDemo = filteredDemo.filter((item) => item.status === activeStatusTab);
-            }
-          }
-          if (search.trim()) {
-            const q = search.toLowerCase();
-            filteredDemo = filteredDemo.filter(
-              (item) =>
-                item.employeeName.toLowerCase().includes(q) ||
-                item.employeeNumber.toLowerCase().includes(q),
-            );
-          }
-          setItems(filteredDemo);
-          setPagination({
-            page: 1,
-            pageSize,
-            totalItems: filteredDemo.length,
-            totalPages: Math.ceil(filteredDemo.length / pageSize) || 1,
-          });
-          setStatusCounts({
-            all: DEMO_TRANSFERS.length,
-            pending: DEMO_TRANSFERS.filter((t) => t.status === 'pending').length,
-            upcoming: DEMO_TRANSFERS.filter(
-              (t) => t.status === 'pending' && t.effectiveDate > today,
-            ).length,
-            applied: DEMO_TRANSFERS.filter((t) => t.status === 'applied').length,
-            cancelled: DEMO_TRANSFERS.filter((t) => t.status === 'cancelled').length,
-          });
+          setItems([]);
+          setPagination(null);
+          setStatusCounts({ all: 0, pending: 0, upcoming: 0, applied: 0, cancelled: 0 });
+          setError(err instanceof Error ? err.message : 'Failed to load transfers');
           setLoading(false);
         });
     }, 200);
@@ -333,7 +262,11 @@ export function TransfersPage({
   const handleExportCsv = async () => {
     setExporting(true);
     try {
-      const records = items.length > 0 ? items : DEMO_TRANSFERS;
+      const records = items;
+      if (records.length === 0) {
+        setExporting(false);
+        return;
+      }
       const headers = [
         'Employee ID',
         'Employee Name',
@@ -389,7 +322,7 @@ export function TransfersPage({
   const totalPages = pagination?.totalPages ?? 1;
 
   const statusTabs = [
-    { id: 'all', label: 'All Transfers', count: statusCounts?.all ?? items.length },
+    { id: 'all', label: 'All', count: statusCounts?.all ?? items.length },
     { id: 'pending', label: 'Pending', count: statusCounts?.pending },
     { id: 'upcoming', label: 'Upcoming', count: statusCounts?.upcoming },
     { id: 'applied', label: 'Completed', count: statusCounts?.applied },
@@ -398,35 +331,18 @@ export function TransfersPage({
 
   return (
     <Page maxWidth="full" className="bezent-page" gap="md">
-      {/* 1. Page Header */}
+      {/* 1. Page Header (Clean title with Info Popover) */}
       <PageHeader
-        title={title}
-        eyebrow="HRMS · Workforce"
-        subtitle={subtitle}
-        actions={
-          <Inline gap="sm" align="center">
-            <Button
-              variant="outline"
-              size="md"
-              leftIcon={<BezentIcon name="download" size={16} />}
-              onClick={handleExportCsv}
-              disabled={exporting}
-              aria-label="Export transfers to CSV"
-            >
-              {exporting ? 'Exporting…' : 'Export'}
-            </Button>
-            <Button
-              variant="primary"
-              size="md"
-              leftIcon={<BezentIcon name="plus" size={16} />}
-              onClick={() => setIsNewModalOpen(true)}
-              aria-label="Initiate new transfer"
-            >
-              Initiate Transfer
-            </Button>
-          </Inline>
+        title={
+          <div className="bezent-wf-title-row">
+            <h1 className="bezent-page-header__title">{title}</h1>
+            <WorkforceInfoPopover label={title} tooltip={subtitle} />
+          </div>
         }
       />
+      <span className="sr-only" hidden>
+        {subtitle}
+      </span>
 
       {/* Success banner if an action was applied or cancelled */}
       {successMessage && (
@@ -457,23 +373,25 @@ export function TransfersPage({
               />
             </div>
 
-            {/* Filter Toggle Button */}
+            {/* Filter Toggle Button (Icon-only) */}
             <div className="bezent-filter-anchor">
-              <Button
-                variant={appliedCount > 0 || isFilterPanelOpen ? 'secondary' : 'outline'}
-                size="md"
-                shape="rounded"
-                className={appliedCount > 0 ? 'bezent-btn--filters-active' : ''}
-                leftIcon={<BezentIcon name="filter" size={16} />}
+              <IconButton
+                label={appliedCount > 0 ? `Filters (${appliedCount} active)` : 'Filters'}
+                variant={appliedCount > 0 || isFilterPanelOpen ? 'solid' : 'ghost'}
+                active={isFilterPanelOpen || appliedCount > 0}
+                tooltipDirection="down"
                 onClick={() => setIsFilterPanelOpen((prev) => !prev)}
                 aria-expanded={isFilterPanelOpen}
-                aria-label="Filters"
+                aria-label={appliedCount > 0 ? `Filters (${appliedCount} active)` : 'Filters'}
+                className={appliedCount > 0 ? 'bezent-btn--filters-active' : ''}
               >
-                <span>Filters</span>
+                <BezentIcon name="filter" size={16} />
                 {appliedCount > 0 && (
-                  <span className="bezent-btn__filter-count">{appliedCount}</span>
+                  <span className="bezent-btn__filter-count bezent-btn__filter-count--icon-btn">
+                    {appliedCount}
+                  </span>
                 )}
-              </Button>
+              </IconButton>
 
               <TransfersFilterPanel
                 isOpen={isFilterPanelOpen}
@@ -487,17 +405,17 @@ export function TransfersPage({
               />
             </div>
 
-            {/* Reset Button */}
-            <Button
-              variant="outline"
-              size="md"
-              shape="rounded"
-              leftIcon={<BezentIcon name="reset" size={16} />}
+            {/* Reset Button (Icon-only) */}
+            <IconButton
+              label="Reset filters"
+              variant="ghost"
+              tooltipDirection="down"
               onClick={handleResetFilters}
               disabled={!hasActiveFilters}
+              aria-label="Reset filters"
             >
-              Reset
-            </Button>
+              <BezentIcon name="reset" size={16} />
+            </IconButton>
 
             {/* View Mode Toggle: List vs Grid */}
             <div
@@ -544,7 +462,7 @@ export function TransfersPage({
                 >
                   <span>{tab.label}</span>
                   {tab.count !== undefined && (
-                    <span className="bezent-filter-tab__count">{tab.count}</span>
+                    <span className="bezent-filter-tab-count">{tab.count}</span>
                   )}
                 </button>
               ))}
@@ -558,6 +476,7 @@ export function TransfersPage({
               variant="ghost"
               tooltipDirection="down"
               onClick={handleExportCsv}
+              disabled={exporting}
             >
               <BezentIcon name="download" size={18} />
             </IconButton>

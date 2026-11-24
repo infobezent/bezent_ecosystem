@@ -103,7 +103,6 @@ export const WorkforceComplianceKpiCard: React.FC<WorkforceComplianceKpiCardProp
       onClick={onClick}
       role="region"
       aria-label="Workforce Compliance KPI Summary"
-      title="Workforce compliance health and completeness"
     >
       {/* ── Top Section ── */}
       <div className="bezent-kpi-compliance-top">

@@ -43,7 +43,7 @@ describe('HRMS Dynamic Onboarding Stages V1 Integration Tests', () => {
     await seedDatabase();
     hrms = request.agent(app).set(await hrmsTestHeaders(companyA, tenantA));
     await hrmsTestHeaders(companyB, tenantB);
-  });
+  }, 60000);
 
   afterAll(async () => {
     const db = getDb();

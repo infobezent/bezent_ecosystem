@@ -2,6 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { BezentIcon } from '../../../../design-system/icons';
 import { Select, type SelectOption, Button } from '../../../../design-system/components';
 import type { EmployeeRecord } from '../../employees/api/employeesApi';
+import { WorkforceInfoPopover } from './WorkforceInfoPopover';
 
 export type CompositionDimension =
   'gender' | 'age_group' | 'experience' | 'tenure' | 'employment_status';
@@ -454,37 +455,84 @@ export const WorkforceCompositionCard: React.FC<WorkforceCompositionCardProps> =
       {/* ── 1. Card Header (Title on Left, Dropdown Controls on Right) ── */}
       <div className="bezent-wf-comp-header">
         <div className="bezent-wf-comp-title-group">
-          <div className="bezent-wf-comp-icon-badge" aria-hidden="true">
-            <BezentIcon name="organization" size={18} />
+          <div
+            className={`bezent-wf-comp-icon-badge ${
+              loading ? 'bezent-wf-skeleton-icon-badge' : ''
+            }`}
+            aria-hidden="true"
+          >
+            {loading ? null : <BezentIcon name="organization" size={18} />}
           </div>
-          <h3 className="bezent-wf-comp-title">Workforce Composition</h3>
+          <h3 className="bezent-wf-comp-title">
+            {loading ? (
+              <>
+                <span className="bezent-sr-only">Workforce Composition</span>
+                <span className="bezent-wf-skeleton-shimmer bezent-wf-skeleton-title" />
+              </>
+            ) : (
+              <>
+                <span>Workforce Composition</span>
+                <WorkforceInfoPopover
+                  label="Workforce Composition"
+                  tooltip="Demographic diversity breakdown across gender, age groups, and experience levels"
+                />
+              </>
+            )}
+          </h3>
         </div>
 
         {/* Selection Controls: Two Dropdowns moved directly to Header Right */}
         <div className="bezent-wf-comp-dropdowns-row">
-          {/* Dropdown 1: Composition By */}
-          <div className="bezent-wf-comp-select-wrap">
-            <Select
-              size="sm"
-              width="auto"
-              aria-label="Composition By"
-              value={activeDimension}
-              options={COMPOSITION_DIMENSION_OPTIONS}
-              onChange={(e) => handleDimensionChange(e.target.value as CompositionDimension)}
-            />
-          </div>
+          {loading ? (
+            <>
+              <div className="bezent-sr-only">
+                <Select
+                  size="sm"
+                  width="auto"
+                  aria-label="Composition By"
+                  value={activeDimension}
+                  options={COMPOSITION_DIMENSION_OPTIONS}
+                  onChange={(e) => handleDimensionChange(e.target.value as CompositionDimension)}
+                />
+                <Select
+                  size="sm"
+                  width="auto"
+                  aria-label="Filter By"
+                  value={activeFilter}
+                  options={filterOptions}
+                  onChange={(e) => handleFilterChange(e.target.value)}
+                />
+              </div>
+              <span className="bezent-wf-skeleton-shimmer bezent-wf-skeleton-control-btn" />
+              <span className="bezent-wf-skeleton-shimmer bezent-wf-skeleton-control-btn" />
+            </>
+          ) : (
+            <>
+              {/* Dropdown 1: Composition By */}
+              <div className="bezent-wf-comp-select-wrap">
+                <Select
+                  size="sm"
+                  width="auto"
+                  aria-label="Composition By"
+                  value={activeDimension}
+                  options={COMPOSITION_DIMENSION_OPTIONS}
+                  onChange={(e) => handleDimensionChange(e.target.value as CompositionDimension)}
+                />
+              </div>
 
-          {/* Dropdown 2: Filter By */}
-          <div className="bezent-wf-comp-select-wrap">
-            <Select
-              size="sm"
-              width="auto"
-              aria-label="Filter By"
-              value={activeFilter}
-              options={filterOptions}
-              onChange={(e) => handleFilterChange(e.target.value)}
-            />
-          </div>
+              {/* Dropdown 2: Filter By */}
+              <div className="bezent-wf-comp-select-wrap">
+                <Select
+                  size="sm"
+                  width="auto"
+                  aria-label="Filter By"
+                  value={activeFilter}
+                  options={filterOptions}
+                  onChange={(e) => handleFilterChange(e.target.value)}
+                />
+              </div>
+            </>
+          )}
         </div>
       </div>
 
@@ -532,11 +580,20 @@ export const WorkforceCompositionCard: React.FC<WorkforceCompositionCardProps> =
             <p>No eligible employee records are available for this composition breakdown.</p>
           </div>
         ) : (
-          /* ── Universal Donut Chart View (Gender, Age Group, Experience, Tenure, Employment Status) ── */
+          /* ── Switchable Tailored Visuals (Gender, Age Group, Experience, Tenure, Employment Status) ── */
           <div className="bezent-wf-comp-donut-split">
+            {/* Universal Left Visual (Custom Ring Gauge + Center Count) */}
             <div className="bezent-wf-comp-donut-wrap">
               <svg viewBox="0 0 120 120" className="bezent-wf-comp-donut-svg">
-                <circle cx="60" cy="60" r="46" fill="none" stroke="#f1f5f9" strokeWidth="15" />
+                <circle
+                  cx="60"
+                  cy="60"
+                  r="46"
+                  fill="none"
+                  stroke="#f1f5f9"
+                  strokeWidth="15"
+                  className="bezent-wf-comp-donut-bg-track"
+                />
                 {(() => {
                   let accumulatedPct = 0;
                   return categoryItems.map((item) => {
@@ -574,41 +631,407 @@ export const WorkforceCompositionCard: React.FC<WorkforceCompositionCardProps> =
               </div>
             </div>
 
-            {/* Legend Cards Grid */}
-            <div className="bezent-wf-comp-donut-legend-grid">
-              {categoryItems.map((item) => {
-                const isHovered = hoveredSlice === item.name;
-                return (
-                  <div
-                    key={item.id}
-                    className={`bezent-wf-comp-donut-legend-card ${isHovered ? 'bezent-wf-comp-donut-legend-card--hovered' : ''}`}
-                    onMouseEnter={() => setHoveredSlice(item.name)}
-                    onMouseLeave={() => setHoveredSlice(null)}
+            {/* ── 1. Gender: Parity Split, Hero Stat Cards & Demographic Chips ── */}
+            {activeDimension === 'gender' && (
+              <div className="bezent-wf-comp-detail-panel bezent-wf-comp-gender-panel">
+                <div className="bezent-wf-comp-panel-header">
+                  <span className="bezent-wf-comp-panel-subtitle">Gender Parity Split</span>
+                  <span className="bezent-wf-comp-parity-ratio-badge">
+                    {categoryItems.find((c) => c.name === 'Male')?.percentage || 0}% ♂ :{' '}
+                    {categoryItems.find((c) => c.name === 'Female')?.percentage || 0}% ♀
+                  </span>
+                </div>
+
+                <div className="bezent-wf-comp-parity-bar-wrap">
+                  <svg
+                    className="bezent-wf-comp-parity-svg"
+                    viewBox="0 0 100 8"
+                    preserveAspectRatio="none"
                   >
-                    <div className="bezent-wf-comp-donut-legend-left">
-                      <svg
-                        className="bezent-wf-comp-dot"
-                        width="8"
-                        height="8"
-                        viewBox="0 0 8 8"
-                        aria-hidden="true"
+                    <defs>
+                      <clipPath id="bezent-wf-comp-parity-clip">
+                        <rect x="0" y="0" width="100" height="8" rx="4" ry="4" />
+                      </clipPath>
+                    </defs>
+                    <rect
+                      x="0"
+                      y="0"
+                      width="100"
+                      height="8"
+                      rx="4"
+                      ry="4"
+                      className="bezent-wf-comp-progress-track"
+                    />
+                    <g clipPath="url(#bezent-wf-comp-parity-clip)">
+                      {(() => {
+                        let curX = 0;
+                        return categoryItems.map((item) => {
+                          const segW = item.count > 0 ? Math.max(item.percentage, 2) : 0;
+                          const x = curX;
+                          curX += segW;
+                          return (
+                            <rect
+                              key={item.id}
+                              x={x}
+                              y={0}
+                              width={segW}
+                              height={8}
+                              fill={item.color}
+                              opacity={hoveredSlice && hoveredSlice !== item.name ? 0.45 : 1}
+                              className="bezent-wf-comp-parity-seg"
+                              onMouseEnter={() => setHoveredSlice(item.name)}
+                              onMouseLeave={() => setHoveredSlice(null)}
+                            />
+                          );
+                        });
+                      })()}
+                    </g>
+                  </svg>
+                </div>
+
+                <div className="bezent-wf-comp-hero-cards">
+                  {categoryItems
+                    .filter((item) => item.name === 'Male' || item.name === 'Female')
+                    .map((item) => {
+                      const isMale = item.name === 'Male';
+                      const isHovered = hoveredSlice === item.name;
+                      return (
+                        <div
+                          key={item.id}
+                          className={`bezent-wf-comp-hero-card ${isMale ? 'bezent-wf-comp-hero-card--male' : 'bezent-wf-comp-hero-card--female'} ${isHovered ? 'bezent-wf-comp-hero-card--hovered' : ''}`}
+                          onMouseEnter={() => setHoveredSlice(item.name)}
+                          onMouseLeave={() => setHoveredSlice(null)}
+                        >
+                          <span
+                            className={`bezent-wf-comp-hero-accent ${isMale ? 'bezent-wf-comp-hero-accent--male' : 'bezent-wf-comp-hero-accent--female'}`}
+                            aria-hidden="true"
+                          />
+                          <div className="bezent-wf-comp-hero-card__avatar">
+                            <span className="bezent-wf-comp-hero-glyph">{isMale ? '♂' : '♀'}</span>
+                          </div>
+                          <div className="bezent-wf-comp-hero-card__info">
+                            <span className="bezent-wf-comp-hero-card__title">{item.name}</span>
+                            <div className="bezent-wf-comp-hero-card__metric">
+                              <span className="bezent-wf-comp-hero-card__count">
+                                {item.count.toLocaleString()}
+                              </span>
+                              <span className="bezent-wf-comp-hero-card__pct">
+                                ({item.percentage}%)
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })}
+                </div>
+
+                <div className="bezent-wf-comp-chips-row">
+                  {categoryItems
+                    .filter((item) => item.name !== 'Male' && item.name !== 'Female')
+                    .map((item) => (
+                      <div
+                        key={item.id}
+                        className={`bezent-wf-comp-chip ${hoveredSlice === item.name ? 'bezent-wf-comp-chip--hovered' : ''}`}
+                        onMouseEnter={() => setHoveredSlice(item.name)}
+                        onMouseLeave={() => setHoveredSlice(null)}
                       >
-                        <circle cx="4" cy="4" r="4" fill={item.color} />
-                      </svg>
-                      <span className="bezent-wf-comp-donut-legend-name" title={item.name}>
-                        {item.name}
-                      </span>
-                    </div>
-                    <div className="bezent-wf-comp-donut-legend-right">
-                      <span className="bezent-wf-comp-donut-legend-count">
-                        {item.count.toLocaleString()}
-                      </span>
-                      <span className="bezent-wf-comp-donut-legend-pct">({item.percentage}%)</span>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
+                        <svg
+                          className="bezent-wf-comp-dot"
+                          width="8"
+                          height="8"
+                          viewBox="0 0 8 8"
+                          aria-hidden="true"
+                        >
+                          <circle cx="4" cy="4" r="4" fill={item.color} />
+                        </svg>
+                        <span className="bezent-wf-comp-chip__name">{item.name}</span>
+                        <span className="bezent-wf-comp-chip__count">
+                          {item.count.toLocaleString()}
+                        </span>
+                        <span className="bezent-wf-comp-chip__pct">({item.percentage}%)</span>
+                      </div>
+                    ))}
+                </div>
+              </div>
+            )}
+
+            {/* ── 2. Age Group: Chronological Generation Progress Spectrum ── */}
+            {activeDimension === 'age_group' && (
+              <div className="bezent-wf-comp-detail-panel bezent-wf-comp-age-panel">
+                <div className="bezent-wf-comp-panel-header">
+                  <span className="bezent-wf-comp-panel-subtitle">Generational Spread</span>
+                  <span className="bezent-wf-comp-panel-tag">5 Cohorts</span>
+                </div>
+                <div className="bezent-wf-comp-bars-list">
+                  {categoryItems.map((item) => {
+                    const isHovered = hoveredSlice === item.name;
+                    const cohortTag =
+                      item.name === 'Under 25'
+                        ? 'Early Talent'
+                        : item.name === '25–34'
+                          ? 'Core Workforce'
+                          : item.name === '35–44'
+                            ? 'Mid-Career'
+                            : item.name === '45–54'
+                              ? 'Senior Leaders'
+                              : 'Advisory';
+
+                    return (
+                      <div
+                        key={item.id}
+                        className={`bezent-wf-comp-bar-item ${isHovered ? 'bezent-wf-comp-bar-item--hovered' : ''}`}
+                        onMouseEnter={() => setHoveredSlice(item.name)}
+                        onMouseLeave={() => setHoveredSlice(null)}
+                      >
+                        <div className="bezent-wf-comp-bar-info">
+                          <div className="bezent-wf-comp-bar-labels">
+                            <span className="bezent-wf-comp-bar-name">{item.name}</span>
+                            <span className="bezent-wf-comp-bar-subtag">{cohortTag}</span>
+                          </div>
+                          <div className="bezent-wf-comp-bar-metrics">
+                            <span className="bezent-wf-comp-bar-count">
+                              {item.count.toLocaleString()}
+                            </span>
+                            <span className="bezent-wf-comp-bar-pct">({item.percentage}%)</span>
+                          </div>
+                        </div>
+                        <div className="bezent-wf-comp-bar-track-wrap">
+                          <svg
+                            className="bezent-wf-comp-progress-svg"
+                            viewBox="0 0 100 6"
+                            preserveAspectRatio="none"
+                          >
+                            <rect
+                              x="0"
+                              y="0"
+                              width="100"
+                              height="6"
+                              rx="3"
+                              className="bezent-wf-comp-progress-track"
+                            />
+                            <rect
+                              x="0"
+                              y="0"
+                              width={item.count > 0 ? Math.max(item.percentage, 2) : 0}
+                              height="6"
+                              rx="3"
+                              fill={item.color}
+                              className="bezent-wf-comp-progress-fill"
+                            />
+                          </svg>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
+            {/* ── 3. Experience: Seniority Depth Step-Ladder ── */}
+            {activeDimension === 'experience' && (
+              <div className="bezent-wf-comp-detail-panel bezent-wf-comp-ladder-panel">
+                <div className="bezent-wf-comp-panel-header">
+                  <span className="bezent-wf-comp-panel-subtitle">Seniority Depth Ladder</span>
+                  <span className="bezent-wf-comp-panel-tag">L1 – L5 Depth</span>
+                </div>
+                <div className="bezent-wf-comp-ladder-list">
+                  {categoryItems.map((item, idx) => {
+                    const isHovered = hoveredSlice === item.name;
+                    const tierName = `L${idx + 1}`;
+                    const tierDesc =
+                      idx === 0
+                        ? 'Foundational'
+                        : idx === 1
+                          ? 'Intermediate'
+                          : idx === 2
+                            ? 'Senior'
+                            : idx === 3
+                              ? 'Lead / Staff'
+                              : 'Principal / Exec';
+
+                    return (
+                      <div
+                        key={item.id}
+                        className={`bezent-wf-comp-ladder-item ${isHovered ? 'bezent-wf-comp-ladder-item--hovered' : ''}`}
+                        onMouseEnter={() => setHoveredSlice(item.name)}
+                        onMouseLeave={() => setHoveredSlice(null)}
+                      >
+                        <div className="bezent-wf-comp-ladder-badge">{tierName}</div>
+                        <div className="bezent-wf-comp-ladder-content">
+                          <div className="bezent-wf-comp-ladder-header">
+                            <span className="bezent-wf-comp-ladder-title">{item.name}</span>
+                            <span className="bezent-wf-comp-ladder-desc">{tierDesc}</span>
+                            <div className="bezent-wf-comp-ladder-stats">
+                              <span className="bezent-wf-comp-ladder-count">
+                                {item.count.toLocaleString()}
+                              </span>
+                              <span className="bezent-wf-comp-ladder-pct">
+                                ({item.percentage}%)
+                              </span>
+                            </div>
+                          </div>
+                          <div className="bezent-wf-comp-bar-track-wrap">
+                            <svg
+                              className="bezent-wf-comp-progress-svg"
+                              viewBox="0 0 100 5"
+                              preserveAspectRatio="none"
+                            >
+                              <rect
+                                x="0"
+                                y="0"
+                                width="100"
+                                height="5"
+                                rx="2.5"
+                                className="bezent-wf-comp-progress-track"
+                              />
+                              <rect
+                                x="0"
+                                y="0"
+                                width={item.count > 0 ? Math.max(item.percentage, 2) : 0}
+                                height="5"
+                                rx="2.5"
+                                fill={item.color}
+                                className="bezent-wf-comp-progress-fill"
+                              />
+                            </svg>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
+            {/* ── 4. Tenure: Retention & Loyalty Cohort Milestones ── */}
+            {activeDimension === 'tenure' && (
+              <div className="bezent-wf-comp-detail-panel bezent-wf-comp-tenure-panel">
+                <div className="bezent-wf-comp-panel-header">
+                  <span className="bezent-wf-comp-panel-subtitle">Retention & Loyalty Cohorts</span>
+                  <span className="bezent-wf-comp-panel-tag">Lifecycle</span>
+                </div>
+                <div className="bezent-wf-comp-tenure-list">
+                  {categoryItems.map((item, idx) => {
+                    const isHovered = hoveredSlice === item.name;
+                    const tenureStage =
+                      idx === 0
+                        ? 'New Joiners'
+                        : idx === 1
+                          ? 'Stabilizing'
+                          : idx === 2
+                            ? 'Established'
+                            : idx === 3
+                              ? 'Loyal Core'
+                              : 'Company Pillars';
+
+                    return (
+                      <div
+                        key={item.id}
+                        className={`bezent-wf-comp-tenure-item ${isHovered ? 'bezent-wf-comp-tenure-item--hovered' : ''}`}
+                        onMouseEnter={() => setHoveredSlice(item.name)}
+                        onMouseLeave={() => setHoveredSlice(null)}
+                      >
+                        <div className="bezent-wf-comp-tenure-milestone">
+                          <span className="bezent-wf-comp-tenure-dot" />
+                          <div className="bezent-wf-comp-tenure-meta">
+                            <span className="bezent-wf-comp-tenure-name">{item.name}</span>
+                            <span className="bezent-wf-comp-tenure-stage">{tenureStage}</span>
+                          </div>
+                        </div>
+                        <div className="bezent-wf-comp-tenure-bar-slot">
+                          <svg
+                            className="bezent-wf-comp-progress-svg"
+                            viewBox="0 0 100 5"
+                            preserveAspectRatio="none"
+                          >
+                            <rect
+                              x="0"
+                              y="0"
+                              width="100"
+                              height="5"
+                              rx="2.5"
+                              className="bezent-wf-comp-progress-track"
+                            />
+                            <rect
+                              x="0"
+                              y="0"
+                              width={item.count > 0 ? Math.max(item.percentage, 2) : 0}
+                              height="5"
+                              rx="2.5"
+                              fill={item.color}
+                              className="bezent-wf-comp-progress-fill"
+                            />
+                          </svg>
+                        </div>
+                        <div className="bezent-wf-comp-tenure-stats">
+                          <span className="bezent-wf-comp-tenure-count">
+                            {item.count.toLocaleString()}
+                          </span>
+                          <span className="bezent-wf-comp-tenure-pct">({item.percentage}%)</span>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
+            {/* ── 5. Employment Status: Operational Workforce Health Matrix ── */}
+            {activeDimension === 'employment_status' && (
+              <div className="bezent-wf-comp-detail-panel bezent-wf-comp-status-panel">
+                <div className="bezent-wf-comp-panel-header">
+                  <span className="bezent-wf-comp-panel-subtitle">
+                    Operational Workforce Health
+                  </span>
+                  <span className="bezent-wf-comp-panel-tag">Live Status</span>
+                </div>
+                <div className="bezent-wf-comp-status-grid">
+                  {categoryItems.map((item) => {
+                    const isHovered = hoveredSlice === item.name;
+                    const statusType =
+                      item.name === 'Active'
+                        ? 'active'
+                        : item.name === 'Probation'
+                          ? 'probation'
+                          : item.name === 'Notice Period'
+                            ? 'notice'
+                            : 'leave';
+
+                    const statusSub =
+                      item.name === 'Active'
+                        ? 'Operational'
+                        : item.name === 'Probation'
+                          ? 'In Review'
+                          : item.name === 'Notice Period'
+                            ? 'Exit Transition'
+                            : 'On Leave';
+
+                    return (
+                      <div
+                        key={item.id}
+                        className={`bezent-wf-comp-status-card bezent-wf-comp-status-card--${statusType} ${isHovered ? 'bezent-wf-comp-status-card--hovered' : ''}`}
+                        onMouseEnter={() => setHoveredSlice(item.name)}
+                        onMouseLeave={() => setHoveredSlice(null)}
+                      >
+                        <div className="bezent-wf-comp-status-card__top">
+                          <span className="bezent-wf-comp-status-dot" />
+                          <span className="bezent-wf-comp-status-card__title">{item.name}</span>
+                        </div>
+                        <div className="bezent-wf-comp-status-card__bottom">
+                          <span className="bezent-wf-comp-status-card__count">
+                            {item.count.toLocaleString()}
+                          </span>
+                          <span className="bezent-wf-comp-status-card__pct">
+                            ({item.percentage}%)
+                          </span>
+                        </div>
+                        <span className="bezent-wf-comp-status-card__sub">{statusSub}</span>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
           </div>
         )}
       </div>

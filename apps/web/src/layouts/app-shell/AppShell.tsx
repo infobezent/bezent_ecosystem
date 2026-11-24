@@ -18,6 +18,10 @@ export interface AppShellProps {
   onSubSelect?: (itemId: string, subId: string) => void;
   /** More launcher data; when omitted the sidebar has no More button. */
   launcher?: ShellLauncher;
+  /** Custom logo of the purchasing company / tenant. */
+  companyLogo?: string | null;
+  /** Custom name of the purchasing company / tenant. */
+  companyName?: string | null;
   /** Initials shown in the profile avatar. */
   userInitials: string;
   userName?: string;
@@ -45,6 +49,7 @@ export interface AppShellProps {
   notificationsOpen?: boolean;
   onNotificationsToggle?: () => void;
   onSettingsClick?: () => void;
+  isSettingsActive?: boolean;
   /**
    * Workspace presentation variant.
    * - 'default': standard floating card workspace with outer margins, radius, and shadow.
@@ -73,6 +78,8 @@ export function AppShell({
   activeSubId,
   onSubSelect,
   launcher,
+  companyLogo,
+  companyName,
   userInitials,
   userName,
   userEmail,
@@ -94,21 +101,28 @@ export function AppShell({
   notificationsOpen,
   onNotificationsToggle,
   onSettingsClick,
+  isSettingsActive: isSettingsActiveProp,
   workspaceVariant = 'default',
   children,
 }: AppShellProps) {
   const [railOpen, setRailOpen] = useState(true);
   const [moreOpen, setMoreOpen] = useState(false);
 
+  const isSettingsActive =
+    isSettingsActiveProp ??
+    (activeNavId === 'settings' ||
+      launcher?.activeItemId === 'settings' ||
+      (typeof window !== 'undefined' && window.location.pathname.includes('/settings')));
+
   // More shows a marker when the active destination lives only in the launcher.
   const moreActive =
+    !isSettingsActive &&
     !!launcher?.activeItemId &&
+    launcher.activeItemId !== 'settings' &&
     launcher.items.some((i) => i.id === launcher.activeItemId) &&
     !navItems.some((n) => n.id === launcher.activeItemId);
 
-  const hasLauncherOnlyItems = Boolean(
-    launcher?.items.some((launcherItem) => !navItems.some((nav) => nav.id === launcherItem.id)),
-  );
+  const hasLauncherOnlyItems = Boolean(launcher?.items && launcher.items.length > 0);
 
   return (
     <div
@@ -121,6 +135,8 @@ export function AppShell({
         .join(' ')}
     >
       <TopNav
+        companyLogo={companyLogo}
+        companyName={companyName}
         userInitials={userInitials}
         userName={userName}
         userEmail={userEmail}
@@ -186,6 +202,7 @@ export function AppShell({
         notificationsOpen={notificationsOpen}
         onNotificationsToggle={onNotificationsToggle}
         onAccountSettings={onSettingsClick || onAccountSettings}
+        isSettingsActive={isSettingsActive}
       />
       <BottomBar />
     </div>

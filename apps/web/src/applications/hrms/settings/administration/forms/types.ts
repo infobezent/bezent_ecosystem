@@ -121,8 +121,8 @@ export const CHAPTER_METADATA: readonly ChapterDefinition[] = [
   {
     key: 'onboarding',
     stepNumber: '03',
-    label: 'Administration / Onboarding',
-    title: 'ADMINISTRATION & WORKFLOW',
+    label: 'Onboarding',
+    title: 'ONBOARDING & WORKFLOW',
     description: 'Pre-boarding setup, compliance checklist items, and hardware/asset provisioning',
     kicker: 'CHAPTER // 03',
   },
@@ -296,6 +296,32 @@ export const KNOWN_SECTION_GROUPS: Record<string, readonly SectionGroupDefinitio
       description:
         'Single sign-on authorization, enterprise email allocation, and portal permissions',
       fieldKeys: ['online_access.companyEmail'],
+    },
+  ],
+  emergency: [
+    {
+      key: 'primary_contact',
+      title: 'PRIMARY EMERGENCY CONTACT',
+      description: 'Main point of contact in an emergency',
+      fieldKeys: [
+        'emergency.contactName',
+        'emergency.relationship',
+        'emergency.phone',
+        'emergency.email',
+        'emergency.address',
+        'emergency.isPrimaryPrivate',
+      ],
+    },
+    {
+      key: 'secondary_contact',
+      title: 'SECONDARY EMERGENCY CONTACT',
+      description: 'Optional backup contact',
+      fieldKeys: [
+        'emergency.secondaryContactName',
+        'emergency.secondaryRelationship',
+        'emergency.secondaryMobile',
+        'emergency.secondaryEmail',
+      ],
     },
   ],
 };

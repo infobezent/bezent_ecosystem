@@ -4,17 +4,17 @@
 
 .profile-menu {
   position: absolute;
-  top: calc(100% + 8px);
-  right: 0;
-  width: 330px;
+  top: calc(100% + 4px);
+  right: 8px;
+  width: 300px;
   background: var(--bg-popup, #ffffff);
   border: 1px solid var(--border-default, #dde3ea);
-  border-radius: 8px;
+  border-radius: 12px;
   box-shadow:
     0 10px 30px rgba(60, 64, 67, 0.15),
     0 4px 12px rgba(60, 64, 67, 0.08);
   z-index: var(--z-popup, 1000);
-  padding: 18px 16px 14px;
+  padding: 16px 14px 12px;
   box-sizing: border-box;
   animation: bezentProfileMenuEnter 0.18s cubic-bezier(0.16, 1, 0.3, 1);
   transform-origin: top right;
@@ -39,7 +39,7 @@
   flex-direction: column;
   align-items: center;
   text-align: center;
-  padding: 4px 8px 14px;
+  padding: 4px 8px 10px;
 }
 
 .profile-menu__avatar-wrapper {
@@ -87,50 +87,12 @@
   letter-spacing: 0.1px;
 }
 
-.profile-menu__manage-btn {
-  margin-top: 14px;
-  width: 100%;
-  height: 36px;
-  padding: 0 16px;
-  border-radius: 9999px;
-  border: 1px solid var(--border-default, #dde3ea);
-  background: transparent;
-  color: var(--text-primary, #1f1f1f);
-  font-family: var(--font-family-base);
-  font-size: 13px;
-  font-weight: 500;
-  cursor: pointer;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  transition:
-    background-color 0.14s ease,
-    border-color 0.14s ease,
-    color 0.14s ease;
-  outline: none;
-}
-
-.profile-menu__manage-btn:hover {
-  background: var(--bg-hover, #c2e7ff);
-  border-color: transparent;
-  color: var(--nav-label-active, #041e49);
-}
-
-.profile-menu__manage-btn:active {
-  background: #b3defa;
-}
-
-.profile-menu__manage-btn:focus-visible {
-  outline: 2px solid var(--border-focus);
-  outline-offset: 2px;
-}
-
 /* ── Divider ─────────────────────────────────────────────────────────── */
 
 .profile-menu__divider {
   height: 1px;
   background: var(--border-divider, #e7ebf0);
-  margin: 6px 0 10px;
+  margin: 6px 0;
   width: 100%;
 }
 
@@ -221,9 +183,6 @@
 
 .profile-menu__footer {
   padding-top: 4px;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
 }
 
 .profile-menu__logout-btn {
@@ -261,20 +220,6 @@
 .profile-menu__logout-btn:focus-visible {
   outline: 2px solid var(--border-focus);
   outline-offset: 2px;
-}
-
-.profile-menu__legal {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  font-family: var(--font-family-base);
-  font-size: 11px;
-  color: var(--text-muted, #747775);
-}
-
-.profile-menu__legal-dot {
-  opacity: 0.6;
 }
 
 @media (prefers-reduced-motion: reduce) {

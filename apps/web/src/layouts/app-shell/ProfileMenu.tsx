@@ -14,17 +14,18 @@ export interface ProfileMenuProps {
   onMyProfile?: () => void;
   onAccountSettings?: () => void;
   onSignOut?: () => void;
+  /** @deprecated Retained for backwards compatibility */
   onSwitchAccount?: () => void;
+  /** @deprecated Retained for backwards compatibility */
   onHelp?: () => void;
 }
 
 /**
  * BEZENT Profile & Account Dropdown Menu.
  *
- * Modeled after Google Workspace / BEZENT design system:
- * - Profile header with user initials, name, email, and role badge
- * - Navigation to My Profile, Account Settings, Switch Account
- * - Help & Documentation link
+ * Streamlined enterprise layout:
+ * - Profile header with user avatar, name, email, and role badge
+ * - Navigation: My Profile, Account Settings
  * - Prominent Sign Out action
  */
 export function ProfileMenu({
@@ -38,8 +39,6 @@ export function ProfileMenu({
   onMyProfile,
   onAccountSettings,
   onSignOut,
-  onSwitchAccount,
-  onHelp,
 }: ProfileMenuProps) {
   const menuRef = useRef<HTMLDivElement>(null);
 
@@ -115,18 +114,8 @@ export function ProfileMenu({
         <div className="profile-menu__user-info">
           <div className="profile-menu__name">{userName}</div>
           <div className="profile-menu__email">{userEmail}</div>
-          <div className="profile-menu__role-badge">{userRole}</div>
+          {userRole && <div className="profile-menu__role-badge">{userRole}</div>}
         </div>
-        <button
-          type="button"
-          className="profile-menu__manage-btn"
-          onClick={() => {
-            onAccountSettings?.();
-            onClose();
-          }}
-        >
-          Manage your bezent Account
-        </button>
       </div>
 
       <div className="profile-menu__divider" role="separator" />
@@ -146,7 +135,7 @@ export function ProfileMenu({
           </span>
           <div className="profile-menu__item-content">
             <span className="profile-menu__item-label">My Profile</span>
-            <span className="profile-menu__item-desc">Personal record & employee self-service</span>
+            <span className="profile-menu__item-desc">Personal record & self-service</span>
           </div>
         </button>
 
@@ -169,42 +158,6 @@ export function ProfileMenu({
             </span>
           </div>
         </button>
-
-        <button
-          type="button"
-          className="profile-menu__item"
-          role="menuitem"
-          onClick={() => {
-            onSwitchAccount?.();
-            onClose();
-          }}
-        >
-          <span className="profile-menu__item-icon">
-            <BezentIcon name="switchAccount" size={18} />
-          </span>
-          <div className="profile-menu__item-content">
-            <span className="profile-menu__item-label">Switch Account</span>
-            <span className="profile-menu__item-desc">Sign in with a different email identity</span>
-          </div>
-        </button>
-
-        <button
-          type="button"
-          className="profile-menu__item"
-          role="menuitem"
-          onClick={() => {
-            onHelp?.();
-            onClose();
-          }}
-        >
-          <span className="profile-menu__item-icon">
-            <BezentIcon name="helpdesk" size={18} />
-          </span>
-          <div className="profile-menu__item-content">
-            <span className="profile-menu__item-label">Help & Support</span>
-            <span className="profile-menu__item-desc">Guides, FAQs and documentation</span>
-          </div>
-        </button>
       </div>
 
       <div className="profile-menu__divider" role="separator" />
@@ -222,12 +175,6 @@ export function ProfileMenu({
           <BezentIcon name="logOut" size={18} />
           <span>Sign Out</span>
         </button>
-
-        <div className="profile-menu__legal">
-          <span>Privacy Policy</span>
-          <span className="profile-menu__legal-dot">•</span>
-          <span>Terms of Service</span>
-        </div>
       </div>
     </div>
   );

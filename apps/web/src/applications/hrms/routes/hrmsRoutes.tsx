@@ -10,6 +10,7 @@ import { DocumentsPage } from '../documents';
 import { RecordsPage } from '../records';
 import { WorkforceOverviewPage } from '../overview';
 import { SettingsPage } from '../settings';
+import { FormBuilderPage } from '../settings/forms/FormBuilderPage';
 import {
   EmployeeDirectoryPage,
   EmployeeProfilePage,
@@ -361,6 +362,14 @@ export const hrmsRoutes: RouteObject[] = [
       {
         path: 'administrative/*',
         element: <Navigate to="/hrms/workforce/overview" replace />,
+      },
+      {
+        path: 'settings/forms/:formKey',
+        element: <FormBuilderPage />,
+      },
+      {
+        path: 'settings/forms',
+        element: <Navigate to="/hrms/settings?module=templates" replace />,
       },
       // Organization masters are now owned by Company Administration.
       // These backward-compatible redirects preserve any existing deep links into

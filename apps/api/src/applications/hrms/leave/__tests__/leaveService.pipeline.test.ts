@@ -313,9 +313,9 @@ describe('LeaveService — request pipeline', () => {
     typesRepo.findById.mockResolvedValue(leaveType({ maxPerMonth: '2.00' }));
     repo.findActiveRequestsOfType!.mockResolvedValue([
       {
-        totalDays: '1.00',
+        totalDays: '2.00',
         startDate: MONDAY,
-        calculationSnapshot: { scheduleBreakdown: [{ date: MONDAY, chargedDays: 1 }] },
+        calculationSnapshot: { scheduleBreakdown: [{ date: MONDAY, chargedDays: 2 }] },
       },
     ]);
     await expect(apply()).rejects.toMatchObject({ code: 'LEAVE_MAX_PER_MONTH' });

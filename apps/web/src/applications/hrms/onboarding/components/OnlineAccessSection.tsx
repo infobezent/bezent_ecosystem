@@ -1,345 +1,270 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import {
   FormSection,
   FormGrid,
   FormField,
   Input,
   Select,
-  Button,
-  Badge,
-  Card,
-  CardDescription,
-  Switch,
   Checkbox,
+  Switch,
+  Card,
   Stack,
-  Inline,
-  Grid,
 } from '../../../../design-system';
 
-export interface ModulePermission {
-  id: string;
-  name: string;
-  description: string;
-  enabled: boolean;
-}
-
-const DEFAULT_MODULES: ModulePermission[] = [
-  {
-    id: 'dashboard',
-    name: 'Dashboard',
-    description: 'Personal ESS dashboard & quick stats',
-    enabled: true,
-  },
-  {
-    id: 'attendance',
-    name: 'Attendance',
-    description: 'Clock in/out, shift roster & attendance logs',
-    enabled: true,
-  },
-  { id: 'leave', name: 'Leave', description: 'Apply & view leave balances', enabled: true },
-  {
-    id: 'calendar',
-    name: 'Calendar',
-    description: 'Company & team events calendar',
-    enabled: true,
-  },
-  { id: 'tasks', name: 'Tasks', description: 'Personal & assigned workspace tasks', enabled: true },
-  {
-    id: 'meetings',
-    name: 'Meetings',
-    description: 'Team meeting scheduling & notes',
-    enabled: false,
-  },
-  {
-    id: 'projects',
-    name: 'Projects',
-    description: 'Project management & task tracking',
-    enabled: false,
-  },
-  {
-    id: 'performance',
-    name: 'Performance',
-    description: 'Appraisals & 360 feedback reviews',
-    enabled: false,
-  },
-  {
-    id: 'documents',
-    name: 'Documents',
-    description: 'Employee document repository & vault',
-    enabled: true,
-  },
-];
-
-const INVITATION_STATUS_OPTIONS = [
-  { value: 'Not Sent', label: 'Not Sent' },
-  { value: 'Pending', label: 'Pending' },
-  { value: 'Sent', label: 'Sent' },
-  { value: 'Accepted', label: 'Accepted' },
-  { value: 'Expired', label: 'Expired' },
-];
-
-const ROLE_OPTIONS = [
-  { value: 'Employee', label: 'Employee (Standard ESS)' },
-  { value: 'Team Lead', label: 'Team Lead' },
-  { value: 'Department Manager', label: 'Department Manager' },
-  { value: 'HR Admin', label: 'HR Administrator' },
-  { value: 'Finance Manager', label: 'Finance Manager' },
-  { value: 'System Admin', label: 'System Administrator' },
-];
-
-const SCOPE_OPTIONS = [
-  { value: 'Employee', label: 'Employee Scope (Self-Service)' },
-  { value: 'Team', label: 'Team Scope' },
-  { value: 'Department', label: 'Department Scope' },
-  { value: 'Organization', label: 'Organization Scope (All Entities)' },
-  { value: 'Custom', label: 'Custom Scope Configuration' },
-];
-
+import { RegistrationField, useRegistrationConfig } from '../registration/registrationConfig';
+import type { RegistrationFieldConfig } from '../../settings/api/registrationSettingsApi';
+import type { ResolvedFormField } from '../../settings/api/formsApi';
+import { getGroupsForSection } from '../../settings/administration/forms/types';
 import type { Chapter07OnlineAccessState } from '../types/registration.types';
+
+/**
+ * `online_access.systemRole` and `online_access.ssoEnabled` are fixed Form Engine
+ * fields with no slot yet in `Chapter07OnlineAccessState`; they round-trip through
+ * `onChange` as extra properties on the same object until the canonical type grows them.
+ */
+interface OnlineAccessExtra {
+  systemRole?: string;
+  ssoEnabled?: boolean;
+}
+type OnlineAccessValue = Chapter07OnlineAccessState & OnlineAccessExtra;
+
+const DEFAULT_VALUE: OnlineAccessValue = {
+  username: '',
+  officialEmail: '',
+  mfaRequired: true,
+  forcePasswordSetup: true,
+  accountActive: true,
+};
+
+const SYSTEM_ROLE_OPTIONS = [
+  { value: 'employee', label: 'Employee (Self-Service)' },
+  { value: 'team_lead', label: 'Team Lead / Approver' },
+  { value: 'hr_manager', label: 'HR Manager' },
+];
 
 export interface OnlineAccessSectionProps {
   value?: Chapter07OnlineAccessState;
   onChange?: (updated: Chapter07OnlineAccessState) => void;
 }
 
-export function OnlineAccessSection({
-  value: _value,
-  onChange: _onChange,
-}: OnlineAccessSectionProps = {}) {
-  // A. ACCOUNT INFORMATION STATE
-  const [username, setUsername] = useState('arun.kumar');
-  const [companyEmail, setCompanyEmail] = useState('arun.kumar@bezent.com');
-  const [invitationStatus, setInvitationStatus] = useState<
-    'Not Sent' | 'Pending' | 'Sent' | 'Accepted' | 'Expired'
-  >('Not Sent');
-  const [invitationSentDate, setInvitationSentDate] = useState<string>('—');
+export function OnlineAccessSection({ value, onChange }: OnlineAccessSectionProps = {}) {
+  const current: OnlineAccessValue = (value as OnlineAccessValue | undefined) ?? DEFAULT_VALUE;
 
-  // B. SECURITY STATE
-  const [mfaRequired, setMfaRequired] = useState(true);
-  const [forcePasswordSetup, setForcePasswordSetup] = useState(true);
-  const [accountActive, setAccountActive] = useState(true);
-  const [invitationSuccessMsg, setInvitationSuccessMsg] = useState('');
-
-  // C. ROLE & ACCESS STATE
-  const [employeeRole, setEmployeeRole] = useState('Employee');
-  const [portalRoleScope, setPortalRoleScope] = useState('Employee');
-  const [customScopeText, setCustomScopeText] = useState('');
-
-  // D. MODULE ACCESS STATE
-  const [modules, setModules] = useState<ModulePermission[]>(DEFAULT_MODULES);
-
-  // AUTOMATION: Handle Send Welcome Invitation
-  const handleSendInvitation = () => {
-    const currentDateStr = new Date().toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-    });
-    setInvitationStatus('Sent');
-    setInvitationSentDate(currentDateStr);
-    setInvitationSuccessMsg(`Welcome invitation sent to ${companyEmail} on ${currentDateStr}`);
-    setTimeout(() => setInvitationSuccessMsg(''), 6000);
+  const update = (patch: Partial<OnlineAccessValue>) => {
+    onChange?.({ ...current, ...patch });
   };
 
-  // AUTOMATION: Role Selection -> Auto-set Module Access Defaults
-  const handleRoleChange = (role: string) => {
-    setEmployeeRole(role);
-    if (role === 'HR Admin' || role === 'System Admin') {
-      setPortalRoleScope('Organization');
-      setModules((prev) => prev.map((m) => ({ ...m, enabled: true })));
-    } else if (role === 'Department Manager' || role === 'Team Lead') {
-      setPortalRoleScope('Department');
-      setModules((prev) =>
-        prev.map((m) => ({
-          ...m,
-          enabled: [
-            'dashboard',
-            'attendance',
-            'leave',
-            'calendar',
-            'tasks',
-            'meetings',
-            'performance',
-            'documents',
-          ].includes(m.id),
-        })),
-      );
-    } else {
-      setPortalRoleScope('Employee');
-      setModules((prev) =>
-        prev.map((m) => ({
-          ...m,
-          enabled: ['dashboard', 'attendance', 'leave', 'calendar', 'tasks', 'documents'].includes(
-            m.id,
-          ),
-        })),
-      );
+  // Custom field values for any company-added fields appended to this section.
+  const [customValues, setCustomValues] = useState<Record<string, unknown>>({});
+
+  const config = useRegistrationConfig();
+
+  const onlineAccessFields = useMemo(() => {
+    const fields = config.fields.filter((f) => f.section === 'online_access' && f.enabled);
+    return [...fields].sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
+  }, [config.fields]);
+
+  const groups = useMemo(() => {
+    return getGroupsForSection(
+      'online_access',
+      onlineAccessFields as unknown as ResolvedFormField[],
+      config.metadata,
+    );
+  }, [onlineAccessFields, config.metadata]);
+
+  const renderDynamicFieldInput = (field: RegistrationFieldConfig) => {
+    const fType = field.type;
+    const fKey = field.key;
+    const val = (customValues[fKey] as string) ?? '';
+    const setVal = (newVal: string) => {
+      setCustomValues((prev) => ({ ...prev, [fKey]: newVal }));
+    };
+
+    switch (fType) {
+      case 'dropdown':
+      case 'select': {
+        const opts = (field.config?.options as Array<{ value: string; label: string }>) || [];
+        return (
+          <Select
+            id={`field-${fKey}`}
+            value={val}
+            onChange={(e) => setVal(e.target.value)}
+            options={[{ value: '', label: `Select ${field.label}` }, ...opts]}
+          />
+        );
+      }
+      case 'checkbox':
+        return (
+          <Checkbox
+            id={`field-${fKey}`}
+            label={field.label}
+            checked={Boolean(val)}
+            onChange={(e) => setVal(e.target.checked ? 'true' : '')}
+          />
+        );
+      default:
+        return (
+          <Input
+            id={`field-${fKey}`}
+            type={fType === 'email' ? 'email' : fType === 'phone' ? 'tel' : 'text'}
+            placeholder={(field.config?.placeholder as string) || `Enter ${field.label}`}
+            value={val}
+            onChange={(e) => setVal(e.target.value)}
+          />
+        );
     }
   };
 
-  const toggleModule = (id: string) => {
-    setModules((prev) => prev.map((m) => (m.id === id ? { ...m, enabled: !m.enabled } : m)));
-  };
+  const renderField = (field: RegistrationFieldConfig) => {
+    const { key, width, config: fConfig } = field;
+    const span = width === 'full' ? 'full' : undefined;
+    const configuredPlaceholder = (fConfig?.placeholder as string) || undefined;
+    const configuredOptions = Array.isArray(fConfig?.options)
+      ? (fConfig.options as Array<{ value: string; label: string }>)
+      : undefined;
 
-  const getBadgeVariant = (status: string) => {
-    switch (status) {
-      case 'Accepted':
-        return 'success';
-      case 'Sent':
-        return 'info';
-      case 'Pending':
-        return 'warning';
-      case 'Expired':
-        return 'danger';
+    switch (key) {
+      case 'online_access.companyEmail':
+        return (
+          <RegistrationField
+            key={key}
+            fieldKey={key}
+            value={current.officialEmail}
+            htmlFor="reg-company-email"
+            span={span}
+            helperText={
+              field.description ?? 'System-assigned work email (derived from employee details)'
+            }
+          >
+            <Input
+              id="reg-company-email"
+              type="email"
+              value={current.officialEmail}
+              readOnly
+              disabled
+              placeholder={configuredPlaceholder || 'Generating...'}
+            />
+          </RegistrationField>
+        );
+
+      case 'online_access.username':
+        return (
+          <RegistrationField
+            key={key}
+            fieldKey={key}
+            value={current.username}
+            htmlFor="reg-username"
+            span={span}
+          >
+            <Input
+              id="reg-username"
+              type="text"
+              placeholder={configuredPlaceholder}
+              value={current.username}
+              onChange={(e) => update({ username: e.target.value })}
+            />
+          </RegistrationField>
+        );
+
+      case 'online_access.systemRole':
+        return (
+          <RegistrationField
+            key={key}
+            fieldKey={key}
+            value={current.systemRole ?? ''}
+            htmlFor="reg-system-role"
+            span={span}
+          >
+            <Select
+              id="reg-system-role"
+              value={current.systemRole ?? ''}
+              onChange={(e) => update({ systemRole: e.target.value })}
+              options={configuredOptions || SYSTEM_ROLE_OPTIONS}
+            />
+          </RegistrationField>
+        );
+
+      case 'online_access.ssoEnabled':
+        return (
+          <RegistrationField
+            key={key}
+            fieldKey={key}
+            value={current.ssoEnabled ?? false}
+            htmlFor="reg-sso-enabled"
+            hideLabel
+            span={span}
+          >
+            <Checkbox
+              id="reg-sso-enabled"
+              label={field.label}
+              checked={current.ssoEnabled ?? false}
+              onChange={(e) => update({ ssoEnabled: e.target.checked })}
+            />
+          </RegistrationField>
+        );
+
       default:
-        return 'neutral';
+        // Custom or extended field added via the Form Builder
+        return (
+          <RegistrationField
+            key={key}
+            fieldKey={key}
+            value={customValues[key] ?? ''}
+            htmlFor={`field-${key}`}
+            hideLabel={field.type === 'checkbox'}
+            span={span}
+          >
+            {renderDynamicFieldInput(field)}
+          </RegistrationField>
+        );
     }
   };
 
   return (
     <Stack gap="xl">
-      {/* A. ACCOUNT INFORMATION */}
-      <Card padding="lg">
-        <FormSection title="User Account & Credentials">
-          <FormGrid columns={2} layout="horizontal" labelWidth="md">
-            {/* 1. Employee Username */}
-            <FormField label="Username" required>
-              <Input type="text" value={username} onChange={(e) => setUsername(e.target.value)} />
-            </FormField>
+      {groups.map((group) => {
+        if (group.fields.length === 0) return null;
 
-            {/* 2. Official Company Email */}
-            <FormField label="Company Email" required>
-              <Input
-                type="email"
-                value={companyEmail}
-                onChange={(e) => setCompanyEmail(e.target.value)}
-              />
-            </FormField>
+        return (
+          <Card key={group.key} padding="lg">
+            <FormSection title={group.title}>
+              <FormGrid columns={2} layout="horizontal" labelWidth="md">
+                {group.fields.map((field) =>
+                  renderField(field as unknown as RegistrationFieldConfig),
+                )}
+              </FormGrid>
+            </FormSection>
+          </Card>
+        );
+      })}
 
-            {/* 3. Invitation Status */}
-            <FormField
-              labelNode={
-                <Stack gap="xs" align="start">
-                  <span>Invitation Status</span>
-                  <Badge variant={getBadgeVariant(invitationStatus)}>● {invitationStatus}</Badge>
-                </Stack>
-              }
-            >
-              <Select
-                options={INVITATION_STATUS_OPTIONS}
-                value={invitationStatus}
-                onChange={(e) =>
-                  setInvitationStatus(
-                    e.target.value as 'Not Sent' | 'Pending' | 'Sent' | 'Accepted' | 'Expired',
-                  )
-                }
-              />
-            </FormField>
-
-            {/* 4. Invitation Sent Date */}
-            <FormField label="Sent Date">
-              <Input type="text" value={invitationSentDate} readOnly />
-            </FormField>
-          </FormGrid>
-        </FormSection>
-      </Card>
-
-      {/* B. SECURITY */}
       <Card padding="lg">
         <FormSection title="Security & Authentication">
-          <Stack gap="md">
-            <FormGrid columns={2} layout="horizontal" labelWidth="md">
-              <FormField label="MFA Policy">
-                <Switch
-                  checked={mfaRequired}
-                  onChange={(e) => setMfaRequired(e.target.checked)}
-                  label="Enforce Two-Factor Authentication"
-                />
-              </FormField>
-
-              <FormField label="Password Setup">
-                <Switch
-                  checked={forcePasswordSetup}
-                  onChange={(e) => setForcePasswordSetup(e.target.checked)}
-                  label="Force Password Setup on First Login"
-                />
-              </FormField>
-
-              <FormField label="Account State">
-                <Switch
-                  checked={accountActive}
-                  onChange={(e) => setAccountActive(e.target.checked)}
-                  label="Account Active & Enabled"
-                />
-              </FormField>
-
-              <FormField label="Invitation">
-                <Inline gap="md" align="center">
-                  <Button type="button" variant="primary" onClick={handleSendInvitation}>
-                    ✉️ Send Welcome Invitation
-                  </Button>
-                  {invitationSuccessMsg && <Badge variant="success">{invitationSuccessMsg}</Badge>}
-                </Inline>
-              </FormField>
-            </FormGrid>
-          </Stack>
-        </FormSection>
-      </Card>
-
-      {/* C. ROLE & ACCESS */}
-      <Card padding="lg">
-        <FormSection title="Role & Scope Assignment">
           <FormGrid columns={2} layout="horizontal" labelWidth="md">
-            {/* 1. Employee Role */}
-            <FormField label="Employee Role" required>
-              <Select
-                options={ROLE_OPTIONS}
-                value={employeeRole}
-                onChange={(e) => handleRoleChange(e.target.value)}
+            <FormField label="MFA Policy">
+              <Switch
+                checked={current.mfaRequired}
+                onChange={(e) => update({ mfaRequired: e.target.checked })}
+                label="Enforce Two-Factor Authentication"
               />
             </FormField>
 
-            {/* 2. Portal Role Scope */}
-            <FormField label="Role Scope" required>
-              <Stack gap="xs">
-                <Select
-                  options={SCOPE_OPTIONS}
-                  value={portalRoleScope}
-                  onChange={(e) => setPortalRoleScope(e.target.value)}
-                />
-                {portalRoleScope === 'Custom' && (
-                  <Input
-                    type="text"
-                    placeholder="Describe custom scope boundaries..."
-                    value={customScopeText}
-                    onChange={(e) => setCustomScopeText(e.target.value)}
-                  />
-                )}
-              </Stack>
+            <FormField label="Password Setup">
+              <Switch
+                checked={current.forcePasswordSetup}
+                onChange={(e) => update({ forcePasswordSetup: e.target.checked })}
+                label="Force Password Setup on First Login"
+              />
+            </FormField>
+
+            <FormField label="Account State">
+              <Switch
+                checked={current.accountActive}
+                onChange={(e) => update({ accountActive: e.target.checked })}
+                label="Account Active & Enabled"
+              />
             </FormField>
           </FormGrid>
-        </FormSection>
-      </Card>
-
-      {/* D. MODULE ACCESS */}
-      <Card padding="lg">
-        <FormSection title="Module Access Permissions">
-          <Grid columns={3} gap="md">
-            {modules.map((m) => (
-              <Card key={m.id} variant="flat">
-                <Stack gap="xs">
-                  <Checkbox
-                    checked={m.enabled}
-                    onChange={() => toggleModule(m.id)}
-                    label={m.name}
-                  />
-                  <CardDescription>{m.description}</CardDescription>
-                </Stack>
-              </Card>
-            ))}
-          </Grid>
         </FormSection>
       </Card>
     </Stack>

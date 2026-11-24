@@ -14,7 +14,7 @@ import type { ResolvedForm } from '../../settings/api/formsApi';
 const SECTIONS: RegistrationConfiguration['sections'] = [
   { id: 'general', label: 'General', configurable: true },
   { id: 'personal', label: 'Personal Information', configurable: true },
-  { id: 'onboarding', label: 'Administration', configurable: false },
+  { id: 'onboarding', label: 'Onboarding', configurable: false },
   { id: 'skills', label: 'Skills', configurable: false },
   { id: 'emergency', label: 'Emergency Contact', configurable: false },
   { id: 'accounts', label: 'Accounts', configurable: false },
@@ -71,6 +71,16 @@ const FIELDS: [key: string, label: string, isProtected?: boolean, configurable?:
   ['personal.permanentCity', 'Permanent City'],
   ['personal.permanentDistrict', 'Permanent District'],
   ['personal.permanentState', 'Permanent State'],
+  ['emergency.contactName', 'Contact Name'],
+  ['emergency.relationship', 'Relationship / Role'],
+  ['emergency.phone', 'Phone'],
+  ['emergency.email', 'Email'],
+  ['emergency.address', 'Address Details'],
+  ['emergency.isPrimaryPrivate', 'Primary Emergency Contact (Private Record)'],
+  ['emergency.secondaryContactName', 'Secondary Contact Name'],
+  ['emergency.secondaryRelationship', 'Secondary Relationship'],
+  ['emergency.secondaryMobile', 'Secondary Mobile'],
+  ['emergency.secondaryEmail', 'Secondary Email'],
   ['online_access.companyEmail', 'Company Email', true, false],
 ];
 

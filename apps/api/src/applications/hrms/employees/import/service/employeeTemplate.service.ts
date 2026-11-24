@@ -148,7 +148,7 @@ export const COMPLETE_TEMPLATE_COLUMNS: TemplateColumnDef[] = [
     key: 'reportingManagerId',
     width: 22,
     required: 'No',
-    description: "Manager's existing Employee ID in BEZENT",
+    description: 'Employee ID already in BEZENT, or listed in this same file',
     example: 'EMP-000',
   },
   {

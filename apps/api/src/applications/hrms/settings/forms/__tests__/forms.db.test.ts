@@ -52,6 +52,51 @@ describe('HRMS Forms API — Employee Registration (MySQL)', () => {
   const rowsOf = (companyId: string) =>
     getDb().select().from(formFieldOverrides).where(eq(formFieldOverrides.companyId, companyId));
 
+  /** Every system section is configurable, so a save payload must include all of them. */
+  const SYSTEM_SECTION_KEYS = [
+    'general',
+    'personal',
+    'onboarding',
+    'skills',
+    'emergency',
+    'accounts',
+    'online_access',
+    'working_hours',
+    'documents',
+    'review',
+  ];
+
+  type ApiField = {
+    key: string;
+    origin: string;
+    label: string;
+    description: string | null;
+    enabled: boolean;
+    required: boolean;
+    width: string;
+    type?: string;
+    config?: Record<string, unknown>;
+  };
+
+  const mapField = (f: ApiField) => ({
+    key: f.key,
+    origin: f.origin,
+    label: f.label,
+    description: f.description,
+    enabled: f.enabled,
+    required: f.required,
+    width: f.width,
+    ...(f.origin === 'custom' && f.type ? { type: f.type } : {}),
+    ...(f.origin === 'custom' && f.config ? { config: f.config } : {}),
+  });
+
+  /** Payload entries for every configurable section this test isn't itself editing, unchanged. */
+  const unchangedSections = (current: Body, exclude: string[]) =>
+    SYSTEM_SECTION_KEYS.filter((key) => !exclude.includes(key)).map((key) => {
+      const section = current.data.sections.find((s) => s.key === key)!;
+      return { key, fields: (section.fields as unknown as ApiField[]).map(mapField) };
+    });
+
   beforeAll(async () => {
     hrms = request.agent(app).set(await hrmsTestHeaders());
     const connected = await pingDatabase();
@@ -96,6 +141,17 @@ describe('HRMS Forms API — Employee Registration (MySQL)', () => {
       .where(inArray(formCustomizations.companyId, [companyA, companyB]));
     await removeHrmsTestAccess([companyA, companyB]);
     await db.delete(companies).where(inArray(companies.id, [companyA, companyB]));
+  });
+
+  it('lists the registered system forms', async () => {
+    const res = await hrms.get('/api/v1/hrms/settings/forms').set(headersA);
+    expect(res.status).toBe(200);
+    expect(res.body.data).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ key: 'employee-registration', name: 'Employee Registration' }),
+        expect.objectContaining({ key: 'candidate-intake' }),
+      ]),
+    );
   });
 
   it('resolves the system definition for a company without overrides (no seeding)', async () => {
@@ -296,6 +352,7 @@ describe('HRMS Forms API — Employee Registration (MySQL)', () => {
             ),
           ],
         },
+        ...unchangedSections(current.body, ['general', 'personal']),
       ],
     };
 
@@ -379,6 +436,7 @@ describe('HRMS Forms API — Employee Registration (MySQL)', () => {
           key: 'personal',
           fields: personalSection.fields.map(mapField),
         },
+        ...unchangedSections(current.body, ['general', 'personal']),
       ],
     };
 
@@ -482,6 +540,7 @@ describe('HRMS Forms API — Employee Registration (MySQL)', () => {
             },
           ],
         },
+        ...unchangedSections(current.body, ['general', 'personal']),
       ],
     };
 

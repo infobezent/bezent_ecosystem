@@ -435,6 +435,13 @@
       "when": 1795400000000,
       "tag": "0061_employee_clearance_items",
       "breakpoints": true
+    },
+    {
+      "idx": 62,
+      "version": "5",
+      "when": 1795236863758,
+      "tag": "0062_faulty_wind_dancer",
+      "breakpoints": true
     }
   ]
 }

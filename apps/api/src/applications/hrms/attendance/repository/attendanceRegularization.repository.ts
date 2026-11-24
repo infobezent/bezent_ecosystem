@@ -292,32 +292,46 @@ export class AttendanceRegularizationRepository {
       );
     }
 
-    // 2. Aggregate Summary Counters (tenant & company scoped)
+    // 2. Aggregate Summary Counters (tenant, company, and optional period scoped)
+    const counterConditions = [
+      eq(attendanceRegularizations.tenantId, tenantId),
+      eq(attendanceRegularizations.companyId, companyId),
+    ];
+
+    if (filter.workdayFrom) {
+      counterConditions.push(gte(attendanceRegularizations.workday, filter.workdayFrom));
+    }
+    if (filter.workdayTo) {
+      counterConditions.push(lte(attendanceRegularizations.workday, filter.workdayTo));
+    }
+    if (filter.employeeId) {
+      counterConditions.push(eq(attendanceRegularizations.employeeId, filter.employeeId));
+    }
+
     const [counts] = await db
       .select({
         pendingReview: sql<number>`SUM(CASE WHEN ${attendanceRegularizations.approvalStatus} = 'submitted' THEN 1 ELSE 0 END)`,
         underReview: sql<number>`SUM(CASE WHEN ${attendanceRegularizations.approvalStatus} = 'under_review' THEN 1 ELSE 0 END)`,
         awaitingInfo: sql<number>`SUM(CASE WHEN ${attendanceRegularizations.approvalStatus} = 'awaiting_info' THEN 1 ELSE 0 END)`,
+        approved: sql<number>`SUM(CASE WHEN ${attendanceRegularizations.approvalStatus} = 'approved' THEN 1 ELSE 0 END)`,
         approvedToday: sql<number>`SUM(CASE WHEN ${attendanceRegularizations.approvalStatus} = 'approved' AND DATE(${attendanceRegularizations.decidedAt}) = CURDATE() THEN 1 ELSE 0 END)`,
         applicationIssues: sql<number>`SUM(CASE WHEN ${attendanceRegularizations.applicationStatus} IN ('failed', 'blocked') THEN 1 ELSE 0 END)`,
+        rejected: sql<number>`SUM(CASE WHEN ${attendanceRegularizations.approvalStatus} = 'rejected' THEN 1 ELSE 0 END)`,
         rejectedToday: sql<number>`SUM(CASE WHEN ${attendanceRegularizations.approvalStatus} = 'rejected' AND DATE(${attendanceRegularizations.decidedAt}) = CURDATE() THEN 1 ELSE 0 END)`,
         total: sql<number>`count(*)`,
       })
       .from(attendanceRegularizations)
       .leftJoin(employees, eq(attendanceRegularizations.employeeId, employees.id))
-      .where(
-        and(
-          eq(attendanceRegularizations.tenantId, tenantId),
-          eq(attendanceRegularizations.companyId, companyId),
-        ),
-      );
+      .where(and(...counterConditions));
 
     const counters: RegularizationSummaryCounters = {
       pendingReview: Number(counts?.pendingReview || 0),
       underReview: Number(counts?.underReview || 0),
       awaitingInfo: Number(counts?.awaitingInfo || 0),
+      approved: Number(counts?.approved || 0),
       approvedToday: Number(counts?.approvedToday || 0),
       applicationIssues: Number(counts?.applicationIssues || 0),
+      rejected: Number(counts?.rejected || 0),
       rejectedToday: Number(counts?.rejectedToday || 0),
     };
 

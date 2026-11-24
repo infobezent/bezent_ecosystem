@@ -2,8 +2,6 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Alert,
-  Button,
-  Grid,
   IconButton,
   Inline,
   Page,
@@ -19,7 +17,6 @@ import {
   type ActionStatusCounts,
   type EmployeeActionListItem,
   type EmployeeActionStatus,
-  type EmployeeActionType,
   type OrganizationMasters,
   type PaginationMetadata,
 } from '../../employee-administration/api/employeeAdministrationApi';
@@ -31,6 +28,7 @@ import {
 import { NewEmployeeActionModal } from '../../employee-administration/components/NewEmployeeActionModal';
 import { EmployeeActionDetailModal } from '../../employee-administration/components/EmployeeActionDetailModal';
 import { employeeProfilePath } from '../../employees/model/employeeModel';
+import { WorkforceInfoPopover } from '../../components/WorkforceInfoPopover';
 import {
   PromotionsFilterPanel,
   type PromotionsFilterState,
@@ -38,7 +36,6 @@ import {
   countActivePromotionsFilters,
 } from '../components/PromotionsFilterPanel';
 import { PromotionsTable } from '../components/PromotionsTable';
-import { DEMO_PROMOTIONS } from '../model/demoPromotions';
 
 const PAGE_SIZE_OPTIONS = [10, 25, 50, 100] as const;
 type PageSizeOption = (typeof PAGE_SIZE_OPTIONS)[number];
@@ -183,91 +180,22 @@ export function PromotionsPage({
       })
         .then((res) => {
           if (!active) return;
-          if (res.data.length > 0) {
-            setListState({
-              status: 'ready',
-              items: res.data,
-              pagination: res.pagination,
-              statusCounts: res.statusCounts ?? null,
-              error: null,
-            });
-          } else {
-            // Fallback to rich demo promotions
-            let filteredDemo = [...DEMO_PROMOTIONS];
-            if (activeStatusTab !== 'all') {
-              if (activeStatusTab === 'upcoming') {
-                filteredDemo = filteredDemo.filter(
-                  (item) => item.status === 'pending' && item.effectiveDate > today,
-                );
-              } else {
-                filteredDemo = filteredDemo.filter((item) => item.status === activeStatusTab);
-              }
-            }
-            if (search.trim()) {
-              const q = search.toLowerCase();
-              filteredDemo = filteredDemo.filter(
-                (item) =>
-                  item.employeeName.toLowerCase().includes(q) ||
-                  item.employeeNumber.toLowerCase().includes(q) ||
-                  item.reason.toLowerCase().includes(q),
-              );
-            }
-
-            setListState({
-              status: 'ready',
-              items: filteredDemo,
-              pagination: {
-                page: 1,
-                pageSize,
-                totalItems: filteredDemo.length,
-                totalPages: Math.ceil(filteredDemo.length / pageSize) || 1,
-              },
-              statusCounts: {
-                all: DEMO_PROMOTIONS.length,
-                pending: DEMO_PROMOTIONS.filter((p) => p.status === 'pending').length,
-                upcoming: DEMO_PROMOTIONS.filter(
-                  (p) => p.status === 'pending' && p.effectiveDate > today,
-                ).length,
-                applied: DEMO_PROMOTIONS.filter((p) => p.status === 'applied').length,
-                cancelled: DEMO_PROMOTIONS.filter((p) => p.status === 'cancelled').length,
-              },
-              error: null,
-            });
-          }
-        })
-        .catch(() => {
-          if (!active) return;
-          let filteredDemo = [...DEMO_PROMOTIONS];
-          if (activeStatusTab !== 'all') {
-            filteredDemo = filteredDemo.filter((item) => item.status === activeStatusTab);
-          }
-          if (search.trim()) {
-            const q = search.toLowerCase();
-            filteredDemo = filteredDemo.filter(
-              (item) =>
-                item.employeeName.toLowerCase().includes(q) ||
-                item.employeeNumber.toLowerCase().includes(q),
-            );
-          }
           setListState({
             status: 'ready',
-            items: filteredDemo,
-            pagination: {
-              page: 1,
-              pageSize,
-              totalItems: filteredDemo.length,
-              totalPages: Math.ceil(filteredDemo.length / pageSize) || 1,
-            },
-            statusCounts: {
-              all: DEMO_PROMOTIONS.length,
-              pending: DEMO_PROMOTIONS.filter((p) => p.status === 'pending').length,
-              upcoming: DEMO_PROMOTIONS.filter(
-                (p) => p.status === 'pending' && p.effectiveDate > today,
-              ).length,
-              applied: DEMO_PROMOTIONS.filter((p) => p.status === 'applied').length,
-              cancelled: DEMO_PROMOTIONS.filter((p) => p.status === 'cancelled').length,
-            },
+            items: res.data || [],
+            pagination: res.pagination || null,
+            statusCounts: res.statusCounts ?? null,
             error: null,
+          });
+        })
+        .catch((err) => {
+          if (!active) return;
+          setListState({
+            status: 'error',
+            items: [],
+            pagination: null,
+            statusCounts: null,
+            error: err instanceof Error ? err.message : 'Failed to load promotions',
           });
         });
     }, 200);
@@ -334,7 +262,11 @@ export function PromotionsPage({
   const handleExportCsv = async () => {
     setExporting(true);
     try {
-      const records = listState.items.length > 0 ? listState.items : DEMO_PROMOTIONS;
+      const records = listState.items;
+      if (records.length === 0) {
+        setExporting(false);
+        return;
+      }
       const headers = [
         'Employee ID',
         'Employee Name',
@@ -387,7 +319,7 @@ export function PromotionsPage({
   const statusTabs = [
     {
       id: 'all',
-      label: 'All Promotions',
+      label: 'All',
       count: listState.statusCounts?.all ?? listState.items.length,
     },
     { id: 'pending', label: 'Pending', count: listState.statusCounts?.pending },
@@ -397,35 +329,18 @@ export function PromotionsPage({
 
   return (
     <Page maxWidth="full" className="bezent-page" gap="md">
-      {/* 1. Page Header */}
+      {/* 1. Page Header (Clean title with Info Popover) */}
       <PageHeader
-        title={title}
-        eyebrow="HRMS · Workforce"
-        subtitle={subtitle}
-        actions={
-          <Inline gap="sm" align="center">
-            <Button
-              variant="outline"
-              size="md"
-              leftIcon={<BezentIcon name="download" size={16} />}
-              onClick={handleExportCsv}
-              disabled={exporting}
-              aria-label="Export promotions to CSV"
-            >
-              {exporting ? 'Exporting…' : 'Export'}
-            </Button>
-            <Button
-              variant="primary"
-              size="md"
-              leftIcon={<BezentIcon name="plus" size={16} />}
-              onClick={() => setIsNewModalOpen(true)}
-              aria-label="Initiate new promotion"
-            >
-              Initiate Promotion
-            </Button>
-          </Inline>
+        title={
+          <div className="bezent-wf-title-row">
+            <h1 className="bezent-page-header__title">{title}</h1>
+            <WorkforceInfoPopover label={title} tooltip={subtitle} />
+          </div>
         }
       />
+      <span className="sr-only" hidden>
+        {subtitle}
+      </span>
 
       {/* Success banner */}
       {successMessage && (
@@ -456,23 +371,25 @@ export function PromotionsPage({
               />
             </div>
 
-            {/* Filter Toggle Button */}
+            {/* Filter Toggle Button (Icon-only) */}
             <div className="bezent-filter-anchor">
-              <Button
-                variant={appliedCount > 0 || isFilterPanelOpen ? 'secondary' : 'outline'}
-                size="md"
-                shape="rounded"
-                className={appliedCount > 0 ? 'bezent-btn--filters-active' : ''}
-                leftIcon={<BezentIcon name="filter" size={16} />}
+              <IconButton
+                label={appliedCount > 0 ? `Filters (${appliedCount} active)` : 'Filters'}
+                variant={appliedCount > 0 || isFilterPanelOpen ? 'solid' : 'ghost'}
+                active={isFilterPanelOpen || appliedCount > 0}
+                tooltipDirection="down"
                 onClick={() => setIsFilterPanelOpen((prev) => !prev)}
                 aria-expanded={isFilterPanelOpen}
-                aria-label="Filters"
+                aria-label={appliedCount > 0 ? `Filters (${appliedCount} active)` : 'Filters'}
+                className={appliedCount > 0 ? 'bezent-btn--filters-active' : ''}
               >
-                <span>Filters</span>
+                <BezentIcon name="filter" size={16} />
                 {appliedCount > 0 && (
-                  <span className="bezent-btn__filter-count">{appliedCount}</span>
+                  <span className="bezent-btn__filter-count bezent-btn__filter-count--icon-btn">
+                    {appliedCount}
+                  </span>
                 )}
-              </Button>
+              </IconButton>
 
               <PromotionsFilterPanel
                 isOpen={isFilterPanelOpen}
@@ -486,17 +403,17 @@ export function PromotionsPage({
               />
             </div>
 
-            {/* Reset Button */}
-            <Button
-              variant="outline"
-              size="md"
-              shape="rounded"
-              leftIcon={<BezentIcon name="reset" size={16} />}
+            {/* Reset Button (Icon-only) */}
+            <IconButton
+              label="Reset filters"
+              variant="ghost"
+              tooltipDirection="down"
               onClick={handleResetFilters}
               disabled={!hasActiveFilters}
+              aria-label="Reset filters"
             >
-              Reset
-            </Button>
+              <BezentIcon name="reset" size={16} />
+            </IconButton>
 
             {/* View Mode Toggle: List vs Grid */}
             <div
@@ -543,7 +460,7 @@ export function PromotionsPage({
                 >
                   <span>{tab.label}</span>
                   {tab.count !== undefined && (
-                    <span className="bezent-filter-tab__count">{tab.count}</span>
+                    <span className="bezent-filter-tab-count">{tab.count}</span>
                   )}
                 </button>
               ))}
@@ -557,6 +474,7 @@ export function PromotionsPage({
               variant="ghost"
               tooltipDirection="down"
               onClick={handleExportCsv}
+              disabled={exporting}
             >
               <BezentIcon name="download" size={18} />
             </IconButton>

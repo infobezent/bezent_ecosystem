@@ -67,6 +67,16 @@ export function toShellNavItems(
     destinationsToShow.push(dynamicDest);
   }
 
+  // Auto-expansion for tall displays (24", 27", 32"+ monitors):
+  // Append remaining accessible launcher destinations so LeftSidebar's capacity engine
+  // can dynamically surface them one by one into the rail on larger displays (filling empty space)
+  // while collapsing them back into More on compact 15" laptop screens.
+  const addedIds = new Set(destinationsToShow.map((d) => d.id));
+  const remainingDestinations = app.navigation.destinations.filter(
+    (d) => !addedIds.has(d.id) && d.categoryId && d.id !== 'settings' && isAccessible(d),
+  );
+  destinationsToShow.push(...remainingDestinations);
+
   return destinationsToShow.map((d) => {
     const accessibleChildren = d.children
       ? d.children.filter((c) => {

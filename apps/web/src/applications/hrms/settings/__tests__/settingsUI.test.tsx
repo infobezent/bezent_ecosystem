@@ -52,6 +52,7 @@ describe('BEZENT Common Portal Settings Center UI', () => {
     expect(html).toContain('Timesheets');
     expect(html).toContain('Performance');
     expect(html).toContain('Milestones &amp; Rewards');
+    expect(html).toContain('Templates');
   });
 
   it('hrmsRoutes routes /hrms/settings to real SettingsPage', () => {

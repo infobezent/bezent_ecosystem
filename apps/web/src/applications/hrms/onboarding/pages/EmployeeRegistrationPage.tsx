@@ -8,7 +8,10 @@ import { createEmployee } from '../../employees/api/employeesApi';
 import { syncRegistrationDocuments } from '../api/syncEmployeeDocuments';
 import {
   fetchOrganizationMasters,
+  fetchJobLevels,
+  fetchGrades,
   type OrganizationMasters,
+  type MasterOption,
 } from '../../api/organizationMastersApi';
 import { buildCreateEmployeePayload, type RegistrationFormData } from '../types/registration.types';
 import { useOptionalAuth } from '../../../../platform/auth';
@@ -62,6 +65,8 @@ export function EmployeeRegistrationPage({ onCancel }: { onCancel?: () => void }
   }, [directDraft, effectiveCaseId, candidateName]);
 
   const [masters, setMasters] = useState<OrganizationMasters | null>(null);
+  const [jobLevels, setJobLevels] = useState<MasterOption[]>([]);
+  const [grades, setGrades] = useState<MasterOption[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [createdEmployee, setCreatedEmployee] = useState<{
@@ -79,6 +84,22 @@ export function EmployeeRegistrationPage({ onCancel }: { onCancel?: () => void }
       .catch((err) => {
         // Masters are optional for code-to-ID mapping fallback
         console.warn('Could not load organization masters for employee registration:', err);
+      });
+    fetchJobLevels()
+      .then((data) => {
+        if (isMounted) setJobLevels(data);
+      })
+      .catch((err) => {
+        // Job levels are optional for code-to-ID mapping fallback
+        console.warn('Could not load job levels for employee registration:', err);
+      });
+    fetchGrades()
+      .then((data) => {
+        if (isMounted) setGrades(data);
+      })
+      .catch((err) => {
+        // Grades are optional for code-to-ID mapping fallback
+        console.warn('Could not load grades for employee registration:', err);
       });
     return () => {
       isMounted = false;
@@ -154,7 +175,7 @@ export function EmployeeRegistrationPage({ onCancel }: { onCancel?: () => void }
   return (
     <RegistrationConfigLoader>
       <EmployeeRegistration
-        masters={masters}
+        masters={masters ? { ...masters, jobLevels, grades } : null}
         onCancel={handleCancel}
         initialDraft={initialDraft}
         onSubmit={handleSubmit}

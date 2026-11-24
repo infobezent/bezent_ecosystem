@@ -21,6 +21,12 @@
   align-self: stretch;
 }
 
+.bezent-toolbar .bezent-divider--vertical {
+  height: 20px;
+  min-height: 20px;
+  align-self: center;
+}
+
 .bezent-divider--horizontal.bezent-divider--spacing-sm {
   margin: 8px 0;
 }
