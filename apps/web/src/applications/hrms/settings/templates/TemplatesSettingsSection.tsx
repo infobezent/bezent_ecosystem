@@ -4,7 +4,6 @@ import {
   Alert,
   Button,
   Inline,
-  Modal,
   PageHeader,
   Stack,
   Toolbar,
@@ -29,10 +28,24 @@ export interface TemplatesSettingsSectionProps {
   onBack?: () => void;
 }
 
-export function TemplatesSettingsSection({ onBack }: TemplatesSettingsSectionProps) {
-  const inRouter = useInRouterContext();
-  const navigate = inRouter ? useNavigate() : undefined;
+interface TemplatesSettingsSectionInnerProps extends TemplatesSettingsSectionProps {
+  navigate?: (path: string) => void;
+}
 
+function RoutedTemplatesSettingsSection(props: TemplatesSettingsSectionProps) {
+  const navigate = useNavigate();
+  return <TemplatesSettingsSectionInner {...props} navigate={navigate} />;
+}
+
+export function TemplatesSettingsSection(props: TemplatesSettingsSectionProps) {
+  const inRouter = useInRouterContext();
+  if (inRouter) {
+    return <RoutedTemplatesSettingsSection {...props} />;
+  }
+  return <TemplatesSettingsSectionInner {...props} />;
+}
+
+function TemplatesSettingsSectionInner({ onBack, navigate }: TemplatesSettingsSectionInnerProps) {
   const [forms, setForms] = useState<FormTemplateItem[]>(DEFAULT_FORMS);
   const [emailTemplates, setEmailTemplates] =
     useState<EmailTemplateItem[]>(DEFAULT_EMAIL_TEMPLATES);
