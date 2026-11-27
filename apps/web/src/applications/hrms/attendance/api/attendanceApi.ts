@@ -174,7 +174,11 @@ export async function fetchEmployeeDailyDetail(
 export async function recalculateDailyAttendance(payload: {
   employeeIds: string[];
   date: string;
-}): Promise<{ recalculatedCount: number; failures: Array<{ employeeId: string; error: string }> }> {
+}): Promise<{
+  recalculatedCount: number;
+  failures: Array<{ employeeId: string; error: string }>;
+  skipped: Array<{ employeeId: string; reason: string }>;
+}> {
   const res = await authorizedFetch(
     `${appConfig.apiBaseUrl}/hrms/attendance/daily-log/recalculate`,
     {

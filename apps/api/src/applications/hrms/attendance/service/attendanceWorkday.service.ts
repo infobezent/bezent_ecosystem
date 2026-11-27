@@ -48,6 +48,47 @@ export function formatTimeInTimezone(date: Date, timeZone: string = 'UTC'): stri
 }
 
 /**
+ * Builds the UTC instant corresponding to a given YYYY-MM-DD date and HH:mm
+ * wall-clock time in `timeZone`. The inverse of formatDateInTimezone +
+ * formatTimeInTimezone -- used when persisting a punch for a specific
+ * corrected/regularized local date & time (not "now").
+ */
+export function combineDateTimeInTimezone(
+  dateStr: string,
+  timeStr: string,
+  timeZone: string = 'UTC',
+): Date {
+  const validTz = isValidTimezone(timeZone) ? timeZone : 'UTC';
+  const naiveUtc = new Date(`${dateStr}T${timeStr.length === 5 ? timeStr : '00:00'}:00.000Z`);
+
+  // Discover the wall-clock time `naiveUtc` maps to in `timeZone`; the gap
+  // between that and the instant we started from is the timezone's offset.
+  const parts = new Intl.DateTimeFormat('en-US', {
+    timeZone: validTz,
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+    hour12: false,
+  }).formatToParts(naiveUtc);
+  const get = (type: string) => parts.find((p) => p.type === type)?.value ?? '0';
+  const hourPart = Number(get('hour'));
+  const asIfUtc = Date.UTC(
+    Number(get('year')),
+    Number(get('month')) - 1,
+    Number(get('day')),
+    hourPart === 24 ? 0 : hourPart,
+    Number(get('minute')),
+    Number(get('second')),
+  );
+  const offsetMs = asIfUtc - naiveUtc.getTime();
+
+  return new Date(naiveUtc.getTime() - offsetMs);
+}
+
+/**
  * Which attendance workday does "now" belong to?
  *
  * The company's day boundary (HR Settings -> Attendance -> General) is the clock

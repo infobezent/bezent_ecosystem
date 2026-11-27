@@ -400,7 +400,7 @@ export function DailyAttendanceLogPage() {
       });
       setBulkBannerMessage({
         type: 'success',
-        text: `Successfully recalculated ${res.recalculatedCount} records.${res.failures.length > 0 ? ` (${res.failures.length} failures)` : ''}`,
+        text: `Successfully recalculated ${res.recalculatedCount} records.${res.failures.length > 0 ? ` (${res.failures.length} failures)` : ''}${res.skipped.length > 0 ? ` (${res.skipped.length} skipped: manually corrected/regularized)` : ''}`,
       });
       setSelectedIds(new Set());
       await loadData();

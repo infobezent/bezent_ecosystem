@@ -20,7 +20,11 @@ import {
   defaultShiftScheduleProvider,
 } from './shiftSchedule.provider.js';
 import { AttendanceHolidayService, attendanceHolidayService } from './attendanceHoliday.service.js';
-import { attendanceWorkdayService, formatTimeInTimezone } from './attendanceWorkday.service.js';
+import {
+  attendanceWorkdayService,
+  formatTimeInTimezone,
+  combineDateTimeInTimezone,
+} from './attendanceWorkday.service.js';
 import { BadRequestError, ConflictError, NotFoundError } from '../../../../app/errors/AppError.js';
 import type {
   CheckInInput,
@@ -592,6 +596,7 @@ export class AttendanceService {
   ): Promise<{
     recalculatedCount: number;
     failures: Array<{ employeeId: string; error: string }>;
+    skipped: Array<{ employeeId: string; reason: string }>;
   }> {
     const isLocked = await this.repo.checkDateInLockedPeriod(tenantId, companyId, date, date);
     if (isLocked) {
@@ -602,16 +607,28 @@ export class AttendanceService {
 
     let recalculatedCount = 0;
     const failures: Array<{ employeeId: string; error: string }> = [];
+    const skipped: Array<{ employeeId: string; reason: string }> = [];
 
     for (const empId of employeeIds) {
       try {
-        const [schedule, policy, onLeave, punches, holidayRes] = await Promise.all([
+        // A manually corrected or regularized day is authoritative; recomputing
+        // it from punches would silently discard an HR-approved correction
+        // (audit finding C3). Checked before touching the calculation engine.
+        const existing = await this.repo.getTodayAttendance(tenantId, companyId, empId, date);
+        if (existing?.isRegularized) {
+          skipped.push({ employeeId: empId, reason: 'Day is manually corrected/regularized' });
+          continue;
+        }
+
+        const [schedule, policy, onLeave, effectiveTz, punches, holidayRes] = await Promise.all([
           this.scheduleProvider.getEmployeeSchedule(tenantId, companyId, empId, date),
           this.policyService.getEffectivePolicy(tenantId, companyId, date, empId),
           this.scheduleProvider.isEmployeeOnApprovedLeave(tenantId, companyId, empId, date),
+          attendanceWorkdayService.resolveTimezone(tenantId, companyId, empId),
           this.repo.getPunches(tenantId, companyId, {
             employeeId: empId,
             date,
+            dateInterpretation: 'workday',
             limit: 50,
           }),
           this.holidayService.resolveHolidayForEmployee(tenantId, companyId, empId, date),
@@ -625,9 +642,7 @@ export class AttendanceService {
           if (!d) return null;
           const dateObj = typeof d === 'string' ? new Date(d) : d;
           if (isNaN(dateObj.getTime())) return null;
-          const h = String(dateObj.getUTCHours()).padStart(2, '0');
-          const m = String(dateObj.getUTCMinutes()).padStart(2, '0');
-          return `${h}:${m}`;
+          return formatTimeInTimezone(dateObj, effectiveTz);
         };
 
         const firstInTime =
@@ -647,8 +662,6 @@ export class AttendanceService {
           holidayName: holidayRes.holidayName,
           isToday,
         });
-
-        const existing = await this.repo.getTodayAttendance(tenantId, companyId, empId, date);
 
         const recordData = {
           tenantId,
@@ -694,7 +707,7 @@ export class AttendanceService {
       }
     }
 
-    return { recalculatedCount, failures };
+    return { recalculatedCount, failures, skipped };
   }
 
   async bulkFinalizeAttendance(
@@ -1062,7 +1075,14 @@ export class AttendanceService {
       );
     }
 
-    // 1. Audit punch events for correction
+    // 1. Audit punch events for correction, dated to the corrected day/time
+    // (not "now") so a later recalculation finds true evidence for this day
+    // instead of reverting it (audit finding C3).
+    const correctionTz = await attendanceWorkdayService.resolveTimezone(
+      tenantId,
+      companyId,
+      input.employeeId,
+    );
     if (input.checkInTime) {
       await this.repo.recordPunch(
         tenantId,
@@ -1072,6 +1092,9 @@ export class AttendanceService {
         'manual',
         input.workLocation ?? 'office',
         `Admin correction by ${adminUserId}: ${reason}`,
+        undefined,
+        combineDateTimeInTimezone(input.date, input.checkInTime, correctionTz),
+        input.date,
       );
     }
     if (input.checkOutTime) {
@@ -1083,6 +1106,9 @@ export class AttendanceService {
         'manual',
         input.workLocation ?? 'office',
         `Admin correction by ${adminUserId}: ${reason}`,
+        undefined,
+        combineDateTimeInTimezone(input.date, input.checkOutTime, correctionTz),
+        input.date,
       );
     }
 

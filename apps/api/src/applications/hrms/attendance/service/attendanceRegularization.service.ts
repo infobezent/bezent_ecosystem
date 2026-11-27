@@ -24,6 +24,10 @@ import {
 import { attendanceCalculationService } from './attendanceCalculation.service.js';
 import { DefaultShiftScheduleProvider } from './shiftSchedule.provider.js';
 import { attendancePolicyService } from './attendancePolicy.service.js';
+import {
+  attendanceWorkdayService,
+  combineDateTimeInTimezone,
+} from './attendanceWorkday.service.js';
 import type {
   RegularizationSubmissionInput,
   RegularizationDecisionInput,
@@ -1118,6 +1122,46 @@ export class AttendanceRegularizationService {
         id: generateSurrogateId('att'),
         ...recordData,
       });
+    }
+
+    // Defense in depth (audit finding C3): write real punch evidence for the
+    // adjusted times, dated to this workday, so the punch log and employee
+    // attendance record stay consistent -- and so a future recalculation,
+    // should the isRegularized guard ever be bypassed, still finds true
+    // evidence for this day rather than reverting it. The isRegularized flag
+    // on the attendance record above is the primary protection.
+    const regTz = await attendanceWorkdayService.resolveTimezone(
+      tenantId,
+      companyId,
+      reg.employeeId,
+    );
+    if (newIn) {
+      await this.attRepo.recordPunch(
+        tenantId,
+        companyId,
+        reg.employeeId,
+        'in',
+        'manual',
+        'office',
+        `Regularization applied (${reg.reason})`,
+        undefined,
+        combineDateTimeInTimezone(reg.workday, newIn, regTz),
+        reg.workday,
+      );
+    }
+    if (newOut) {
+      await this.attRepo.recordPunch(
+        tenantId,
+        companyId,
+        reg.employeeId,
+        'out',
+        'manual',
+        'office',
+        `Regularization applied (${reg.reason})`,
+        undefined,
+        combineDateTimeInTimezone(reg.workday, newOut, regTz),
+        reg.workday,
+      );
     }
 
     // 5. Update Regularization state to Applied
