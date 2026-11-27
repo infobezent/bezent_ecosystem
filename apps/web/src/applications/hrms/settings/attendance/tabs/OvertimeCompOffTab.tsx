@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import { useAuthorization } from '../../../../../platform/auth';
 import {
   Card,
   CardHeader,
@@ -31,6 +32,8 @@ import {
 } from '../../../attendance/api/attendanceCompOffApi';
 
 export function OvertimeCompOffTab() {
+  const { can } = useAuthorization();
+  const canManagePolicy = can('hrms.attendance.policy_manage');
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [lapsing, setLapsing] = useState(false);
@@ -520,7 +523,7 @@ export function OvertimeCompOffTab() {
         <Button variant="secondary" onClick={loadSettings} disabled={saving}>
           Reset Changes
         </Button>
-        <Button variant="primary" onClick={handleSave} disabled={saving}>
+        <Button variant="primary" onClick={handleSave} disabled={saving || !canManagePolicy}>
           {saving ? 'Saving Policies...' : 'Save Overtime & Comp-Off Settings'}
         </Button>
       </Inline>
