@@ -1,14 +1,29 @@
-import { eq, and, sql, or, isNull } from 'drizzle-orm';
+import crypto from 'crypto';
+import { eq, sql, and, or, isNull } from 'drizzle-orm';
 import { getDb, isDatabaseConfigured } from '../../../../db/connection.js';
-import { users, memberships, employees } from '../../../../db/schema.js';
-import { hashPassword, generateSurrogateId } from '../../../../platform/auth/security.js';
+import { users, employees } from '../../../../db/schema.js';
+import {
+  createUnusableCredential,
+  generateSurrogateId,
+} from '../../../../platform/auth/security.js';
+import { companyAdminRepository } from '../../../../platform/company-admin/repository/companyAdmin.repository.js';
+import { roleManagementService } from '../../../../platform/access/service/roleManagement.service.js';
+import { workforceSettingsRepository } from '../../workforce/repository/workforceSettings.repository.js';
 
-export const DEFAULT_EMPLOYEE_PASSWORD = 'Password@1234';
+/** Matches the admin-invitation TTL in companyAdmin.service.ts (INVITATION_TTL_DAYS). */
+const EMPLOYEE_INVITATION_TTL_DAYS = 7;
 
 /**
- * Provisions a User identity and company membership for an Employee.
- * Sets the default login password to 'Password@1234' for seamless developer
- * and UAT reviewer authentication, bridging User and Employee models (ADR-009).
+ * Provisions a User identity and company membership for an Employee, reusing
+ * the same passwordless-identity and invitation building blocks as an admin
+ * invite (companyAdmin.service.ts inviteUser()/acceptInvitation()) so this
+ * never diverges into a second onboarding architecture. The identity is
+ * passwordless and signs in with Email OTP (ADR-018) -- no password is ever
+ * set, issued, or stored for sign-in purposes.
+ *
+ * An existing membership that is not 'active' (inactive/revoked) is left
+ * untouched: this function must never silently reactivate access that was
+ * deliberately disabled or revoked (see C6).
  */
 export async function provisionUserForEmployee(
   tenantId: string,
@@ -36,7 +51,7 @@ export async function provisionUserForEmployee(
 
   if (!existingUser) {
     userId = generateSurrogateId('usr');
-    const { hash, salt } = hashPassword(DEFAULT_EMPLOYEE_PASSWORD);
+    const { hash, salt } = createUnusableCredential();
 
     await db.insert(users).values({
       id: userId,
@@ -50,42 +65,49 @@ export async function provisionUserForEmployee(
     });
   } else {
     userId = existingUser.id;
-    // If the user does not have a password or is missing salt, update with default password
-    if (!existingUser.passwordHash || !existingUser.salt) {
-      const { hash, salt } = hashPassword(DEFAULT_EMPLOYEE_PASSWORD);
-      await db
-        .update(users)
-        .set({ passwordHash: hash, salt, status: 'active' })
-        .where(eq(users.id, userId));
-    }
   }
 
-  // 2. Ensure company membership exists with 'employee' role
-  const [existingMem] = await db
-    .select()
-    .from(memberships)
-    .where(
-      and(
-        eq(memberships.tenantId, tenantId),
-        eq(memberships.companyId, companyId),
-        eq(memberships.userId, userId),
-      ),
-    );
+  // 2. Ensure a company membership + role assignment exist for the employee
+  // role. An existing membership is NEVER touched here, regardless of its
+  // status -- only a brand-new membership is created.
+  const existingMem = await companyAdminRepository.findMembership(companyId, userId);
 
   if (!existingMem) {
-    await db.insert(memberships).values({
-      id: generateSurrogateId('mem'),
+    await getDb().transaction(async (tx) => {
+      await companyAdminRepository.createMembership(
+        {
+          id: generateSurrogateId('mem'),
+          userId,
+          tenantId,
+          companyId,
+          role: 'employee',
+          status: 'active',
+        },
+        tx,
+      );
+      await roleManagementService.syncMembershipRole(tx, {
+        userId,
+        tenantId,
+        companyId,
+        role: 'employee',
+        actorId: userId,
+      });
+    });
+
+    // Paper trail + sign-in instructions, same mechanism an admin invite uses.
+    const token = crypto.randomBytes(32).toString('hex');
+    await companyAdminRepository.createInvitation({
+      id: generateSurrogateId('inv'),
       tenantId,
       companyId,
-      userId,
+      email: normalizedEmail,
       role: 'employee',
-      status: 'active',
+      authorityType: 'company_role',
+      token,
+      invitedByUserId: null,
+      status: 'pending',
+      expiresAt: new Date(Date.now() + EMPLOYEE_INVITATION_TTL_DAYS * 24 * 60 * 60 * 1000),
     });
-  } else if (existingMem.status !== 'active') {
-    await db
-      .update(memberships)
-      .set({ status: 'active' })
-      .where(eq(memberships.id, existingMem.id));
   }
 
   // 3. Link employee.userId if not linked or mismatched
@@ -108,7 +130,9 @@ export async function syncAllUnlinkedEmployees(): Promise<number> {
   try {
     const db = getDb();
 
-    // Find all active employees whose userId is null or empty
+    // Find all unlinked employees who have not left the company. Separated
+    // employees (terminated/resigned) and suspended employees are never
+    // auto-provisioned (see C6).
     const unlinkedEmployees = await db
       .select({
         id: employees.id,
@@ -122,14 +146,32 @@ export async function syncAllUnlinkedEmployees(): Promise<number> {
       .from(employees)
       .where(
         and(
-          sql`${employees.employmentStatus} NOT IN ('terminated', 'suspended')`,
+          sql`${employees.employmentStatus} NOT IN ('terminated', 'suspended', 'resigned')`,
           or(isNull(employees.userId), eq(employees.userId, '')),
         ),
       );
 
+    // A company with autoProvisionUser explicitly disabled opts out of all
+    // automatic provisioning. Settings are resolved per company and cached
+    // for the duration of this sync run.
+    const autoProvisionByCompany = new Map<string, boolean>();
+
     let provisionedCount = 0;
     for (const emp of unlinkedEmployees) {
       try {
+        const cacheKey = `${emp.tenantId}:${emp.companyId}`;
+        let autoProvisionUser = autoProvisionByCompany.get(cacheKey);
+        if (autoProvisionUser === undefined) {
+          const settings = await workforceSettingsRepository.getGeneralSettings(
+            emp.tenantId,
+            emp.companyId,
+          );
+          // No settings row yet defaults to enabled, matching the seeded default.
+          autoProvisionUser = settings?.autoProvisionUser ?? true;
+          autoProvisionByCompany.set(cacheKey, autoProvisionUser);
+        }
+        if (!autoProvisionUser) continue;
+
         await provisionUserForEmployee(emp.tenantId, emp.companyId, emp);
         provisionedCount++;
       } catch (err) {

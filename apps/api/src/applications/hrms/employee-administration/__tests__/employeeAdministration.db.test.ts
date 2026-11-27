@@ -4,7 +4,7 @@ import {
   hrmsTestHeaders,
   removeHrmsTestAccess,
 } from '../../../../platform/__tests__/support/testSession.js';
-import { eq, inArray } from 'drizzle-orm';
+import { eq, and, inArray } from 'drizzle-orm';
 import { createApp } from '../../../../app/server/createApp.js';
 import { getDb, pingDatabase } from '../../../../db/connection.js';
 import {
@@ -14,10 +14,16 @@ import {
   employeeActions,
   employeeClearanceItems,
   employees,
+  memberships,
+  users,
 } from '../../../../db/schema.js';
 import { EmployeeRepository } from '../../employees/repository/employee.repository.js';
 import { EmployeeActionRepository } from '../repository/employeeAction.repository.js';
 import type { CreateEmployeeDto } from '../../employees/types/employee.types.js';
+import {
+  createUnusableCredential,
+  generateSurrogateId,
+} from '../../../../platform/auth/security.js';
 
 /**
  * MySQL-backed integration tests for Employee Administration. They run
@@ -38,6 +44,7 @@ describe('HRMS Employee Administration API (MySQL)', () => {
   const otherCompanyHeaders = { 'x-tenant-id': tenantId, 'x-company-id': otherCompanyId };
 
   const createdEmployeeIds: string[] = [];
+  const createdUserIds: string[] = [];
   let masters: {
     departments: { id: string; name: string }[];
     designations: { id: string; name: string }[];
@@ -138,6 +145,10 @@ describe('HRMS Employee Administration API (MySQL)', () => {
         .set({ reportingManagerId: null })
         .where(inArray(employees.id, createdEmployeeIds));
       await db.delete(employees).where(inArray(employees.id, createdEmployeeIds));
+    }
+    if (createdUserIds.length > 0) {
+      await db.delete(memberships).where(inArray(memberships.userId, createdUserIds));
+      await db.delete(users).where(inArray(users.id, createdUserIds));
     }
     await db.delete(departments).where(eq(departments.id, otherDepartmentId));
     await removeHrmsTestAccess([otherCompanyId]);
@@ -595,6 +606,94 @@ describe('HRMS Employee Administration API (MySQL)', () => {
     const current = await getEmployee(employee.id);
     expect(current.employmentStatus).toBe('terminated');
     expect(current.lastWorkingDate).toBe('2026-01-31');
+  });
+
+  // ==========================================================================
+  // C6: separation revokes company access, scoped to this company only
+  // ==========================================================================
+
+  async function linkEmployeeToUserWithMemberships(employeeId: string) {
+    const db = getDb();
+    const userId = generateSurrogateId('usr');
+    const { hash, salt } = createUnusableCredential();
+    await db.insert(users).values({
+      id: userId,
+      email: `ea_c6_${userId}@example.com`,
+      firstName: 'C6',
+      lastName: 'Test',
+      status: 'active',
+      passwordHash: hash,
+      salt,
+      isSuperAdmin: false,
+    });
+    await db.insert(memberships).values([
+      {
+        id: generateSurrogateId('mem'),
+        userId,
+        tenantId,
+        companyId,
+        role: 'employee',
+        status: 'active',
+      },
+      {
+        id: generateSurrogateId('mem'),
+        userId,
+        tenantId,
+        companyId: otherCompanyId,
+        role: 'employee',
+        status: 'active',
+      },
+    ]);
+    await db.update(employees).set({ userId }).where(eq(employees.id, employeeId));
+    createdUserIds.push(userId);
+    return userId;
+  }
+
+  async function membershipStatus(targetCompanyId: string, userId: string) {
+    const [mem] = await getDb()
+      .select()
+      .from(memberships)
+      .where(and(eq(memberships.companyId, targetCompanyId), eq(memberships.userId, userId)));
+    return mem?.status;
+  }
+
+  it('revokes company membership on termination, leaving other-company membership untouched', async () => {
+    const employee = await createEmployee();
+    const userId = await linkEmployeeToUserWithMemberships(employee.id);
+
+    const res = await createAction({
+      employeeId: employee.id,
+      actionType: 'termination',
+      effectiveDate: '2026-02-01',
+      reason: 'Policy violation',
+      values: { lastWorkingDate: '2026-01-31' },
+    });
+    await hrms
+      .post(`/api/v1/hrms/employee-actions/${res.body.data.id}/apply`)
+      .send({ version: 1 })
+      .expect(200);
+
+    expect(await membershipStatus(companyId, userId)).toBe('revoked');
+    expect(await membershipStatus(otherCompanyId, userId)).toBe('active');
+  });
+
+  it('revokes company membership on resignation, leaving other-company membership untouched', async () => {
+    const employee = await createEmployee();
+    const userId = await linkEmployeeToUserWithMemberships(employee.id);
+
+    const res = await createAction({
+      employeeId: employee.id,
+      actionType: 'resignation',
+      reason: 'Pursuing higher studies',
+      values: { requestDate: '2026-01-02', lastWorkingDate: '2026-01-31' },
+    });
+    await hrms
+      .post(`/api/v1/hrms/employee-actions/${res.body.data.id}/apply`)
+      .send({ version: 1 })
+      .expect(200);
+
+    expect(await membershipStatus(companyId, userId)).toBe('revoked');
+    expect(await membershipStatus(otherCompanyId, userId)).toBe('active');
   });
 
   // ==========================================================================

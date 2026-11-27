@@ -19,6 +19,8 @@ import {
   employees,
   employeeSkills,
   employeeWorkSchedules,
+  memberships,
+  roleAssignments,
 } from '../../../../db/schema.js';
 import { EmployeeProfileRepository } from '../repository/employeeProfile.repository.js';
 
@@ -213,6 +215,11 @@ describe('HRMS Employee Profile & record details (MySQL)', () => {
     }
     await db.delete(employees).where(eq(employees.companyId, otherCompanyId));
     await removeHrmsTestAccess([otherCompanyId]);
+    // An employee created in otherCompanyId may have been auto-provisioned a
+    // User + membership + role assignment (see employeeUserBridge.service.ts);
+    // both are FK-constrained on companyId and must go before the company.
+    await db.delete(roleAssignments).where(eq(roleAssignments.companyId, otherCompanyId));
+    await db.delete(memberships).where(eq(memberships.companyId, otherCompanyId));
     await db.delete(companies).where(eq(companies.id, otherCompanyId));
   });
 

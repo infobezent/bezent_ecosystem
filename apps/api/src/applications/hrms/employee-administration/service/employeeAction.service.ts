@@ -3,6 +3,7 @@ import { EmployeeActionRepository } from '../repository/employeeAction.repositor
 import { workforceSettingsService } from '../../workforce/service/workforceSettings.service.js';
 import { EmployeeRepository } from '../../employees/repository/employee.repository.js';
 import { OrganizationRepository } from '../../../../platform/organization/repository/organization.repository.js';
+import { companyAdminRepository } from '../../../../platform/company-admin/repository/companyAdmin.repository.js';
 import type {
   EmployeeDetails,
   EmploymentStatus,
@@ -443,9 +444,31 @@ export class EmployeeActionService {
         throw new ConflictError('Employee record could not be updated', 'STALE_ACTION');
       }
 
+      let historyNotes: string | null = null;
+      if (isSeparationType(action.actionType) && employee.userId) {
+        // Revoke access in THIS company only; other-company memberships for the
+        // same user identity are untouched (ADR-009: identity is tenant-shared).
+        await companyAdminRepository.updateMembershipStatusForUser(
+          companyId,
+          employee.userId,
+          'revoked',
+          tx,
+        );
+        historyNotes = 'Company membership revoked on separation';
+      }
+
       await this.repo.insertHistory(
         tx,
-        this.historyRecord(tenantId, companyId, id, 'applied', 'pending', 'applied', null, actor),
+        this.historyRecord(
+          tenantId,
+          companyId,
+          id,
+          'applied',
+          'pending',
+          'applied',
+          historyNotes,
+          actor,
+        ),
       );
     });
 
