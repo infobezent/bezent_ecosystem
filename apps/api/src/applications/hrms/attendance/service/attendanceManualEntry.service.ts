@@ -19,6 +19,14 @@ export interface ManualEntryActor {
   roleCodes: string[];
   isSuperAdmin: boolean;
   isTenantAdmin: boolean;
+  /** The actor's own employee record, when linked (used for team-scoping a reporting manager). */
+  employeeId: string | null;
+}
+
+/** True when the actor's only settings-role is 'reporting_manager' -- team-scoped, not company-wide (audit finding C4). */
+export function isTeamScopedActor(actor: ManualEntryActor): boolean {
+  const roles = actorSettingsRoles(actor);
+  return roles.length > 0 && roles.every((r) => r === 'reporting_manager');
 }
 
 export type ManualEntryMethod = 'actual_times' | 'full_day_admin' | 'half_day_admin';
@@ -58,13 +66,24 @@ export class AttendanceManualEntryService {
     private readonly settingsRepo: AttendanceSettingsRepository = attendanceSettingsRepository,
   ) {}
 
-  /** Throws when manual entry is not permitted; returns whether a reason is mandatory. */
+  /**
+   * Throws when manual entry is not permitted. Otherwise returns whether a
+   * reason is mandatory, the employee id a team-scoped reporting manager must
+   * be restricted to (null for HR/company_admin/super_admin, who see the
+   * whole company), and whether approvalMode requires routing this through
+   * the approval pipeline instead of applying it directly (audit finding C4:
+   * approvalMode was stored but never read).
+   */
   async assertAllowed(
     tenantId: string,
     companyId: string,
     input: ManualCorrectionInput,
     actor: ManualEntryActor,
-  ): Promise<{ reasonRequired: boolean }> {
+  ): Promise<{
+    reasonRequired: boolean;
+    teamScopeManagerId: string | null;
+    requiresApproval: boolean;
+  }> {
     const settings = await this.settingsRepo.getGeneralSettings(tenantId, companyId);
     const config = settings?.manualEntryConfig ?? DEFAULT_MANUAL_ENTRY_CONFIG;
 
@@ -92,7 +111,12 @@ export class AttendanceManualEntryService {
       );
     }
 
-    return { reasonRequired: config.requireReason ?? true };
+    const teamScoped = isTeamScopedActor(actor);
+    return {
+      reasonRequired: config.requireReason ?? true,
+      teamScopeManagerId: teamScoped ? actor.employeeId : null,
+      requiresApproval: teamScoped && config.approvalMode === 'approval_required',
+    };
   }
 }
 

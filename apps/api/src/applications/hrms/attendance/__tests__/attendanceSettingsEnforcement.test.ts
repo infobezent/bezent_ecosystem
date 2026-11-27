@@ -80,16 +80,36 @@ describe('Attendance settings helpers (pure)', () => {
 
   it('maps system roles to the manual-entry settings roles', () => {
     expect(
-      actorSettingsRoles({ roleCodes: ['hr_manager'], isSuperAdmin: false, isTenantAdmin: false }),
+      actorSettingsRoles({
+        roleCodes: ['hr_manager'],
+        isSuperAdmin: false,
+        isTenantAdmin: false,
+        employeeId: null,
+      }),
     ).toEqual(['hr']);
     expect(
-      actorSettingsRoles({ roleCodes: ['manager'], isSuperAdmin: false, isTenantAdmin: false }),
+      actorSettingsRoles({
+        roleCodes: ['manager'],
+        isSuperAdmin: false,
+        isTenantAdmin: false,
+        employeeId: null,
+      }),
     ).toEqual(['reporting_manager']);
     expect(
-      actorSettingsRoles({ roleCodes: [], isSuperAdmin: true, isTenantAdmin: true }).sort(),
+      actorSettingsRoles({
+        roleCodes: [],
+        isSuperAdmin: true,
+        isTenantAdmin: true,
+        employeeId: null,
+      }).sort(),
     ).toEqual(['company_admin', 'super_admin']);
     expect(
-      actorSettingsRoles({ roleCodes: ['employee'], isSuperAdmin: false, isTenantAdmin: false }),
+      actorSettingsRoles({
+        roleCodes: ['employee'],
+        isSuperAdmin: false,
+        isTenantAdmin: false,
+        employeeId: null,
+      }),
     ).toEqual([]);
   });
 

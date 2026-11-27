@@ -49,10 +49,12 @@ attendanceRouter.get(
 );
 attendanceRouter.post(
   '/hrms/attendance/daily-log/recalculate',
+  requirePermission('hrms.attendance.correct'),
   attendanceController.recalculateDailyAttendance,
 );
 attendanceRouter.post(
   '/hrms/attendance/daily-log/bulk-finalize',
+  requirePermission('hrms.attendance.correct'),
   attendanceController.bulkFinalizeDailyAttendance,
 );
 
@@ -77,10 +79,12 @@ attendanceRouter.post(
 );
 attendanceRouter.post(
   '/hrms/attendance/monthly-summary/bulk-preview',
+  requirePermission('hrms.attendance.payroll_close'),
   attendanceMonthlySummaryController.bulkPreview,
 );
 attendanceRouter.post(
   '/hrms/attendance/monthly-summary/bulk',
+  requirePermission('hrms.attendance.payroll_close'),
   attendanceMonthlySummaryController.bulkExecute,
 );
 attendanceRouter.get(
@@ -113,10 +117,12 @@ attendanceRouter.post(
 );
 attendanceRouter.post(
   '/hrms/attendance/monthly-summary/:id/mark-reviewed',
+  requirePermission('hrms.attendance.payroll_close'),
   attendanceMonthlySummaryController.markReviewed,
 );
 attendanceRouter.post(
   '/hrms/attendance/monthly-summary/:id/reopen',
+  requirePermission('hrms.attendance.payroll_close'),
   attendanceMonthlySummaryController.reopenReview,
 );
 attendanceRouter.post(
@@ -161,7 +167,11 @@ attendanceRouter.post(
   '/hrms/attendance/exceptions/:id/verify-resolve',
   attendanceController.verifyAndResolveException,
 );
-attendanceRouter.post('/hrms/attendance/exceptions/bulk', attendanceController.bulkExceptionAction);
+attendanceRouter.post(
+  '/hrms/attendance/exceptions/bulk',
+  requirePermission('hrms.attendance.correct'),
+  attendanceController.bulkExceptionAction,
+);
 attendanceRouter.post(
   '/hrms/attendance/missing-punch/sweep',
   attendanceController.triggerMissingPunchSweep,
@@ -248,9 +258,14 @@ attendanceRouter.get('/hrms/attendance/on-duty/export', attendanceOnDutyControll
 attendanceRouter.post('/hrms/attendance/on-duty/export', attendanceOnDutyController.exportRequests);
 attendanceRouter.post(
   '/hrms/attendance/on-duty/bulk-preview',
+  requirePermission('hrms.attendance.correct'),
   attendanceOnDutyController.previewBulkApproval,
 );
-attendanceRouter.post('/hrms/attendance/on-duty/bulk', attendanceOnDutyController.bulkAction);
+attendanceRouter.post(
+  '/hrms/attendance/on-duty/bulk',
+  requirePermission('hrms.attendance.correct'),
+  attendanceOnDutyController.bulkAction,
+);
 attendanceRouter.get('/hrms/attendance/on-duty/:id', attendanceOnDutyController.getRequestDetails);
 attendanceRouter.post(
   '/hrms/attendance/on-duty/:id/assign',
@@ -332,6 +347,7 @@ attendanceRouter.get(
 );
 attendanceRouter.post(
   '/hrms/attendance/overtime/settlements/:settlementId/reverse',
+  requirePermission('hrms.attendance.policy_manage'),
   attendanceOvertimeController.reverseSettlement,
 );
 attendanceRouter.get(
@@ -340,6 +356,7 @@ attendanceRouter.get(
 );
 attendanceRouter.post(
   '/hrms/attendance/overtime/policies',
+  requirePermission('hrms.attendance.policy_manage'),
   attendanceOvertimeController.createPolicy,
 );
 attendanceRouter.get(
@@ -348,6 +365,7 @@ attendanceRouter.get(
 );
 attendanceRouter.put(
   '/hrms/attendance/overtime/policies/:id',
+  requirePermission('hrms.attendance.policy_manage'),
   attendanceOvertimeController.updatePolicy,
 );
 
@@ -415,6 +433,7 @@ attendanceRouter.get(
 );
 attendanceRouter.post(
   '/hrms/attendance/comp-off/policies',
+  requirePermission('hrms.attendance.policy_manage'),
   attendanceCompOffController.createPolicy,
 );
 attendanceRouter.get(
@@ -423,6 +442,7 @@ attendanceRouter.get(
 );
 attendanceRouter.put(
   '/hrms/attendance/comp-off/policies/:id',
+  requirePermission('hrms.attendance.policy_manage'),
   attendanceCompOffController.updatePolicy,
 );
 attendanceRouter.get(
@@ -431,6 +451,10 @@ attendanceRouter.get(
 );
 
 // 7. Manual Correction
+// No extra route-level permission here: a manager (holding only
+// hrms.attendance.regularize) may still correct a direct report -- enforced
+// as a team-scope check inside the controller (audit finding C4). A caller
+// with hrms.attendance.correct bypasses that check (company-wide).
 attendanceRouter.post('/hrms/attendance/manual-correction', attendanceController.manualCorrection);
 
 // 8. Attendance Reports V1.0 Endpoints

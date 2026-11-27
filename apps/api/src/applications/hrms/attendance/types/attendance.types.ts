@@ -169,6 +169,13 @@ export interface DailyLogSummaryCounters {
 export interface DailyLogFilter {
   date: string;
   employeeId?: string;
+  /**
+   * Restricts results to employees whose reportingManagerId matches this
+   * employee id. Set by the controller for callers who hold only
+   * hrms.attendance.regularize (not .correct) -- team scope, not company-wide
+   * (audit finding C4).
+   */
+  reportingManagerEmployeeId?: string;
   departmentId?: string;
   status?: string;
   search?: string;

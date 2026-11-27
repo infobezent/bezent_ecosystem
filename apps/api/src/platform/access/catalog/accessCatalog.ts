@@ -344,6 +344,30 @@ const BASE_PERMISSION_DEFINITIONS: PermissionDefinition[] = [
   ]),
   hrms(
     'attendance',
+    'correct',
+    'Correct attendance records',
+    'Manually correct daily attendance and bulk-finalize daily log entries.',
+  ),
+  hrms(
+    'attendance',
+    'policy_manage',
+    'Manage attendance policies',
+    'Create and update overtime and compensatory-off policies, and reverse settlements.',
+  ),
+  hrms(
+    'attendance',
+    'payroll_close',
+    'Close attendance for payroll',
+    'Bulk-finalize, mark-reviewed and reopen monthly attendance summaries ahead of payroll.',
+  ),
+  hrms(
+    'attendance',
+    'approve_hr',
+    'Approve attendance regularizations (HR)',
+    'Give the final, HR-level approval on a two-stage attendance regularization request.',
+  ),
+  hrms(
+    'attendance',
     'reports',
     'View attendance reports',
     'Access and preview attendance reports.',

@@ -9,7 +9,21 @@ import {
   attendanceOnDutyService,
 } from '../service/attendanceOnDuty.service.js';
 import { attendanceMissingPunchDetectorService } from '../service/attendanceMissingPunchDetector.service.js';
-import { BadRequestError } from '../../../../app/errors/AppError.js';
+import { BadRequestError, ForbiddenError } from '../../../../app/errors/AppError.js';
+
+/**
+ * A caller holding hrms.attendance.correct (HR/admin tier) sees the whole
+ * company; a caller with only hrms.attendance.regularize (manager tier) is
+ * scoped to their own direct reports (audit finding C4). Returns the id to
+ * filter by, or undefined when no scoping is needed. A manager with no
+ * linked employee record has no team to see.
+ */
+function resolveTeamScope(req: Request): string | undefined {
+  if (req.access?.permissions.includes('hrms.attendance.correct')) {
+    return undefined;
+  }
+  return req.access?.employeeId ?? '__no_linked_employee__';
+}
 
 export class AttendanceController {
   constructor(
@@ -37,6 +51,7 @@ export class AttendanceController {
         typeof req.query.date === 'string' ? req.query.date : new Date().toISOString().slice(0, 10);
       const result = await this.service.getDailyLog(tenantId, companyId, {
         date,
+        reportingManagerEmployeeId: resolveTeamScope(req),
         departmentId:
           typeof req.query.departmentId === 'string' ? req.query.departmentId : undefined,
         employeeId: typeof req.query.employeeId === 'string' ? req.query.employeeId : undefined,
@@ -83,6 +98,21 @@ export class AttendanceController {
       }
       const date =
         typeof req.query.date === 'string' ? req.query.date : new Date().toISOString().slice(0, 10);
+      const teamScope = resolveTeamScope(req);
+      if (teamScope) {
+        const inScope = await this.service.getDailyLog(tenantId, companyId, {
+          date,
+          employeeId,
+          reportingManagerEmployeeId: teamScope,
+          limit: 1,
+        });
+        if (inScope.items.length === 0) {
+          throw new ForbiddenError(
+            "You do not have access to this employee's attendance",
+            'FORBIDDEN_TEAM_SCOPE',
+          );
+        }
+      }
       const detail = await this.service.getEmployeeDailyDetail(
         tenantId,
         companyId,
@@ -569,6 +599,7 @@ export class AttendanceController {
           roleCodes: (req.access?.roles ?? []).map((role) => role.code),
           isSuperAdmin: Boolean(req.user?.isSuperAdmin),
           isTenantAdmin: Boolean(req.access?.isTenantAdmin),
+          employeeId: req.access?.employeeId ?? null,
         },
       );
       res.status(200).json({ data: record });

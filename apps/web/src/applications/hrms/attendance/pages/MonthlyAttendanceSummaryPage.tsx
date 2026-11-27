@@ -28,6 +28,7 @@ import {
   TableSkeleton,
 } from '../../../../design-system/components';
 import { BezentIcon } from '../../../../design-system/icons';
+import { useAuthorization } from '../../../../platform/auth';
 import { AttendanceSectionTabs } from '../components/AttendanceSectionTabs';
 import { AttendanceImportModal } from '../components/import';
 import {
@@ -137,6 +138,8 @@ function getReviewStatusConfig(row: MonthlySummaryRow): ReviewStatusConfig {
 }
 
 export function MonthlyAttendanceSummaryPage() {
+  const { can } = useAuthorization();
+  const canClosePayroll = can('hrms.attendance.payroll_close');
   const navigate = useNavigate();
 
   // Navigation & Primary Filter State
@@ -1082,6 +1085,7 @@ export function MonthlyAttendanceSummaryPage() {
                   variant="primary"
                   size="sm"
                   shape="rounded"
+                  disabled={!canClosePayroll}
                   onClick={() => setShowBulkApproveModal(true)}
                 >
                   Approve Selected
@@ -2092,6 +2096,7 @@ export function MonthlyAttendanceSummaryPage() {
                     </Button>
                     <Button
                       variant="primary"
+                      disabled={!canClosePayroll}
                       onClick={() => {
                         handleCloseDrawer();
                         handleApproveRow(drawerSummary);
@@ -2208,7 +2213,7 @@ export function MonthlyAttendanceSummaryPage() {
               </Button>
               <Button
                 variant="primary"
-                disabled={bulkSubmitting || eligibleRecords.length === 0}
+                disabled={bulkSubmitting || eligibleRecords.length === 0 || !canClosePayroll}
                 onClick={handleExecuteBulkApprove}
               >
                 {bulkSubmitting ? 'Approving...' : 'Approve'}

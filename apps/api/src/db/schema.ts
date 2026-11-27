@@ -2499,6 +2499,10 @@ export const attendanceRegularizations = mysqlTable(
     decisionReason: varchar('decision_reason', { length: 500 }),
     decidedByUserId: varchar('decided_by_user_id', { length: 64 }),
     decidedAt: timestamp('decided_at'),
+    /** Stage-1 (reporting manager) approver, for two-stage `manager_then_hr` workflows. */
+    stage1ApproverUserId: varchar('stage1_approver_user_id', { length: 64 }),
+    /** Stage-2 (HR) approver, for two-stage `manager_then_hr` workflows. */
+    stage2ApproverUserId: varchar('stage2_approver_user_id', { length: 64 }),
     appliedAt: timestamp('applied_at'),
     applicationError: varchar('application_error', { length: 500 }),
     applicationBlockedReason: varchar('application_blocked_reason', { length: 500 }),
