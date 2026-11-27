@@ -116,6 +116,118 @@ describe('AttendanceCalculationService', () => {
     });
   });
 
+  describe('C1 regression: late arrival must not shrink the full-day threshold', () => {
+    // Shift 09:00-18:00, 60-min break, 15-min grace, 8h full-day threshold.
+    it('09:15-18:00 (within grace): present, late 0', () => {
+      const result = service.calculate({
+        date: '2026-10-09',
+        checkInTime: '09:15',
+        checkOutTime: '18:00',
+        schedule: DEFAULT_WORK_SCHEDULE,
+        policy: FALLBACK_ATTENDANCE_POLICY,
+      });
+
+      expect(result.status).toBe('present');
+      expect(result.isLate).toBe(false);
+      expect(result.lateMinutes).toBe(0);
+    });
+
+    it('09:16-18:00 (1 min past grace): present, late 16 - not half_day', () => {
+      const result = service.calculate({
+        date: '2026-10-09',
+        checkInTime: '09:16',
+        checkOutTime: '18:00',
+        schedule: DEFAULT_WORK_SCHEDULE,
+        policy: FALLBACK_ATTENDANCE_POLICY,
+      });
+
+      expect(result.status).toBe('present');
+      expect(result.isLate).toBe(true);
+      expect(result.lateMinutes).toBe(16);
+      // 18:00 - 09:16 = 524 min gross, minus 60 min break = 464 min worked.
+      expect(result.workedMinutes).toBe(464);
+    });
+
+    it('09:46-18:00 (31 min past grace): present, late 46', () => {
+      const result = service.calculate({
+        date: '2026-10-09',
+        checkInTime: '09:46',
+        checkOutTime: '18:00',
+        schedule: DEFAULT_WORK_SCHEDULE,
+        policy: FALLBACK_ATTENDANCE_POLICY,
+      });
+
+      expect(result.status).toBe('present');
+      expect(result.isLate).toBe(true);
+      expect(result.lateMinutes).toBe(46);
+    });
+
+    it('09:00-13:00 (on time, short day): half_day, independent of lateness', () => {
+      const result = service.calculate({
+        date: '2026-10-09',
+        checkInTime: '09:00',
+        checkOutTime: '13:00',
+        schedule: DEFAULT_WORK_SCHEDULE,
+        policy: FALLBACK_ATTENDANCE_POLICY,
+      });
+
+      expect(result.status).toBe('half_day');
+      expect(result.isLate).toBe(false);
+    });
+
+    it('09:00-14:00 (on time, early exit): half_day, unaffected by the C1 fix', () => {
+      const result = service.calculate({
+        date: '2026-10-09',
+        checkInTime: '09:00',
+        checkOutTime: '14:00',
+        schedule: DEFAULT_WORK_SCHEDULE,
+        policy: FALLBACK_ATTENDANCE_POLICY,
+      });
+
+      expect(result.status).toBe('half_day');
+      expect(result.isEarlyExit).toBe(true);
+    });
+
+    it('09:00-23:59 (on time, overtime): present, unaffected by the C1 fix', () => {
+      const result = service.calculate({
+        date: '2026-10-09',
+        checkInTime: '09:00',
+        checkOutTime: '23:59',
+        schedule: DEFAULT_WORK_SCHEDULE,
+        policy: FALLBACK_ATTENDANCE_POLICY,
+      });
+
+      expect(result.status).toBe('present');
+      expect(result.isEarlyExit).toBe(false);
+    });
+
+    it('a late arrival past the extended-late-action threshold can still be demoted by explicit policy opt-in', () => {
+      const policy = {
+        ...FALLBACK_ATTENDANCE_POLICY,
+        classificationRules: {
+          lateArrivalConfig: {
+            extendedLateThresholdMinutes: 30,
+            extendedLateAction: 'half_day',
+          },
+        },
+      };
+      const result = service.calculate({
+        date: '2026-10-09',
+        checkInTime: '09:46', // 46 min late, past the 30-min extended threshold
+        checkOutTime: '18:00',
+        schedule: DEFAULT_WORK_SCHEDULE,
+        policy,
+      });
+
+      expect(result.isLate).toBe(true);
+      expect(result.lateMinutes).toBe(46);
+      // The default-off extended-late-action policy is the explicit opt-in the
+      // audit allows (unlike the removed implicit threshold-shrink), and it is
+      // unaffected by the C1 fix.
+      expect(result.status).toBe('half_day');
+    });
+  });
+
   describe('Missing Punches & Weekend Rules', () => {
     it('detects missing checkout for a past date', () => {
       const result = service.calculate({

@@ -258,9 +258,6 @@ export class AttendanceCalculationService {
       halfDayThresholdHours = (halfPct / 100) * shiftGrossHours;
     }
 
-    const effectiveFullDayThreshold = isLate
-      ? fullDayThresholdHours
-      : Math.max(halfDayThresholdHours, fullDayThresholdHours - gracePeriod / 60);
     const workedHours = workedMinutes / 60;
 
     let status: AttendanceStatus = 'present';
@@ -296,9 +293,18 @@ export class AttendanceCalculationService {
         } else {
           status = workedHours >= 1.0 ? 'half_day' : 'absent';
         }
-      } else if (workedHours < effectiveFullDayThreshold) {
+      } else if (isEarlyExit) {
+        // Cleared the half-day floor but left before the shift's scheduled end
+        // (beyond any configured early-exit grace): a genuinely short day.
         status = 'half_day';
       } else {
+        // Late arrival never shrinks the full-day bar (audit finding C1):
+        // lateness is reported independently via isLate/lateMinutes above.
+        // Full-day status instead depends on completing the shift through to
+        // its scheduled end (not flagged early exit) plus clearing the
+        // half-day floor just above — not on raw workedHours vs
+        // fullDayThresholdHours, which a late arrival would otherwise fail
+        // through no fault of its own.
         status = 'present';
       }
 
@@ -350,6 +356,8 @@ export class AttendanceCalculationService {
         scheduledEnd: schedule.endTime,
         gracePeriodApplied: gracePeriod,
         workedHours: Math.round(workedHours * 100) / 100,
+        halfDayThresholdHours,
+        fullDayThresholdHours,
         dayName,
       },
     };
