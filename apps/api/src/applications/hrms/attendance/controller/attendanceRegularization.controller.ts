@@ -249,6 +249,7 @@ export class AttendanceRegularizationController {
         id,
         { status, reason, remarks },
         req.user?.id ?? 'system',
+        req.access?.permissions ?? [],
       );
       res.json({ data });
     } catch (err) {
@@ -292,6 +293,7 @@ export class AttendanceRegularizationController {
         companyId,
         input,
         req.user?.id ?? 'system',
+        req.access?.permissions ?? [],
       );
       res.json({ data });
     } catch (err) {

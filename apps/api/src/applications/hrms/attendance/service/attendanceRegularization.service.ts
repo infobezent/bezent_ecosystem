@@ -727,6 +727,7 @@ export class AttendanceRegularizationService {
     id: string,
     input: RegularizationDecisionInput,
     actorUserId: string,
+    actorPermissions: string[] = [],
   ) {
     const db = getDb();
     const existing = await this.repo.getRegularizationById(tenantId, companyId, id);
@@ -809,6 +810,7 @@ export class AttendanceRegularizationService {
         assignedTo: null,
         assignedAt: new Date(),
         decisionReason: decisionReason.trim() || 'Approved by Reporting Manager',
+        stage1ApproverUserId: actorUserId,
       });
 
       await this.repo.createAudit({
@@ -858,6 +860,35 @@ export class AttendanceRegularizationService {
       return updated;
     }
 
+    // 2b. Stage 2 (HR) approval gate -- only applies to a genuine two-stage
+    // review that already cleared stage 1 (audit finding C5). Single-stage
+    // companies (approvalHierarchy !== 'manager_then_hr') and auto-approval
+    // never reach this branch, so they keep using hrms.attendance.regularize
+    // exactly as before.
+    const isStage2HrApproval =
+      actorUserId !== AUTO_APPROVAL_ACTOR &&
+      workflow.approvalHierarchy === 'manager_then_hr' &&
+      reg.assignedQueue === 'hr_queue';
+
+    if (isStage2HrApproval) {
+      if (!actorPermissions.includes('hrms.attendance.approve_hr')) {
+        throw new ForbiddenError(
+          'Stage 2 (HR) approval of a regularization request requires HR approval permission.',
+          'FORBIDDEN_STAGE2_PERMISSION',
+        );
+      }
+      // A request submitted before this check existed has no recorded
+      // stage-1 approver; nothing to compare against, so this specific
+      // identity check is skipped for it -- the permission check above still
+      // applies unconditionally.
+      if (reg.stage1ApproverUserId && actorUserId === reg.stage1ApproverUserId) {
+        throw new ForbiddenError(
+          'The same approver cannot complete both stages of this regularization request.',
+          'FORBIDDEN_STAGE2_SAME_APPROVER',
+        );
+      }
+    }
+
     // 3. Recheck Payroll Lock state (Stage 2 or single-stage approval)
     const isLocked = await this.attRepo.checkDateInLockedPeriod(
       tenantId,
@@ -876,6 +907,7 @@ export class AttendanceRegularizationService {
         decisionReason: decisionReason.trim() || 'Approved by reviewer',
         decidedByUserId: actorUserId,
         decidedAt: new Date(),
+        stage2ApproverUserId: isStage2HrApproval ? actorUserId : null,
       });
 
       await this.repo.createAudit({
@@ -900,6 +932,7 @@ export class AttendanceRegularizationService {
       decisionReason: decisionReason.trim() || 'Approved by reviewer',
       decidedByUserId: actorUserId,
       decidedAt: new Date(),
+      stage2ApproverUserId: isStage2HrApproval ? actorUserId : null,
     });
 
     await this.repo.createAudit({
@@ -1213,6 +1246,7 @@ export class AttendanceRegularizationService {
     companyId: string,
     input: BulkRegularizationActionInput,
     actorUserId: string,
+    actorPermissions: string[] = [],
   ): Promise<BulkRegularizationActionResult> {
     const succeeded: string[] = [];
     const skipped: Array<{ id: string; reason: string }> = [];
@@ -1303,6 +1337,7 @@ export class AttendanceRegularizationService {
               reqId,
               { status: 'approved', remarks: input.notes || 'Approved in controlled bulk review' },
               actorUserId,
+              actorPermissions,
             );
             succeeded.push(reqId);
             break;
@@ -1319,6 +1354,7 @@ export class AttendanceRegularizationService {
               reqId,
               { status: 'rejected', reason: input.reason || 'Rejected in bulk operation' },
               actorUserId,
+              actorPermissions,
             );
             succeeded.push(reqId);
             break;

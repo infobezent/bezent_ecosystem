@@ -842,6 +842,262 @@ describe.skipIf(!isDatabaseConfigured)(
       });
     });
 
+    describe('Stage 2 Permission & Identity Gates (audit finding C5)', () => {
+      const submitAndApproveStage1 = async (workday: string, reason: string) => {
+        const db = getDb();
+        await db
+          .insert(employeeAttendance)
+          .values({
+            id: generateSurrogateId('adly'),
+            tenantId,
+            companyId,
+            employeeId,
+            date: workday,
+            status: 'absent',
+            isRegularized: false,
+            workedMinutes: 0,
+          })
+          .onDuplicateKeyUpdate({ set: { status: 'absent', isRegularized: false } });
+
+        const subRes = await request(app)
+          .post('/api/v1/ess/attendance/regularize')
+          .set('Authorization', `Bearer ${employeeToken}`)
+          .set('X-Company-Id', companyId)
+          .send({ date: workday, checkInTime: '09:00', checkOutTime: '18:00', reason });
+        expect(subRes.status).toBe(201);
+        const id = subRes.body.data.id;
+        expect(subRes.body.data.assignedQueue).toBe('manager_queue');
+
+        const stage1Res = await request(app)
+          .post(`/api/v1/hrms/attendance/regularization/${id}/decision`)
+          .set('Authorization', `Bearer ${mgrToken}`)
+          .set('X-Company-Id', companyId)
+          .send({ decision: 'approved', remarks: 'Stage 1 OK' });
+        expect(stage1Res.status).toBe(200);
+
+        const [row] = await db
+          .select()
+          .from(attendanceRegularizations)
+          .where(eq(attendanceRegularizations.id, id));
+        expect(row?.assignedQueue).toBe('hr_queue');
+        expect(row?.stage1ApproverUserId).toBe(mgrUserId);
+        return id;
+      };
+
+      it('1. Permission gate: the stage-1 manager (holds regularize, not approve_hr) is blocked at stage 2', async () => {
+        const id = await submitAndApproveStage1(getPastWorkday(10), 'Stage-2 permission gate case');
+
+        const res = await request(app)
+          .post(`/api/v1/hrms/attendance/regularization/${id}/decision`)
+          .set('Authorization', `Bearer ${mgrToken}`)
+          .set('X-Company-Id', companyId)
+          .send({ decision: 'approved', remarks: 'Manager attempts stage 2' });
+
+        expect(res.status).toBe(403);
+        expect(res.body.error?.code || res.body.code).toBe('FORBIDDEN_STAGE2_PERMISSION');
+      });
+
+      it('2. Identity gate: an HR-permission holder who was themselves the stage-1 approver is blocked from completing stage 2', async () => {
+        const db = getDb();
+        // Seed attendance and submit as the HR test operator so they land in
+        // manager_queue (reportingManagerId points at the real manager) --
+        // then have the HR operator approve "stage 1" directly. The service
+        // does not check that assignedTo === actorUserId for stage 1 (a
+        // pre-existing gap outside C5's scope), so this reproduces the
+        // scenario of one person holding both tiers of permission and
+        // handling stage 1 themselves.
+        const workday = getPastWorkday(9);
+        await db
+          .insert(employeeAttendance)
+          .values({
+            id: generateSurrogateId('adly'),
+            tenantId,
+            companyId,
+            employeeId,
+            date: workday,
+            status: 'absent',
+            isRegularized: false,
+            workedMinutes: 0,
+          })
+          .onDuplicateKeyUpdate({ set: { status: 'absent', isRegularized: false } });
+
+        const subRes = await request(app)
+          .post('/api/v1/ess/attendance/regularize')
+          .set('Authorization', `Bearer ${employeeToken}`)
+          .set('X-Company-Id', companyId)
+          .send({
+            date: workday,
+            checkInTime: '09:00',
+            checkOutTime: '18:00',
+            reason: 'Stage-2 identity gate case',
+          });
+        expect(subRes.status).toBe(201);
+        const id = subRes.body.data.id;
+
+        const stage1Res = await request(app)
+          .post(`/api/v1/hrms/attendance/regularization/${id}/decision`)
+          .set(hrHeaders)
+          .send({ decision: 'approved', remarks: 'HR operator approves stage 1' });
+        expect(stage1Res.status).toBe(200);
+
+        const [row] = await db
+          .select()
+          .from(attendanceRegularizations)
+          .where(eq(attendanceRegularizations.id, id));
+        expect(row?.assignedQueue).toBe('hr_queue');
+        expect(row?.stage1ApproverUserId).toBeTruthy();
+
+        const stage2Res = await request(app)
+          .post(`/api/v1/hrms/attendance/regularization/${id}/decision`)
+          .set(hrHeaders)
+          .send({ decision: 'approved', remarks: 'Same HR operator attempts stage 2' });
+
+        expect(stage2Res.status).toBe(403);
+        expect(stage2Res.body.error?.code || stage2Res.body.code).toBe(
+          'FORBIDDEN_STAGE2_SAME_APPROVER',
+        );
+      });
+
+      it('3. A different HR approver completes stage 2: succeeds and persists stage2ApproverUserId', async () => {
+        const db = getDb();
+        const id = await submitAndApproveStage1(
+          getPastWorkday(8),
+          'Stage-2 success case with distinct approvers',
+        );
+
+        const res = await request(app)
+          .post(`/api/v1/hrms/attendance/regularization/${id}/decision`)
+          .set(hrHeaders)
+          .send({ decision: 'approved', remarks: 'HR final sign-off' });
+        expect(res.status).toBe(200);
+
+        const [row] = await db
+          .select()
+          .from(attendanceRegularizations)
+          .where(eq(attendanceRegularizations.id, id));
+        expect(row?.approvalStatus).toBe('approved');
+        expect(row?.stage1ApproverUserId).toBe(mgrUserId);
+        expect(row?.stage2ApproverUserId).toBeTruthy();
+        expect(row?.stage2ApproverUserId).not.toBe(row?.stage1ApproverUserId);
+      });
+
+      it('4. Pre-migration compatibility: a request with stage1ApproverUserId=NULL at hr_queue skips the identity check but still enforces the permission check', async () => {
+        const db = getDb();
+        const id = await submitAndApproveStage1(
+          getPastWorkday(7),
+          'Pre-migration null stage1 approver case',
+        );
+
+        // Simulate a row that predates this migration: stage1ApproverUserId
+        // was never recorded even though it already reached hr_queue.
+        await db
+          .update(attendanceRegularizations)
+          .set({ stage1ApproverUserId: null })
+          .where(eq(attendanceRegularizations.id, id));
+
+        // The stage-1 manager (no approve_hr) is still correctly blocked --
+        // the permission check does not depend on stage1ApproverUserId.
+        const blockedRes = await request(app)
+          .post(`/api/v1/hrms/attendance/regularization/${id}/decision`)
+          .set('Authorization', `Bearer ${mgrToken}`)
+          .set('X-Company-Id', companyId)
+          .send({ decision: 'approved', remarks: 'Manager retry, still no approve_hr' });
+        expect(blockedRes.status).toBe(403);
+        expect(blockedRes.body.error?.code || blockedRes.body.code).toBe(
+          'FORBIDDEN_STAGE2_PERMISSION',
+        );
+
+        // An HR approver succeeds even though stage1ApproverUserId is null --
+        // nothing to compare the identity check against, so it's skipped.
+        const res = await request(app)
+          .post(`/api/v1/hrms/attendance/regularization/${id}/decision`)
+          .set(hrHeaders)
+          .send({ decision: 'approved', remarks: 'HR approves despite missing stage-1 record' });
+        expect(res.status).toBe(200);
+
+        const [row] = await db
+          .select()
+          .from(attendanceRegularizations)
+          .where(eq(attendanceRegularizations.id, id));
+        expect(row?.approvalStatus).toBe('approved');
+        expect(row?.stage1ApproverUserId).toBeNull();
+        expect(row?.stage2ApproverUserId).toBeTruthy();
+      });
+
+      it('5. Single-stage companies (manager_only) are unaffected: the manager completes approval alone via hrms.attendance.regularize', async () => {
+        const db = getDb();
+        // Temporarily switch this company to a single-stage hierarchy for
+        // this one case; manager_then_hr is restored immediately after so it
+        // cannot leak into any other test in this file.
+        await db
+          .update(attendanceRegularizationSettings)
+          .set({ approvalHierarchy: 'manager_only' })
+          .where(
+            and(
+              eq(attendanceRegularizationSettings.tenantId, tenantId),
+              eq(attendanceRegularizationSettings.companyId, companyId),
+            ),
+          );
+
+        try {
+          const workday = getPastWorkday(6);
+          await db
+            .insert(employeeAttendance)
+            .values({
+              id: generateSurrogateId('adly'),
+              tenantId,
+              companyId,
+              employeeId,
+              date: workday,
+              status: 'absent',
+              isRegularized: false,
+              workedMinutes: 0,
+            })
+            .onDuplicateKeyUpdate({ set: { status: 'absent', isRegularized: false } });
+
+          const subRes = await request(app)
+            .post('/api/v1/ess/attendance/regularize')
+            .set('Authorization', `Bearer ${employeeToken}`)
+            .set('X-Company-Id', companyId)
+            .send({
+              date: workday,
+              checkInTime: '09:00',
+              checkOutTime: '18:00',
+              reason: 'Single-stage manager_only regression case',
+            });
+          expect(subRes.status).toBe(201);
+          const id = subRes.body.data.id;
+          expect(subRes.body.data.assignedQueue).toBe('manager_queue');
+
+          const res = await request(app)
+            .post(`/api/v1/hrms/attendance/regularization/${id}/decision`)
+            .set('Authorization', `Bearer ${mgrToken}`)
+            .set('X-Company-Id', companyId)
+            .send({ decision: 'approved', remarks: 'Manager completes single-stage approval' });
+          expect(res.status).toBe(200);
+
+          const [row] = await db
+            .select()
+            .from(attendanceRegularizations)
+            .where(eq(attendanceRegularizations.id, id));
+          expect(row?.approvalStatus).toBe('approved');
+          expect(row?.applicationStatus).toBe('applied');
+          expect(row?.stage1ApproverUserId).toBeNull();
+          expect(row?.stage2ApproverUserId).toBeNull();
+        } finally {
+          await db
+            .update(attendanceRegularizationSettings)
+            .set({ approvalHierarchy: 'manager_then_hr' })
+            .where(
+              and(
+                eq(attendanceRegularizationSettings.tenantId, tenantId),
+                eq(attendanceRegularizationSettings.companyId, companyId),
+              ),
+            );
+        }
+      });
+    });
+
     describe('Queue Filtering (Workspace Queues)', () => {
       it('1. Filters list by assignedQueue="manager_queue" and assignedQueue="hr_queue"', async () => {
         // Query manager queue
