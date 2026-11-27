@@ -3,6 +3,7 @@ import request from 'supertest';
 import { and, eq } from 'drizzle-orm';
 import { createApp } from '../../../../app/server/createApp.js';
 import { isDatabaseConfigured, getDb } from '../../../../db/connection.js';
+import { addDays, leaveCycleFor } from '../../leave/rules/leaveCalendar.js';
 import {
   tenants,
   companies,
@@ -24,6 +25,67 @@ import {
 
 import { hashPassword } from '../../../../platform/auth/security.js';
 import { signInForTest } from '../../../../platform/__tests__/support/testSession.js';
+
+const isoDay = (d: Date) => d.toISOString().slice(0, 10);
+
+/**
+ * A start/end pair at least 11 calendar days apart, anchored 4 days after
+ * `anchor`, that stays inside a single calendar-year leave cycle no matter
+ * where in the year `anchor` falls. A naive `anchor + N days` offset can
+ * silently cross a calendar-year boundary once a year, flipping a request
+ * meant to test an over-the-yearly-ceiling rejection into one that instead
+ * (correctly, but unintentionally) trips the separate "crosses leave year"
+ * check first. Pure and DB-free so the boundary case itself can be
+ * regression-tested in isolation, without needing the suite to actually run
+ * near 31 December.
+ */
+function ceilingWindowFrom(anchor: Date): { start: string; end: string } {
+  let start = isoDay(new Date(anchor.getTime() + 4 * 86_400_000));
+  let end = isoDay(new Date(anchor.getTime() + 15 * 86_400_000));
+  const cycle = leaveCycleFor(start, 'calendar_year', null);
+  if (end > cycle.end) {
+    // Would spill into the next leave-year cycle: anchor the same span to
+    // the start of that next cycle instead, which always has a full year of
+    // runway and is still unambiguously in the future relative to `anchor`.
+    start = addDays(cycle.end, 1);
+    end = addDays(start, 11);
+  }
+  return { start, end };
+}
+
+describe('ceilingWindowFrom (leave-year boundary safety)', () => {
+  it('leaves a mid-year window unchanged', () => {
+    const { start, end } = ceilingWindowFrom(new Date('2026-06-04T00:00:00.000Z'));
+    expect(start).toBe('2026-06-08');
+    expect(end).toBe('2026-06-19');
+    expect(leaveCycleFor(start, 'calendar_year', null).start).toBe(
+      leaveCycleFor(end, 'calendar_year', null).start,
+    );
+  });
+
+  it('keeps the window in one cycle when the naive offset would cross into next year', () => {
+    // anchor + 4 = 2026-12-24, anchor + 15 = 2027-01-04 -- crosses the
+    // boundary under the old, unfixed computation.
+    const { start, end } = ceilingWindowFrom(new Date('2026-12-20T00:00:00.000Z'));
+    expect(leaveCycleFor(start, 'calendar_year', null).start).toBe(
+      leaveCycleFor(end, 'calendar_year', null).start,
+    );
+    expect(start).toBe('2027-01-01');
+    expect(end).toBe('2027-01-12');
+  });
+
+  it('keeps the window in one cycle for an anchor on the last day of the year', () => {
+    // anchor + 4 and anchor + 15 both already land in the next calendar
+    // year here, so no adjustment is even needed -- the invariant (same
+    // cycle) still holds, which is the property under test.
+    const { start, end } = ceilingWindowFrom(new Date('2026-12-31T00:00:00.000Z'));
+    expect(leaveCycleFor(start, 'calendar_year', null).start).toBe(
+      leaveCycleFor(end, 'calendar_year', null).start,
+    );
+    expect(start).toBe('2027-01-04');
+    expect(end).toBe('2027-01-15');
+  });
+});
 
 describe('Employee Self Service (ESS) Backend API (Phase 3)', () => {
   const app = createApp();
@@ -685,7 +747,6 @@ describe('Employee Self Service (ESS) Backend API (Phase 3)', () => {
 
     // Upcoming Thursday/Friday at least two weeks out, so the dates never age out of the
     // booking windows and always contain exactly two working days.
-    const isoDay = (d: Date) => d.toISOString().slice(0, 10);
     const thursday = (() => {
       const d = new Date(Date.now() + 14 * 86_400_000);
       while (d.getUTCDay() !== 4) d.setUTCDate(d.getUTCDate() + 1);
@@ -784,12 +845,18 @@ describe('Employee Self Service (ESS) Backend API (Phase 3)', () => {
     });
 
     it('enforces the yearly ceiling of the leave type', async () => {
-      const nextMonday = isoDay(new Date(thursday.getTime() + 4 * 86_400_000));
-      const twoWeeksLater = isoDay(new Date(thursday.getTime() + 15 * 86_400_000));
+      // A naive thursday+15-day offset can silently cross a calendar-year
+      // boundary when the suite runs in December, flipping the expected
+      // error from LEAVE_MAX_PER_YEAR to LEAVE_CROSSES_YEAR (a real,
+      // separate check that correctly fires first for a genuinely
+      // year-crossing request -- see leave.service.ts). ceilingWindowFrom
+      // keeps this request inside a single leave-year cycle regardless of
+      // what day the suite runs on.
+      const { start: ceilingStart, end: ceilingEnd } = ceilingWindowFrom(thursday);
       const res = await apply({
         leaveTypeId: casualLeaveTypeId,
-        startDate: nextMonday,
-        endDate: twoWeeksLater,
+        startDate: ceilingStart,
+        endDate: ceilingEnd,
         reason: 'Exceeds casual leave ceiling',
       });
 
