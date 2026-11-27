@@ -28,6 +28,7 @@ import {
   TableSkeleton,
 } from '../../../../design-system/components';
 import { BezentIcon } from '../../../../design-system/icons';
+import { useAuthorization } from '../../../../platform/auth';
 import { AttendanceSectionTabs } from '../components/AttendanceSectionTabs';
 import { RequestStatStrip } from '../components/RequestStatStrip';
 import { AttendanceDateRangeControl } from '../components/AttendanceDateRangeControl';
@@ -153,6 +154,8 @@ const OD_SUBMITTED_RANGE: RequestFilterDateRange = {
 };
 
 export function AttendanceOnDutyPage() {
+  const { can } = useAuthorization();
+  const canBulkAct = can('hrms.attendance.correct');
   // 1. Date Range State (defaults to current month)
   const [startDate, setStartDate] = useState(getStartOfMonthString());
   const [endDate, setEndDate] = useState(getEndOfMonthString());
@@ -922,13 +925,19 @@ export function AttendanceOnDutyPage() {
               </Inline>
 
               <Inline gap="xs" align="center">
-                <Button variant="secondary" size="sm" onClick={() => handleOpenBulkModal('assign')}>
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  disabled={!canBulkAct}
+                  onClick={() => handleOpenBulkModal('assign')}
+                >
                   <BezentIcon name="person" size={14} /> Assign
                 </Button>
 
                 <Button
                   variant="secondary"
                   size="sm"
+                  disabled={!canBulkAct}
                   onClick={() => handleOpenBulkModal('start_review')}
                 >
                   <BezentIcon name="play_arrow" size={14} /> Start Review
@@ -937,6 +946,7 @@ export function AttendanceOnDutyPage() {
                 <Button
                   variant="secondary"
                   size="sm"
+                  disabled={!canBulkAct}
                   onClick={() => handleOpenBulkModal('request_info')}
                 >
                   <BezentIcon name="chat" size={14} /> Request Info
@@ -945,6 +955,7 @@ export function AttendanceOnDutyPage() {
                 <Button
                   variant="primary"
                   size="sm"
+                  disabled={!canBulkAct}
                   onClick={() => handleOpenBulkModal('bulk_approve')}
                 >
                   <BezentIcon name="check" size={14} /> Approve
@@ -953,6 +964,7 @@ export function AttendanceOnDutyPage() {
                 <Button
                   variant="danger"
                   size="sm"
+                  disabled={!canBulkAct}
                   onClick={() => handleOpenBulkModal('bulk_reject')}
                 >
                   <BezentIcon name="close" size={14} /> Reject

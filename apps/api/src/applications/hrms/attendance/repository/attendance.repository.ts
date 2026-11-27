@@ -1054,6 +1054,9 @@ export class AttendanceRepository {
     if (filter.employeeId) {
       conditions.push(eq(employees.id, filter.employeeId));
     }
+    if (filter.reportingManagerEmployeeId) {
+      conditions.push(eq(employees.reportingManagerId, filter.reportingManagerEmployeeId));
+    }
     if (filter.departmentId) {
       conditions.push(eq(employees.departmentId, filter.departmentId));
     }
@@ -3661,13 +3664,19 @@ export class AttendanceRepository {
     companyId: string,
     employeeId: string,
     tx?: DbClient,
-  ): Promise<{ id: string; employmentStatus: string; employeeNumber: string } | null> {
+  ): Promise<{
+    id: string;
+    employmentStatus: string;
+    employeeNumber: string;
+    reportingManagerId: string | null;
+  } | null> {
     const db = tx ?? getDb();
     const [emp] = await db
       .select({
         id: employees.id,
         employmentStatus: employees.employmentStatus,
         employeeNumber: employees.employeeNumber,
+        reportingManagerId: employees.reportingManagerId,
       })
       .from(employees)
       .where(

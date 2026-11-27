@@ -27,6 +27,7 @@ import {
   TableSkeleton,
 } from '../../../../design-system/components';
 import { BezentIcon } from '../../../../design-system/icons';
+import { useAuthorization } from '../../../../platform/auth';
 import { AttendanceSectionTabs } from '../components/AttendanceSectionTabs';
 import { AttendanceImportModal } from '../components/import';
 import {
@@ -54,6 +55,8 @@ import {
 } from '../components/AttendanceFilterPanel';
 
 export function DailyAttendanceLogPage() {
+  const { can } = useAuthorization();
+  const canCorrect = can('hrms.attendance.correct');
   const [searchParams] = useSearchParams();
 
   // Primary Filters (initialized from URL search parameters if available)
@@ -975,7 +978,7 @@ export function DailyAttendanceLogPage() {
                   <Button
                     variant="secondary"
                     size="sm"
-                    disabled={bulkActionLoading}
+                    disabled={!canCorrect || bulkActionLoading}
                     onClick={handleBulkRecalculate}
                   >
                     Recalculate Selected
@@ -983,7 +986,7 @@ export function DailyAttendanceLogPage() {
                   <Button
                     variant="secondary"
                     size="sm"
-                    disabled={bulkActionLoading}
+                    disabled={!canCorrect || bulkActionLoading}
                     onClick={handleBulkFinalize}
                   >
                     Finalize Validated
@@ -1464,6 +1467,7 @@ export function DailyAttendanceLogPage() {
                 <Button
                   variant="secondary"
                   size="sm"
+                  disabled={!canCorrect}
                   onClick={() => handleRecalculateSingle(drawerDetail.employee.id)}
                 >
                   <BezentIcon name="clock" size={14} />

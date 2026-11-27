@@ -21,7 +21,16 @@ import {
 } from './shiftSchedule.provider.js';
 import { AttendanceHolidayService, attendanceHolidayService } from './attendanceHoliday.service.js';
 import { attendanceWorkdayService, formatTimeInTimezone } from './attendanceWorkday.service.js';
-import { BadRequestError, ConflictError, NotFoundError } from '../../../../app/errors/AppError.js';
+import {
+  AttendanceRegularizationService,
+  attendanceRegularizationService,
+} from './attendanceRegularization.service.js';
+import {
+  BadRequestError,
+  ConflictError,
+  ForbiddenError,
+  NotFoundError,
+} from '../../../../app/errors/AppError.js';
 import type {
   CheckInInput,
   EmployeeAttendance,
@@ -50,6 +59,7 @@ import type {
   UpdateExceptionStatusInput,
   OverrideExceptionSeverityInput,
   BulkExceptionActionInput,
+  RegularizationRequestType,
 } from '../types/attendance.types.js';
 
 export class AttendanceService {
@@ -62,6 +72,7 @@ export class AttendanceService {
     private readonly manualEntryService: AttendanceManualEntryService = attendanceManualEntryService,
     private readonly alertService: AttendanceAlertService = attendanceAlertService,
     private readonly holidayService: AttendanceHolidayService = attendanceHolidayService,
+    private readonly regularizationService: AttendanceRegularizationService = attendanceRegularizationService,
   ) {}
 
   getCurrentTimeString(now: Date = new Date(), timeZone?: string): string {
@@ -1022,9 +1033,9 @@ export class AttendanceService {
     actor?: ManualEntryActor,
   ): Promise<EmployeeAttendance> {
     // Company manual-entry settings apply to interactive admin entries only.
-    const { reasonRequired } = actor
+    const { reasonRequired, teamScopeManagerId, requiresApproval } = actor
       ? await this.manualEntryService.assertAllowed(tenantId, companyId, input, actor)
-      : { reasonRequired: true };
+      : { reasonRequired: true, teamScopeManagerId: null, requiresApproval: false };
     if (!input.employeeId || !input.date || (reasonRequired && !input.reason?.trim())) {
       throw new BadRequestError(
         reasonRequired
@@ -1040,6 +1051,15 @@ export class AttendanceService {
         `Employee with ID '${input.employeeId}' not found in the selected company`,
       );
     }
+    // A reporting manager (not HR/company_admin/super_admin) may only correct
+    // their own direct reports -- company-wide access stays with
+    // hrms.attendance.correct holders (audit finding C4).
+    if (teamScopeManagerId && targetEmployee.reportingManagerId !== teamScopeManagerId) {
+      throw new ForbiddenError(
+        'You can only correct attendance for your direct reports.',
+        'FORBIDDEN_TEAM_SCOPE',
+      );
+    }
     const ineligibleStatuses = ['terminated', 'resigned', 'suspended', 'pending_activation'];
     if (ineligibleStatuses.includes(targetEmployee.employmentStatus)) {
       throw new BadRequestError(
@@ -1049,6 +1069,33 @@ export class AttendanceService {
     }
 
     const reason = input.reason?.trim() || 'Manual correction';
+
+    // A reporting manager's correction is routed through the existing
+    // regularization approval pipeline instead of applied directly when the
+    // company requires approval for manual entries (audit finding C4:
+    // approvalMode was stored but never read).
+    if (requiresApproval) {
+      const requestType: RegularizationRequestType =
+        input.checkInTime || input.checkOutTime ? 'incorrect_time' : 'status_correction';
+      await this.regularizationService.submitRequest(
+        tenantId,
+        companyId,
+        {
+          employeeId: input.employeeId,
+          workday: input.date,
+          requestType,
+          proposedCheckIn: input.checkInTime,
+          proposedCheckOut: input.checkOutTime,
+          proposedStatus: input.status,
+          reason,
+        },
+        adminUserId,
+      );
+      throw new BadRequestError(
+        'This correction requires HR approval and has been submitted as a regularization request instead of being applied directly.',
+        'MANUAL_ENTRY_PENDING_APPROVAL',
+      );
+    }
 
     const isLocked = await this.repo.checkDateInLockedPeriod(
       tenantId,
